@@ -186,16 +186,16 @@ const REGIONS = [
 
 // Neighbours: map only for now (later: diplomacy, border events).
 const FOREIGN = [
-  { id: "trueants", name: ["Southern", "Trueants"], label: [2110, 70],
+  { id: "trueants", flag: "trueants", name: ["Southern", "Trueants"], label: [2110, 70],
     blurb: "Corrupt and in economic crisis. Its leader still claims Alinni.",
     shape: "1750,100 1780,0 2296,0 2296,465 2160,488 2130,490 2120,460 2060,410 1990,290 1960,230 1850,190 1810,130" },
-  { id: "dillihan", name: ["Dillihan", "Republic"], label: [2150, 790],
+  { id: "dillihan", flag: "dillihan", name: ["Dillihan", "Republic"], label: [2150, 790],
     blurb: "The regional powerhouse. Disputes the Fauraifai border.",
     shape: "1900,730 1980,690 2060,665 2090,610 2100,560 2130,490 2160,488 2296,465 2296,1623 2060,1623 2030,1460 2000,1360 2060,1310 2120,1270 2120,1220 2080,1170 2040,1100 2010,960 1985,880 1940,830 1910,780" },
-  { id: "bourdeaux", name: ["Bourdeaux", "Federation"], label: [1390, 1515],
+  { id: "bourdeaux", flag: "bourdeaux", name: ["Bourdeaux", "Federation"], label: [1390, 1515],
     blurb: "A fragile federation held together by a charismatic generalissimo.",
     shape: "1040,1195 1080,1130 1120,1110 1280,1110 1275,1150 1270,1250 1280,1290 1310,1330 1360,1335 1370,1360 1420,1380 1530,1395 1740,1405 1810,1395 1840,1360 2000,1360 2030,1460 2060,1623 965,1623 975,1480 1000,1400 1050,1260" },
-  { id: "james", name: ["James"], label: [1358, 1205], small: true,
+  { id: "james", flag: "james", name: ["James"], label: [1358, 1205], small: true,
     blurb: "Refuses to join Bourdeaux and trusts Cranebonistan to protect it. Rich in rare materials.",
     shape: "1280,1110 1330,1100 1390,1075 1440,1045 1470,1045 1465,1080 1440,1125 1440,1180 1435,1290 1415,1305 1385,1305 1360,1335 1310,1330 1280,1290 1270,1250 1275,1150" },
 ];
@@ -219,22 +219,22 @@ const VIEW_GROUPS = [
 const PARTIES = [
   { id: "player", isPlayer: true, color: "#d0452c", manifesto: {}, establishment: 0.05, stability: 70 },
   { id: "nup", name: "National Unity Party", short: "NUP", color: "#3a64b8", ruling: true, emblem: "landmark",
-    leader: "Aurel Mendrik", charisma: 52, stability: 55, establishment: 1.0,
+    leader: "Aurel Mendrik", leaderSex: "m", leaderAge: 68, charisma: 52, stability: 55, establishment: 1.0,
     blurb: "The ruling party. Nationalist, traditional, strongest in Erland.",
     owns: { "nat:L": 0.6, "prog:R": 0.4, "immig:R": 0.3 },
     manifesto: { nat: -45, econ: -15, prog: 35, war: -30, gov: -5, labor: 20, immig: 40, rev: 25 } },
   { id: "clf", name: "Cranebonian Labour Front", short: "CLF", color: "#3e9a5c", emblem: "hammer",
-    leader: "Sanna Brokk", charisma: 46, stability: 60, establishment: 0.75,
+    leader: "Sanna Brokk", leaderSex: "f", leaderAge: 58, charisma: 46, stability: 60, establishment: 0.75,
     blurb: "The old left. Unions, factories, public services.",
     owns: { "labor:L": 0.7, "gov:R": 0.45, "econ:R": 0.3 },
     manifesto: { nat: 15, econ: 45, prog: -15, war: 20, gov: 50, labor: -55, immig: -5, rev: -10 } },
   { id: "oc", name: "Open Cranebonistan", short: "OC", color: "#c99a16", emblem: "anchor",
-    leader: "Teodor Lisz", charisma: 55, stability: 62, establishment: 0.6,
+    leader: "Teodor Lisz", leaderSex: "m", leaderAge: 54, charisma: 55, stability: 62, establishment: 0.6,
     blurb: "Liberal and pro-business. Popular with Yamlin's traders and the urban rich.",
     owns: { "econ:L": 0.6, "prog:L": 0.4, "immig:L": 0.35 },
     manifesto: { nat: 45, econ: -60, prog: -40, war: 30, gov: -45, labor: 40, immig: -45, rev: -15 } },
   { id: "apv", name: "Alinni People's Voice", short: "APV", color: "#2795a3", emblem: "bird",
-    leader: "Mira Alenshi", charisma: 58, stability: 68, establishment: 0.35,
+    leader: "Mira Alenshi", leaderSex: "f", leaderAge: 61, charisma: 58, stability: 68, establishment: 0.35,
     blurb: "Speaks for the Alinnian minority. Wants autonomy and peace.",
     reach: { default: 0.25, alinni: 1 }, // little known outside Alinni
     owns: { "nat:R": 0.6, "war:R": 0.35 },
@@ -242,30 +242,34 @@ const PARTIES = [
 ];
 // establishment: 1 = the system itself, 0 = total outsider. Matters when trust is low.
 // owns: issue ownership at the start ("axis:L" = left side of that axis).
-// emblem: an icon name from icons.js. Leader portraits are in assets/portraits/<leader-name>.svg
+// emblem: an icon name from icons.js. Portraits are drawn by portraits.js from the leader's name, sex and age.
 // New leaders for rival parties are drawn from this list.
-const LEADER_POOL = ["Petra Halvin", "Oskar Trand", "Lena Morvic", "Ivo Castrel", "Hanne Dobrik",
-  "Matei Solun", "Vera Kostan", "Emil Radeck", "Ilsa Fenrow", "Bogdan Ure", "Nadia Selvo", "Ruben Akkar"];
+const LEADER_POOL = [
+  { name: "Petra Halvin", sex: "f", age: 66 }, { name: "Oskar Trand", sex: "m", age: 72 }, { name: "Lena Morvic", sex: "f", age: 52 },
+  { name: "Ivo Castrel", sex: "m", age: 63 }, { name: "Hanne Dobrik", sex: "f", age: 70 }, { name: "Matei Solun", sex: "m", age: 59 },
+  { name: "Vera Kostan", sex: "f", age: 64 }, { name: "Emil Radeck", sex: "m", age: 75 }, { name: "Ilsa Fenrow", sex: "f", age: 57 },
+  { name: "Bogdan Ure", sex: "m", age: 66 }, { name: "Nadia Selvo", sex: "f", age: 49 }, { name: "Ruben Akkar", sex: "m", age: 61 },
+];
 
 // ---------- Your party: templates, colours, emblems, portraits ----------
 // manifesto = stance index per axis: 0 = far left label ... 2 = neutral ... 4 = far right label.
 const PARTY_TEMPLATES = [
-  { id: "awakening", name: "People's Awakening", leader: "Dorin Vask", portrait: 8, color: "#c8402a", emblem: "hand-fist",
+  { id: "awakening", name: "People's Awakening", leader: "Dorin Vask", portrait: 3, color: "#c8402a", emblem: "hand-fist",
     tagline: "Left-wing populism",
     pitch: "Bread, wages and dignity. Take on the factory owners and the comfortable politicians who protect them.",
     targets: "Working class, young voters, Cranbia and Fauraifai",
     manifesto: { nat: 2, econ: 3, prog: 2, war: 3, gov: 3, labor: 1, immig: 2, rev: 1 } },
-  { id: "homeland", name: "Homeland First", leader: "Varro Stell", portrait: 4, color: "#6b3fa0", emblem: "flag",
+  { id: "homeland", name: "Homeland First", leader: "Varro Stell", portrait: 9, color: "#6b3fa0", emblem: "flag",
     tagline: "Right-wing populism",
     pitch: "Close the borders, stand up to the Trueants and Dillihan, and give the country back to ordinary Cranebonians.",
     targets: "Erland, older voters, fed-up nationalists in Yamlin",
     manifesto: { nat: 1, econ: 2, prog: 3, war: 1, gov: 2, labor: 2, immig: 3, rev: 1 } },
-  { id: "horizon", name: "New Horizon", leader: "Alma Teren", portrait: 7, color: "#e07b1a", emblem: "sun",
+  { id: "horizon", name: "New Horizon", leader: "Alma Teren", portrait: 4, color: "#e07b1a", emblem: "sun",
     tagline: "Fresh-faced centrism",
     pitch: "Competent, modern and above the old quarrels. Sell yourself as the adults the country never had.",
     targets: "Middle class, educated Cranbia, young professionals",
     manifesto: { nat: 3, econ: 1, prog: 1, war: 3, gov: 2, labor: 2, immig: 2, rev: 2 } },
-  { id: "steppe", name: "Land and Hearth", leader: "Kerem Ashvar", portrait: 1, color: "#8b5a2b", emblem: "wheat",
+  { id: "steppe", name: "Land and Hearth", leader: "Kerem Ashvar", portrait: 5, color: "#8b5a2b", emblem: "wheat",
     tagline: "Agrarian provincialism",
     pitch: "The capital has forgotten the villages. Farmers, herders and small towns deserve their fair share.",
     targets: "Erland and Fauraifai, rural working class",
@@ -275,7 +279,7 @@ const PARTY_TEMPLATES = [
     pitch: "They are all the same. Burn the old system down and let the people decide directly.",
     targets: "Anyone fed up with politics: the young, Fauraifai, Alinni",
     manifesto: { nat: 2, econ: 2, prog: 1, war: 2, gov: 1, labor: 1, immig: 2, rev: 0 } },
-  { id: "custom", name: "", leader: "", portrait: 6, color: "#c8402a", emblem: "star",
+  { id: "custom", name: "", leader: "", portrait: 1, color: "#c8402a", emblem: "star",
     tagline: "Build your own",
     pitch: "Start from a blank manifesto and decide everything yourself.",
     targets: "Up to you",
@@ -284,7 +288,12 @@ const PARTY_TEMPLATES = [
 // Colours chosen so they don't clash with the rival parties.
 const PLAYER_COLORS = ["#c8402a", "#d6336c", "#6b3fa0", "#e07b1a", "#8b5a2b", "#4a4a4a"];
 const PLAYER_EMBLEMS = ["hand-fist", "flag", "sun", "wheat", "megaphone", "flame", "star", "sprout", "shield", "crown", "scale", "users", "leaf", "sparkles", "mountain"];
-const PLAYER_PORTRAITS = 12; // assets/portraits/player-1.svg ... player-12.svg
+// Portraits you can choose for your leader (drawn by portraits.js; the seed fixes the face).
+const PLAYER_PORTRAITS = [
+  { seed: "p1", sex: "m", age: 47 }, { seed: "p2", sex: "f", age: 49 }, { seed: "p7", sex: "m", age: 58 }, { seed: "p6", sex: "f", age: 56 },
+  { seed: "p9", sex: "m", age: 61 }, { seed: "p8", sex: "f", age: 59 }, { seed: "p11", sex: "m", age: 65 }, { seed: "p10", sex: "f", age: 63 },
+  { seed: "p13", sex: "m", age: 68 }, { seed: "p12", sex: "f", age: 67 }, { seed: "p15", sex: "m", age: 72 }, { seed: "p14", sex: "f", age: 70 },
+];
 
 // ---------- Campaign spending ----------
 // Effects are per ₱1M. Rallies are divided by the region's adults (in millions).

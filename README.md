@@ -25,7 +25,9 @@ Runs in any browser with no installation: open `index.html`. Art and licences ar
 | `ui.js` | Map, tabs, pop-up sheets and saving. Reads the state and calls `sim.js` |
 | `sfx.js` | Sound effects, synthesised in code |
 | `icons.js` | Line icons used for party emblems and buttons |
-| `assets/portraits/` | Leader portraits (CC0 public domain art) |
+| `portraits.js` | Draws leader portraits from a name, sex and age |
+| `flags.js` | National flags |
+| `art.js` | Event illustrations, and which event uses which picture |
 | `style.css` | The look |
 | `index.html` | Page skeleton |
 

@@ -5,7 +5,7 @@
 // =====================================================================
 "use strict";
 
-const SAVE_KEY = "cranebonistan-save-v5";
+const SAVE_KEY = "cranebonistan-save-v6";
 const SVG_NS = "http://www.w3.org/2000/svg";
 let S = null; // the game state (created by newGame or loaded from a save)
 const ui = { tab: "electorate", kind: "age", group: "18-29", budget: null, offers: [], draft: null, champ: null };
@@ -74,6 +74,15 @@ function buildMap() {
     poly.addEventListener("mouseleave", () => ($("#map-tip").hidden = true));
   }
   for (const f of FOREIGN) {
+    if (f.flag && FLAGS[f.flag]) {
+      // flag above the country name, or below it if there is no room at the top of the map
+      const sc = f.small ? 1.1 : 2.2;
+      const h = 40 * sc, lineH = f.small ? 38 : 62;
+      let top = f.label[1] - (f.small ? 34 : 56) - h - 10;
+      if (top < 12) top = f.label[1] + (f.name.length - 1) * lineH + 26;
+      const g = svgEl("g", { transform: `translate(${f.label[0] - 30 * sc} ${top}) scale(${sc})`, class: "map-flag" }, svg);
+      g.innerHTML = FLAGS[f.flag]() + `<rect width="60" height="40" fill="none" stroke="#26292b" stroke-width="2"/><title>${FLAG_INFO[f.flag].name}. ${FLAG_INFO[f.flag].note}</title>`;
+    }
     f.name.forEach((line, i) => {
       const t = svgEl("text", { x: f.label[0], y: f.label[1] + i * (f.small ? 38 : 62), "text-anchor": "middle",
         class: f.small ? "label-small" : "label-foreign" }, svg);
@@ -336,10 +345,20 @@ function renderModal() {
 }
 
 // ---------- Portraits and emblems ----------
-const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-function portraitSrc(party) { return `assets/portraits/${party.portrait || slugify(party.leader)}.svg`; }
+// Portraits are drawn by portraits.js; the same leader always gets the same face.
+const portraitCache = new Map();
+function portraitSVG(seed, sex, age, pin) {
+  const key = `${seed}|${sex}|${age}|${pin}`;
+  if (!portraitCache.has(key)) portraitCache.set(key, Portraits.drawPortrait({ seed, sex, age, pin }));
+  return portraitCache.get(key);
+}
 function portraitHTML(party, cls = "") {
-  return `<span class="portrait ${cls}" style="--pc:${party.color}"><img src="${portraitSrc(party)}" alt="${esc(party.leader)}" loading="lazy"></span>`;
+  const svg = portraitSVG(party.portraitSeed || party.leader, party.leaderSex || "m", party.leaderAge || 60, party.color);
+  return `<span class="portrait ${cls}" style="--pc:${party.color}" role="img" aria-label="${esc(party.leader)}">${svg}</span>`;
+}
+function choicePortrait(n, color) {
+  const p = PLAYER_PORTRAITS[n - 1] || PLAYER_PORTRAITS[0];
+  return portraitSVG(p.seed, p.sex, p.age, color);
 }
 function iconSVG(name, cls = "") {
   return `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.star}</svg>`;
@@ -359,13 +378,13 @@ function renderTitle() {
   closeSheet();
   $("#toast").hidden = true;
   const saved = loadSave();
-  const canContinue = saved && !saved.result && saved.version === 5;
+  const canContinue = saved && !saved.result && saved.version === 6;
   const el = $("#title");
   el.hidden = false;
   el.innerHTML = `
     ${titleMapSVG()}
     <div class="title-inner">
-      <p class="title-kicker">The Republic of Cranebonistan · ${CONFIG.startYear}</p>
+      <p class="title-kicker">${flagSVG("cranebonistan", "flag flag-sm")} The Republic of Cranebonistan · ${CONFIG.startYear}</p>
       <h1 class="title-name">Cranebonistan</h1>
       <p class="title-tag">Five years. One election. Say whatever it takes.</p>
       <div class="title-menu">
@@ -404,7 +423,7 @@ function creditsSheet() {
     <span class="stamp">Credits</span>
     <h2>Credits</h2>
     <ul class="howto">
-      <li><strong>Portraits:</strong> "Notionists" by Zoish, released as CC0 1.0 (public domain), generated with DiceBear (MIT).</li>
+      <li><strong>Portraits, flags and event illustrations:</strong> original artwork drawn in code for this game.</li>
       <li><strong>Icons:</strong> Lucide, ISC License.</li>
       <li><strong>Fonts:</strong> Bricolage Grotesque and IBM Plex, SIL Open Font License, via Google Fonts.</li>
       <li><strong>Sound:</strong> synthesised in the browser; no recordings used.</li>
@@ -443,7 +462,7 @@ function renderCreate() {
   openSheet(`
     <span class="stamp">Step 2 of 2 · Your party</span>
     <div class="create-hero" style="--pc:${c.color}">
-      <span class="portrait portrait-xl" style="--pc:${c.color}"><img src="assets/portraits/player-${c.portrait}.svg" alt=""></span>
+      <span class="portrait portrait-xl" style="--pc:${c.color}">${choicePortrait(c.portrait, c.color)}</span>
       <div class="create-names">
         ${emblemHTML(c.color, c.emblem, "emblem-lg")}
         <label class="field">Party name <input type="text" id="party-name" maxlength="40" value="${esc(c.name)}" placeholder="Name your party"></label>
@@ -451,8 +470,8 @@ function renderCreate() {
       </div>
     </div>
     <div class="pickers">
-      <div><p class="eyebrow">Leader's portrait</p><div class="portrait-pick">${Array.from({ length: PLAYER_PORTRAITS }, (_, i) => i + 1).map((n) => `
-        <button class="portrait-opt" data-portrait="${n}" aria-pressed="${c.portrait === n}" aria-label="Portrait ${n}"><img src="assets/portraits/player-${n}.svg" alt=""></button>`).join("")}</div></div>
+      <div><p class="eyebrow">Leader's portrait</p><div class="portrait-pick">${PLAYER_PORTRAITS.map((_, i) => i + 1).map((n) => `
+        <button class="portrait-opt" data-portrait="${n}" aria-pressed="${c.portrait === n}" aria-label="Portrait ${n}" style="--pc:${c.color}">${choicePortrait(n, c.color)}</button>`).join("")}</div></div>
       <div class="pick-row">
         <div><p class="eyebrow">Colour</p><div class="swatches">${PLAYER_COLORS.map((col) => `<button class="swatch" data-color="${col}" style="background:${col}" aria-pressed="${c.color === col}" aria-label="Colour ${col}"></button>`).join("")}</div></div>
         <div><p class="eyebrow">Emblem</p><div class="emblem-pick">${PLAYER_EMBLEMS.map((e) => `<button class="emblem-opt" data-emblem="${e}" aria-pressed="${c.emblem === e}" aria-label="${e}">${iconSVG(e)}</button>`).join("")}</div></div>
@@ -494,6 +513,7 @@ function eventSheet(front) {
   const ev = eventOf(front);
   const kindLabel = { crisis: "Crisis", opportunity: "Opportunity", trap: "Tricky moment", scandal: "Scandal", regional: "Regional issue", foreign: "Foreign affairs", followup: "Consequences" }[ev.kind] || "Event";
   openSheet(`
+    <div class="art-wrap">${ART.eventArt(ev)}</div>
     <span class="stamp">${kindLabel} · ${dateLabel(S.week, false)}</span>
     <h2>${esc(ev.title)}</h2>
     <p class="lede">${esc(ev.text)}</p>
@@ -851,6 +871,7 @@ document.addEventListener("click", (e) => {
 });
 
 buildMap();
+$("#brand-flag").innerHTML = flagSVG("cranebonistan", "flag flag-brand");
 const existing = loadSave();
 if (existing && existing.result) clearSave();
 render();

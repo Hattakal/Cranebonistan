@@ -92,7 +92,7 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
   const playerPoint = {};
   for (const ax of AXES) playerPoint[ax.id] = CONFIG.stanceCenters[manifesto[ax.id] ?? 2];
   const state = {
-    version: 5, seed, rng: seed, week: 0, money: 0,
+    version: 6, seed, rng: seed, week: 0, money: 0,
     trust: CONFIG.trustStart, trustHistory: [],
     salMod: {},          // temporary national salience boosts ("hot issues")
     ownership: {},       // { "nat:L": { partyId: 0..1 } }
@@ -114,12 +114,14 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
       name: p.isPlayer ? partyName : p.name,
       short: p.isPlayer ? initials(partyName) : p.short,
       leader: p.isPlayer ? leaderName : p.leader,
+      leaderSex: p.isPlayer ? (PLAYER_PORTRAITS[portrait - 1] || PLAYER_PORTRAITS[0]).sex : (p.leaderSex || "m"),
+      leaderAge: p.isPlayer ? (PLAYER_PORTRAITS[portrait - 1] || PLAYER_PORTRAITS[0]).age : (p.leaderAge || 60),
       charisma: p.isPlayer ? CONFIG.startCharisma : (p.charisma ?? 50),
       stability: p.stability ?? 60,
       establishment: p.establishment ?? 0.5,
       color: p.isPlayer ? color : p.color,
       emblem: p.isPlayer ? emblem : (p.emblem || "star"),
-      portrait: p.isPlayer ? `player-${portrait}` : null, // rivals use their leader's name
+      portraitSeed: p.isPlayer ? (PLAYER_PORTRAITS[portrait - 1] || PLAYER_PORTRAITS[0]).seed : null, // rivals use their leader's name
       isPlayer: !!p.isPlayer,
       ruling: !!p.ruling,
       manifesto: fullVector(p.isPlayer ? playerPoint : p.manifesto),
@@ -489,7 +491,8 @@ const RIVAL_HAPPENINGS = [
     run(state, p) {
       const old = p.leader;
       const used = state.parties.map((x) => x.leader);
-      p.leader = pick(state, LEADER_POOL.filter((n) => !used.includes(n)));
+      const next = pick(state, LEADER_POOL.filter((n) => !used.includes(n.name)));
+      p.leader = next.name; p.leaderSex = next.sex; p.leaderAge = next.age;
       p.charisma = Math.round(28 + rand(state) * 50);
       p.stability = 58;
       // A new leader takes the party somewhere new on one issue.
