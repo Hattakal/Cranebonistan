@@ -210,7 +210,7 @@ const FOREIGN = [
   { id: "james", flag: "james", name: ["James"], label: [1358, 1205], small: true,
     blurb: "Refuses to join Bourdeaux and trusts Cranebonistan to protect it. Rich in rare materials.",
     summary: "A small country with very large reserves of rare materials. James refuses to join the Bourdeaux Federation and relies on Cranebonistan to defend it. In return, Cranebonian companies hold favourable mining deals there, which Potania would love to take over.",
-    leader: { name: "Daniel Akron", title: "Prime Minister", sex: "m", age: 41 },
+    leader: { name: "Tomas Verin", title: "Prime Minister", sex: "m", age: 52 },
     relation: "Ally", facts: ["Rare material reserves", "Protected by Cranebonistan", "Refuses to join Bourdeaux"],
     shape: "1280,1110 1330,1100 1390,1075 1440,1045 1470,1045 1465,1080 1440,1125 1440,1180 1435,1290 1415,1305 1385,1305 1360,1335 1310,1330 1280,1290 1270,1250 1275,1150" },
 ];

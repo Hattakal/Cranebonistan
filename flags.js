@@ -10,7 +10,7 @@ const FLAG_INFO = {
   trueants:      { name: "Southern Trueants", note: "Orange and black, with the single star of the ruling party." },
   dillihan:      { name: "Dillihan Republic", note: "Green for its farmland, the gold star of its republican revolution." },
   bourdeaux:     { name: "Bourdeaux Federation", note: "One star for each of its five nations, held together by the generalissimo's sabre." },
-  james:         { name: "James", note: "Wine and gold, under a crown. The people of James have opinions about who the real king is." },
+  james:         { name: "James", note: "Slate for its mountains, a gold seam for the rare ores beneath them." },
   golba:         { name: "United Federation of Golba", note: "The biggest power in the world and Cranebonistan's main trading partner." },
   norbanistan:   { name: "Norbanistan", note: "The flag of the old state, still flown by every side in its civil war." },
   potania:       { name: "Potania", note: "The violet and silver of the world's biggest buyer of rare materials." },
@@ -32,8 +32,9 @@ const FLAGS = {
     ${[0, 1, 2, 3, 4].map((i) => { const a = Math.PI * (1.15 + i * 0.175); return `<path d="${star5(30 + Math.cos(a) * 14, 22 + Math.sin(a) * 14, 2.6)}" fill="#f4f1ea"/>`; }).join("")}
     <path d="M14 30 L44 24 L45 25.5 L15 31.5 Z" fill="#d9a43a"/><path d="M42 23 L46 26.5" stroke="#d9a43a" stroke-width="2" stroke-linecap="round"/>`,
   james: () => `
-    <rect width="60" height="40" fill="#6f1d38"/><rect y="25" width="60" height="6" fill="#e2a93b"/>
-    <path d="M20 19 L22 9 L26 14 L30 7 L34 14 L38 9 L40 19 Z" fill="#e2a93b"/><rect x="20" y="19" width="20" height="2.6" fill="#e2a93b"/>`,
+    <rect width="60" height="40" fill="#3f5566"/>
+    <path d="M0 30 L16 12 L26 22 L38 8 L60 30 L60 40 L0 40 Z" fill="#f4f1ea"/>
+    <path d="M0 33 L60 33 L60 37 L0 37 Z" fill="#d9a43a"/>`,
   golba: () => `
     <rect width="60" height="40" fill="#2b4f9c"/>
     ${[6, 14, 22, 30].map((y) => `<rect y="${y}" width="60" height="3" fill="#f4f1ea"/>`).join("")}
