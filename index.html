@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cranebonistan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+<div id="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="brand-name">Cranebonistan</span>
+      <span class="brand-sub">General election <span id="election-year"></span></span>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="controls">
+      <button id="btn-week" class="btn">Next week</button>
+      <button id="btn-skip" class="btn btn-primary">Skip to next decision</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="map-panel" aria-label="Map of Cranebonistan">
+      <svg id="map" viewBox="0 0 2296 1623" role="img" aria-label="Map of Cranebonistan and its neighbours"></svg>
+      <div id="map-tip" class="map-tip" hidden></div>
+      <div id="map-legend" class="map-legend"></div>
+    </section>
+
+    <section class="side">
+      <nav class="tabs" role="tablist" id="tabs">
+        <button role="tab" data-tab="electorate">Electorate</button>
+        <button role="tab" data-tab="platform">Platform</button>
+        <button role="tab" data-tab="actions">Actions</button>
+        <button role="tab" data-tab="parties">Parties</button>
+        <button role="tab" data-tab="polls">Polls</button>
+        <button role="tab" data-tab="diary">Diary</button>
+      </nav>
+      <div id="tab-body" class="tab-body"></div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" class="modal" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="data.js"></script>
+<script src="events.js"></script>
+<script src="sim.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
