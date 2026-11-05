@@ -156,7 +156,18 @@ const ART = (() => {
     if (!name) name = BY_KIND[ev.kind] || "parliament";
     return SCENES[name](flags);
   }
+  function sceneName(ev) {
+    let [name] = EVENT_ART[ev.id] || [];
+    if (!name && String(ev.id).startsWith("defectors_")) name = "parliament";
+    return name || BY_KIND[ev.kind] || "parliament";
+  }
   function eventArt(ev) {
+    // A picture from images.js wins over the drawing.
+    const img = (typeof IMAGES !== "undefined") && ((IMAGES.events || {})[ev.id] || (IMAGES.scenes || {})[sceneName(ev)]);
+    if (img) {
+      const alt = String(img.alt || "").replace(/"/g, "&quot;");
+      return `<img class="art-photo" src="${img.src}" alt="${alt}">` + (img.credit ? `<span class="art-credit">${String(img.credit).replace(/</g, "&lt;")}</span>` : "");
+    }
     return `<svg class="event-art" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${sceneFor(ev)}</svg>`;
   }
   return { eventArt, SCENES, EVENT_ART };

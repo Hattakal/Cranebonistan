@@ -64,7 +64,11 @@ function buildMap() {
   const svg = $("#map");
   svg.innerHTML = "";
   for (const f of FOREIGN) {
-    svgEl("polygon", { points: f.shape, class: "foreign" }, svg);
+    const poly = svgEl("polygon", { points: f.shape, class: "foreign", tabindex: 0, "data-foreign": f.id }, svg);
+    poly.addEventListener("click", () => foreignSheet(f.id));
+    poly.addEventListener("keydown", (e) => { if (e.key === "Enter") foreignSheet(f.id); });
+    poly.addEventListener("mousemove", (e) => showForeignTip(e, f));
+    poly.addEventListener("mouseleave", () => ($("#map-tip").hidden = true));
   }
   for (const r of REGIONS) {
     const poly = svgEl("polygon", { points: r.shape, class: "region", "data-id": r.id, tabindex: 0 }, svg);
@@ -74,15 +78,6 @@ function buildMap() {
     poly.addEventListener("mouseleave", () => ($("#map-tip").hidden = true));
   }
   for (const f of FOREIGN) {
-    if (f.flag && FLAGS[f.flag]) {
-      // flag above the country name, or below it if there is no room at the top of the map
-      const sc = f.small ? 1.1 : 2.2;
-      const h = 40 * sc, lineH = f.small ? 38 : 62;
-      let top = f.label[1] - (f.small ? 34 : 56) - h - 10;
-      if (top < 12) top = f.label[1] + (f.name.length - 1) * lineH + 26;
-      const g = svgEl("g", { transform: `translate(${f.label[0] - 30 * sc} ${top}) scale(${sc})`, class: "map-flag" }, svg);
-      g.innerHTML = FLAGS[f.flag]() + `<rect width="60" height="40" fill="none" stroke="#26292b" stroke-width="2"/><title>${FLAG_INFO[f.flag].name}. ${FLAG_INFO[f.flag].note}</title>`;
-    }
     f.name.forEach((line, i) => {
       const t = svgEl("text", { x: f.label[0], y: f.label[1] + i * (f.small ? 38 : 62), "text-anchor": "middle",
         class: f.small ? "label-small" : "label-foreign" }, svg);
@@ -130,6 +125,35 @@ function showTip(e, r) {
   const x = e.clientX - box.left, y = e.clientY - box.top;
   tip.style.left = Math.min(x + 14, box.width - 250) + "px";
   tip.style.top = Math.max(y - 10, 8) + "px";
+}
+function showForeignTip(e, f) {
+  const tip = $("#map-tip");
+  tip.innerHTML = `<strong>${esc(f.name.join(" "))}</strong><br><span class="muted">${esc(f.blurb)}</span><br><span class="small">Click for more</span>`;
+  tip.hidden = false;
+  const box = $(".map-panel").getBoundingClientRect();
+  tip.style.left = Math.min(e.clientX - box.left + 14, box.width - 250) + "px";
+  tip.style.top = Math.max(e.clientY - box.top - 10, 8) + "px";
+}
+// Profile of a neighbouring country: flag, leader and summary.
+function foreignSheet(id) {
+  if (S && S.queue.length) return; // don't cover a decision
+  const f = byId(FOREIGN, id);
+  const l = f.leader;
+  const img = leaderImage(l.name);
+  const face = img
+    ? `<span class="portrait portrait-xl" style="--pc:#6b7172"><img src="${esc(img.src)}" alt="${esc(l.name)}" title="${esc(img.credit || "")}"></span>`
+    : `<span class="portrait portrait-xl" style="--pc:#6b7172">${portraitSVG(l.name, l.sex, l.age, "#6b7172")}</span>`;
+  openSheet(`
+    <span class="stamp">Neighbouring country · ${esc(f.relation)}</span>
+    <div class="country-head">${flagSVG(f.flag, "flag flag-lg")}<h2>${esc(f.name.join(" "))}</h2></div>
+    <div class="country-body">
+      <div class="country-leader">${face}<div><p class="eyebrow">${esc(l.title)}</p><strong>${esc(l.name)}</strong></div></div>
+      <div class="country-text"><p class="lede">${esc(f.summary)}</p>
+        <ul class="country-facts">${f.facts.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        <p class="small muted">${esc(FLAG_INFO[f.flag].note)}</p></div>
+    </div>
+    <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Close</button></div>`);
+  $("#btn-close").addEventListener("click", () => { closeSheet(); if (S) renderModal(); });
 }
 function selectRegion(id) {
   ui.tab = "electorate"; ui.kind = "region"; ui.group = id;
@@ -352,7 +376,11 @@ function portraitSVG(seed, sex, age, pin) {
   if (!portraitCache.has(key)) portraitCache.set(key, Portraits.drawPortrait({ seed, sex, age, pin }));
   return portraitCache.get(key);
 }
+// A picture from images.js (by leader name) replaces the drawn portrait.
+function leaderImage(name) { return (typeof IMAGES !== "undefined" && (IMAGES.leaders || {})[name]) || null; }
 function portraitHTML(party, cls = "") {
+  const img = leaderImage(party.leader);
+  if (img) return `<span class="portrait ${cls}" style="--pc:${party.color}"><img src="${esc(img.src)}" alt="${esc(party.leader)}" title="${esc(img.credit || "")}"></span>`;
   const svg = portraitSVG(party.portraitSeed || party.leader, party.leaderSex || "m", party.leaderAge || 60, party.color);
   return `<span class="portrait ${cls}" style="--pc:${party.color}" role="img" aria-label="${esc(party.leader)}">${svg}</span>`;
 }

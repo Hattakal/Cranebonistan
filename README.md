@@ -28,6 +28,7 @@ Runs in any browser with no installation: open `index.html`. Art and licences ar
 | `portraits.js` | Draws leader portraits from a name, sex and age |
 | `flags.js` | National flags |
 | `art.js` | Event illustrations, and which event uses which picture |
+| `images.js` | Your own pictures for events and leaders (see [IMAGES.md](IMAGES.md)) |
 | `style.css` | The look |
 | `index.html` | Page skeleton |
 

@@ -185,18 +185,33 @@ const REGIONS = [
 ];
 
 // Neighbours: map only for now (later: diplomacy, border events).
+// Neighbouring countries. Click one on the map to see its profile.
+// leader: placeholder names and details; change them freely.
+// Leader pictures can be added in images.js (see IMAGES.md).
 const FOREIGN = [
   { id: "trueants", flag: "trueants", name: ["Southern", "Trueants"], label: [2110, 70],
     blurb: "Corrupt and in economic crisis. Its leader still claims Alinni.",
+    summary: "Cranebonistan took Alinni from the Southern Trueants in a war fifty years ago, and the Trueants have never accepted it. The country is corrupt and stuck in a long economic crisis, and its president keeps his supporters loyal by promising that Alinni will one day come home.",
+    leader: { name: "Gavrel Ostrun", title: "President", sex: "m", age: 67 },
+    relation: "Hostile", facts: ["Claims Alinni as its own", "Major economic crisis", "Sells Cranebonistan a third of its gas"],
     shape: "1750,100 1780,0 2296,0 2296,465 2160,488 2130,490 2120,460 2060,410 1990,290 1960,230 1850,190 1810,130" },
   { id: "dillihan", flag: "dillihan", name: ["Dillihan", "Republic"], label: [2150, 790],
     blurb: "The regional powerhouse. Disputes the Fauraifai border.",
+    summary: "The richest and strongest country in the region, economically and militarily. Dillihan disputes parts of the Fauraifai border, and its patrols regularly cross into land Cranebonian herders consider theirs. It would like a pipeline across Fauraifai to the sea.",
+    leader: { name: "Selin Arvadi", title: "Chancellor", sex: "f", age: 58 },
+    relation: "Rival", facts: ["Strongest economy and army in the region", "Border dispute over Fauraifai", "Wants a pipeline to Yamlin"],
     shape: "1900,730 1980,690 2060,665 2090,610 2100,560 2130,490 2160,488 2296,465 2296,1623 2060,1623 2030,1460 2000,1360 2060,1310 2120,1270 2120,1220 2080,1170 2040,1100 2010,960 1985,880 1940,830 1910,780" },
   { id: "bourdeaux", flag: "bourdeaux", name: ["Bourdeaux", "Federation"], label: [1390, 1515],
     blurb: "A fragile federation held together by a charismatic generalissimo.",
+    summary: "A union of several nations that would probably fall apart without the generalissimo at its head. His health is the subject of constant rumours. Erland's border towns watch nervously: if the federation breaks up, refugees and trouble will come north.",
+    leader: { name: "Hector Valmont", title: "Generalissimo", sex: "m", age: 74 },
+    relation: "Uneasy", facts: ["Five nations under one flag", "Held together by one man", "Wants James to join it"],
     shape: "1040,1195 1080,1130 1120,1110 1280,1110 1275,1150 1270,1250 1280,1290 1310,1330 1360,1335 1370,1360 1420,1380 1530,1395 1740,1405 1810,1395 1840,1360 2000,1360 2030,1460 2060,1623 965,1623 975,1480 1000,1400 1050,1260" },
   { id: "james", flag: "james", name: ["James"], label: [1358, 1205], small: true,
     blurb: "Refuses to join Bourdeaux and trusts Cranebonistan to protect it. Rich in rare materials.",
+    summary: "A small country with very large reserves of rare materials. James refuses to join the Bourdeaux Federation and relies on Cranebonistan to defend it. In return, Cranebonian companies hold favourable mining deals there, which Potania would love to take over.",
+    leader: { name: "Daniel Akron", title: "Prime Minister", sex: "m", age: 41 },
+    relation: "Ally", facts: ["Rare material reserves", "Protected by Cranebonistan", "Refuses to join Bourdeaux"],
     shape: "1280,1110 1330,1100 1390,1075 1440,1045 1470,1045 1465,1080 1440,1125 1440,1180 1435,1290 1415,1305 1385,1305 1360,1335 1310,1330 1280,1290 1270,1250 1275,1150" },
 ];
 const CAPITAL = { name: "Craneapolis", x: 1175, y: 445 };
