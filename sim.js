@@ -86,12 +86,13 @@ function sideLabel(key) {
 
 // ---------- Starting a new game ----------
 // manifesto: { axisId: stance index 0..4 }
-function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Vask", manifesto = {} } = {}) {
+function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Vask", manifesto = {},
+  color = "#c8402a", emblem = "star", portrait = 1 } = {}) {
   seed = seed ?? Math.floor(Math.random() * 2147483647);
   const playerPoint = {};
   for (const ax of AXES) playerPoint[ax.id] = CONFIG.stanceCenters[manifesto[ax.id] ?? 2];
   const state = {
-    version: 4, seed, rng: seed, week: 0, money: 0,
+    version: 5, seed, rng: seed, week: 0, money: 0,
     trust: CONFIG.trustStart, trustHistory: [],
     salMod: {},          // temporary national salience boosts ("hot issues")
     ownership: {},       // { "nat:L": { partyId: 0..1 } }
@@ -116,7 +117,9 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
       charisma: p.isPlayer ? CONFIG.startCharisma : (p.charisma ?? 50),
       stability: p.stability ?? 60,
       establishment: p.establishment ?? 0.5,
-      color: p.color,
+      color: p.isPlayer ? color : p.color,
+      emblem: p.isPlayer ? emblem : (p.emblem || "star"),
+      portrait: p.isPlayer ? `player-${portrait}` : null, // rivals use their leader's name
       isPlayer: !!p.isPlayer,
       ruling: !!p.ruling,
       manifesto: fullVector(p.isPlayer ? playerPoint : p.manifesto),

@@ -2,7 +2,7 @@
 
 A political election simulator set in the fictional country of Cranebonistan. You found a new party and have five years to become the largest party in the National Assembly. The intended way to win is populism: chasing the votes of whichever groups you can win over, while managing the cost of contradicting yourself.
 
-Runs in any browser with no installation: open `index.html`.
+Runs in any browser with no installation: open `index.html`. Art and licences are listed in [CREDITS.md](CREDITS.md).
 
 ## How it plays
 
@@ -23,6 +23,9 @@ Runs in any browser with no installation: open `index.html`.
 | `events.js` | Monthly events and funding offers, as data. The header explains every effect type |
 | `sim.js` | The rules. No screen code, so it also runs in Node for balance testing |
 | `ui.js` | Map, tabs, pop-up sheets and saving. Reads the state and calls `sim.js` |
+| `sfx.js` | Sound effects, synthesised in code |
+| `icons.js` | Line icons used for party emblems and buttons |
+| `assets/portraits/` | Leader portraits (CC0 public domain art) |
 | `style.css` | The look |
 | `index.html` | Page skeleton |
 

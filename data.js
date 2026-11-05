@@ -218,22 +218,22 @@ const VIEW_GROUPS = [
 // reach (optional) = how well-known the party is, per region (1 = everyone).
 const PARTIES = [
   { id: "player", isPlayer: true, color: "#d0452c", manifesto: {}, establishment: 0.05, stability: 70 },
-  { id: "nup", name: "National Unity Party", short: "NUP", color: "#3a64b8", ruling: true,
+  { id: "nup", name: "National Unity Party", short: "NUP", color: "#3a64b8", ruling: true, emblem: "landmark",
     leader: "Aurel Mendrik", charisma: 52, stability: 55, establishment: 1.0,
     blurb: "The ruling party. Nationalist, traditional, strongest in Erland.",
     owns: { "nat:L": 0.6, "prog:R": 0.4, "immig:R": 0.3 },
     manifesto: { nat: -45, econ: -15, prog: 35, war: -30, gov: -5, labor: 20, immig: 40, rev: 25 } },
-  { id: "clf", name: "Cranebonian Labour Front", short: "CLF", color: "#3e9a5c",
+  { id: "clf", name: "Cranebonian Labour Front", short: "CLF", color: "#3e9a5c", emblem: "hammer",
     leader: "Sanna Brokk", charisma: 46, stability: 60, establishment: 0.75,
     blurb: "The old left. Unions, factories, public services.",
     owns: { "labor:L": 0.7, "gov:R": 0.45, "econ:R": 0.3 },
     manifesto: { nat: 15, econ: 45, prog: -15, war: 20, gov: 50, labor: -55, immig: -5, rev: -10 } },
-  { id: "oc", name: "Open Cranebonistan", short: "OC", color: "#c99a16",
+  { id: "oc", name: "Open Cranebonistan", short: "OC", color: "#c99a16", emblem: "anchor",
     leader: "Teodor Lisz", charisma: 55, stability: 62, establishment: 0.6,
     blurb: "Liberal and pro-business. Popular with Yamlin's traders and the urban rich.",
     owns: { "econ:L": 0.6, "prog:L": 0.4, "immig:L": 0.35 },
     manifesto: { nat: 45, econ: -60, prog: -40, war: 30, gov: -45, labor: 40, immig: -45, rev: -15 } },
-  { id: "apv", name: "Alinni People's Voice", short: "APV", color: "#2795a3",
+  { id: "apv", name: "Alinni People's Voice", short: "APV", color: "#2795a3", emblem: "bird",
     leader: "Mira Alenshi", charisma: 58, stability: 68, establishment: 0.35,
     blurb: "Speaks for the Alinnian minority. Wants autonomy and peace.",
     reach: { default: 0.25, alinni: 1 }, // little known outside Alinni
@@ -242,9 +242,49 @@ const PARTIES = [
 ];
 // establishment: 1 = the system itself, 0 = total outsider. Matters when trust is low.
 // owns: issue ownership at the start ("axis:L" = left side of that axis).
+// emblem: an icon name from icons.js. Leader portraits are in assets/portraits/<leader-name>.svg
 // New leaders for rival parties are drawn from this list.
 const LEADER_POOL = ["Petra Halvin", "Oskar Trand", "Lena Morvic", "Ivo Castrel", "Hanne Dobrik",
   "Matei Solun", "Vera Kostan", "Emil Radeck", "Ilsa Fenrow", "Bogdan Ure", "Nadia Selvo", "Ruben Akkar"];
+
+// ---------- Your party: templates, colours, emblems, portraits ----------
+// manifesto = stance index per axis: 0 = far left label ... 2 = neutral ... 4 = far right label.
+const PARTY_TEMPLATES = [
+  { id: "awakening", name: "People's Awakening", leader: "Dorin Vask", portrait: 8, color: "#c8402a", emblem: "hand-fist",
+    tagline: "Left-wing populism",
+    pitch: "Bread, wages and dignity. Take on the factory owners and the comfortable politicians who protect them.",
+    targets: "Working class, young voters, Cranbia and Fauraifai",
+    manifesto: { nat: 2, econ: 3, prog: 2, war: 3, gov: 3, labor: 1, immig: 2, rev: 1 } },
+  { id: "homeland", name: "Homeland First", leader: "Varro Stell", portrait: 4, color: "#6b3fa0", emblem: "flag",
+    tagline: "Right-wing populism",
+    pitch: "Close the borders, stand up to the Trueants and Dillihan, and give the country back to ordinary Cranebonians.",
+    targets: "Erland, older voters, fed-up nationalists in Yamlin",
+    manifesto: { nat: 1, econ: 2, prog: 3, war: 1, gov: 2, labor: 2, immig: 3, rev: 1 } },
+  { id: "horizon", name: "New Horizon", leader: "Alma Teren", portrait: 7, color: "#e07b1a", emblem: "sun",
+    tagline: "Fresh-faced centrism",
+    pitch: "Competent, modern and above the old quarrels. Sell yourself as the adults the country never had.",
+    targets: "Middle class, educated Cranbia, young professionals",
+    manifesto: { nat: 3, econ: 1, prog: 1, war: 3, gov: 2, labor: 2, immig: 2, rev: 2 } },
+  { id: "steppe", name: "Land and Hearth", leader: "Kerem Ashvar", portrait: 1, color: "#8b5a2b", emblem: "wheat",
+    tagline: "Agrarian provincialism",
+    pitch: "The capital has forgotten the villages. Farmers, herders and small towns deserve their fair share.",
+    targets: "Erland and Fauraifai, rural working class",
+    manifesto: { nat: 2, econ: 3, prog: 3, war: 2, gov: 3, labor: 1, immig: 3, rev: 2 } },
+  { id: "rage", name: "Enough!", leader: "Ines Varga", portrait: 2, color: "#d6336c", emblem: "megaphone",
+    tagline: "Anti-system protest",
+    pitch: "They are all the same. Burn the old system down and let the people decide directly.",
+    targets: "Anyone fed up with politics: the young, Fauraifai, Alinni",
+    manifesto: { nat: 2, econ: 2, prog: 1, war: 2, gov: 1, labor: 1, immig: 2, rev: 0 } },
+  { id: "custom", name: "", leader: "", portrait: 6, color: "#c8402a", emblem: "star",
+    tagline: "Build your own",
+    pitch: "Start from a blank manifesto and decide everything yourself.",
+    targets: "Up to you",
+    manifesto: { nat: 2, econ: 2, prog: 2, war: 2, gov: 2, labor: 2, immig: 2, rev: 2 } },
+];
+// Colours chosen so they don't clash with the rival parties.
+const PLAYER_COLORS = ["#c8402a", "#d6336c", "#6b3fa0", "#e07b1a", "#8b5a2b", "#4a4a4a"];
+const PLAYER_EMBLEMS = ["hand-fist", "flag", "sun", "wheat", "megaphone", "flame", "star", "sprout", "shield", "crown", "scale", "users", "leaf", "sparkles", "mountain"];
+const PLAYER_PORTRAITS = 12; // assets/portraits/player-1.svg ... player-12.svg
 
 // ---------- Campaign spending ----------
 // Effects are per ₱1M. Rallies are divided by the region's adults (in millions).

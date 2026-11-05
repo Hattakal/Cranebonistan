@@ -20,6 +20,7 @@
     </div>
     <div class="status" id="status"></div>
     <div class="controls">
+      <button id="btn-sound" class="btn btn-icon" aria-label="Sound"></button>
       <button id="btn-week" class="btn">Next week</button>
       <button id="btn-skip" class="btn btn-primary">Skip to next decision</button>
     </div>
@@ -46,11 +47,14 @@
   </main>
 </div>
 
+<div id="title" class="title" hidden></div>
 <div id="modal" class="modal" hidden>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 </div>
 <div id="toast" class="toast" hidden></div>
 
+<script src="icons.js"></script>
+<script src="sfx.js"></script>
 <script src="data.js"></script>
 <script src="events.js"></script>
 <script src="sim.js"></script>
