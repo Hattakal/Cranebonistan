@@ -91,7 +91,7 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
   const playerPoint = {};
   for (const ax of AXES) playerPoint[ax.id] = CONFIG.stanceCenters[manifesto[ax.id] ?? 2];
   const state = {
-    version: 3, seed, rng: seed, week: 0, money: 0,
+    version: 4, seed, rng: seed, week: 0, money: 0,
     trust: CONFIG.trustStart, trustHistory: [],
     salMod: {},          // temporary national salience boosts ("hot issues")
     ownership: {},       // { "nat:L": { partyId: 0..1 } }
@@ -103,6 +103,7 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
     scheduled: [],       // follow-up events waiting for their month
     scandals: [],        // hidden dirty money that may leak
     dossiers: [],        // dirt you have dug up on rivals
+    signature: [],       // the issues your party campaigns on ("immig:R"), at most CONFIG.maxSignatureIssues
     actionsLeft: CONFIG.actionsPerMonth,
     lastSupport: null,   // national support last month, to see who is rising or falling
     lastBudget: null,    // your previous allocation, to reuse
@@ -192,22 +193,15 @@ function seedLoyalty(state) {
 }
 
 // ---------- Consistency: stances and flips ----------
-function recentFlipWeight(state, partyId) {
-  let w = 0;
-  for (const f of state.flips) {
-    if (f.party !== partyId) continue;
-    w += Math.max(0, 1 - (state.week - f.week) / CONFIG.flipMemoryWeeks);
-  }
-  return w;
-}
-// Inconsistency = how far your stances are from your manifesto + how often you've flipped lately.
+// Inconsistency = how far your current stances are from your manifesto.
+// How you got there doesn't matter: only where voters see you now.
 function inconsistencyOf(state, party) {
   let steps = 0;
   for (const ax of AXES) {
     const off = Math.abs(stanceOf(party.perceived[ax.id]) - stanceOf(party.manifesto[ax.id]));
     steps += CONFIG.stepPenalty[off];
   }
-  return steps + CONFIG.flipWeight * recentFlipWeight(state, party.id);
+  return steps;
 }
 
 // ---------- Opinion: how a pop feels about a party ----------
@@ -238,11 +232,10 @@ function scoreContext(state) {
   for (const [key, owners] of Object.entries(state.ownership)) {
     const total = Object.values(owners).reduce((a, b) => a + b, 0);
     const [axis, side] = key.split(":");
-    const heat = CONFIG.ownBase + Math.max(0, state.salMod[axis] || 0);
     for (const [pid, v] of Object.entries(owners)) {
       if (v < 0.02 || !own[pid]) continue;
       // your share of the issue, but a weak lone claim is still weak
-      own[pid].push({ axis, side, value: heat * v / Math.max(total, CONFIG.ownShareFloor + v * 0.5) });
+      own[pid].push({ axis, side, value: v / Math.max(total, CONFIG.ownShareFloor + v * 0.5) });
     }
   }
   return { inc, own, distrust: (50 - state.trust) / 50 };
@@ -263,11 +256,13 @@ function partyScore(state, pop, party, ctx) {
   s -= penalty * pop.engagement * (1 - CONFIG.devotionBlind * dev);
   // 6) trust in the system: when trust is low, outsiders gain and the establishment loses
   s += CONFIG.trustWeight * ctx.distrust * (0.5 - party.establishment) * pop.disaffection;
-  // 7) issue ownership: the party that "owns" my side of a hot issue gets a bonus
+  // 7) issue ownership: single-issue voters back the party that owns their side of the issue.
+  //    When an issue is in the news, more voters care enough to become single-issue voters.
   for (const o of ctx.own[party.id]) {
     const p = pop.pos[o.axis];
     if ((o.side === "L" && p < -15) || (o.side === "R" && p > 15)) {
-      s += CONFIG.ownWeight * o.value * pop.sal[o.axis];
+      const care = salienceOf(state, pop, o.axis) - CONFIG.singleIssueFrom;
+      if (care > 0) s += CONFIG.ownWeight * o.value * care;
     }
   }
   return s;
@@ -372,8 +367,6 @@ function shiftPerceived(state, shift, record = true) {
     player.perceived[ax] = clamp(player.perceived[ax] + d, -100, 100);
     const after = stanceOf(player.perceived[ax]);
     if (record && before !== after) state.flips.push({ party: player.id, week: state.week, axis: ax, from: before, to: after });
-    // Taking a strong public position slowly makes the issue yours.
-    if (record && Math.abs(d) >= 10) addOwnership(state, "player", sideKey(ax, d < 0 ? "L" : "R"), 0.04);
   }
 }
 // Preview: which stances a shift would change, without changing anything.
@@ -628,7 +621,7 @@ function monthlyUpdate(state) {
     const owners = ownershipTable(state).filter((r) => r.axis === ax.id && r.owners.length);
     const who = owners.map((r) => `${partyOf(state, r.owners[0].party).short} (${r.label.toLowerCase()})`).join(" and ");
     pushNews(state, { kind: "issue", title: `${ax.issue} dominates the headlines`,
-      text: `Everyone is suddenly talking about ${ax.issue.toLowerCase()}. ${who ? `The parties that own this issue gain most: ${who}.` : "Nobody owns this issue yet."}` });
+      text: `Everyone is suddenly talking about ${ax.issue.toLowerCase()}, and for many voters it is now the only issue that matters. ${who ? `The parties that own it gain most: ${who}.` : "Nobody owns this issue yet."}` });
   }
   for (const key in state.ownership) for (const pid in state.ownership[key]) state.ownership[key][pid] *= CONFIG.ownDecay;
   state.trust += (50 - state.trust) * CONFIG.trustRecovery;
@@ -676,7 +669,7 @@ function monthlyUpdate(state) {
 // Each returns { ok, text } for the screen. All cost one action point.
 const ACTIONS = {
   champion: { label: "Champion an issue", cost: 0,
-    help: "Make an issue yours with speeches, op-eds and a campaign. Cheapest to claim while nobody cares about it; when it later dominates the news, its owner gains most." },
+    help: "Campaign hard on one of your manifesto's issues to win its single-issue voters: people who care about that issue above everything else. You can campaign on two issues at a time. Claims are cheapest while nobody is talking about the issue; when it later dominates the news, many more voters become single-issue voters and its owner gains most." },
   grassroots: { label: "Grassroots organising", cost: 1.5,
     help: "Door-to-door work and local branches in one region. Turns supporters into core voters and gets them to the polls. Slow, but it lasts." },
   research: { label: "Opposition research", cost: 2,
@@ -696,14 +689,42 @@ function canAct(state, cost = 0) {
 }
 function spendAction(state, cost) { state.actionsLeft--; state.money -= cost; }
 
+// Which side of an issue your manifesto takes: "L", "R" or null (neutral).
+function manifestoSide(state, axis) {
+  const st = stanceOf(playerParty(state).manifesto[axis]);
+  return st <= 1 ? "L" : st >= 3 ? "R" : null;
+}
+// Why you can't champion this side, or null if you can.
+function championBlock(state, axis, side) {
+  const mine = manifestoSide(state, axis);
+  if (!mine) return "Your manifesto is neutral on this issue.";
+  if (mine !== side) return "Your manifesto takes the other side.";
+  const key = sideKey(axis, side);
+  if (!state.signature.includes(key) && state.signature.length >= CONFIG.maxSignatureIssues)
+    return `You already campaign on ${CONFIG.maxSignatureIssues} issues. Drop one first.`;
+  return null;
+}
 function championPreview(state, axis, side) {
   const heat = Math.max(0, state.salMod[axis] || 0);
   const gain = 0.22 / (1 + 2 * heat);
-  return { gain, heat, shift: previewShift(state, { [axis]: side === "L" ? -6 : 6 })[0] };
+  const ax = byId(AXES, axis);
+  // how many people care enough about this issue to vote on it alone, on your side
+  let single = 0;
+  for (const pop of state.pops) {
+    const p = pop.pos[axis];
+    if (((side === "L" && p < -15) || (side === "R" && p > 15)) && salienceOf(state, pop, axis) > CONFIG.singleIssueFrom) single += pop.size;
+  }
+  return { gain, heat, single, block: championBlock(state, axis, side), shift: previewShift(state, { [axis]: side === "L" ? -6 : 6 })[0], ax };
+}
+function dropSignature(state, key) {
+  state.signature = state.signature.filter((k) => k !== key);
+  state.log.push({ week: state.week, kind: "action", text: `Stopped campaigning on ${sideLabel(key).toLowerCase()}.` });
 }
 function actChampion(state, axis, side) {
   const err = canAct(state, 0); if (err) return { ok: false, text: err };
+  const block = championBlock(state, axis, side); if (block) return { ok: false, text: block };
   const { gain } = championPreview(state, axis, side);
+  if (!state.signature.includes(sideKey(axis, side))) state.signature.push(sideKey(axis, side));
   const key = sideKey(axis, side);
   spendAction(state, 0);
   addOwnership(state, "player", key, gain);

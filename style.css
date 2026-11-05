@@ -288,3 +288,12 @@ table.results td.num, table.results th.num { text-align: right; }
 .news .news-issue { border-left-color: #c9a227; }
 .news-kind { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: flex; align-items: center; gap: 4px; }
 .news-kind .dot { width: 8px; height: 8px; }
+
+/* ---------- v4: signature issues ---------- */
+.claim.is-yours { border-color: var(--line); }
+.claim.not-yours { opacity: 0.55; }
+.claim.is-sig { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+.sig-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sig-list .eyebrow { margin: 0 6px 0 0; }
+.link-btn { background: none; border: 0; padding: 0 0 0 4px; color: var(--accent); cursor: pointer; font-size: 12px; text-decoration: underline; }
+.link-btn:disabled { opacity: 0.4; cursor: not-allowed; }

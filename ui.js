@@ -5,7 +5,7 @@
 // =====================================================================
 "use strict";
 
-const SAVE_KEY = "cranebonistan-save-v3";
+const SAVE_KEY = "cranebonistan-save-v4";
 const SVG_NS = "http://www.w3.org/2000/svg";
 let S = null; // the game state (created by newGame or loaded from a save)
 const ui = { tab: "electorate", kind: "age", group: "18-29", budget: null, offers: [], draft: null, champ: null };
@@ -255,8 +255,8 @@ function platformHTML() {
         <p class="eyebrow">Consistency</p>
         <div><span class="big-number">${inc.toFixed(1)}</span> <strong>${label}</strong></div>
         <div class="drift-meter"><span class="drift-needle" style="left:${clamp(inc / 8, 0, 1) * 100}%"></span></div>
-        <span class="small muted">${explain} Moving inside a stance is free. One stance away costs a little, two costs a lot, and every flip is remembered for two years.</span>
-        ${recent.length ? `<ul class="flips">${recent.slice(0, 5).map((f) => `<li><span class="when">${dateLabel(f.week, false)}</span> ${esc(stanceName(f.axis, f.from))} → ${esc(stanceName(f.axis, f.to))}</li>`).join("")}</ul>` : `<span class="small muted">No stance flips yet.</span>`}
+        <span class="small muted">${explain} Only the distance between your manifesto and where voters see you now counts. Moving inside a stance is free; one stance away costs a little, two costs a lot. Drift back to your manifesto and the penalty goes away.</span>
+        ${recent.length ? `<ul class="flips">${recent.slice(0, 5).map((f) => `<li><span class="when">${dateLabel(f.week, false)}</span> ${esc(stanceName(f.axis, f.from))} → ${esc(stanceName(f.axis, f.to))}</li>`).join("")}</ul>` : `<span class="small muted">No stance changes yet.</span>`}
       </div>
     </div>
     <div class="legend-inline" style="margin-top:14px">
@@ -334,7 +334,7 @@ function renderStart() {
     openSheet(`
     <span class="stamp">Cranebonistan · Election ${calendar(ELECTION_WEEK).year}</span>
     <h2>Found a party. Become the largest in the Assembly.</h2>
-    <p class="lede">You have five years and very little money. Every month the country throws a crisis at you, and how you respond decides who likes you. First, write your manifesto: one stance on each issue. Your statements afterwards move how voters see you. Stay inside your stances and voters trust you; cross into other stances too often and your core supporters walk away.</p>
+    <p class="lede">You have five years and very little money. Every month the country throws a crisis at you, and how you respond decides who likes you. First, write your manifesto: one stance on each issue. Your statements afterwards move how voters see you. Stay close to your manifesto and voters trust you; drift away from it and your core supporters walk away.</p>
     <div class="two-col">
       <label class="field">Party name <input type="text" id="party-name" maxlength="40" value="${esc(ui.draft.name)}"></label>
       <label class="field">Party leader <input type="text" id="leader-name" maxlength="40" value="${esc(ui.draft.leader)}"></label>
@@ -350,7 +350,7 @@ function renderStart() {
         }).join("")}</div>
       </fieldset>`).join("")}</div>
     <div class="sheet-actions">
-      ${saved && !saved.result && saved.version === 3 ? `<button class="btn" id="btn-continue">Continue saved game (${dateLabel(saved.week, false)})</button>` : ""}
+      ${saved && !saved.result && saved.version === 4 ? `<button class="btn" id="btn-continue">Continue saved game (${dateLabel(saved.week, false)})</button>` : ""}
       <button class="btn btn-primary" id="btn-start">Start the campaign</button>
     </div>`);
     $("#party-name").addEventListener("input", (e) => (ui.draft.name = e.target.value));
@@ -542,8 +542,10 @@ function actionsHTML() {
     const top = owners[0];
     const mine = ownershipOf(S, "player", key);
     const isSel = sel && sel.axis === ax.id && sel.side === side;
-    return `<button class="claim ${isSel ? "is-sel" : ""}" data-claim="${ax.id}" data-side="${side}" aria-pressed="${isSel}">
-      <span class="claim-label">${esc(side === "L" ? ax.left : ax.right)}</span>
+    const yours = manifestoSide(S, ax.id) === side;
+    const sig = S.signature.includes(key);
+    return `<button class="claim ${isSel ? "is-sel" : ""} ${yours ? "is-yours" : "not-yours"} ${sig ? "is-sig" : ""}" data-claim="${ax.id}" data-side="${side}" aria-pressed="${isSel}" title="${yours ? "Your manifesto's side" : "Not your manifesto's side"}">
+      <span class="claim-label">${sig ? "★ " : ""}${esc(side === "L" ? ax.left : ax.right)}</span>
       <span class="claim-owner">${top ? `<span class="dot" style="background:${partyById(top.party).color}"></span>${esc(partyById(top.party).short)} ${Math.round(top.value * 100)}` : `<span class="muted">Unclaimed</span>`}
       ${mine >= 0.02 && (!top || top.party !== "player") ? ` · you ${Math.round(mine * 100)}` : ""}</span></button>`;
   };
@@ -552,10 +554,12 @@ function actionsHTML() {
     const ax = byId(AXES, sel.axis);
     const pv = championPreview(S, sel.axis, sel.side);
     const st = pv.shift;
-    preview = `<div class="act-preview">
+    const sideName = (sel.side === "L" ? ax.left : ax.right).toLowerCase();
+    preview = pv.block ? `<div class="act-preview"><span class="tag tag-warn">${esc(pv.block)}</span></div>` : `<div class="act-preview">
+      <span>Single-issue voters on this side right now: <strong>${(pv.single / 1e6).toFixed(2)}M</strong>${pv.heat > 0.45 ? " (it's in the news)" : ""}</span>
       <span>Claim gain <strong>+${Math.round(pv.gain * 100)}</strong>${pv.heat > 0.25 ? " (reduced: everyone is already talking about it)" : " (cheap: nobody is talking about it yet)"}</span>
       ${st.from !== st.to ? `<span class="tag tag-warn">Stance change: ${esc(stanceName(ax.id, st.from))} → ${esc(stanceName(ax.id, st.to))}</span>` : `<span class="tag tag-quiet">Your ${esc(ax.issue.toLowerCase())} stance holds</span>`}
-      <button class="btn btn-primary btn-small" data-act="champion" ${dis()}>Champion ${esc((sel.side === "L" ? ax.left : ax.right).toLowerCase())}</button></div>`;
+      <button class="btn btn-primary btn-small" data-act="champion" ${dis()}>Champion ${esc(sideName)}</button></div>`;
   }
   const rv = rivals(S);
   return `
@@ -567,7 +571,10 @@ function actionsHTML() {
 
     <section class="act">
       <h4>${ACTIONS.champion.label} <span class="cost">Free</span></h4>
-      <p class="small muted">${esc(ACTIONS.champion.help)} Numbers show the strongest claim on each side, out of 100.</p>
+      <p class="small muted">${esc(ACTIONS.champion.help)} Numbers show the strongest claim on each side, out of 100. Your manifesto's sides are outlined.</p>
+      <div class="sig-list"><span class="eyebrow">Your issues (${S.signature.length} of ${CONFIG.maxSignatureIssues})</span>
+        ${S.signature.length ? S.signature.map((k) => `<span class="chip">★ ${esc(sideLabel(k))} · claim ${Math.round(ownershipOf(S, "player", k) * 100)}
+          <button class="link-btn" data-drop="${k}" ${blocked ? "disabled" : ""}>drop</button></span>`).join("") : `<span class="small muted">None yet</span>`}</div>
       <div class="claims">${AXES.map((ax) => {
         const heat = S.salMod[ax.id] || 0;
         return `<div class="claim-row"><span class="claim-issue">${esc(ax.issue)}${heat > 0.45 ? ` <span class="hot">Hot</span>` : ""}</span>${claimCell(ax, "L")}${claimCell(ax, "R")}</div>`;
@@ -700,6 +707,8 @@ document.querySelector("#tabs").addEventListener("click", (e) => {
   if (b) { ui.tab = b.dataset.tab; renderTabs(); }
 });
 $("#tab-body").addEventListener("click", (e) => {
+  const dr = e.target.closest("[data-drop]");
+  if (dr && !dr.disabled) { dropSignature(S, dr.dataset.drop); save(); renderTabs(); return; }
   const c = e.target.closest("[data-claim]");
   if (c) { ui.champ = { axis: c.dataset.claim, side: c.dataset.side }; renderTabs(); return; }
   const a = e.target.closest("[data-act]");

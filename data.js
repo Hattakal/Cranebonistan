@@ -29,8 +29,7 @@ const CONFIG = {
   stanceBounds: [-60, -20, 20, 60],
   stanceCenters: [-80, -40, 0, 40, 80],
   stepPenalty: [0, 1, 3, 6, 10], // inconsistency for being 0,1,2,3,4 stances off your manifesto
-  flipMemoryWeeks: 96,     // a stance flip is fully forgotten after two years
-  flipWeight: 0.8,         // how much each recent flip adds to inconsistency
+  flipMemoryWeeks: 96,     // stance changes are listed on the Platform tab for two years
   inconsistencyTolerance: 0.5,
 
   startLoyalty: 0.40,      // share of each pop that is "core" for some party at start
@@ -56,8 +55,10 @@ const CONFIG = {
 
   // Issue ownership: the party most identified with a side of an issue
   // gains when that issue becomes hot.
-  ownWeight: 0.5,
-  ownBase: 0.15,           // how much ownership matters when nobody is talking about the issue
+  ownWeight: 0.9,
+  singleIssueFrom: 1.3,    // voters who care at least this much about an issue react to who owns it
+                           // (hot news raises how much everyone cares, so more voters cross the line)
+  maxSignatureIssues: 2,   // how many issues your party can campaign on at once
   ownDecay: 0.97,          // monthly
   ownShareFloor: 0.25,     // a lone owner still needs a decent claim to get the full bonus
   newsWaveChance: 0.2,     // monthly chance a random issue suddenly dominates the news
