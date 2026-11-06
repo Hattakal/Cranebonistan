@@ -9,7 +9,7 @@ const CONFIG = {
   startYear: 2027,
   weeksPerMonth: 4,
   monthsPerYear: 12,
-  electionYears: 5,        // election lands in the first week after year 5
+  electionYears: 4,        // election lands in the first week after year 4
   seats: 300,              // seats in the National Assembly
 
   quarterIncome: 8,        // ₱ millions the player gets every quarter
@@ -28,7 +28,7 @@ const CONFIG = {
   // Stances: every axis is cut into 5 stances at these boundaries.
   stanceBounds: [-60, -20, 20, 60],
   stanceCenters: [-80, -40, 0, 40, 80],
-  stepPenalty: [0, 1, 3, 6, 10], // inconsistency for being 0,1,2,3,4 stances off your manifesto
+  stepPenalty: [0, 0, 3, 6, 10], // inconsistency for being 0,1,2,3,4 stances off your manifesto (one step is free)
   flipMemoryWeeks: 96,     // stance changes are listed on the Platform tab for two years
   inconsistencyTolerance: 0.5,
 
@@ -77,6 +77,28 @@ const CONFIG = {
   scrutinyChance: 0.35,    // monthly chance of a damaging story while you are a frontrunner
 
   pollError: 0.012,        // standard error of national polls (1.2 points)
+
+  // Reactive events: most months, not all. Initiatives carry the rest.
+  eventChance: 0.6,        // chance of a reactive event in a month
+  maxQuietMonths: 1,       // never more than this many months in a row without one
+
+  // Influence: the bigger you are, the more your words move the country.
+  influenceAt: 0.2,        // poll share at which your influence is "normal" (1.0)
+  influenceMin: 0.2,
+  influenceMax: 1.6,
+
+  // Extreme vs moderate manifestos (extremity 0 = all neutral, 1 = all far ends)
+  extremeAnger: 0.5,       // how much more an extreme party's statements anger people
+  extremeLeader: 0.9,      // how much faster an extreme party's leader builds a following
+
+  // The major crisis
+  crisisMonths: [14, 18],  // happens in this window (months from the start)
+  crisisBoostAt: 3.5,      // pressure (at full influence) needed for the biggest boost
+  crisisBoostMax: 1.667,   // weight boost cap: one crisis can reach at most 40%
+  crisisBlameFrom: 0.30,   // above these odds, the crisis says your campaign played a part
+
+  // Delivery: how lines land
+  styleMemory: 0.93,       // older lines count less when judging your style
   scandalChanceScale: 1,   // multiplies every leak chance
 };
 

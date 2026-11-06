@@ -695,3 +695,66 @@ const FUNDING_OFFERS = [
     note: "Hidden foreign money, but from a friendly country. A leak would hurt less.",
     effects: { money: 8, scandal: { event: "leak_golba", chance: 0.04 } } },
 ];
+
+// ---------------------------------------------------------------------
+// Context for events: kept separate so the events above stay readable.
+//   when       makes the event more likely while the state of the nation fits ("jobs: <45")
+//   world      how the news itself changes the state of the nation
+//   government what the ruling party does about it, shown before you answer
+//   choices    per choice (same order as above), extra effects:
+//              crisis: { id: pressure } pushes a major crisis (see crises.js),
+//              world: { indicator: change } scaled by your influence,
+//              blame: "group" records who you blamed (for the end-of-game profile)
+// ---------------------------------------------------------------------
+const EVENT_CONTEXT = {
+  pezo_slide: { when: { prices: ">50" }, world: { prices: 8, jobs: -3 },
+    government: { text: "The NUP finance minister says the Pezo is \"fundamentally strong\" and announces no measures." },
+    choices: [{ crisis: { economy: 1 }, world: { prices: 2 } }, {}, { crisis: { insurgency: 1.5, terror: 2 }, blame: "the Alinnian minority" }, {}] },
+  minimum_wage: { when: { prices: ">55" } },
+  rent_crisis: { when: { prices: ">50" }, world: { prices: 2 },
+    choices: [{}, {}, {}, { crisis: { terror: 1 }, blame: "immigrants" }] },
+  pension_reform: { world: { unrest: 4 } },
+  youth_video: { when: { jobs: "<50" }, world: { unrest: 2 },
+    choices: [{}, {}, {}, { blame: "the older generation" }] },
+  port_automation: { when: { jobs: "<52" }, world: { jobs: -3 },
+    choices: [{}, {}, {}, { crisis: { terror: 1 }, blame: "Norbanian workers" }] },
+  golba_trade: { government: { text: "The government says it is \"carefully studying\" Golba's offer." },
+    choices: [{}, {}, {}, { crisis: { economy: 1 } }] },
+  norbanian_boats: { when: { migration: ">60" }, world: { migration: 5 },
+    government: { text: "The government lets the ships dock but holds everyone in a closed camp on the quay.", world: { unrest: 2 } },
+    choices: [{ world: { migration: 2 } }, { crisis: { terror: 1 }, world: { migration: -3 } }, {}, {}] },
+  alinnian_schools: { choices: [{ crisis: { insurgency: -0.5 } }, {}, { crisis: { insurgency: 1 } }] },
+  crime_wave: { when: { unrest: ">40" }, world: { unrest: 3 },
+    government: { text: "The Interior Minister blames the previous government and promises \"a review\"." },
+    choices: [{}, {}, { crisis: { terror: 1.5 }, blame: "Norbanian gangs" }, {}] },
+  trueant_claim: { when: { border: ">45" }, world: { border: 10 },
+    government: { text: "The Foreign Ministry summons the Trueant ambassador for a formal protest." },
+    choices: [{ crisis: { expansion: 1.5 }, world: { border: 4 } }, { crisis: { expansion: -1, insurgency: -0.5 }, world: { border: -4 } }, { crisis: { insurgency: -0.5 } }, { crisis: { expansion: 0.5 } }] },
+  dillihan_border: { world: { border: 8 },
+    government: { text: "The government sends Dillihan a \"strongly worded note\"." },
+    choices: [{ world: { border: 4 } }, { world: { border: -4 } }, {}, {}] },
+  james_mines: { choices: [{ crisis: { james: 1 } }, {}, { crisis: { economy: 0.5 } }, {}] },
+  generalissimo: { world: { border: 6 },
+    choices: [{}, { crisis: { james: -0.5 } }, { crisis: { james: 1.5, expansion: 1 } }, {}] },
+  golba_sanctions: { world: { prices: 2 } },
+  dillihan_pipeline: {},
+  james_base: { world: { border: 3 }, choices: [{ crisis: { james: 1 } }, {}, { crisis: { james: -0.5 } }] },
+  yamlin_flood: { world: { unrest: 2 },
+    government: { text: "The prime minister is on holiday. His office says he is \"monitoring the situation\"." } },
+  cup_victory: { world: { unrest: -6 } },
+  hospital_queues: { world: { unrest: 3 },
+    government: { text: "The Health Minister says waiting times are \"a European problem\"." } },
+  smog_cranbia: {},
+  erland_drought: { world: { prices: 5, jobs: -2 },
+    government: { text: "The government promises a study on the effects of the drought, due next year." } },
+  cranbia_strike: { when: { prices: ">52" }, world: { unrest: 5, jobs: -1 },
+    government: { text: "The government declares the strike illegal and threatens fines." },
+    choices: [{}, {}, {}, { blame: "foreign agitators" }] },
+  minister_corruption: { trust: 0 },
+};
+for (const [id, ctx] of Object.entries(EVENT_CONTEXT)) {
+  const ev = EVENTS.find((e) => e.id === id);
+  if (!ev) continue;
+  for (const k of ["when", "world", "government"]) if (ctx[k]) ev[k] = ctx[k];
+  (ctx.choices || []).forEach((extra, i) => { if (ev.choices[i]) Object.assign(ev.choices[i].effects, extra); });
+}

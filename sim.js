@@ -92,7 +92,7 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
   const playerPoint = {};
   for (const ax of AXES) playerPoint[ax.id] = CONFIG.stanceCenters[manifesto[ax.id] ?? 2];
   const state = {
-    version: 6, seed, rng: seed, week: 0, money: 0,
+    version: 7, seed, rng: seed, week: 0, money: 0,
     trust: CONFIG.trustStart, trustHistory: [],
     salMod: {},          // temporary national salience boosts ("hot issues")
     ownership: {},       // { "nat:L": { partyId: 0..1 } }
@@ -108,6 +108,15 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
     actionsLeft: CONFIG.actionsPerMonth,
     lastSupport: null,   // national support last month, to see who is rising or falling
     lastBudget: null,    // your previous allocation, to reuse
+    world: { jobs: 55, prices: 45, migration: 58, border: 40, unrest: 32 }, // state of the nation (0-100)
+    climate: {},         // how much the state of the nation makes people care about each axis
+    permSal: {},         // lasting changes in what the country argues about (after the crisis)
+    agenda: { offered: [], done: false, used: [] }, // this month's initiatives
+    crisisPressure: {},  // how much your campaign has pushed each major crisis
+    crisis: null,        // the major crisis once it happens
+    quietMonths: 0,      // months since the last reactive event
+    style: {},           // how your leader tends to speak (tone -> weight)
+    record: { quotes: [], blamed: [], betrayed: [], promises: [], money: [], memes: 0, gaffes: 0, dossiers: 0, outrages: 0 },
     result: null,
     parties: PARTIES.map((p) => ({
       id: p.id,
@@ -129,6 +138,8 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
     })),
     pops: [],
   };
+  // How extreme the player's manifesto is: 0 = all neutral, 1 = every axis at a far end.
+  playerParty(state).extremity = AXES.reduce((a, ax) => a + Math.abs(CONFIG.stanceCenters[manifesto[ax.id] ?? 2]) / 80, 0) / AXES.length;
   for (const p of PARTIES) for (const [key, v] of Object.entries(p.owns || {})) {
     (state.ownership[key] = state.ownership[key] || {})[p.id] = v;
   }
@@ -211,7 +222,8 @@ function inconsistencyOf(state, party) {
 
 // ---------- Opinion: how a pop feels about a party ----------
 function salienceOf(state, pop, axis) {
-  return pop.sal[axis] * (1 + (state.salMod[axis] || 0));
+  const climate = (state.climate[axis] || 0) + ((((state.regionClimate || {})[pop.region]) || {})[axis] || 0);
+  return pop.sal[axis] * Math.max(0.3, 1 + (state.salMod[axis] || 0) + climate + (state.permSal[axis] || 0));
 }
 // Weighted distance between a pop and a position (0 = identical, 200 = opposite).
 function distance(state, pop, pos) {
@@ -227,7 +239,7 @@ function distance(state, pop, pos) {
 // A devoted voter judges the leader, not the party's positions.
 function devotionOf(pop, party) {
   if (!party.isPlayer) return 0;
-  const attachment = pop.leader[party.id] * pop.leaderPull * (party.charisma / 50);
+  const attachment = pop.leader[party.id] * pop.leaderPull * (party.charisma / 50) * (0.85 + 0.4 * (party.extremity || 0));
   return clamp((attachment - CONFIG.devotionStart) / CONFIG.devotionRange, 0, 1);
 }
 // Everything that is the same for every pop is worked out once per calculation.
@@ -385,17 +397,43 @@ function previewShift(state, shift) {
   }
   return out;
 }
+// How much your words move the country: grows with your support.
+function influenceOf(state) {
+  const share = state.lastSupport ? state.lastSupport.player : 0.03;
+  return clamp(share / CONFIG.influenceAt, CONFIG.influenceMin, CONFIG.influenceMax);
+}
+function influenceLabel(state) {
+  const i = influenceOf(state);
+  if (i < 0.4) return "Fringe voice";
+  if (i < 0.8) return "Getting noticed";
+  if (i < 1.2) return "Agenda-setter";
+  return "Sets the national debate";
+}
 function applyEffects(state, fx) {
   const player = playerParty(state);
+  const ext = player.extremity || 0;
+  const inf = influenceOf(state);
   shiftPerceived(state, fx.shift);
   for (const g of fx.goodwill || []) {
     const party = g.party || player.id;
+    // Extreme parties anger people more; moderate ones less.
+    const amt = g.amt < 0 && party === player.id ? g.amt * (1 - CONFIG.extremeAnger / 2 + CONFIG.extremeAnger * ext) : g.amt;
     for (const pop of state.pops) {
-      if (matches(pop, g.who)) pop.goodwill[party] = clamp(pop.goodwill[party] + g.amt * CONFIG.goodwillScale, -2, 2);
+      if (matches(pop, g.who)) pop.goodwill[party] = clamp(pop.goodwill[party] + amt * CONFIG.goodwillScale, -2, 2);
     }
   }
+  // Your statements push the major crisis, more so the bigger you are.
+  for (const [id, p] of Object.entries(fx.crisis || {})) {
+    if (state.crisis) break;
+    state.crisisPressure[id] = Math.max(-3, (state.crisisPressure[id] || 0) + p * inf);
+  }
+  // ...and the state of the nation (scaled by influence for your statements, full strength for news)
+  for (const [k, d] of Object.entries(fx.world || {})) {
+    if (state.world[k] !== undefined) state.world[k] = clamp(state.world[k] + d * (fx.fromNews ? 1 : inf), 0, 100);
+  }
+  for (const [ax, d] of Object.entries(fx.permSal || {})) state.permSal[ax] = (state.permSal[ax] || 0) + d;
   if (fx.leader) {
-    const scale = player.charisma / 50;
+    const scale = player.charisma / 50 * (1 - CONFIG.extremeLeader / 2 + CONFIG.extremeLeader * ext);
     for (const pop of state.pops) {
       for (const g of [].concat(fx.leader)) {
         const who = typeof g === "number" ? {} : g.who;
@@ -406,9 +444,9 @@ function applyEffects(state, fx) {
   }
   if (fx.charisma) player.charisma = clamp(player.charisma + fx.charisma, 10, 100);
   for (const [ax, d] of Object.entries(fx.salience || {})) {
-    state.salMod[ax] = clamp((state.salMod[ax] || 0) + d, -0.5, 1.5);
+    state.salMod[ax] = clamp((state.salMod[ax] || 0) + d * (fx.fromNews ? 1 : inf), -0.5, 1.5);
   }
-  if (fx.trust) changeTrust(state, fx.trust);
+  if (fx.trust) changeTrust(state, fx.trust * (fx.fromNews || fx.trust > 0 ? 1 : inf));
   for (const [pid, d] of Object.entries(fx.stability || {})) {
     const p = partyOf(state, pid);
     if (p) p.stability = clamp(p.stability + d, 0, 100);
@@ -626,7 +664,7 @@ function monthlyUpdate(state) {
     state.salMod[ax.id] = clamp((state.salMod[ax.id] || 0) + CONFIG.newsWaveSize, -0.5, 1.5);
     const owners = ownershipTable(state).filter((r) => r.axis === ax.id && r.owners.length);
     const who = owners.map((r) => `${partyOf(state, r.owners[0].party).short} (${r.label.toLowerCase()})`).join(" and ");
-    pushNews(state, { kind: "issue", title: `${ax.issue} dominates the headlines`,
+    pushNews(state, { kind: "issue", title: `All eyes on ${ax.issue.toLowerCase()}`,
       text: `Everyone is suddenly talking about ${ax.issue.toLowerCase()}, and for many voters it is now the only issue that matters. ${who ? `The parties that own it gain most: ${who}.` : "Nobody owns this issue yet."}` });
   }
   for (const key in state.ownership) for (const pid in state.ownership[key]) state.ownership[key][pid] *= CONFIG.ownDecay;
@@ -798,6 +836,7 @@ function actRelease(state, index) {
   if (!dos) return { ok: false, text: "No such dossier." };
   spendAction(state, 0);
   state.dossiers.splice(index, 1);
+  state.record.dossiers++;
   const p = partyOf(state, dos.party);
   const sev = dos.severity;
   p.stability = clamp(p.stability - 5 * sev, 0, 100);
@@ -837,6 +876,7 @@ function actOutrage(state) {
   state.outrages = (state.outrages || []).filter((w) => state.week - w < 24);
   const f = 1 / (1 + state.outrages.length);
   state.outrages.push(state.week);
+  state.record.outrages++;
   applyEffects(state, { shift: { rev: -5 }, awareness: 0.07 * f, trust: -1,
     leader: [{ who: { lean: { rev: "<-10" } }, amt: 0.1 * f }, { who: { class: "working" }, amt: 0.05 * f }],
     goodwill: [{ who: { class: "middle" }, amt: -0.25 }, { who: { class: "upper" }, amt: -0.3 }, { who: { lean: { rev: "<-15" } }, amt: 0.15 * f }] });
@@ -912,6 +952,7 @@ function resolveBudget(state, alloc, offersTaken = []) {
     if (!offer) continue;
     applyEffects(state, { ...offer.effects, awareness: 0 });
     notes.push(offer.source);
+    state.record.money.push({ week: state.week, source: offer.source, amount: offer.effects.money || 0, dirty: !!offer.effects.scandal });
   }
   const clean = {};
   let spent = 0;
@@ -926,7 +967,7 @@ function resolveBudget(state, alloc, offersTaken = []) {
   for (const [pop, imp] of impact) {
     pop.aware.player = clamp(imp.aware, 0.01, 1);
     pop.goodwill.player = clamp(pop.goodwill.player + imp.goodwill, -2, 2);
-    pop.leader.player = clamp(pop.leader.player + imp.leader * (player.charisma / 50), -2, 2);
+    pop.leader.player = clamp(pop.leader.player + imp.leader * (player.charisma / 50) * (1 - CONFIG.extremeLeader / 2 + CONFIG.extremeLeader * (player.extremity || 0)), -2, 2);
   }
   if (swing) for (const pop of state.pops) if (CAMPAIGN.social.ages.includes(pop.age)) {
     pop.goodwill.player = clamp(pop.goodwill.player + swing, -2, 2);
@@ -948,7 +989,19 @@ function eligibleEvents(state) {
   return EVENTS.filter((e) => e.deck !== false
     && (!e.minYear || calendar(state.week).year >= e.minYear)
     && (!e.requires || state.flags[e.requires] !== undefined)
-    && !(e.once && state.flags["seen:" + e.id] !== undefined));
+    && !(e.once && state.flags["seen:" + e.id] !== undefined)
+    && !(state.flags["seen:" + e.id] !== undefined && state.week - state.flags["seen:" + e.id] < 18 * WEEKS_PER_MONTH));
+}
+// How likely an event is right now: events tied to the state of the nation come up when it fits.
+// when: { jobs: "<45", migration: ">60" } makes the event three times as likely while true.
+function eventWeight(state, e) {
+  let w = e.weight || 1;
+  for (const [k, cond] of Object.entries(e.when || {})) {
+    const v = state.world[k];
+    const n = parseFloat(cond.slice(1));
+    if (cond[0] === "<" ? v < n : v > n) w *= 3;
+  }
+  return w;
 }
 function drawEvent(state) {
   // 1) a follow-up that is due
@@ -959,24 +1012,42 @@ function drawEvent(state) {
     const sc = state.scandals[i];
     if (rand(state) < sc.chance * CONFIG.scandalChanceScale) { state.scandals.splice(i, 1); return sc.event; }
   }
-  // 3) the shuffled deck
-  const eligible = eligibleEvents(state).map((e) => e.id);
-  state.deck = state.deck.filter((id) => eligible.includes(id));
-  if (!state.deck.length) state.deck = shuffle(state, eligible);
-  return state.deck.pop();
+  // 3) a weighted pick from the events that fit the moment
+  const pool = eligibleEvents(state);
+  if (!pool.length) return null;
+  let r = rand(state) * pool.reduce((a, e) => a + eventWeight(state, e), 0);
+  for (const e of pool) { r -= eventWeight(state, e); if (r <= 0) return e.id; }
+  return pool[pool.length - 1].id;
+}
+// Most months bring a reactive event, but not all. Follow-ups and leaks always come through.
+function monthlyEvent(state) {
+  // No ordinary event in a month that already has a crisis phase or the final debate.
+  if (state.queue.some((q) => q.type === "event" || q.type === "debate")) return;
+  const forced = state.scheduled.some((s) => s.week <= state.week);
+  if (!forced && state.quietMonths < CONFIG.maxQuietMonths && rand(state) > CONFIG.eventChance) { state.quietMonths++; return; }
+  const id = drawEvent(state);
+  if (!id) return;
+  state.quietMonths = 0;
+  queueEvent(state, id);
 }
 // Events come from events.js (by id) or are generated on the spot (front.event).
 function eventOf(front) { return front.event || byId(EVENTS, front.id); }
 function queueEvent(state, id) {
   const ev = byId(EVENTS, id);
-  if (ev && ev.trust) changeTrust(state, ev.trust); // the news itself moves trust, whatever you say
+  if (!ev) return;
+  // The news itself, and the government's response, change things whatever you say.
+  if (ev.trust) changeTrust(state, ev.trust);
+  if (ev.world) applyEffects(state, { world: ev.world, fromNews: true, awareness: 0 });
+  if (ev.government && ev.government.world) applyEffects(state, { world: ev.government.world, fromNews: true, awareness: 0 });
   state.queue.push({ type: "event", id });
 }
-function resolveEvent(state, choiceIndex) {
+// choiceIndex: what you say. lineIndex: how you say it (only for choices with sound bites).
+function resolveEvent(state, choiceIndex, lineIndex = null) {
   const front = state.queue[0];
   const ev = eventOf(front);
   const choice = ev.choices[choiceIndex];
   const before = { ...playerParty(state).perceived };
+  const groupsBefore = snapshotGroups(state);
   const flipsBefore = state.flips.length;
   applyEffects(state, choice.effects);
   let extra = "";
@@ -984,10 +1055,19 @@ function resolveEvent(state, choiceIndex) {
     const moved = defect(state, choice.effects.defect.from, choice.effects.defect.share);
     extra = ` About ${Math.round(moved / 1000)}k core voters came with them.`;
   }
+  let delivery = null, quote = null, tone = null;
+  if (choice.lines && lineIndex !== null && choice.lines[lineIndex]) {
+    const line = choice.lines[lineIndex];
+    delivery = deliverLine(state, line);
+    quote = line.text;
+    tone = line.tone;
+  }
+  recordStatement(state, { text: quote || choice.label, title: ev.title, effects: choice.effects, tone, spoken: !!quote });
   state.flags["seen:" + ev.id] = state.week;
-  state.log.push({ week: state.week, kind: "event", text: `${ev.title}: ${choice.label}.${extra}` });
+  state.log.push({ week: state.week, kind: "event", text: `${ev.title}: ${quote ? `"${quote}"` : choice.label + "."}${extra}` });
   finishFront(state, "event");
-  return { before, after: { ...playerParty(state).perceived }, flips: state.flips.slice(flipsBefore), extra };
+  return { before, after: { ...playerParty(state).perceived }, flips: state.flips.slice(flipsBefore), extra,
+    delivery, quote, label: choice.label, title: ev.title, changes: groupChanges(state, groupsBefore) };
 }
 
 // ---------- News: everything that happened this month, shown together ----------
@@ -1006,7 +1086,7 @@ function noisy(state, shares, sd) {
   for (const id in out) out[id] /= total;
   return out;
 }
-function takePoll(state, label) {
+function takePoll(state, label, silent = false) {
   const ctx = scoreContext(state);
   const nation = summarize(state, state.pops, ctx);
   const poll = { week: state.week, label, national: noisy(state, nation.support, CONFIG.pollError),
@@ -1018,9 +1098,12 @@ function takePoll(state, label) {
     poll.groups[`${kind.id}:${g.id}`] = entry;
     if (kind.id === "region") poll.regions[g.id] = entry.support;
   }
-  const prev = state.polls[state.polls.length - 1];
+  poll.tracker = silent;
   state.polls.push(poll);
-  if (prev) rivalsAdapt(state, prev.national, poll.national);
+  if (silent) return;
+  // Rivals compare with the previous December poll and adapt.
+  const prevAnnual = [...state.polls].reverse().find((p, i) => i > 0 && !p.tracker);
+  if (prevAnnual) rivalsAdapt(state, prevAnnual.national, poll.national);
   state.queue.push({ type: "poll", index: state.polls.length - 1 });
 }
 
@@ -1088,7 +1171,8 @@ const HOOKS = [
   { name: "monthly update", when: (c) => c.isMonthStart && c.week > 0, run: monthlyUpdate },
   { name: "quarterly budget", when: (c) => c.isQuarterStart,
     run: (s) => { s.money += CONFIG.quarterIncome; s.queue.push({ type: "budget", offers: drawOffers(s) }); } },
-  { name: "monthly event", when: (c) => c.isMonthStart, run: (s) => queueEvent(s, drawEvent(s)) },
+  { name: "monthly event", when: (c) => c.isMonthStart, run: monthlyEvent },
+  { name: "tracking poll", when: (c) => c.weekOfMonth === 2 && !c.isYearEnd, run: (s) => takePoll(s, `Tracking poll`, true) },
   { name: "annual poll", when: (c) => c.isYearEnd, run: (s) => takePoll(s, `Annual poll ${calendar(s.week).year}`) },
   { name: "news", when: () => true, run: flushNews }, // news always shows first
 ];

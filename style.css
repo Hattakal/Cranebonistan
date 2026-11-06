@@ -407,3 +407,56 @@ table.results td.num, table.results th.num { text-align: right; }
 .portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .art-photo { display: block; width: 100%; aspect-ratio: 3 / 1; max-height: 260px; object-fit: cover; }
 .art-credit { display: block; font-size: 11px; color: var(--muted); padding: 4px 24px 0; text-align: right; }
+
+/* ---------- v7: voice, results, agenda, country, newspaper, debate, profile ---------- */
+.big-word { font-family: var(--font-display); font-size: 26px; font-weight: 700; line-height: 1.1; }
+.gov-block { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1.5px solid var(--line); border-left: 4px solid #3a64b8; border-radius: 6px; font-size: 14px; }
+.gov-block .eyebrow { margin: 0; }
+.callout-strong { border-left-width: 5px; font-weight: 600; padding: 6px 10px; background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.echo { margin: 0; padding: 10px 14px; border-left: 4px solid var(--accent); font-family: Georgia, serif; font-size: 17px; font-style: italic; }
+.echo cite, .said cite, .pq cite { display: block; font-family: var(--font-body); font-style: normal; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.tag-voice { border-color: var(--ink); }
+.lines { display: flex; flex-direction: column; gap: 8px; }
+.line { text-align: left; background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 14px 16px; cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif; font-size: 17px; line-height: 1.4; }
+.line:hover { border-color: var(--ink); }
+.said { display: flex; gap: 14px; align-items: flex-start; }
+.said blockquote { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 21px; line-height: 1.35; }
+.said blockquote.prompt { font-size: 18px; }
+.press { margin: 0; font-style: italic; }
+.badge { align-self: flex-start; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px; color: #fff; }
+.badge-good { background: #2f8a4c; } .badge-bad { background: var(--accent); }
+.played { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.chgs { display: flex; flex-wrap: wrap; gap: 6px; }
+.chg { font-size: 13px; border-radius: 4px; padding: 3px 8px; border: 1px solid var(--line); }
+.chg b { font-family: var(--font-mono); font-weight: 500; }
+.chg-up b { color: #2f8a4c; } .chg-down b { color: var(--accent); }
+.agenda { border-bottom: 1.5px solid var(--ink); }
+.initiatives { display: flex; flex-direction: column; gap: 8px; }
+.initiative:disabled { opacity: 0.5; cursor: not-allowed; }
+.nation-card { margin-bottom: 12px; }
+.indicators { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.ind { display: flex; flex-direction: column; gap: 1px; }
+.ind-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.trend { font-size: 12px; color: var(--muted); }
+.trend-good { color: #2f8a4c; } .trend-bad { color: var(--accent); }
+.paper { background: #f6f1e4; color: #23201b; border: 1px solid #d8cfba; border-radius: 4px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;
+  font-family: Georgia, "Times New Roman", serif; }
+.paper .muted, .paper .news-kind, .paper .eyebrow, .paper cite { color: #6a6253; }
+.masthead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; border-bottom: 3px double #23201b; padding-bottom: 6px;
+  font-family: Georgia, serif; font-weight: 700; font-size: 22px; letter-spacing: 0.02em; }
+.masthead .small { font-weight: 400; font-size: 12px; font-family: var(--font-mono); }
+.paper-head { font-family: Georgia, "Times New Roman", serif; font-size: clamp(26px, 4.5vw, 38px); line-height: 1.05; text-transform: none; }
+.paper-sub { margin: 8px 0 0; font-family: var(--font-body); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; border-top: 1px solid #23201b; padding-top: 8px; }
+.paper p { margin: 0; }
+.paper .news li { border-left-color: #b9ad94; }
+.profile-top { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.profile-top > div { flex: 1; min-width: 220px; }
+.profile-top h3 { font-family: Georgia, serif; font-size: 24px; }
+.contra { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
+@media (max-width: 560px) { .contra { grid-template-columns: minmax(0, 1fr); } }
+.vs { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; color: #9e2f2a; }
+.pq { margin: 0; font-size: 17px; font-style: italic; padding-left: 10px; border-left: 3px solid #9e2f2a; }
+/* Photos from images.js share one newsprint treatment */
+.art-photo, .portrait img { filter: grayscale(1) sepia(0.28) contrast(1.08) brightness(1.02); }
+.pq-act { font-style: normal; font-family: var(--font-body); font-size: 15px; border-left-style: dashed; }

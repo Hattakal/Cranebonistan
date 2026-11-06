@@ -6,14 +6,18 @@ Runs in any browser with no installation: open `index.html`. Art and licences ar
 
 ## How it plays
 
-- **Weekly turns.** A monthly event, a quarterly campaign budget, a poll every December, and the election after five years.
-- **Pops.** About 170 population groups (region × age × class × nationality). Each has views on 8 political axes, cares about some issues more than others, and decides how much it likes each party.
-- **Manifesto and stances.** Each axis has 5 stances. Moving inside your stance is free. Crossing into other stances, or flip-flopping, costs you core supporters.
-- **Leader and cult.** Voters judge your leader as a person. Devoted followers forgive flip-flops and slowly adopt your views.
-- **Monthly actions.** Champion an issue, grassroots organising, opposition research, recruit defectors, provoke outrage.
-- **Living rivals.** Rival parties have leaders and stability. They suffer scandals, change leaders, split apart (a power vacuum) and copy your popular positions.
-- **Trust in politics.** When trust is low, voters turn to outsiders.
-- **Issue ownership.** The party that owns an issue gains most when it suddenly dominates the news.
+- **Four years, weekly turns.** A tracking poll every month, a detailed poll every December, a quarterly budget, the final debate, then the election.
+- **Pops.** About 170 population groups (region × age × class × nationality) with views on 8 axes.
+- **Manifesto.** One stance per axis. Up to one stance of drift is free; beyond that, voters punish you.
+- **Events.** Most months bring one. Choose what to say, then how to say it from real sound bites; the wording shapes your leader's style. Afterwards you see how it played with each group.
+- **Agenda.** Each month, open a debate of your own. What you raise comes back as later events.
+- **Actions.** Champion an issue, grassroots organising, opposition research, recruit defectors, provoke outrage.
+- **The state of the nation.** Jobs, prices, migration, border tension and the public mood drift and push each other.
+- **One major crisis** in the second year, from five. Your campaign can make one up to twice as likely.
+- **Living rivals, trust in politics, issue ownership, a leader cult.**
+- **The final debate and the profile.** Rivals quote you against yourself; at the end a hostile newspaper writes your story.
+
+See [DESIGN.md](DESIGN.md) for every design decision and why it was made.
 
 ## Files
 
@@ -21,6 +25,11 @@ Runs in any browser with no installation: open `index.html`. Art and licences ar
 |------|---------------|
 | `data.js` | The world: balance settings (`CONFIG`), axes, demographics, regions and map shapes, neighbouring countries, parties, campaign channels |
 | `events.js` | Monthly events and funding offers, as data. The header explains every effect type |
+| `soundbites.js` | What your leader can say in each event |
+| `initiatives.js` | The monthly agenda and its consequences |
+| `crises.js` | The five major crises |
+| `world.js` | State of the nation, agenda, crisis rules |
+| `voice.js` | Delivery, style, the record, the debate, the end profile |
 | `sim.js` | The rules. No screen code, so it also runs in Node for balance testing |
 | `ui.js` | Map, tabs, pop-up sheets and saving. Reads the state and calls `sim.js` |
 | `sfx.js` | Sound effects, synthesised in code |
