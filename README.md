@@ -31,7 +31,9 @@ See [DESIGN.md](DESIGN.md) for every design decision and why it was made.
 | `world.js` | State of the nation, agenda, crisis rules |
 | `voice.js` | Delivery, style, the record, the debate, the end profile |
 | `sim.js` | The rules. No screen code, so it also runs in Node for balance testing |
-| `ui.js` | Map, tabs, pop-up sheets and saving. Reads the state and calls `sim.js` |
+| `board.js` | The evidence board: the decision waiting for you, the latest poll, staff notes, headlines |
+| `scene.js` | The back room: dialogue scenes with Pim and Marta Teyl (the opening one is the tutorial) |
+| `ui.js` | Top bar, map, planning files, decision sheets and saving. Reads the state and calls `sim.js` |
 | `sfx.js` | Sound effects, synthesised in code |
 | `icons.js` | Line icons used for party emblems and buttons |
 | `portraits.js` | Draws leader portraits from a name, sex and age |

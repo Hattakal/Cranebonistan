@@ -86,6 +86,12 @@ const SFX = (() => {
     // defeat
     lose: () => [392, 349, 311, 262].forEach((f, i) => tone({ freq: f, type: "triangle", start: i * 0.28, dur: 0.5, vol: 0.13 })),
     // big moment on the title screen
+    // a drawing pin pushed into cork
+    pin: () => { noise({ type: "lowpass", freq: 900, dur: 0.08, vol: 0.5, attack: 0.002 }); tone({ freq: 2600, type: "sine", start: 0.01, dur: 0.05, vol: 0.05 }); },
+    // one typewriter key
+    type: () => { noise({ type: "highpass", freq: 2200, dur: 0.03, vol: 0.18, attack: 0.001 }); tone({ freq: 160, type: "square", dur: 0.025, vol: 0.03 }); },
+    // a folder sliding open
+    drawer: () => { noise({ type: "bandpass", freq: 1200, q: 0.5, dur: 0.28, vol: 0.18, attack: 0.04, sweepTo: 2600 }); },
     open: () => { tone({ freq: 196, type: "triangle", dur: 0.6, vol: 0.15 }); tone({ freq: 294, type: "triangle", start: 0.1, dur: 0.6, vol: 0.12 }); tone({ freq: 392, type: "triangle", start: 0.2, dur: 0.9, vol: 0.12 }); },
   };
 

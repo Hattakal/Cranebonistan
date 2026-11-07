@@ -246,6 +246,19 @@ Not a list of events, but **a profile of the leader written by a hostile newspap
 | Monthly news as a newspaper front page | Built | |
 | Map-centred play | Planned | Events pinned to places, rallies by clicking the map, election night. Waits for the map. |
 
+### 7.1 The back room (the visual direction) — Built, first pass
+
+The designer's aims: the game should be enjoyable first, and it should look like a finished game rather than a simple browser game. Paradox games are the main inspiration. Several directions were mocked up first. The one chosen is a **detective's evidence board in a smoky back room**. The alternative, "tech bros with laptops", was turned down because the back room is grittier and more fun.
+
+- **Chrome and paper.** The interface around the game is dark tobacco and brass, and everything you read is paper: newspaper clippings, index cards, typed slips and a ledger.
+- **Top bar, Paradox-style.** The party, the key numbers (funds, polling, recognition, business mood, trust), the planning files, the date and the speed controls.
+- **The board holds only what is current or urgent.** That means the decision waiting for you (red pin), the latest poll, notes from staff, this week's headlines, trouble to watch and what's coming up. Red string links the decision to related cards. *Decided:* planning (manifesto, rival files, dossiers) belongs in the files along the top, especially at the start of a month, not on the board.
+- **Planning files** slide out over the board like a folder. Clicking a region on the map opens its voters.
+- **Decisions zoom up as paper.** Events are a newspaper front page. You choose what to say on index cards, then the exact words on typed slips. The outcome is shown as the evening news. Any decision can be **put down** to look at the map or the files first, then picked up again from the board.
+- **The tutorial is a scene in the game.** *Decided:* the old "How to play" button felt fake, so the first night in the back room teaches the game instead. Pim Aster, the advisor, is a sycophant. *Revised after the mockup:* the first draft of Pim was too on the nose. He now flatters by keeping bad news away, crediting your instincts and agreeing with criticism in a way that still compliments you. Marta Teyl, the party secretary, is respected in the party and pushes back. For now she is a narrative device that remembers whether you listened. Later she could walk out and found her own party.
+- **Sound.** New sounds were added for the pin, typing and the folder. Sound still has a long way to go.
+- **Still to come:** more cartoonish politician portraits (the designer will look for public-domain material), event pictures, the redrawn map with provinces, and election night.
+
 ### Technology
 
 Browser game in HTML, CSS and JavaScript, no installation. *Discussed:* a desktop program instead. Decided that the browser doesn't limit this kind of game and can be wrapped later (Electron or Tauri) for Steam. The rules live in `sim.js` with no screen code, so the game can be tested in bulk and moved to another engine if ever needed. Hosted on GitHub.
@@ -288,7 +301,9 @@ Original targets:
 | `sim.js` | Core rules: pops, opinion, effects, rivals, actions, budget, polls, elections, calendar |
 | `world.js` | State of the nation, initiatives, the major crisis |
 | `voice.js` | Delivery, leader style, the record of statements, the final debate, the end profile |
-| `ui.js`, `style.css`, `index.html` | Screens |
+| `ui.js`, `style.css`, `index.html` | Screens: top bar, map, planning files, sheets, title |
+| `board.js` | The evidence board (current and urgent items only) |
+| `scene.js` | Back-room dialogue scenes; the opening scene is the tutorial |
 | `portraits.js`, `flags.js`, `art.js`, `icons.js`, `sfx.js` | Drawn art, flags, illustrations, icons, sound |
 | `images.js` | Public-domain pictures that replace drawings (see IMAGES.md) |
 

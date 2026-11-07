@@ -8,7 +8,7 @@
 const SAVE_KEY = "cranebonistan-save-v8";
 const SVG_NS = "http://www.w3.org/2000/svg";
 let S = null; // the game state (created by newGame or loaded from a save)
-const ui = { tab: "electorate", kind: "age", group: "18-29", budget: null, offers: [], draft: null, champ: null };
+const ui = { tab: "electorate", drawer: false, down: null, kind: "age", group: "18-29", budget: null, offers: [], draft: null, champ: null };
 
 const $ = (sel) => document.querySelector(sel);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -27,6 +27,8 @@ function render() {
   if (!S) { if (ui.create) renderCreate(); else renderTitle(); return; }
   renderStatus();
   updateMap();
+  renderBoard();
+  renderTicker();
   renderTabs();
   renderModal();
 }
@@ -36,22 +38,36 @@ function renderStatus() {
   const player = partyById("player");
   const weeksLeft = ELECTION_WEEK - S.week;
   const monthsLeft = Math.ceil(weeksLeft / CONFIG.weeksPerMonth);
-  $("#election-year").textContent = calendar(ELECTION_WEEK).year;
-  $("#status").innerHTML = `
-    <div class="stat stat-party">${portraitHTML(player, "portrait-sm")}<span><span class="stat-label">${emblemHTML(player.color, player.emblem, "emblem-xs")} ${esc(player.leader)}</span>
-      <span class="party-name">${esc(player.name)}</span></span></div>
-    <div class="stat"><span class="stat-label">Date</span><span class="stat-value">${dateLabel(S.week)}</span></div>
-    <div class="stat"><span class="stat-label">Election in</span><span class="stat-value">${S.result ? "Held" : `${monthsLeft} months`}</span></div>
-    <div class="stat"><span class="stat-label">Polling</span><span class="stat-value">${pollingNow()}</span></div>
-    <div class="stat"><span class="stat-label">Campaign funds</span><span class="stat-value">₱${S.money.toFixed(1)}M</span></div>
-    <div class="stat"><span class="stat-label">Trust in politics</span><span class="stat-value">${trustLabel(S.trust)}</span></div>
-    <button class="stat stat-btn" id="stat-actions"><span class="stat-label">This month</span><span class="stat-value">${S.actionsLeft} action${S.actionsLeft === 1 ? "" : "s"}${S.agenda.done ? "" : " · agenda open"}${S.actionsLeft || !S.agenda.done ? " →" : ""}</span></button>`;
-  $("#stat-actions").addEventListener("click", () => { ui.tab = "actions"; renderTabs(); });
+  $("#tb-party").innerHTML = `${portraitHTML(player, "portrait-sm")}
+    <span class="tb-party-text"><span class="tb-party-name">${emblemHTML(player.color, player.emblem, "emblem-xs")} ${esc(player.name)}</span>
+    <span class="tb-leader">Leader: ${esc(player.leader)}</span></span>`;
+  const mood = businessMood(S);
+  const chip = (label, value, title, cls = "") => `<div class="chip-stat ${cls}" title="${esc(title)}"><span class="cs-label">${label}</span><span class="cs-value">${value}</span></div>`;
+  $("#status").innerHTML =
+    chip("Funds", `₱${S.money.toFixed(1)}M`, "Campaign money. Income arrives every quarter.") +
+    chip("Polling", pollingNow(), "Your national vote share in the latest poll.") +
+    chip("Known by", pct(nationalAwareness(S), 0), "Share of adults who have heard of your party.") +
+    chip("Business", mood < 0.25 ? "Hostile" : mood < 0.4 ? "Distant" : mood < 0.7 ? "Cautious" : mood < 1.1 ? "Willing" : "Generous", `Business donors are ${businessWord(mood)}. Angry donors give less.`, mood < 0.4 ? "cs-bad" : mood >= 1.1 ? "cs-good" : "") +
+    chip("Trust", esc(trustLabel(S.trust)), "Trust in the political system. Low trust helps outsiders.");
+  $("#tb-date").textContent = dateLabel(S.week);
+  $("#tb-countdown").textContent = S.result ? "Election held" : `Election in ${monthsLeft} month${monthsLeft === 1 ? "" : "s"}`;
+  const todo = S.actionsLeft + (S.agenda.done ? 0 : 1);
+  const badge = $("#badge-actions");
+  badge.hidden = !todo || !!S.result; badge.textContent = todo;
   const blocked = S.queue.length > 0 || !!S.result;
   $("#btn-sound").innerHTML = iconSVG(SFX.muted ? "volume-x" : "volume-2");
   $("#btn-sound").setAttribute("aria-label", SFX.muted ? "Turn sound on" : "Turn sound off");
   $("#btn-week").disabled = blocked;
   $("#btn-skip").disabled = blocked;
+}
+const cap = (t) => String(t).charAt(0).toUpperCase() + String(t).slice(1);
+
+// The news ticker under the map: the latest diary entries.
+function renderTicker() {
+  const items = [...S.log].reverse().slice(0, 6).map((l) => `<span>${esc(l.text)}</span>`).join("");
+  const html = items ? items + items : "<span>Welcome to the campaign.</span>";
+  const t = $("#ticker");
+  if (t.dataset.html !== html) { t.innerHTML = html; t.dataset.html = html; t.style.animationDuration = `${Math.max(30, S.log.length ? 50 : 30)}s`; }
 }
 
 function pollingNow() {
@@ -72,13 +88,20 @@ function svgEl(tag, attrs, parent) {
 }
 function buildMap() {
   const svg = $("#map");
-  svg.innerHTML = "";
+  svg.innerHTML = `<defs>
+    <pattern id="m-waves" width="90" height="40" patternUnits="userSpaceOnUse"><path d="M0 20 Q 22 4 45 20 T 90 20" stroke="#40606a" stroke-width="3" fill="none" opacity=".35"/></pattern>
+    <pattern id="m-hatch" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V26" stroke="#6b5a40" stroke-width="3" opacity=".28"/></pattern>
+    <filter id="m-paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".012 .02" numOctaves="3" seed="4"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .12  0 0 0 .22 0"/></filter>
+    <filter id="m-ink"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+  </defs>
+  <rect class="sea" width="2296" height="1623"/><rect width="2296" height="1623" fill="url(#m-waves)"/>`;
   for (const f of FOREIGN) {
     const poly = svgEl("polygon", { points: f.shape, class: "foreign", tabindex: 0, "data-foreign": f.id }, svg);
     poly.addEventListener("click", () => foreignSheet(f.id));
     poly.addEventListener("keydown", (e) => { if (e.key === "Enter") foreignSheet(f.id); });
     poly.addEventListener("mousemove", (e) => showForeignTip(e, f));
     poly.addEventListener("mouseleave", () => ($("#map-tip").hidden = true));
+    svgEl("polygon", { points: f.shape, class: "foreign-hatch" }, svg);
   }
   for (const r of REGIONS) {
     const poly = svgEl("polygon", { points: r.shape, class: "region", "data-id": r.id, tabindex: 0 }, svg);
@@ -99,9 +122,10 @@ function buildMap() {
     t.textContent = r.name;
     svgEl("text", { x: r.label[0], y: r.label[1] + 46, "text-anchor": "middle", class: "label-share", "data-share": r.id }, svg);
   }
-  svgEl("circle", { cx: CAPITAL.x, cy: CAPITAL.y, r: 14, class: "capital" }, svg);
+  svgEl("path", { d: `M${CAPITAL.x} ${CAPITAL.y - 26} l7.6 15.6 17.2 2.5 -12.4 12.1 2.9 17.1 -15.3 -8.1 -15.3 8.1 2.9 -17.1 -12.4 -12.1 17.2 -2.5Z`, class: "capital" }, svg);
   const cap = svgEl("text", { x: CAPITAL.x + 24, y: CAPITAL.y + 40, class: "label-capital" }, svg);
   cap.textContent = CAPITAL.name;
+  svgEl("rect", { width: 2296, height: 1623, filter: "url(#m-paper)", class: "map-grain" }, svg);
 }
 function leaderOf(shares) {
   const ids = Object.keys(shares).sort((a, b) => shares[b] - shares[a]);
@@ -119,13 +143,13 @@ function updateMap() {
     if (shares) {
       const lead = leaderOf(shares);
       const strength = Math.round(clamp(28 + lead.margin * 160, 28, 75));
-      poly.style.fill = `color-mix(in srgb, ${partyById(lead.id).color} ${strength}%, var(--land))`;
+      poly.style.fill = `color-mix(in srgb, ${partyById(lead.id).color} ${Math.round(strength * 0.8)}%, var(--land))`;
       document.querySelector(`[data-share="${r.id}"]`).textContent = `You ${pct(shares.player, 0)}`;
     } else poly.style.fill = "var(--land)";
     poly.classList.toggle("selected", ui.kind === "region" && ui.group === r.id);
   }
   const legend = S.parties.map((p) => `<span class="party-chip"><span class="dot" style="background:${p.color}"></span>${esc(p.short)}</span>`).join("");
-  $("#map-legend").innerHTML = `${legend}<span class="note">Regions are coloured by the leader in the ${poll ? esc(poll.label.toLowerCase()) : "latest poll"} (${poll ? dateLabel(poll.week, false) : "no poll yet"}). Click a region to see its voters.</span>`;
+  $("#map-legend").innerHTML = `<span class="ml-head">Who leads where</span><span class="ml-chips">${legend}</span><span class="note">${poll ? esc(poll.label) + ", " + dateLabel(poll.week, false) : "No poll yet"}. Click a region for its voters, a neighbour for its news.</span>`;
 }
 function showTip(e, r) {
   const tip = $("#map-tip");
@@ -152,7 +176,7 @@ function showForeignTip(e, f) {
 }
 // Profile of a neighbouring country: flag, leader and summary.
 function foreignSheet(id) {
-  if (S && S.queue.length) return; // don't cover a decision
+  if (S && S.queue.length && ui.down !== S.queue[0]) return; // don't cover a decision
   const f = byId(FOREIGN, id);
   const l = f.leader;
   const img = leaderImage(l.name);
@@ -172,17 +196,22 @@ function foreignSheet(id) {
         ${news.length ? `<p class="eyebrow">Recent developments</p><ul class="developments">${news.map((n) => `<li><span class="when">${dateLabel(n.week, false)}</span> ${esc(n.text)}</li>`).join("")}</ul>` : ""}
         <p class="small muted">${esc(FLAG_INFO[f.flag].note)}</p></div>
     </div>
-    <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Close</button></div>`);
+    <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Close</button></div>`, { plain: true });
   $("#btn-close").addEventListener("click", () => { closeSheet(); if (S) renderModal(); });
 }
 function selectRegion(id) {
-  ui.tab = "electorate"; ui.kind = "region"; ui.group = id;
+  ui.tab = "electorate"; ui.kind = "region"; ui.group = id; ui.drawer = true;
+  SFX.play("drawer");
   render();
 }
 
 // ---------- Tabs ----------
+const TAB_TITLES = { electorate: "The electorate", platform: "Platform and leader", actions: "This month's moves", parties: "The country", polls: "Polls", diary: "Campaign diary" };
 function renderTabs() {
-  document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === ui.tab));
+  document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-pressed", ui.drawer && b.dataset.tab === ui.tab));
+  $("#drawer").hidden = !ui.drawer;
+  if (!ui.drawer) return;
+  $("#drawer-title").textContent = TAB_TITLES[ui.tab] || "";
   const body = $("#tab-body");
   if (ui.tab === "electorate") body.innerHTML = electorateHTML();
   if (ui.tab === "platform") body.innerHTML = platformHTML();
@@ -370,13 +399,25 @@ function diaryHTML() {
 }
 
 // ---------- Modal sheets (start, events, budget, polls, election) ----------
-function openSheet(html) { $("#sheet").innerHTML = html; $("#modal").hidden = false; }
+function openSheet(html, opts = {}) {
+  const sheet = $("#sheet"), modal = $("#modal");
+  const canDown = S && !opts.plain && !ui.pending && S.queue.length && S.queue[0].type !== "election";
+  sheet.dataset.plain = opts.plain ? "1" : "";
+  sheet.innerHTML = (canDown ? `<button class="sheet-down" id="btn-down" title="Put it on the board and look around first">${iconSVG("pin")} Put it down</button>` : "") + html;
+  sheet.classList.toggle("sheet-paper", !sheet.querySelector(".paper"));
+  if (modal.hidden) { sheet.classList.remove("zoom-in"); void sheet.offsetWidth; sheet.classList.add("zoom-in"); }
+  modal.hidden = false;
+  const down = $("#btn-down");
+  if (down) down.addEventListener("click", () => { ui.down = S.queue[0]; SFX.play("pin"); closeSheet(); render(); });
+}
 function closeSheet() { $("#modal").hidden = true; $("#sheet").innerHTML = ""; }
 
 function renderModal() {
   if (ui.pending) { resultSheet(ui.pending); return; }
   const front = S.queue[0];
-  if (!front) { closeSheet(); ui.lastFront = null; return; }
+  if (!front) { closeSheet(); ui.lastFront = null; ui.down = null; return; }
+  if (ui.down === front) { if (!$("#modal").hidden && !$("#sheet").dataset.plain) closeSheet(); return; }
+  if (!$("#scene").hidden) return; // a back-room scene is playing
   if (front !== ui.lastFront) {
     ui.lastFront = front;
     const sound = { news: "paper", event: "stamp", poll: "poll", budget: "click",
@@ -433,24 +474,24 @@ function renderTitle() {
   const el = $("#title");
   el.hidden = false;
   el.innerHTML = `
+    <div class="title-glow"></div>
     ${titleMapSVG()}
     <div class="title-inner">
       <p class="title-kicker">${flagSVG("cranebonistan", "flag flag-sm")} The Republic of Cranebonistan · ${CONFIG.startYear}</p>
-      <h1 class="title-name">Cranebonistan</h1>
-      <p class="title-tag">Five years. One election. Say whatever it takes.</p>
+      <h1 class="title-name">Crane&shy;bonistan</h1>
+      <p class="title-tag">Four years. One election.<br>Say whatever it takes.</p>
       <div class="title-menu">
-        <button class="btn btn-primary btn-big" id="t-new">${iconSVG("flag")} New campaign</button>
-        ${canContinue ? `<button class="btn btn-big" id="t-continue">Continue · ${esc(saved.parties.find((p) => p.isPlayer).name)}, ${dateLabel(saved.week, false)}</button>` : ""}
-        <button class="btn btn-big" id="t-how">How to play</button>
+        <button class="title-btn title-btn-main" id="t-new">${iconSVG("flag")} Found a party</button>
+        ${canContinue ? `<button class="title-btn" id="t-continue">${iconSVG("folder-open")} Continue <span>${esc(saved.parties.find((p) => p.isPlayer).name)}, ${dateLabel(saved.week, false)}</span></button>` : ""}
       </div>
       <div class="title-foot">
-        <button class="btn btn-small" id="t-sound">${iconSVG(SFX.muted ? "volume-x" : "volume-2")} Sound ${SFX.muted ? "off" : "on"}</button>
+        <button class="link-btn" id="t-sound">${iconSVG(SFX.muted ? "volume-x" : "volume-2")} Sound ${SFX.muted ? "off" : "on"}</button>
         <button class="link-btn" id="t-credits">Credits</button>
       </div>
-    </div>`;
+    </div>
+    <span class="title-stamp">Classified · for party eyes only</span>`;
   $("#t-new").addEventListener("click", () => { SFX.play("open"); ui.create = { step: "pick" }; el.hidden = true; renderCreate(); });
   if (canContinue) $("#t-continue").addEventListener("click", () => { SFX.play("open"); S = saved; el.hidden = true; render(); });
-  $("#t-how").addEventListener("click", howToPlay);
   $("#t-credits").addEventListener("click", creditsSheet);
   $("#t-sound").addEventListener("click", () => { SFX.toggle(); renderTitle(); });
 }
@@ -459,6 +500,8 @@ function howToPlay() {
     <span class="stamp">How to play</span>
     <h2>Become the largest party in four years</h2>
     <ul class="howto">
+      <li><strong>Watch the board.</strong> Anything that needs you right now is pinned to the board on the left. You can put a decision down, look at the map or your files, and pick it up again.</li>
+      <li><strong>Plan with your files.</strong> The buttons along the top open your planning files: the electorate, your platform, this month's moves, the country, the polls and your diary.</li>
       <li><strong>Write a manifesto.</strong> One stance on each of eight issues. Drifting away from it costs you trust and core voters.</li>
       <li><strong>Set the agenda.</strong> Each month, open a debate of your choosing. What you raise comes back to you later.</li>
       <li><strong>React to events.</strong> Most months bring a crisis, scandal or opportunity. Choose what to say, then how to say it: the wording matters, and it shapes your leader's style.</li>
@@ -469,8 +512,8 @@ function howToPlay() {
       <li><strong>Read the polls.</strong> A tracking poll every month, a detailed one every December. After each decision you see how it played.</li>
       <li><strong>Win the debate.</strong> A month before the election, face your rivals on live TV. They will use your own words against you.</li>
     </ul>
-    <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Got it</button></div>`);
-  $("#btn-close").addEventListener("click", closeSheet);
+    <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Got it</button></div>`, { plain: true });
+  $("#btn-close").addEventListener("click", () => { closeSheet(); if (S) { ui.lastFront = null; renderModal(); } });
 }
 function creditsSheet() {
   openSheet(`
@@ -479,11 +522,11 @@ function creditsSheet() {
     <ul class="howto">
       <li><strong>Portraits, flags and event illustrations:</strong> original artwork drawn in code for this game.</li>
       <li><strong>Icons:</strong> Lucide, ISC License.</li>
-      <li><strong>Fonts:</strong> Bricolage Grotesque and IBM Plex, SIL Open Font License, via Google Fonts.</li>
+      <li><strong>Fonts:</strong> Oswald, Special Elite, Old Standard TT and IBM Plex, SIL Open Font License (Special Elite: Apache License), via Google Fonts.</li>
       <li><strong>Sound:</strong> synthesised in the browser; no recordings used.</li>
       <li><strong>Map, setting and design:</strong> Ugur Ozan Denizgünü.</li>
     </ul>
-    <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Close</button></div>`);
+    <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Close</button></div>`, { plain: true });
   $("#btn-close").addEventListener("click", closeSheet);
 }
 
@@ -556,7 +599,10 @@ function renderCreate() {
   $("#btn-start").addEventListener("click", () => {
     S = newGame({ partyName: c.name.trim() || "New Dawn Movement", leaderName: c.leader.trim() || "Dorin Vask",
       manifesto: c.manifesto, color: c.color, emblem: c.emblem, portrait: c.portrait });
-    ui.create = null; SFX.play("open"); save(); render();
+    ui.create = null; SFX.play("open"); save();
+    closeSheet();
+    playScene("intro", () => { save(); render(); });
+    render();
   });
 }
 
@@ -905,17 +951,21 @@ function eventSheet(front) {
   const kindLabel = { crisis: "Crisis", opportunity: "Opportunity", trap: "Tricky moment", scandal: "Scandal", regional: "Regional issue", foreign: "Foreign affairs", followup: "Consequences" }[ev.kind] || "Event";
   const crisisName = ev.kind === "crisis" && S.crisis ? byId(CRISES, S.crisis.id).name : null;
   const head = `
-    <div class="art-wrap">${ART.eventArt(ev)}</div>
-    <span class="stamp">${crisisName ? `Crisis · ${esc(crisisName)}` : kindLabel} · ${dateLabel(S.week, false)}</span>
-    <h2>${esc(ev.title)}</h2>
-    <p class="lede">${esc(ev.text)}</p>
-    ${crisisNotes(ev)}
-    ${governmentBlock(ev)}`;
+    <div class="frontpage">
+      <div class="fp-mast"><span>${dateLabel(S.week, false)}</span><span class="fp-name">The Morning Post</span><span>${crisisName ? `Crisis · ${esc(crisisName)}` : kindLabel}</span></div>
+      <h2 class="fp-head">${esc(ev.title)}</h2>
+      <div class="fp-body">
+        <div class="art-wrap">${ART.eventArt(ev)}</div>
+        <div class="fp-text"><p class="lede">${esc(ev.text)}</p>${governmentBlock(ev)}</div>
+      </div>
+      ${crisisNotes(ev)}
+    </div>`;
   // Step 2: how do you say it?
   if (ui.pick && ui.pick.front === front && ev.choices[ui.pick.choice].lines) {
     const c = ev.choices[ui.pick.choice];
     openSheet(`${head}
-      <p class="eyebrow">You will: ${esc(c.label.charAt(0).toLowerCase() + c.label.slice(1))}. How do you say it?</p>
+      <div class="step-head"><span class="step-n">Step 2 of 2</span><h3>How do you say it?</h3></div>
+      <p class="chosen-pos">You will ${esc(c.label.charAt(0).toLowerCase() + c.label.slice(1))}.</p>
       <p class="small muted">The wording matters. The same position can win people over or blow up in your face.</p>
       <div class="lines">${c.lines.map((l, i) => `<button class="line" data-line="${i}">"${esc(l.text)}"</button>`).join("")}</div>
       <div class="sheet-actions"><button class="btn" id="btn-back">Choose a different answer</button></div>`);
@@ -925,7 +975,7 @@ function eventSheet(front) {
   }
   // Step 1: what do you say?
   openSheet(`${head}
-    <p class="eyebrow">How do you respond?</p>
+    <div class="step-head"><span class="step-n">${ev.choices.some((c) => c.lines) ? "Step 1 of 2" : "Your decision"}</span><h3>What do you say?</h3></div>
     <div class="choices">${ev.choices.map((c, i) => {
       const d = describeChoice(S, c.effects);
       const stanceLines = d.stances.filter((s) => s.from !== s.to).map((s) => {
@@ -968,7 +1018,7 @@ function resultSheet(res) {
   const flips = (res.flips || []).map((f) => `<span class="tag tag-warn">Stance change: ${esc(stanceName(f.axis, f.from))} → ${esc(stanceName(f.axis, f.to))}</span>`).join("");
   const player = partyById("player");
   openSheet(`
-    <span class="stamp">How it played · ${esc(res.title || "")}</span>
+    <div class="tv-strap"><span class="tv-live">CBC · Evening news</span><span>How it played · ${esc(res.title || "")}</span></div>
     <div class="said">${portraitHTML(player, "portrait-md")}
       <blockquote>${res.quote ? `"${esc(res.quote)}"` : esc(res.label || "")}<cite>${esc(player.leader)}</cite></blockquote></div>
     ${outcomeBadge}
@@ -1104,8 +1154,28 @@ function toast(text) {
 // ---------- Wiring ----------
 document.querySelector("#tabs").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-tab]");
-  if (b) { ui.tab = b.dataset.tab; renderTabs(); }
+  if (!b || !S) return;
+  if (ui.drawer && ui.tab === b.dataset.tab) ui.drawer = false;
+  else { ui.tab = b.dataset.tab; ui.drawer = true; SFX.play("drawer"); }
+  renderTabs();
+  if (ui.drawer) $("#tab-body").scrollTop = 0;
 });
+$("#drawer-close").addEventListener("click", () => { ui.drawer = false; renderTabs(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!$("#modal").hidden && $("#sheet").dataset.plain) { closeSheet(); if (S) renderModal(); return; }
+  if (ui.drawer) { ui.drawer = false; renderTabs(); }
+});
+$("#board").addEventListener("click", (e) => {
+  const c = e.target.closest("[data-board]");
+  if (!c || !S) return;
+  const what = c.dataset.board;
+  if (what === "decision") { ui.down = null; SFX.play("paper"); renderModal(); return; }
+  if (what === "results") { electionSheet(); return; }
+  ui.tab = what; ui.drawer = true; SFX.play("drawer"); renderTabs();
+});
+document.querySelectorAll("[data-icon]").forEach((el) => (el.innerHTML = iconSVG(el.dataset.icon)));
+$("#btn-help").addEventListener("click", howToPlay);
 $("#tab-body").addEventListener("click", (e) => {
   const ini = e.target.closest("[data-initiative]");
   if (ini && !ini.disabled) { runInitiative(ini.dataset.initiative); return; }
@@ -1127,11 +1197,10 @@ $("#btn-skip").addEventListener("click", () => { advanceToDecision(S); save(); r
 // Small tick on ordinary buttons (choices and big moments have their own sounds).
 document.addEventListener("click", (e) => {
   const b = e.target.closest("button");
-  if (b && !b.disabled && !b.matches("[data-choice], [data-line], [data-debate], [data-initiative], #btn-budget, #t-new, #t-continue, #btn-start, [data-act], #btn-sound, #t-sound")) SFX.play("click");
+  if (b && !b.disabled && !b.matches("[data-choice], [data-line], [data-debate], [data-initiative], #btn-budget, #t-new, #t-continue, #btn-start, [data-act], #btn-sound, #t-sound, [data-tab], [data-board], #btn-down, #sc-next, [data-story]")) SFX.play("click");
 });
 
 buildMap();
-$("#brand-flag").innerHTML = flagSVG("cranebonistan", "flag flag-brand");
 const existing = loadSave();
 if (existing && existing.result) clearSave();
 render();
