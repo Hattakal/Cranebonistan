@@ -105,7 +105,7 @@ function startCrisis(state) {
   applyEffects(state, { ...c.onStart, fromNews: true, awareness: 0 });
   // Its phases arrive over the following months.
   c.phases.forEach((p, i) => {
-    if (i === 0) state.queue.push({ type: "event", id: p.event });
+    if (i === 0) queueEvent(state, p.event);
     else state.scheduled.push({ id: p.event, week: state.week + p.month * WEEKS_PER_MONTH });
   });
   state.log.push({ week: state.week, kind: "crisis", text: `Crisis: ${c.name}.` });

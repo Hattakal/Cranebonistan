@@ -158,9 +158,12 @@ Each month the player can open a debate: propose a referendum, launch a campaign
 
 Two actions a month:
 - **Champion an issue:** only on the manifesto's side of an issue, at most two issues at a time. Ownership wins **single-issue voters**, people who care about that issue above all, a group that grows when the issue is in the news. *History:* originally any side of any issue could be championed, which let the player claim everything.
-- **Grassroots organising, opposition research, releasing dossiers, recruiting defectors, provoking outrage.** Outrage wears off with repetition.
+- **Grassroots organising, opposition research, releasing dossiers, recruiting defectors, provoking outrage.**
+- **Provoking outrage** exists to get the party's name known: recognition jumps (the result shows how much), anti-system voters cheer, the middle class and older voters are appalled, and business donors back away. It wears off with repetition.
 
-### 4.5 Money — Built
+### 4.5 Money — Built (revised)
+
+**Income** (revised): money is no longer a flat amount. Members and small donors give more as the party grows, so a small party is poor. Business gives according to how the upper class feels about the party: anger the bourgeoisie and business donations dry up, and the Chamber of Commerce stops offering money. This makes the working class vs business balance a real choice, and made the game harder, which was the designer's request ("the current version is a bit too easy").
 
 Quarterly budget: rallies per region, social media (cheap, volatile), TV (older voters), the leader's national tour (builds the leader as a person). Shows awareness before and after, remembers last quarter's allocation.
 
@@ -177,6 +180,10 @@ National Unity Party (ruling, nationalist), Cranebonian Labour Front, Open Crane
 Rivals have leaders, charisma and stability. They suffer scandals and infighting, change leaders (who take them in new directions), recover, and **split** when stability collapses, freeing their core voters: a **power vacuum** the closest party can fill, and a chance to take in defectors. Rivals losing voters to the player copy the player's most popular position. Rivals sit in their niches otherwise.
 
 *Origin:* real politicians rise out of nowhere when other parties falter. The designer asked for power vacuums that can be exploited, or that cost the player their own base.
+
+### 5.1b Neighbours change with events — Built
+
+The map doesn't change borders, but events and crises are recorded in each neighbouring country's profile ("Lost its mining valleys to Bourdeaux in the ceasefire"), its relationship with Cranebonistan can change ("Ally, weakened", "On the brink of war"), and countries in an active conflict are shown in red on the map. The latest development appears when hovering over a country.
 
 ### 5.2 Trust in the system — Built
 
@@ -222,7 +229,7 @@ Win condition: the largest party in the Assembly. Governing and staying in power
 
 ### 6.3 The end screen — Built
 
-Not a list of events, but **a profile of the leader written by a hostile newspaper**: an archetype title earned by how the game was played, contradictions side by side with dates, who was blamed, who was betrayed, who paid, and the headline the country remembers. If the satire works, the player should recognise themselves in it.
+Not a list of events, but **a profile of the leader written by a hostile newspaper**. *Fixed after the first playtest:* the "Said and unsaid" section repeated the same quote in several pairs and counted taking in defectors as a statement. Now each statement appears once, different issues come first, each pair says which issue it's about, plain choices are reported as actions rather than quotes, and only position-taking statements count as broken promises. an archetype title earned by how the game was played, contradictions side by side with dates, who was blamed, who was betrayed, who paid, and the headline the country remembers. If the satire works, the player should recognise themselves in it.
 
 ---
 
@@ -247,14 +254,16 @@ Browser game in HTML, CSS and JavaScript, no installation. *Discussed:* a deskto
 
 ## 8. Balance targets
 
-Measured with simple bots over five seeded games each (these bots pick sound bites at random and take all dirty money, so a thoughtful player does better):
+Measured with simple bots over five seeded games each, after the funding change (these bots pick sound bites at random and take all dirty money, so a thoughtful player does better). The winning party usually takes 26–35%.
 
 | Strategy | Target | Measured |
 |---|---|---|
-| Random play | under 12% | 10–12% |
-| Principled | 15–20%, not enough to win | 17–23%, never won |
-| Opportunist | 25–30%, wins sometimes | 18–27%, won 1 in 5 |
-| Active and dirty | 30%+ | 22–25% (bot plays the dirty options badly) |
+| Random play | under 12% | 6–11% |
+| Principled | 15–20%, not enough to win | 11–20%, never won |
+| Opportunist | 25–30%, wins sometimes | 18–21%, never won (but often second) |
+| Active and dirty | 30%+ | 13–26%, came within 0.2 points of winning |
+
+*History:* the first balance pass let the opportunist bot win about half its games; the designer found the game too easy, which led to the income change in 4.5.
 
 Original targets:
 

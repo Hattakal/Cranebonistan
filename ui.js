@@ -5,7 +5,7 @@
 // =====================================================================
 "use strict";
 
-const SAVE_KEY = "cranebonistan-save-v7";
+const SAVE_KEY = "cranebonistan-save-v8";
 const SVG_NS = "http://www.w3.org/2000/svg";
 let S = null; // the game state (created by newGame or loaded from a save)
 const ui = { tab: "electorate", kind: "age", group: "18-29", budget: null, offers: [], draft: null, champ: null };
@@ -108,6 +108,10 @@ function leaderOf(shares) {
   return { id: ids[0], margin: shares[ids[0]] - shares[ids[1]] };
 }
 function updateMap() {
+  for (const f of FOREIGN) {
+    const el = document.querySelector(`[data-foreign="${f.id}"]`);
+    if (el) el.classList.toggle("foreign-hot", !!(S.countries && S.countries[f.id] && S.countries[f.id].hot));
+  }
   const poll = latestPoll();
   for (const r of REGIONS) {
     const poly = document.querySelector(`.region[data-id="${r.id}"]`);
@@ -138,7 +142,9 @@ function showTip(e, r) {
 }
 function showForeignTip(e, f) {
   const tip = $("#map-tip");
-  tip.innerHTML = `<strong>${esc(f.name.join(" "))}</strong><br><span class="muted">${esc(f.blurb)}</span><br><span class="small">Click for more</span>`;
+  const st = (S && S.countries && S.countries[f.id]) || { notes: [] };
+  const latest = st.notes[st.notes.length - 1];
+  tip.innerHTML = `<strong>${esc(f.name.join(" "))}</strong> · ${esc(st.relation || f.relation)}<br><span class="muted">${esc(latest ? latest.text : f.blurb)}</span><br><span class="small">Click for more</span>`;
   tip.hidden = false;
   const box = $(".map-panel").getBoundingClientRect();
   tip.style.left = Math.min(e.clientX - box.left + 14, box.width - 250) + "px";
@@ -153,13 +159,17 @@ function foreignSheet(id) {
   const face = img
     ? `<span class="portrait portrait-xl" style="--pc:#6b7172"><img src="${esc(img.src)}" alt="${esc(l.name)}" title="${esc(img.credit || "")}"></span>`
     : `<span class="portrait portrait-xl" style="--pc:#6b7172">${portraitSVG(l.name, l.sex, l.age, "#6b7172")}</span>`;
+  const st = (S && S.countries && S.countries[id]) || { notes: [] };
+  const relation = st.relation || f.relation;
+  const news = [...st.notes].reverse();
   openSheet(`
-    <span class="stamp">Neighbouring country · ${esc(f.relation)}</span>
+    <span class="stamp">Neighbouring country · ${esc(relation)}</span>
     <div class="country-head">${flagSVG(f.flag, "flag flag-lg")}<h2>${esc(f.name.join(" "))}</h2></div>
     <div class="country-body">
       <div class="country-leader">${face}<div><p class="eyebrow">${esc(l.title)}</p><strong>${esc(l.name)}</strong></div></div>
       <div class="country-text"><p class="lede">${esc(f.summary)}</p>
         <ul class="country-facts">${f.facts.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        ${news.length ? `<p class="eyebrow">Recent developments</p><ul class="developments">${news.map((n) => `<li><span class="when">${dateLabel(n.week, false)}</span> ${esc(n.text)}</li>`).join("")}</ul>` : ""}
         <p class="small muted">${esc(FLAG_INFO[f.flag].note)}</p></div>
     </div>
     <div class="sheet-actions"><button class="btn btn-primary" id="btn-close">Close</button></div>`);
@@ -419,7 +429,7 @@ function renderTitle() {
   closeSheet();
   $("#toast").hidden = true;
   const saved = loadSave();
-  const canContinue = saved && !saved.result && saved.version === 7;
+  const canContinue = saved && !saved.result && saved.version === 8;
   const el = $("#title");
   el.hidden = false;
   el.innerHTML = `
@@ -577,7 +587,7 @@ function budgetSheet(front) {
   openSheet(`
     <span class="stamp">Quarterly budget · Q${Math.floor(c.monthIndex / 3) + 1} ${c.year}</span>
     <h2>Where does the money go?</h2>
-    <p class="lede">You received ₱${CONFIG.quarterIncome}M this quarter. Nationally, ${pct(preview.all.before, 0)} of adults know your party. Whatever you don't spend is saved. Spending in the same place has diminishing returns.</p>
+    <p class="lede">This quarter you raised <strong>₱${(S.lastIncome || { total: 0 }).total.toFixed(1)}M</strong>: ₱${(S.lastIncome || { grassroots: 0 }).grassroots.toFixed(1)}M from members and small donors, who give more as your party grows, and ₱${(S.lastIncome || { business: 0 }).business.toFixed(1)}M from business, which is ${businessWord((S.lastIncome || { mood: 0 }).mood)}. Nationally, ${pct(preview.all.before, 0)} of adults know your party. Whatever you don't spend is saved; spending in the same place has diminishing returns.</p>
     ${offers.length ? `<div class="offers"><p class="eyebrow">Money on the table</p>${offers.map((o) => `
       <label class="donor ${o.effects.scandal ? "donor-dirty" : ""}"><input type="checkbox" data-offer="${o.id}" ${ui.offers.includes(o.id) ? "checked" : ""}>
         <span><strong>${esc(o.title)}</strong><br><span class="small muted">${esc(o.note)}</span>
@@ -1049,7 +1059,7 @@ function profileSheet() {
         <p class="lede">${esc(p.archetype.line)}</p>
         <p class="small muted">${esc(player.name)} · ${esc(p.style)} · ${p.statements} public statements, ${p.memes} viral moments, ${p.gaffes} gaffes</p></div>
       </div>
-      ${p.contradictions.length ? `<h4 class="paper-sub">Said and unsaid</h4>${p.contradictions.map((c) => `<div class="contra">${q(c.first)}<span class="vs">then</span>${q(c.second)}</div>`).join("")}` : `<h4 class="paper-sub">Said and unsaid</h4><p>Remarkably, ${esc(player.leader)} never openly contradicted themself. Rivals called it stubbornness; supporters called it backbone.</p>`}
+      ${p.contradictions.length ? `<h4 class="paper-sub">Said and unsaid</h4>${p.contradictions.map((c) => `<p class="contra-issue">On ${esc(byId(AXES, c.axis).issue.toLowerCase())}</p><div class="contra">${q(c.first)}<span class="vs">then</span>${q(c.second)}</div>`).join("")}` : `<h4 class="paper-sub">Said and unsaid</h4><p>Remarkably, ${esc(player.leader)} never openly contradicted themself. Rivals called it stubbornness; supporters called it backbone.</p>`}
       ${p.betrayed.length ? `<h4 class="paper-sub">Promises</h4>${p.betrayed.map((b) => `<p><strong>${esc(b.group.charAt(0).toUpperCase() + b.group.slice(1))}</strong> ${told(b.promised, b.promisedSpoken)} in ${dateLabel(b.promisedWeek, false)}. In ${dateLabel(b.week, false)} they ${b.nowSpoken === false ? `saw you ${esc(lowerFirst(b.now))}` : `heard "${esc(b.now)}"`}.</p>`).join("")}` : ""}
       ${p.blamed.length ? `<h4 class="paper-sub">Who was to blame</h4><p>Over the campaign, ${esc(player.leader)} blamed ${esc(listJoin(p.blamed))}.</p>` : ""}
       ${p.money.length ? `<h4 class="paper-sub">Follow the money</h4><p>${esc(listJoin(p.money.map((m) => `₱${m.amount}M from ${m.source}`)))}.${p.money.some((m) => m.dirty) ? " Not all of it was declared." : ""}</p>` : ""}

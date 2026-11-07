@@ -14,6 +14,9 @@
 // =====================================================================
 "use strict";
 
+// Events added by initiatives.js and crises.js get their country notes now that they all exist.
+if (typeof attachCountryNotes === "function") attachCountryNotes();
+
 // ---------- Small helpers ----------
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const byId = (list, id) => list.find((x) => x.id === id);
@@ -92,7 +95,7 @@ function newGame({ seed, partyName = "New Dawn Movement", leaderName = "Dorin Va
   const playerPoint = {};
   for (const ax of AXES) playerPoint[ax.id] = CONFIG.stanceCenters[manifesto[ax.id] ?? 2];
   const state = {
-    version: 7, seed, rng: seed, week: 0, money: 0,
+    version: 8, seed, rng: seed, week: 0, money: 0,
     trust: CONFIG.trustStart, trustHistory: [],
     salMod: {},          // temporary national salience boosts ("hot issues")
     ownership: {},       // { "nat:L": { partyId: 0..1 } }
@@ -456,6 +459,7 @@ function applyEffects(state, fx) {
     pop.aware[player.id] = clamp(pop.aware[player.id] + (1 - pop.aware[player.id]) * coverage, 0.01, 1);
   }
   if (fx.money) state.money = Math.max(0, state.money + fx.money);
+  for (const c of fx.country || []) noteCountry(state, c);
   if (fx.flag) state.flags[fx.flag] = state.week;
   if (fx.scandal) state.scandals.push({ ...fx.scandal, week: state.week });
   if (fx.followup) {
@@ -463,6 +467,15 @@ function applyEffects(state, fx) {
     const months = lo + Math.floor(rand(state) * (hi - lo + 1));
     state.scheduled.push({ id: fx.followup.event, week: state.week + months * WEEKS_PER_MONTH });
   }
+}
+
+// ---------- Neighbouring countries: what has happened to them ----------
+// note: a line for the country's profile; relation: how it now stands with Cranebonistan; hot: shown in red on the map
+function noteCountry(state, { id, note, relation, hot }) {
+  const c = (state.countries = state.countries || {})[id] || (state.countries[id] = { notes: [] });
+  if (note) c.notes.push({ week: state.week, text: note });
+  if (relation) c.relation = relation;
+  if (hot !== undefined) c.hot = hot;
 }
 
 // ---------- Trust in the system ----------
@@ -723,7 +736,7 @@ const ACTIONS = {
   poach: { label: "Recruit defectors", cost: 2,
     help: "Only possible when a rival is unstable, and once every six months per party. Win over some of their local organisers and core voters, but they bring their views with them." },
   outrage: { label: "Provoke outrage", cost: 0,
-    help: "Say something deliberately shocking. Huge coverage and excitement among anti-system voters; the educated middle class is appalled." },
+    help: "Say something deliberately shocking to get your party's name everywhere. Recognition jumps and anti-system voters cheer, but the middle class is appalled and business donors back away." },
 };
 function canAct(state, cost = 0) {
   if (state.result) return "The election is over.";
@@ -877,13 +890,22 @@ function actOutrage(state) {
   const f = 1 / (1 + state.outrages.length);
   state.outrages.push(state.week);
   state.record.outrages++;
-  applyEffects(state, { shift: { rev: -5 }, awareness: 0.07 * f, trust: -1,
-    leader: [{ who: { lean: { rev: "<-10" } }, amt: 0.1 * f }, { who: { class: "working" }, amt: 0.05 * f }],
-    goodwill: [{ who: { class: "middle" }, amt: -0.25 }, { who: { class: "upper" }, amt: -0.3 }, { who: { lean: { rev: "<-15" } }, amt: 0.15 * f }] });
-  const text = f === 1 ? "Your comments are on every channel. Anti-system voters loved it; the middle class is horrified."
-    : "Another provocation. The media is getting used to you: less coverage, same backlash.";
+  // The point of outrage is recognition: everyone hears your party's name.
+  const knownBefore = nationalAwareness(state);
+  applyEffects(state, { shift: { rev: -5 }, awareness: 0.11 * f, trust: -1,
+    leader: [{ who: { lean: { rev: "<-10" } }, amt: 0.06 * f }],
+    goodwill: [{ who: { class: "middle" }, amt: -0.2 }, { who: { class: "upper" }, amt: -0.3 }, { who: { age: "61+" }, amt: -0.1 }, { who: { lean: { rev: "<-15" } }, amt: 0.08 * f }] });
+  const knownAfter = nationalAwareness(state);
+  const known = `People who know your party: ${Math.round(knownBefore * 100)}% → ${Math.round(knownAfter * 100)}%.`;
+  const text = (f === 1 ? "Your comments are on every channel. Anti-system voters loved it; the middle class and business donors are horrified."
+    : "Another provocation. The media is getting used to you: less coverage, same backlash.") + " " + known;
   state.log.push({ week: state.week, kind: "action", text });
   return { ok: true, text };
+}
+function nationalAwareness(state) {
+  let size = 0, a = 0;
+  for (const pop of state.pops) { size += pop.size; a += pop.size * pop.aware.player; }
+  return a / size;
 }
 // ---------- Campaign budget ----------
 const BUDGET_KEYS = [...REGIONS.map((r) => r.id), "social", "tv", "tour"];
@@ -979,8 +1001,35 @@ function resolveBudget(state, alloc, offersTaken = []) {
   finishFront(state, "budget");
   return { spent, preview, socialSwing: swing };
 }
+// Where the money comes from. Bigger parties raise more; business gives to parties it likes.
+function businessMood(state) {
+  const ctx = scoreContext(state);
+  let size = 0, sup = 0, gw = 0;
+  for (const pop of state.pops) if (pop.class === "upper") {
+    size += pop.size;
+    sup += pop.size * popSupport(state, pop, null, ctx).player;
+    gw += pop.size * pop.goodwill.player;
+  }
+  return clamp(0.25 + (sup / size) * 5 + (gw / size) * 0.8, 0, 1.6);
+}
+function quarterlyIncome(state) {
+  const share = state.lastSupport ? state.lastSupport.player : 0.03;
+  const grassroots = CONFIG.incomeBase + share * CONFIG.incomePerShare;
+  const mood = businessMood(state);
+  const business = CONFIG.businessBase * mood;
+  return { grassroots, business, mood, total: grassroots + business };
+}
+function businessWord(mood) {
+  if (mood >= 1.1) return "generous";
+  if (mood >= 0.7) return "willing";
+  if (mood >= 0.4) return "cautious";
+  return "keeping their distance";
+}
 function drawOffers(state) {
-  const pool = FUNDING_OFFERS.filter((o) => rand(state) < o.chance);
+  const mood = businessMood(state);
+  // Business offers only come when business likes you; the union offer when workers do.
+  const chanceOf = (o) => (o.id === "chamber" ? o.chance * Math.min(1.3, mood) : o.chance);
+  const pool = FUNDING_OFFERS.filter((o) => rand(state) < chanceOf(o));
   return shuffle(state, pool).slice(0, 2).map((o) => o.id);
 }
 
@@ -1032,13 +1081,17 @@ function monthlyEvent(state) {
 }
 // Events come from events.js (by id) or are generated on the spot (front.event).
 function eventOf(front) { return front.event || byId(EVENTS, front.id); }
-function queueEvent(state, id) {
-  const ev = byId(EVENTS, id);
-  if (!ev) return;
-  // The news itself, and the government's response, change things whatever you say.
+// The news itself, and the government's response, change things whatever you say.
+function eventNews(state, ev) {
   if (ev.trust) changeTrust(state, ev.trust);
   if (ev.world) applyEffects(state, { world: ev.world, fromNews: true, awareness: 0 });
   if (ev.government && ev.government.world) applyEffects(state, { world: ev.government.world, fromNews: true, awareness: 0 });
+  for (const c of ev.country || []) noteCountry(state, c);
+}
+function queueEvent(state, id) {
+  const ev = byId(EVENTS, id);
+  if (!ev) return;
+  eventNews(state, ev);
   state.queue.push({ type: "event", id });
 }
 // choiceIndex: what you say. lineIndex: how you say it (only for choices with sound bites).
@@ -1062,7 +1115,9 @@ function resolveEvent(state, choiceIndex, lineIndex = null) {
     quote = line.text;
     tone = line.tone;
   }
-  recordStatement(state, { text: quote || choice.label, title: ev.title, effects: choice.effects, tone, spoken: !!quote });
+  // Taking in defectors moves your image, but it isn't something you said.
+  const statement = !choice.effects.defect && !String(ev.id).startsWith("defectors_");
+  recordStatement(state, { text: quote || choice.label, title: ev.title, effects: choice.effects, tone, spoken: !!quote, statement });
   state.flags["seen:" + ev.id] = state.week;
   state.log.push({ week: state.week, kind: "event", text: `${ev.title}: ${quote ? `"${quote}"` : choice.label + "."}${extra}` });
   finishFront(state, "event");
@@ -1170,7 +1225,7 @@ const HOOKS = [
   { name: "opening poll", when: (c) => c.week === 0, run: (s) => takePoll(s, "Opening poll") },
   { name: "monthly update", when: (c) => c.isMonthStart && c.week > 0, run: monthlyUpdate },
   { name: "quarterly budget", when: (c) => c.isQuarterStart,
-    run: (s) => { s.money += CONFIG.quarterIncome; s.queue.push({ type: "budget", offers: drawOffers(s) }); } },
+    run: (s) => { const inc = quarterlyIncome(s); s.lastIncome = inc; s.money += inc.total; s.queue.push({ type: "budget", offers: drawOffers(s) }); } },
   { name: "monthly event", when: (c) => c.isMonthStart, run: monthlyEvent },
   { name: "tracking poll", when: (c) => c.weekOfMonth === 2 && !c.isYearEnd, run: (s) => takePoll(s, `Tracking poll`, true) },
   { name: "annual poll", when: (c) => c.isYearEnd, run: (s) => takePoll(s, `Annual poll ${calendar(s.week).year}`) },

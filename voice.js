@@ -52,17 +52,19 @@ function groupChanges(state, before) {
 
 // ---------- The record ----------
 // Every statement is kept: the debate and the end screen use it.
-function recordStatement(state, { text, title, effects = {}, tone = null, spoken = true }) {
+function recordStatement(state, { text, title, effects = {}, tone = null, spoken = true, statement = true }) {
   const rec = state.record;
   const week = state.week;
-  rec.quotes.push({ week, text, title, tone, spoken, shift: effects.shift || {} });
+  rec.quotes.push({ week, text, title, tone, spoken, statement, shift: effects.shift || {} });
   // who you blamed
   if (effects.blame) rec.blamed.push({ week, group: effects.blame, text });
   for (const g of effects.goodwill || []) {
     if (g.amt <= -0.8 && g.who.nationality && !effects.blame) rec.blamed.push({ week, group: describeWho(g.who), text });
   }
-  // promises and betrayals: groups remember what you told them, for a while
-  for (const g of effects.goodwill || []) {
+  // promises and betrayals: groups remember what you told them, for a while.
+  // Only statements that take a position count (not apologies, scandals or defectors).
+  const takesPosition = statement && Object.keys(effects.shift || {}).length > 0;
+  for (const g of takesPosition ? effects.goodwill || [] : []) {
     const key = describeWho(g.who);
     if (g.amt <= -0.3) {
       const p = rec.promises.find((x) => x.key === key && week - x.week < 72);
@@ -77,18 +79,31 @@ function recordStatement(state, { text, title, effects = {}, tone = null, spoken
   }
 }
 // Pairs of statements that pulled the same issue in opposite directions.
+// Each statement is used in one pair at most, and different issues come first,
+// so the end screen doesn't show the same quote three times.
 function contradictions(state) {
-  const q = state.record.quotes;
-  const out = [];
+  const q = state.record.quotes.filter((x) => x.statement !== false);
+  const all = [];
   for (let i = 0; i < q.length; i++) for (let j = i + 1; j < q.length; j++) {
     for (const ax of Object.keys(q[i].shift)) {
       const a = q[i].shift[ax], b = q[j].shift[ax] || 0;
       if (Math.abs(a) >= 8 && Math.abs(b) >= 8 && Math.sign(a) !== Math.sign(b) && q[j].week - q[i].week >= 12) {
-        out.push({ axis: ax, first: q[i], second: q[j], size: Math.abs(a) + Math.abs(b) });
+        // spoken lines make better evidence than plain choices
+        const spoken = (q[i].spoken !== false) + (q[j].spoken !== false);
+        all.push({ axis: ax, first: q[i], second: q[j], size: Math.abs(a) + Math.abs(b) + spoken * 6 });
       }
     }
   }
-  return out.sort((x, y) => y.size - x.size);
+  all.sort((x, y) => y.size - x.size);
+  const used = new Set(), axes = new Set(), out = [];
+  for (const pass of [true, false]) {
+    for (const c of all) {
+      if (used.has(c.first) || used.has(c.second)) continue;
+      if (pass && axes.has(c.axis)) continue;
+      out.push(c); used.add(c.first); used.add(c.second); axes.add(c.axis);
+    }
+  }
+  return out;
 }
 
 // ---------- Delivery ----------

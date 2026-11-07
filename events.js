@@ -758,3 +758,41 @@ for (const [id, ctx] of Object.entries(EVENT_CONTEXT)) {
   for (const k of ["when", "world", "government"]) if (ctx[k]) ev[k] = ctx[k];
   (ctx.choices || []).forEach((extra, i) => { if (ev.choices[i]) Object.assign(ev.choices[i].effects, extra); });
 }
+
+// ---------------------------------------------------------------------
+// What events record about the neighbouring countries. Shown in each
+// country's profile on the map. relation: how it now stands with
+// Cranebonistan; hot: true shows the country in red on the map.
+// ---------------------------------------------------------------------
+const COUNTRY_NOTES = {
+  trueant_claim: [{ id: "trueants", note: "Its president promised that Alinni \"will come home\" within a generation." }],
+  dillihan_border: [{ id: "dillihan", note: "Its border patrols seized forty camels from Fauraifai herders." }],
+  generalissimo: [{ id: "bourdeaux", note: "The generalissimo collapsed at a military parade. Rumours about his health are everywhere." }],
+  james_mines: [{ id: "james", note: "Potania is pressing it for direct rights to its rare-earth mines." }],
+  james_base: [{ id: "james", note: "Asked Cranebonistan to station troops on its soil." }],
+  golba_sanctions: [{ id: "trueants", note: "Golba is pushing its partners to sanction it." }],
+  dillihan_pipeline: [{ id: "dillihan", note: "Proposed a gas pipeline across Fauraifai to the port of Yamlin." }],
+  trueant_friend: [{ id: "trueants", note: "Its state TV praised your secret talks with the Trueant opposition." }],
+  bourdeaux_warns: [{ id: "bourdeaux", note: "Called a Cranebonian defence pact with James \"a provocation\".", relation: "Hostile" }],
+  dillihan_land: [{ id: "dillihan", note: "Now claims the Fauraifai pastures as its own territory.", relation: "Rival, border dispute heating up", hot: true }],
+  trueant_troops: [{ id: "trueants", note: "Moved two divisions to the Alinni border.", relation: "Hostile, troops on the border", hot: true }],
+  crisis_insurgency_1: [{ id: "trueants", note: "Accused of arming the Free Alinni separatists.", relation: "Hostile, accused of arming separatists" }],
+  crisis_insurgency_3: [{ id: "trueants", note: "Denies any link to the captured Free Alinni commander." }],
+  crisis_james_1: [{ id: "james", note: "Invaded by the Bourdeaux Federation.", relation: "Ally, under attack", hot: true },
+    { id: "bourdeaux", note: "Invaded James to \"reunite the family\".", relation: "Hostile, at war with James", hot: true }],
+  crisis_james_2: [{ id: "james", note: "Its capital is under siege. Thousands of refugees are fleeing north into Erland." }],
+  crisis_james_3: [{ id: "james", note: "Lost its mining valleys to Bourdeaux in the ceasefire.", relation: "Ally, weakened", hot: false },
+    { id: "bourdeaux", note: "Holds James's mining valleys under the ceasefire.", relation: "Hostile", hot: false }],
+  crisis_economy_1: [{ id: "trueants", note: "Its already weak economy has collapsed further in the global crisis." },
+    { id: "dillihan", note: "Weathering the global crisis better than any of its neighbours." }],
+  crisis_expansion_1: [{ id: "trueants", note: "Cranebonian divisions are massed on its border.", relation: "On the brink of war", hot: true }],
+  crisis_expansion_2: [{ id: "trueants", note: "Its troops killed four Cranebonian soldiers in a border clash." }],
+  crisis_expansion_3: [{ id: "trueants", note: "An uneasy truce with Cranebonistan, brokered by Golba.", relation: "Hostile, uneasy truce", hot: false }],
+};
+// Attached after initiatives.js and crises.js have added their events (see sim.js).
+function attachCountryNotes() {
+  for (const [id, notes] of Object.entries(COUNTRY_NOTES)) {
+    const ev = EVENTS.find((e) => e.id === id);
+    if (ev) ev.country = notes;
+  }
+}

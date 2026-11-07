@@ -12,7 +12,12 @@ const CONFIG = {
   electionYears: 4,        // election lands in the first week after year 4
   seats: 300,              // seats in the National Assembly
 
-  quarterIncome: 8,        // ₱ millions the player gets every quarter
+  // Quarterly income (₱ millions): small donors and members grow with your support;
+  // business donors give according to how the upper class feels about you.
+  incomeBase: 1.5,
+  incomePerShare: 25,      // ₱ per quarter for every 100% of poll share (so 20% = ₱5M)
+  businessBase: 4,         // business money when the upper class is neutral-to-warm
+  scrutinyFrom: 0.24,      // once your poll share passes this, the press starts digging
 
   startAwareness: 0.12,    // share of "people know who you are" for a new party
   awarenessFloor: 0.10,
@@ -73,7 +78,6 @@ const CONFIG = {
   collapseAt: 20,          // stability below which a party splits
   collapseCooldownMonths: 24, // a party that just split can't split again this soon
   poachCooldownMonths: 6,  // you can only raid the same party this often
-  scrutinyFrom: 0.27,      // once your poll share passes this, the press starts digging
   scrutinyChance: 0.35,    // monthly chance of a damaging story while you are a frontrunner
 
   pollError: 0.012,        // standard error of national polls (1.2 points)

@@ -460,3 +460,9 @@ table.results td.num, table.results th.num { text-align: right; }
 /* Photos from images.js share one newsprint treatment */
 .art-photo, .portrait img { filter: grayscale(1) sepia(0.28) contrast(1.08) brightness(1.02); }
 .pq-act { font-style: normal; font-family: var(--font-body); font-size: 15px; border-left-style: dashed; }
+
+/* ---------- v8: country developments, contradiction labels ---------- */
+#map .foreign.foreign-hot { fill: color-mix(in srgb, var(--land-foreign) 70%, #c8402a); }
+.developments { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.developments .when { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-right: 6px; }
+.contra-issue { margin: 6px 0 -4px !important; font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #6a6253; }
