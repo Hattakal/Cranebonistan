@@ -72,7 +72,7 @@ const INITIATIVES = [
       goodwill: [{ who: { lean: { prog: ">30" } }, amt: 0.5 }, { who: { age: "61+" }, amt: 0.2 }, { who: { region: "erland" }, amt: 0.2 }, { who: { lean: { prog: "<-25" } }, amt: -0.55 }, { who: { age: "18-29" }, amt: -0.2 }] },
     seeds: [{ event: "teachers_march", months: [2, 3] }] },
 
-  { id: "herder_titles", title: "Promise land titles to Fauraifai's herders", when: { border: ">45" },
+  { id: "herder_titles", title: "Promise land titles to Fauran's herders", when: { border: ">45" },
     text: "Legal ownership of the grazing lands the nomads have used for centuries.",
     quote: "The land the herds walk on belongs to the people who walk with them.",
     effects: { shift: { gov: 6, nat: -4 }, world: { border: 4 },
@@ -127,7 +127,7 @@ EVENTS.push(
       { label: "Pay for it with a tax on the rich", effects: { shift: { econ: 6 }, goodwill: [{ who: { class: "working" }, amt: 0.2 }, { who: { class: "upper" }, amt: -0.3 }] } },
       { label: "Quietly halve the figure", effects: { shift: { war: 6 }, goodwill: [{ who: { lean: { war: "<-25" } }, amt: -0.3 }, { who: { class: "middle" }, amt: 0.1 }] } },
     ] },
-  { id: "trueant_friend", kind: "followup", deck: false, title: "Trueant TV calls you \"our friend in Craneapolis\"",
+  { id: "trueant_friend", kind: "followup", deck: false, title: "Trueant TV calls you \"our friend in Cranebo\"",
     text: "Your secret talks leaked. Trueant state television is praising you, which is the worst thing that could happen to you in Erland.",
     choices: [
       { label: "Laugh it off", effects: { leader: [{ who: { age: "18-29" }, amt: 0.1 }], goodwill: [{ who: { lean: { nat: "<-30" } }, amt: -0.2 }] } },
@@ -148,16 +148,16 @@ EVENTS.push(
       { label: "Make it \"double by 2040\"", effects: { shift: { gov: -6 }, goodwill: [{ who: { age: "61+" }, amt: -0.4 }, { who: { class: "middle" }, amt: 0.1 }] } },
       { label: "Say the economists work for Golban banks", effects: { shift: { nat: -5 }, trust: -2, goodwill: [{ who: { lean: { nat: "<-30" } }, amt: 0.2 }, { who: { class: "middle" }, amt: -0.15 }] } },
     ] },
-  { id: "bourdeaux_warns", kind: "followup", deck: false, title: "Bourdeaux calls your pact \"a provocation\"",
+  { id: "bourdeaux_warns", kind: "followup", deck: false, title: "Bordon calls your pact \"a provocation\"",
     text: "The generalissimo's spokesman says any pact with James would be \"a hostile act against the Federation\".",
     world: { border: 4 },
     choices: [
       { label: "Stand firm", effects: { shift: { war: -6 }, crisis: { james: 1 }, goodwill: [{ who: { lean: { war: "<-25" } }, amt: 0.3 }, { who: { class: "middle" }, amt: -0.1 }] } },
-      { label: "Reassure Bourdeaux", effects: { shift: { war: 6 }, crisis: { james: -1 }, goodwill: [{ who: { lean: { war: ">20" } }, amt: 0.2 }, { who: { lean: { war: "<-25" } }, amt: -0.2 }] } },
+      { label: "Reassure Bordon", effects: { shift: { war: 6 }, crisis: { james: -1 }, goodwill: [{ who: { lean: { war: ">20" } }, amt: 0.2 }, { who: { lean: { war: "<-25" } }, amt: -0.2 }] } },
       { label: "Call the generalissimo a dying tyrant", effects: { shift: { war: -8 }, crisis: { james: 1.5 }, awareness: 0.06, goodwill: [{ who: { lean: { nat: "<-30" } }, amt: 0.2 }, { who: { class: "middle" }, amt: -0.2 }] } },
     ] },
   { id: "teachers_march", kind: "followup", deck: false, title: "Teachers march against your curriculum plans",
-    text: "Thirty thousand teachers marched through Craneapolis against religion in schools. Several carried your face on a placard.",
+    text: "Thirty thousand teachers marched through Cranebo against religion in schools. Several carried your face on a placard.",
     choices: [
       { label: "Back down on the schools part", effects: { shift: { prog: -6 }, goodwill: [{ who: { class: "middle" }, amt: 0.15 }, { who: { lean: { prog: ">30" } }, amt: -0.25 }] } },
       { label: "Call the teachers ideologues", effects: { shift: { prog: 4 }, goodwill: [{ who: { lean: { prog: ">30" } }, amt: 0.25 }, { who: { class: "middle" }, amt: -0.25 }, { who: { age: "18-29" }, amt: -0.2 }] } },

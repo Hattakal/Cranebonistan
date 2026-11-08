@@ -106,7 +106,7 @@ function renderBoard() {
   // 4. This week's headlines
   const recent = [...S.log].reverse().slice(0, 3);
   if (recent.length) cards.push(`<button class="bcard bcard-news" data-board="diary" style="--tilt:-1.2deg">${pinHTML("yellow")}
-    <span class="news-mast">The Craneapolis Herald</span>
+    <span class="news-mast">The Cranebo Herald</span>
     ${recent.map((l, i) => `<span class="news-item ${i ? "" : "lead"}"><span class="when">${dateLabel(l.week, false)}</span>${esc(l.text)}</span>`).join("")}
   </button>`);
 

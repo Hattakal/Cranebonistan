@@ -20,7 +20,7 @@ A political simulator where the only goal is to get elected. The player founds a
 
 ### Cranebonistan
 
-Five regions. The capital is Craneapolis, on the northern coast in Cranbia. The north and west are coastline.
+Five regions. The capital is Cranebo, on the northern coast in Cranbia. The north and west are coastline. *Renamed in November 2026 with the new map:* Fauraifai became **Fauran**, the Bourdeaux Federation became the **Bordon Federation**, and the capital Craneapolis became **Cranebo** (the designer's map names it; other cities include Nikecisa, Bayernal, Kravk and Aikütesk). The names below are the current ones.
 
 | Region | Character |
 |---|---|
@@ -28,18 +28,18 @@ Five regions. The capital is Craneapolis, on the northern coast in Cranbia. The 
 | **Yamlin** | Where international trade with distant countries happens. Mixed and tense: progressives, immigrants, nationalists fed up with immigrants, economic turmoil from the new population, but also the rich who profit from trade and cheap immigrant labour. |
 | **Erland** | The nationalist heartland and breadbasket. |
 | **Alinni** | Conquered from the Southern Trueants fifty years ago. Home to the Alinnian minority, which has never fully settled in. Big tensions. |
-| **Fauraifai** ("Faur") | Nomadic, sparse, poorest and least educated. Disputed border with Dillihan. |
+| **Fauran** | Nomadic, sparse, poorest and least educated. Disputed border with Dillihan. |
 
-Alinni, not Fauraifai, is the minority region, to avoid more parallels with Turkey than the map shape already suggests.
+Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey than the map shape already suggests.
 
 ### Neighbours
 
 | Country | Character | Leader (placeholder) |
 |---|---|---|
 | **Southern Trueants** | Corrupt, in major economic crisis. Its leader still claims Alinni. | President Gavrel Ostrun |
-| **Dillihan Republic** | The regional powerhouse, economically and militarily. Border disputes around Fauraifai. | Chancellor Selin Arvadi |
-| **Bourdeaux Federation** | A fragile federation of several nations held together by a charismatic generalissimo. | Generalissimo Hector Valmont |
-| **James** | Refuses to join Bourdeaux and trusts Cranebonistan to defend it. Cranebonistan holds favourable mining deals for its rare materials. The name is the only nod to the Jordan vs LeBron debate. | Prime Minister Tomas Verin |
+| **Dillihan Republic** | The regional powerhouse, economically and militarily. Border disputes around Fauran. | Chancellor Selin Arvadi |
+| **Bordon Federation** | A fragile federation of several nations held together by a charismatic generalissimo. | Generalissimo Hector Valmont |
+| **James** | Refuses to join the Bordon Federation and trusts Cranebonistan to defend it. Cranebonistan holds favourable mining deals for its rare materials. The name is the only nod to the Jordan vs LeBron debate. | Prime Minister Tomas Verin |
 
 ### Further away
 
@@ -183,7 +183,7 @@ Rivals have leaders, charisma and stability. They suffer scandals and infighting
 
 ### 5.1b Neighbours change with events — Built
 
-The map doesn't change borders, but events and crises are recorded in each neighbouring country's profile ("Lost its mining valleys to Bourdeaux in the ceasefire"), its relationship with Cranebonistan can change ("Ally, weakened", "On the brink of war"), and countries in an active conflict are shown in red on the map. The latest development appears when hovering over a country.
+The map doesn't change borders, but events and crises are recorded in each neighbouring country's profile ("Lost its mining valleys to Bordon in the ceasefire"), its relationship with Cranebonistan can change ("Ally, weakened", "On the brink of war"), and countries in an active conflict are shown in red on the map. The latest development appears when hovering over a country.
 
 ### 5.2 Trust in the system — Built
 
@@ -204,7 +204,7 @@ This is deliberately light for now. A fuller economy is future work.
 Every game has **exactly one** major crisis, in the second year, drawn from a pool of five:
 
 1. **Alinni insurgency:** the separation movement turns to violence.
-2. **Bourdeaux attacks James:** Cranebonistan can only send supplies.
+2. **Bordon attacks James:** Cranebonistan can only send supplies.
 3. **Global economic crisis** reaches Cranebonistan.
 4. **Ultranationalist terror** against minority groups.
 5. **Expansion:** Cranebonistan postures militarily toward the Southern Trueants.
@@ -244,6 +244,7 @@ Not a list of events, but **a profile of the leader written by a hostile newspap
 | Flags | Built | Original designs. *History:* first shown on the map, where some didn't line up. Moved into country profiles: clicking a neighbour shows its flag, leader and summary. |
 | Event illustrations | Built (placeholder) | Drawn scenes. The designer wants public-domain images; `images.js` lets any picture replace a drawing, with a credit line. Photos are shown through one shared newsprint treatment so different sources look like one newspaper. |
 | Monthly news as a newspaper front page | Built | |
+| The designer's map | Built | Drawn in Krita by the designer and converted by `tools/build_map.py`: regions and countries come from the border lines (rivers and mountains are decoration, never borders), cities from the dots and a text layer. *Decided:* Inkscape was tried for drawing and dropped as counter-intuitive; drawing stays in Krita and the converter does the rest. Provinces will be added the same way. |
 | Map-centred play | Planned | Events pinned to places, rallies by clicking the map, election night. Waits for the map. |
 
 ### 7.1 The back room (the visual direction) — Built, first pass

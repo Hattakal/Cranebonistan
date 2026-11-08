@@ -16,7 +16,7 @@ const CRISES = [
     blurb: "Alinnian separatists turn to violence.",
     onStart: { world: { unrest: 20, border: 15 }, permSal: { war: 0.3, nat: 0.4 }, trust: -6, stability: { apv: -25 } },
     phases: [{ month: 0, event: "crisis_insurgency_1" }, { month: 2, event: "crisis_insurgency_2" }, { month: 5, event: "crisis_insurgency_3" }] },
-  { id: "james", name: "Bourdeaux invades James",
+  { id: "james", name: "Bordon invades James",
     blurb: "The Federation attacks James. Cranebonistan can only send supplies.",
     onStart: { world: { border: 25, prices: 8, jobs: -4 }, permSal: { war: 0.5 }, trust: -3, stability: { nup: -10 } },
     phases: [{ month: 0, event: "crisis_james_1" }, { month: 2, event: "crisis_james_2" }, { month: 5, event: "crisis_james_3" }] },
@@ -65,9 +65,9 @@ EVENTS.push(
       { label: "Take credit for pushing the government to act", effects: { shift: { rev: -2 }, awareness: 0.06, goodwill: [cg({ loyalTo: "nup" }, -0.15), cg({ lean: { nat: "<-25" } }, 0.1)] } },
     ] },
 
-  // ---------- Bourdeaux invades James ----------
-  { id: "crisis_james_1", kind: "crisis", deck: false, crisisStart: true, title: "Bourdeaux tanks cross into James",
-    text: "The Bourdeaux Federation has invaded James. The generalissimo says he is \"reuniting the family\". James begs Cranebonistan for help.",
+  // ---------- Bordon invades James ----------
+  { id: "crisis_james_1", kind: "crisis", deck: false, crisisStart: true, title: "Bordon tanks cross into James",
+    text: "The Bordon Federation has invaded James. The generalissimo says he is \"reuniting the family\". James begs Cranebonistan for help.",
     government: { text: "The government says the army is not ready for war and will send only supplies and ammunition." },
     choices: [
       { label: "Demand that troops be sent anyway", effects: { shift: { war: -15 }, awareness: 0.05, goodwill: [cg({ lean: { war: "<-25" } }, 0.6), cg({ lean: { war: ">15" } }, -0.6), cg({ class: "middle" }, -0.15)] } },
@@ -80,10 +80,10 @@ EVENTS.push(
     choices: [
       { label: "Open Erland's towns to them", effects: { shift: { immig: -8 }, goodwill: [cg({ region: "erland" }, -0.2), cg({ lean: { prog: "<-25" } }, 0.3), cg({ lean: { immig: ">35" } }, -0.3)] } },
       { label: "Demand camps at the border", effects: { shift: { immig: 8 }, goodwill: [cg({ lean: { immig: ">30" } }, 0.35), cg({ region: "erland" }, 0.2), cg({ lean: { prog: "<-25" } }, -0.3)] } },
-      { label: "Demand a ban on Bourdeaux grain", effects: { shift: { econ: 6, war: -4 }, world: { prices: 3 }, goodwill: [cg({ region: "erland" }, 0.25), cg({ lean: { war: "<-25" } }, 0.15)] } },
+      { label: "Demand a ban on Bordon grain", effects: { shift: { econ: 6, war: -4 }, world: { prices: 3 }, goodwill: [cg({ region: "erland" }, 0.25), cg({ lean: { war: "<-25" } }, 0.15)] } },
     ] },
   { id: "crisis_james_3", kind: "crisis", deck: false, title: "Ceasefire: James loses its mining valleys",
-    text: "A ceasefire has been signed. Bourdeaux keeps the valleys where most of James's rare materials are mined.",
+    text: "A ceasefire has been signed. Bordon keeps the valleys where most of James's rare materials are mined.",
     world: { border: -12, prices: 4 },
     choices: [
       { label: "Call it a national humiliation", effects: { shift: { nat: -10 }, trust: -4, goodwill: [cg({ lean: { nat: "<-30" } }, 0.5), cg({ loyalTo: "nup" }, -0.3)] } },
@@ -93,7 +93,7 @@ EVENTS.push(
 
   // ---------- The Great Contraction ----------
   { id: "crisis_economy_1", kind: "crisis", deck: false, crisisStart: true, title: "Golban banks collapse; the Pezo is in free fall",
-    text: "Three of Golba's biggest banks have failed in a week. Cranebonian savings are evaporating and queues are forming outside banks in Craneapolis.",
+    text: "Three of Golba's biggest banks have failed in a week. Cranebonian savings are evaporating and queues are forming outside banks in Cranebo.",
     government: { text: "The government closes the banks for three days \"to restore calm\"." },
     choices: [
       { label: "Demand capital controls and nationalised banks", effects: { shift: { econ: 15, rev: -6 }, goodwill: [cg({ lean: { econ: ">25" } }, 0.5), cg({ class: "upper" }, -0.7), cg({ class: "working" }, 0.2)] } },
@@ -145,7 +145,7 @@ EVENTS.push(
 
   // ---------- Drums of war ----------
   { id: "crisis_expansion_1", kind: "crisis", deck: false, crisisStart: true, title: "Troops mass on the Trueant border",
-    text: "The government has moved three divisions to the border. The prime minister speaks of \"historic lands\" south of Alinni. Crowds wave flags in Craneapolis.",
+    text: "The government has moved three divisions to the border. The prime minister speaks of \"historic lands\" south of Alinni. Crowds wave flags in Cranebo.",
     government: { text: "The prime minister says Cranebonistan \"will not apologise for its history\"." },
     choices: [
       { label: "Join the chorus", effects: { shift: { war: -12, nat: -10 }, goodwill: [cg({ lean: { nat: "<-30" } }, 0.5), cg({ lean: { war: "<-20" } }, 0.4), cg({ lean: { war: ">20" } }, -0.5), cg({ nationality: "alinnian" }, -0.6)] } },

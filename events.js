@@ -24,7 +24,7 @@
 const EVENTS = [
   // ---------------- Economy ----------------
   { id: "pezo_slide", trust: -6, kind: "crisis", title: "The Pezo slides against the Golban dollar",
-    text: "The Cranebonian Pezo has lost 14% against the Golban dollar in a month. Bread prices in Craneapolis are climbing, importers in Yamlin are panicking, and every talk show wants a party leader on the line tonight.",
+    text: "The Cranebonian Pezo has lost 14% against the Golban dollar in a month. Bread prices in Cranebo are climbing, importers in Yamlin are panicking, and every talk show wants a party leader on the line tonight.",
     choices: [
       { label: "Argue for tariffs on Golban imports",
         effects: { shift: { econ: 12, prog: 5 }, salience: { econ: 0.4 },
@@ -57,7 +57,7 @@ const EVENTS = [
           goodwill: [{ who: { class: "upper" }, amt: 0.45 }, { who: { lean: { econ: "<-25" } }, amt: 0.2 }, { who: { class: "working" }, amt: -0.5 }] } },
     ] },
 
-  { id: "rent_crisis", trust: -3, kind: "crisis", title: "Rents in Craneapolis double in three years",
+  { id: "rent_crisis", trust: -3, kind: "crisis", title: "Rents in Cranebo double in three years",
     text: "A new report shows the average rent in the capital now eats 60% of a young worker's salary. Landlords blame the shortage of new buildings.",
     choices: [
       { label: "Promise a rent cap",
@@ -90,7 +90,7 @@ const EVENTS = [
     ] },
 
   { id: "youth_video", trust: -3, kind: "crisis", title: "Viral video: graduates driving taxis",
-    text: "A video of three engineering graduates driving taxis in Craneapolis has been watched nine million times. Youth unemployment has reached 24%, and the comments are furious.",
+    text: "A video of three engineering graduates driving taxis in Cranebo has been watched nine million times. Youth unemployment has reached 24%, and the comments are furious.",
     choices: [
       { label: "Promise a state job guarantee for under-30s",
         effects: { shift: { gov: 12, econ: 10 }, salience: { econ: 0.3 },
@@ -203,7 +203,7 @@ const EVENTS = [
           goodwill: [{ who: { class: "upper" }, amt: 0.2 }, { who: { region: "erland" }, amt: -0.45 }, { who: { class: "working" }, amt: -0.2 }] } },
     ] },
 
-  { id: "crime_wave", trust: -3, kind: "crisis", title: "Robberies surge in Craneapolis",
+  { id: "crime_wave", trust: -3, kind: "crisis", title: "Robberies surge in Cranebo",
     text: "A string of violent robberies in the capital's suburbs has dominated the news for a week. The police say they lack officers; residents say they no longer feel safe at night.",
     choices: [
       { label: "Demand 10,000 more police officers",
@@ -239,8 +239,8 @@ const EVENTS = [
           goodwill: [{ who: { lean: { nat: "<-25" } }, amt: 0.25 }, { who: { age: "18-29" }, amt: 0.15 }, { who: { nationality: "alinnian" }, amt: -0.3 }] } },
     ] },
 
-  { id: "dillihan_border", kind: "foreign", title: "Dillihan patrol enters Fauraifai pastures",
-    text: "A Dillihan border patrol crossed into grazing land claimed by Fauraifai herders and confiscated forty camels. The government has issued a \"strongly worded note\". Herders say nobody in Craneapolis cares about them.",
+  { id: "dillihan_border", kind: "foreign", title: "Dillihan patrol enters Fauran pastures",
+    text: "A Dillihan border patrol crossed into grazing land claimed by Fauran herders and confiscated forty camels. The government has issued a \"strongly worded note\". Herders say nobody in Cranebo cares about them.",
     choices: [
       { label: "Demand a firm military response",
         effects: { shift: { war: -12 }, salience: { war: 0.4 },
@@ -248,7 +248,7 @@ const EVENTS = [
       { label: "Propose a joint grazing agreement",
         effects: { shift: { war: 10 },
           goodwill: [{ who: { lean: { war: ">20" } }, amt: 0.3 }, { who: { region: "fauraifai" }, amt: 0.1 }, { who: { lean: { nat: "<-35" } }, amt: -0.2 }] } },
-      { label: "Blame the weak government in Craneapolis",
+      { label: "Blame the weak government in Cranebo",
         effects: { shift: { rev: -10 }, trust: -3, awareness: 0.04,
           goodwill: [{ who: { lean: { rev: "<-15" } }, amt: 0.35 }, { who: { region: "fauraifai" }, amt: 0.3 }, { who: { loyalTo: "nup" }, amt: -0.4 }] } },
       { label: "Stay quiet",
@@ -256,7 +256,7 @@ const EVENTS = [
     ] },
 
   { id: "james_mines", kind: "foreign", title: "Potania wants more of James's rare earths",
-    text: "Potania, the biggest buyer of rare materials from James, is pressuring the little country to sell mining rights directly instead of through Cranebonian companies. James has quietly asked Craneapolis for support.",
+    text: "Potania, the biggest buyer of rare materials from James, is pressuring the little country to sell mining rights directly instead of through Cranebonian companies. James has quietly asked Cranebo for support.",
     choices: [
       { label: "Promise to defend James's sovereignty",
         effects: { shift: { war: -10, nat: -5 },
@@ -272,8 +272,8 @@ const EVENTS = [
           goodwill: [{ who: { lean: { war: ">25" } }, amt: 0.2 }] } },
     ] },
 
-  { id: "generalissimo", kind: "foreign", title: "Bourdeaux's generalissimo collapses at a parade",
-    text: "The generalissimo who holds the Bourdeaux Federation together collapsed during a military parade. State TV insists he is fine. Border towns in Erland are worried about what happens if the federation breaks apart.",
+  { id: "generalissimo", kind: "foreign", title: "Bordon's generalissimo collapses at a parade",
+    text: "The generalissimo who holds the Bordon Federation together collapsed during a military parade. State TV insists he is fine. Border towns in Erland are worried about what happens if the federation breaks apart.",
     choices: [
       { label: "Call for the southern border to be sealed",
         effects: { shift: { immig: 10, war: -8 }, salience: { immig: 0.3, war: 0.3 },
@@ -302,8 +302,8 @@ const EVENTS = [
           goodwill: [{ who: { class: "middle" }, amt: 0.25 }, { who: { class: "working" }, amt: 0.15 }] } },
     ] },
 
-  { id: "dillihan_pipeline", kind: "foreign", title: "Dillihan proposes a gas pipeline through Fauraifai",
-    text: "Dillihan wants to build a pipeline across Fauraifai to the port of Yamlin. It would bring jobs and transit fees, but herders say it will cut their ancient migration routes.",
+  { id: "dillihan_pipeline", kind: "foreign", title: "Dillihan proposes a gas pipeline through Fauran",
+    text: "Dillihan wants to build a pipeline across Fauran to the port of Yamlin. It would bring jobs and transit fees, but herders say it will cut their ancient migration routes.",
     choices: [
       { label: "Back the pipeline",
         effects: { shift: { econ: -8, labor: 6, war: 5 },
@@ -311,13 +311,13 @@ const EVENTS = [
       { label: "Back it only if the state owns half",
         effects: { shift: { econ: 10, gov: 6 },
           goodwill: [{ who: { lean: { econ: ">25" } }, amt: 0.35 }, { who: { region: "fauraifai" }, amt: 0.1 }, { who: { class: "upper" }, amt: -0.2 }] } },
-      { label: "Not one metre of Faur soil for Dillihan",
+      { label: "Not one metre of Fauran soil for Dillihan",
         effects: { shift: { nat: -10, war: -6 }, leader: [{ who: { region: "fauraifai" }, amt: 0.3 }],
           goodwill: [{ who: { region: "fauraifai" }, amt: 0.55 }, { who: { lean: { nat: "<-30" } }, amt: 0.25 }, { who: { region: "yamlin", class: "upper" }, amt: -0.3 }] } },
     ] },
 
   { id: "james_base", kind: "foreign", title: "James asks for a Cranebonian military base",
-    text: "Worried by Bourdeaux and Potania, the government of James has asked Cranebonistan to station troops in the country. The base would protect the mines and cost a fortune.",
+    text: "Worried by Bordon and Potania, the government of James has asked Cranebonistan to station troops in the country. The base would protect the mines and cost a fortune.",
     choices: [
       { label: "Urge the government to send troops",
         effects: { shift: { war: -12, gov: 5 },
@@ -346,7 +346,7 @@ const EVENTS = [
     ] },
 
   { id: "cup_victory", trust: 5, kind: "opportunity", title: "Cranebonistan wins the Continental Cup",
-    text: "The national football team has beaten Dillihan 2-1 in the final. A million people are celebrating in the streets of Craneapolis tonight.",
+    text: "The national football team has beaten Dillihan 2-1 in the final. A million people are celebrating in the streets of Cranebo tonight.",
     choices: [
       { label: "Celebrate with fans in the main square",
         effects: { awareness: 0.06, leader: [{ who: { age: ["18-29", "30-45"] }, amt: 0.3 }, { who: { class: "working" }, amt: 0.2 }],
@@ -373,8 +373,8 @@ const EVENTS = [
           goodwill: [{ who: { age: "18-29" }, amt: -0.1 }] } },
     ] },
 
-  { id: "fauraifai_quake", kind: "opportunity", title: "Earthquake in Fauraifai",
-    text: "A strong earthquake has hit the Fauraifai steppe. Nomad camps are scattered and roads are cut. Aid is slow to arrive from Craneapolis.",
+  { id: "fauraifai_quake", kind: "opportunity", title: "Earthquake in Fauran",
+    text: "A strong earthquake has hit the Fauran steppe. Nomad camps are scattered and roads are cut. Aid is slow to arrive from Cranebo.",
     choices: [
       { label: "Organise a party aid convoy",
         effects: { awareness: 0.06, money: -2, leader: [{ who: { region: "fauraifai" }, amt: 0.5 }, { who: {}, amt: 0.1 }],
@@ -428,8 +428,8 @@ const EVENTS = [
           goodwill: [{ who: { class: "upper" }, amt: 0.3 }, { who: { region: "cranbia", age: ["18-29", "30-45"] }, amt: -0.45 }] } },
     ] },
 
-  { id: "nomad_schools", kind: "regional", title: "Mobile schools for Fauraifai's nomads",
-    text: "Only half of Fauraifai's nomad children go to school. A charity proposes travelling schools that move with the herds.",
+  { id: "nomad_schools", kind: "regional", title: "Mobile schools for Fauran's nomads",
+    text: "Only half of Fauran's nomad children go to school. A charity proposes travelling schools that move with the herds.",
     choices: [
       { label: "Promise national funding if you win",
         effects: { shift: { gov: 8, prog: -4 },
@@ -443,7 +443,7 @@ const EVENTS = [
     ] },
 
   { id: "erland_drought", trust: -2, kind: "regional", title: "Drought hits the Erland harvest",
-    text: "Erland's wheat harvest is expected to be the worst in thirty years. Farmers are selling livestock they can no longer feed, and bakeries in Craneapolis are warning of higher prices.",
+    text: "Erland's wheat harvest is expected to be the worst in thirty years. Farmers are selling livestock they can no longer feed, and bakeries in Cranebo are warning of higher prices.",
     choices: [
       { label: "Demand emergency subsidies for farmers",
         effects: { shift: { gov: 10, econ: 8 },
@@ -451,7 +451,7 @@ const EVENTS = [
       { label: "Say the market should be left to adjust",
         effects: { shift: { econ: -10, gov: -6 },
           goodwill: [{ who: { lean: { econ: "<-30" } }, amt: 0.35 }, { who: { region: "erland" }, amt: -0.55 }] } },
-      { label: "Call for cheap grain imports from Bourdeaux",
+      { label: "Call for cheap grain imports from Bordon",
         effects: { shift: { econ: -5, nat: 5 },
           goodwill: [{ who: { region: ["cranbia", "yamlin"] }, amt: 0.25 }, { who: { region: "erland" }, amt: -0.6 }] } },
       { label: "Pray for rain with farmers at a village shrine",
@@ -521,7 +521,7 @@ const EVENTS = [
 
   // ---------------- Scandals ----------------
   { id: "deputy_fight", kind: "scandal", title: "Your deputy in a nightclub brawl",
-    text: "Your party's deputy leader was filmed throwing a chair in a Craneapolis nightclub. He says he was defending a friend.",
+    text: "Your party's deputy leader was filmed throwing a chair in a Cranebo nightclub. He says he was defending a friend.",
     choices: [
       { label: "Expel him from the party",
         effects: { leader: [{ who: { class: ["middle", "upper"] }, amt: 0.15 }],
@@ -600,7 +600,7 @@ const EVENTS = [
 
   // ---------------- Leaks of dirty money (fired by scandal risk) ----------------
   { id: "leak_dillihan", kind: "scandal", deck: false, title: "Leak: your party took money from Dillihan",
-    text: "Bank records show your party received millions from a Dillihan state company, while Dillihani patrols were seizing herds in Fauraifai.",
+    text: "Bank records show your party received millions from a Dillihan state company, while Dillihani patrols were seizing herds in Fauran.",
     choices: [
       { label: "Deny everything",
         effects: { awareness: 0.08, leader: -0.3, followup: { event: "leak_proof", months: [2, 4] },
@@ -680,7 +680,7 @@ const FUNDING_OFFERS = [
     effects: { money: 7, scandal: { event: "leak_tycoon", chance: 0.04 } } },
   { id: "dillihan", source: "a Dillihan state company", chance: 0.2,
     title: "₱12M through a Dillihan state energy company",
-    note: "Secret foreign money. If it leaks, Fauraifai and nationalists will never forgive you.",
+    note: "Secret foreign money. If it leaks, Fauran and nationalists will never forgive you.",
     effects: { money: 12, scandal: { event: "leak_dillihan", chance: 0.06 } } },
   { id: "trueants", source: "the Southern Trueant government", chance: 0.15,
     title: "₱10M from Southern Trueant intermediaries",
@@ -766,22 +766,22 @@ for (const [id, ctx] of Object.entries(EVENT_CONTEXT)) {
 // ---------------------------------------------------------------------
 const COUNTRY_NOTES = {
   trueant_claim: [{ id: "trueants", note: "Its president promised that Alinni \"will come home\" within a generation." }],
-  dillihan_border: [{ id: "dillihan", note: "Its border patrols seized forty camels from Fauraifai herders." }],
+  dillihan_border: [{ id: "dillihan", note: "Its border patrols seized forty camels from Fauran herders." }],
   generalissimo: [{ id: "bourdeaux", note: "The generalissimo collapsed at a military parade. Rumours about his health are everywhere." }],
   james_mines: [{ id: "james", note: "Potania is pressing it for direct rights to its rare-earth mines." }],
   james_base: [{ id: "james", note: "Asked Cranebonistan to station troops on its soil." }],
   golba_sanctions: [{ id: "trueants", note: "Golba is pushing its partners to sanction it." }],
-  dillihan_pipeline: [{ id: "dillihan", note: "Proposed a gas pipeline across Fauraifai to the port of Yamlin." }],
+  dillihan_pipeline: [{ id: "dillihan", note: "Proposed a gas pipeline across Fauran to the port of Yamlin." }],
   trueant_friend: [{ id: "trueants", note: "Its state TV praised your secret talks with the Trueant opposition." }],
   bourdeaux_warns: [{ id: "bourdeaux", note: "Called a Cranebonian defence pact with James \"a provocation\".", relation: "Hostile" }],
-  dillihan_land: [{ id: "dillihan", note: "Now claims the Fauraifai pastures as its own territory.", relation: "Rival, border dispute heating up", hot: true }],
+  dillihan_land: [{ id: "dillihan", note: "Now claims the Fauran pastures as its own territory.", relation: "Rival, border dispute heating up", hot: true }],
   trueant_troops: [{ id: "trueants", note: "Moved two divisions to the Alinni border.", relation: "Hostile, troops on the border", hot: true }],
   crisis_insurgency_1: [{ id: "trueants", note: "Accused of arming the Free Alinni separatists.", relation: "Hostile, accused of arming separatists" }],
   crisis_insurgency_3: [{ id: "trueants", note: "Denies any link to the captured Free Alinni commander." }],
-  crisis_james_1: [{ id: "james", note: "Invaded by the Bourdeaux Federation.", relation: "Ally, under attack", hot: true },
+  crisis_james_1: [{ id: "james", note: "Invaded by the Bordon Federation.", relation: "Ally, under attack", hot: true },
     { id: "bourdeaux", note: "Invaded James to \"reunite the family\".", relation: "Hostile, at war with James", hot: true }],
   crisis_james_2: [{ id: "james", note: "Its capital is under siege. Thousands of refugees are fleeing north into Erland." }],
-  crisis_james_3: [{ id: "james", note: "Lost its mining valleys to Bourdeaux in the ceasefire.", relation: "Ally, weakened", hot: false },
+  crisis_james_3: [{ id: "james", note: "Lost its mining valleys to Bordon in the ceasefire.", relation: "Ally, weakened", hot: false },
     { id: "bourdeaux", note: "Holds James's mining valleys under the ceasefire.", relation: "Hostile", hot: false }],
   crisis_economy_1: [{ id: "trueants", note: "Its already weak economy has collapsed further in the global crisis." },
     { id: "dillihan", note: "Weathering the global crisis better than any of its neighbours." }],

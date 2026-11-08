@@ -9,7 +9,7 @@ const FLAG_INFO = {
   cranebonistan: { name: "Cranebonistan", note: "Navy for the northern sea, white for peace, gold for Erland's wheat. The red disc carries the crane that gives the country its name." },
   trueants:      { name: "Southern Trueants", note: "Orange and black, with the single star of the ruling party." },
   dillihan:      { name: "Dillihan Republic", note: "Green for its farmland, the gold star of its republican revolution." },
-  bourdeaux:     { name: "Bourdeaux Federation", note: "One star for each of its five nations, held together by the generalissimo's sabre." },
+  bourdeaux:     { name: "Bordon Federation", note: "One star for each of its five nations, held together by the generalissimo's sabre." },
   james:         { name: "James", note: "Slate for its mountains, a gold seam for the rare ores beneath them." },
   golba:         { name: "United Federation of Golba", note: "The biggest power in the world and Cranebonistan's main trading partner." },
   norbanistan:   { name: "Norbanistan", note: "The flag of the old state, still flown by every side in its civil war." },

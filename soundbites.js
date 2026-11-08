@@ -74,7 +74,7 @@ const SOUNDBITES = {
     [ // development fund for Alinni
       { tone: "statesman", text: "The best answer to the Trueants is an Alinni where people want to stay." },
       { tone: "folksy", text: "Build the roads, open the schools, and nobody in Alinni will want to go anywhere." },
-      { tone: "fiery", text: "Craneapolis has ignored Alinni for fifty years. No wonder the vultures are circling!", react: [{ who: { loyalTo: "nup" }, amt: -0.1 }] },
+      { tone: "fiery", text: "Cranebo has ignored Alinni for fifty years. No wonder the vultures are circling!", react: [{ who: { loyalTo: "nup" }, amt: -0.1 }] },
     ],
     [ // mock the Trueant economy
       { tone: "folksy", text: "A man who can't pay his own teachers wants another region? Good luck to him." },
@@ -110,7 +110,7 @@ const SOUNDBITES = {
     [ // emergency subsidies
       { tone: "statesman", text: "Erland feeds this country. In a bad year, the country must feed Erland." },
       { tone: "folksy", text: "No farmer should have to sell the cow that feeds his children." },
-      { tone: "fiery", text: "Craneapolis spends millions on statues and nothing on the people who grow its bread!", react: [{ who: { region: "cranbia" }, amt: -0.08 }] },
+      { tone: "fiery", text: "Cranebo spends millions on statues and nothing on the people who grow its bread!", react: [{ who: { region: "cranbia" }, amt: -0.08 }] },
     ],
     [ // let the market adjust
       { tone: "statesman", text: "Subsidies keep weak farms alive and strong ones waiting. Let prices do their work." },
@@ -118,7 +118,7 @@ const SOUNDBITES = {
       { tone: "folksy", text: "My uncle farmed for forty years without a penny from the state. Never stopped complaining, mind you." },
     ],
     [ // cheap grain imports
-      { tone: "statesman", text: "Bread prices matter to every family. Bourdeaux grain will keep them down this winter." },
+      { tone: "statesman", text: "Bread prices matter to every family. Bordon grain will keep them down this winter." },
       { tone: "folksy", text: "A loaf is a loaf. My kids can't tell where the wheat came from.", react: [{ who: { region: "erland" }, amt: -0.12 }] },
       { tone: "provocative", text: "Erland's farmers have had their hand out for decades. Time for some competition.", react: [{ who: { region: "erland" }, amt: -0.35 }] },
     ],
@@ -155,7 +155,7 @@ const SOUNDBITES = {
   crime_wave: [
     [ // more police
       { tone: "statesman", text: "Safety is the first freedom. We will put ten thousand more officers on the streets." },
-      { tone: "fiery", text: "Criminals should fear the night, not the families of Craneapolis!" },
+      { tone: "fiery", text: "Criminals should fear the night, not the families of Cranebo!" },
       { tone: "folksy", text: "My mother won't take the bus after dark any more. That's not a capital, that's a hostage situation." },
     ],
     [ // poverty and youth centres
@@ -200,7 +200,7 @@ const SOUNDBITES = {
       { tone: "folksy", text: "Sixty percent of your salary for one room and a view of the bins? No." },
     ],
     [ // public housing
-      { tone: "statesman", text: "The state built Craneapolis once. It can build it again." },
+      { tone: "statesman", text: "The state built Cranebo once. It can build it again." },
       { tone: "folksy", text: "Cranes on the skyline, keys in young people's hands." },
       { tone: "fiery", text: "A hundred thousand homes, and not one of them for a speculator!" },
     ],

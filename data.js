@@ -169,45 +169,35 @@ const NATIONALITIES = [
 // ---------- Regions ----------
 // adults = millions of voting-age citizens. classes / nationalities = shares (sum to 1).
 // local = extra lean for one nationality inside this region only.
-// shape = map polygon on the 2296 × 1623 map canvas.
+// Shapes and label positions come from map.js (built from the Krita map).
 const REGIONS = [
   { id: "cranbia", name: "Cranbia", adults: 9.4, turnout: 0.03, leaderAppeal: 0.9, disaffect: -0.1,
-    blurb: "Industrial, urban and educated. Home to the capital, Craneapolis.",
+    blurb: "Industrial, urban and educated. Home to the capital, Cranebo.",
     classes: { working: 0.45, middle: 0.42, upper: 0.13 },
     nationalities: { cranebonian: 0.86, alinnian: 0.07, norbanian: 0.07 },
-    lean: { prog: -25, nat: 15, labor: -10 }, sal: { labor: 1.2 },
-    label: [1170, 610],
-    shape: "915,580 960,535 1000,505 1060,475 1130,445 1180,430 1230,400 1335,400 1360,400 1410,410 1440,470 1500,500 1520,540 1535,580 1580,598 1575,630 1570,700 1560,740 1500,765 1390,765 1300,775 1240,800 1150,822 1000,825 910,860 810,860 805,800 808,770 840,755 920,740 928,700 915,640" },
+    lean: { prog: -25, nat: 15, labor: -10 }, sal: { labor: 1.2 }, },
   { id: "yamlin", name: "Yamlin", adults: 6.1, turnout: 0, leaderAppeal: 1.05, disaffect: 0.15,
     blurb: "The trade gateway to the wider world. Progressives, immigrants and fed-up nationalists live side by side; the rich profit from trade and cheap labour while others feel left behind.",
     classes: { working: 0.50, middle: 0.35, upper: 0.15 },
     nationalities: { cranebonian: 0.72, alinnian: 0.05, norbanian: 0.23 },
     lean: { econ: -15, war: 10, prog: -8 }, sal: { immig: 1.5, econ: 1.2 },
-    local: { cranebonian: { lean: { immig: 28, nat: -15 }, sal: { immig: 1.3 } } },
-    label: [520, 925],
-    shape: "915,580 820,568 750,568 715,575 680,630 640,660 590,655 540,650 510,700 480,760 445,775 440,795 400,795 385,812 325,800 270,815 210,840 150,840 145,920 130,1000 90,1035 65,1060 65,1090 100,1130 150,1150 210,1140 270,1140 330,1175 410,1178 460,1130 550,1080 620,1072 690,1110 760,1095 840,1093 900,1135 930,1150 960,1110 980,1075 980,1060 940,1035 915,1000 910,920 920,870 910,860 810,860 805,800 808,770 840,755 920,740 928,700 915,640" },
+    local: { cranebonian: { lean: { immig: 28, nat: -15 }, sal: { immig: 1.3 } } }, },
   { id: "erland", name: "Erland", adults: 6.5, turnout: 0.02, leaderAppeal: 1.15, disaffect: 0,
     blurb: "The nationalist heartland and breadbasket of Cranebonistan.",
     classes: { working: 0.55, middle: 0.38, upper: 0.07 },
     nationalities: { cranebonian: 0.95, alinnian: 0.03, norbanian: 0.02 },
-    lean: { nat: -35, prog: 35, war: -20, immig: 30, rev: 15 }, sal: { nat: 1.5, prog: 1.4 },
-    label: [1205, 975],
-    shape: "910,860 1000,825 1150,822 1240,800 1300,775 1390,765 1500,765 1560,740 1570,700 1575,630 1630,630 1650,680 1670,780 1665,840 1650,910 1600,940 1530,960 1510,1000 1470,1045 1440,1045 1390,1075 1330,1100 1280,1110 1120,1110 1080,1130 1040,1195 980,1170 930,1150 960,1110 980,1075 980,1060 940,1035 915,1000 910,920 920,870" },
+    lean: { nat: -35, prog: 35, war: -20, immig: 30, rev: 15 }, sal: { nat: 1.5, prog: 1.4 }, },
   { id: "alinni", name: "Alinni", adults: 4.0, turnout: -0.02, leaderAppeal: 0.95, disaffect: 0.25,
     blurb: "Conquered from the Southern Trueants fifty years ago. The Alinnian minority has never fully settled into Cranebonistan, and tensions run high.",
     classes: { working: 0.60, middle: 0.33, upper: 0.07 },
     nationalities: { cranebonian: 0.45, alinnian: 0.53, norbanian: 0.02 },
     lean: { war: 5 }, sal: { nat: 1.6, war: 1.5 },
-    local: { cranebonian: { lean: { nat: -30, war: -25, rev: 10 } } },
-    label: [1780, 495],
-    shape: "1360,400 1400,330 1460,240 1530,235 1600,180 1690,150 1750,100 1810,130 1850,190 1960,230 1990,290 2060,410 2120,460 2130,490 2100,560 2090,610 2060,665 1980,690 1900,730 1870,725 1840,690 1770,660 1720,660 1690,640 1640,605 1580,598 1535,580 1520,540 1500,500 1440,470 1410,410" },
-  { id: "fauraifai", name: "Fauraifai", adults: 2.1, turnout: -0.06, leaderAppeal: 1.3, disaffect: 0.35,
-    blurb: "\"Faur\" for short. Sparse, nomadic and the poorest region, with a disputed border with Dillihan.",
+    local: { cranebonian: { lean: { nat: -30, war: -25, rev: 10 } } }, },
+  { id: "fauraifai", name: "Fauran", adults: 2.1, turnout: -0.06, leaderAppeal: 1.3, disaffect: 0.35,
+    blurb: "Sparse, nomadic and the poorest region, with a disputed border with Dillihan.",
     classes: { working: 0.72, middle: 0.24, upper: 0.04 },
     nationalities: { cranebonian: 0.90, alinnian: 0.05, norbanian: 0.05 },
-    lean: { gov: 25, prog: 20, rev: -15, war: -25 }, sal: { gov: 1.6, war: 1.4 },
-    label: [1745, 1205],
-    shape: "1580,598 1640,605 1690,640 1720,660 1770,660 1840,690 1870,725 1900,730 1910,780 1940,830 1985,880 2010,960 2040,1100 2080,1170 2120,1220 2120,1270 2060,1310 2000,1360 1840,1360 1810,1395 1740,1405 1530,1395 1420,1380 1370,1360 1360,1335 1385,1305 1415,1305 1435,1290 1440,1180 1440,1125 1465,1080 1470,1045 1510,1000 1530,960 1600,940 1650,910 1665,840 1670,780 1650,680 1630,630 1580,630" },
+    lean: { gov: 25, prog: 20, rev: -15, war: -25 }, sal: { gov: 1.6, war: 1.4 }, },
 ];
 
 // Neighbours: map only for now (later: diplomacy, border events).
@@ -215,32 +205,36 @@ const REGIONS = [
 // leader: placeholder names and details; change them freely.
 // Leader pictures can be added in images.js (see IMAGES.md).
 const FOREIGN = [
-  { id: "trueants", flag: "trueants", name: ["Southern", "Trueants"], label: [2110, 70],
+  { id: "trueants", flag: "trueants", name: ["Southern", "Trueants"],
     blurb: "Corrupt and in economic crisis. Its leader still claims Alinni.",
     summary: "Cranebonistan took Alinni from the Southern Trueants in a war fifty years ago, and the Trueants have never accepted it. The country is corrupt and stuck in a long economic crisis, and its president keeps his supporters loyal by promising that Alinni will one day come home.",
     leader: { name: "Gavrel Ostrun", title: "President", sex: "m", age: 67 },
-    relation: "Hostile", facts: ["Claims Alinni as its own", "Major economic crisis", "Sells Cranebonistan a third of its gas"],
-    shape: "1750,100 1780,0 2296,0 2296,465 2160,488 2130,490 2120,460 2060,410 1990,290 1960,230 1850,190 1810,130" },
-  { id: "dillihan", flag: "dillihan", name: ["Dillihan", "Republic"], label: [2150, 790],
-    blurb: "The regional powerhouse. Disputes the Fauraifai border.",
-    summary: "The richest and strongest country in the region, economically and militarily. Dillihan disputes parts of the Fauraifai border, and its patrols regularly cross into land Cranebonian herders consider theirs. It would like a pipeline across Fauraifai to the sea.",
+    relation: "Hostile", facts: ["Claims Alinni as its own", "Major economic crisis", "Sells Cranebonistan a third of its gas"] },
+  { id: "dillihan", flag: "dillihan", name: ["Dillihan", "Republic"],
+    blurb: "The regional powerhouse. Disputes the Fauran border.",
+    summary: "The richest and strongest country in the region, economically and militarily. Dillihan disputes parts of the Fauran border, and its patrols regularly cross into land Cranebonian herders consider theirs. It would like a pipeline across Fauran to the sea.",
     leader: { name: "Selin Arvadi", title: "Chancellor", sex: "f", age: 58 },
-    relation: "Rival", facts: ["Strongest economy and army in the region", "Border dispute over Fauraifai", "Wants a pipeline to Yamlin"],
-    shape: "1900,730 1980,690 2060,665 2090,610 2100,560 2130,490 2160,488 2296,465 2296,1623 2060,1623 2030,1460 2000,1360 2060,1310 2120,1270 2120,1220 2080,1170 2040,1100 2010,960 1985,880 1940,830 1910,780" },
-  { id: "bourdeaux", flag: "bourdeaux", name: ["Bourdeaux", "Federation"], label: [1390, 1515],
+    relation: "Rival", facts: ["Strongest economy and army in the region", "Border dispute over Fauran", "Wants a pipeline to Yamlin"] },
+  { id: "bourdeaux", flag: "bourdeaux", name: ["Bordon", "Federation"],
     blurb: "A fragile federation held together by a charismatic generalissimo.",
     summary: "A union of several nations that would probably fall apart without the generalissimo at its head. His health is the subject of constant rumours. Erland's border towns watch nervously: if the federation breaks up, refugees and trouble will come north.",
     leader: { name: "Hector Valmont", title: "Generalissimo", sex: "m", age: 74 },
-    relation: "Uneasy", facts: ["Five nations under one flag", "Held together by one man", "Wants James to join it"],
-    shape: "1040,1195 1080,1130 1120,1110 1280,1110 1275,1150 1270,1250 1280,1290 1310,1330 1360,1335 1370,1360 1420,1380 1530,1395 1740,1405 1810,1395 1840,1360 2000,1360 2030,1460 2060,1623 965,1623 975,1480 1000,1400 1050,1260" },
-  { id: "james", flag: "james", name: ["James"], label: [1358, 1205], small: true,
-    blurb: "Refuses to join Bourdeaux and trusts Cranebonistan to protect it. Rich in rare materials.",
-    summary: "A small country with very large reserves of rare materials. James refuses to join the Bourdeaux Federation and relies on Cranebonistan to defend it. In return, Cranebonian companies hold favourable mining deals there, which Potania would love to take over.",
+    relation: "Uneasy", facts: ["Five nations under one flag", "Held together by one man", "Wants James to join it"] },
+  { id: "james", flag: "james", name: ["James"], small: true,
+    blurb: "Refuses to join Bordon and trusts Cranebonistan to protect it. Rich in rare materials.",
+    summary: "A small country with very large reserves of rare materials. James refuses to join the Bordon Federation and relies on Cranebonistan to defend it. In return, Cranebonian companies hold favourable mining deals there, which Potania would love to take over.",
     leader: { name: "Tomas Verin", title: "Prime Minister", sex: "m", age: 52 },
-    relation: "Ally", facts: ["Rare material reserves", "Protected by Cranebonistan", "Refuses to join Bourdeaux"],
-    shape: "1280,1110 1330,1100 1390,1075 1440,1045 1470,1045 1465,1080 1440,1125 1440,1180 1435,1290 1415,1305 1385,1305 1360,1335 1310,1330 1280,1290 1270,1250 1275,1150" },
+    relation: "Ally", facts: ["Rare material reserves", "Protected by Cranebonistan", "Refuses to join Bordon"] },
 ];
-const CAPITAL = { name: "Craneapolis", x: 1175, y: 445 };
+// Attach map shapes (map.js is generated from the designer's Krita file).
+if (typeof MAP !== "undefined") {
+  for (const r of REGIONS) Object.assign(r, { shape: MAP.regions[r.id].d, label: MAP.regions[r.id].label });
+  for (const f of FOREIGN) Object.assign(f, { shape: MAP.foreign[f.id].d, label: MAP.foreign[f.id].label });
+}
+const CAPITAL = (() => {
+  const c = typeof MAP !== "undefined" && MAP.cities.find((x) => x.name === MAP.capital);
+  return { name: "Cranebo", x: c ? c.x : 0, y: c ? c.y : 0 };
+})();
 
 // Groups for the "Political views" tab. Pops can belong to several.
 const VIEW_GROUPS = [
@@ -298,7 +292,7 @@ const PARTY_TEMPLATES = [
   { id: "awakening", name: "People's Awakening", leader: "Dorin Vask", portrait: 3, color: "#c8402a", emblem: "hand-fist",
     tagline: "Left-wing populism",
     pitch: "Bread, wages and dignity. Take on the factory owners and the comfortable politicians who protect them.",
-    targets: "Working class, young voters, Cranbia and Fauraifai",
+    targets: "Working class, young voters, Cranbia and Fauran",
     manifesto: { nat: 2, econ: 3, prog: 2, war: 3, gov: 3, labor: 1, immig: 2, rev: 1 } },
   { id: "homeland", name: "Homeland First", leader: "Varro Stell", portrait: 9, color: "#6b3fa0", emblem: "flag",
     tagline: "Right-wing populism",
@@ -313,12 +307,12 @@ const PARTY_TEMPLATES = [
   { id: "steppe", name: "Land and Hearth", leader: "Kerem Ashvar", portrait: 5, color: "#8b5a2b", emblem: "wheat",
     tagline: "Agrarian provincialism",
     pitch: "The capital has forgotten the villages. Farmers, herders and small towns deserve their fair share.",
-    targets: "Erland and Fauraifai, rural working class",
+    targets: "Erland and Fauran, rural working class",
     manifesto: { nat: 2, econ: 3, prog: 3, war: 2, gov: 3, labor: 1, immig: 3, rev: 2 } },
   { id: "rage", name: "Enough!", leader: "Ines Varga", portrait: 2, color: "#d6336c", emblem: "megaphone",
     tagline: "Anti-system protest",
     pitch: "They are all the same. Burn the old system down and let the people decide directly.",
-    targets: "Anyone fed up with politics: the young, Fauraifai, Alinni",
+    targets: "Anyone fed up with politics: the young, Fauran, Alinni",
     manifesto: { nat: 2, econ: 2, prog: 1, war: 2, gov: 1, labor: 1, immig: 2, rev: 0 } },
   { id: "custom", name: "", leader: "", portrait: 1, color: "#c8402a", emblem: "star",
     tagline: "Build your own",

@@ -88,44 +88,60 @@ function svgEl(tag, attrs, parent) {
 }
 function buildMap() {
   const svg = $("#map");
+  const W = MAP.w, H = MAP.h;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.innerHTML = `<defs>
     <pattern id="m-waves" width="90" height="40" patternUnits="userSpaceOnUse"><path d="M0 20 Q 22 4 45 20 T 90 20" stroke="#40606a" stroke-width="3" fill="none" opacity=".35"/></pattern>
     <pattern id="m-hatch" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V26" stroke="#6b5a40" stroke-width="3" opacity=".28"/></pattern>
     <filter id="m-paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".012 .02" numOctaves="3" seed="4"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .12  0 0 0 .22 0"/></filter>
-    <filter id="m-ink"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+    <filter id="m-ink"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+    <filter id="m-coast" x="-5%" y="-5%" width="110%" height="110%"><feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/><feFlood flood-color="#6f8f8b"/><feComposite in2="d" operator="in"/></filter>
   </defs>
-  <rect class="sea" width="2296" height="1623"/><rect width="2296" height="1623" fill="url(#m-waves)"/>`;
+  <rect class="sea" width="${W}" height="${H}"/><rect width="${W}" height="${H}" fill="url(#m-waves)"/>
+  <g class="coast-halo" filter="url(#m-coast)">${[...FOREIGN, ...REGIONS].map((a) => `<path d="${a.shape}"/>`).join("")}</g>`;
+  const area = (a, cls, data) => svgEl("path", { d: a.shape, class: cls, tabindex: 0, "fill-rule": "evenodd", ...data }, svg);
   for (const f of FOREIGN) {
-    const poly = svgEl("polygon", { points: f.shape, class: "foreign", tabindex: 0, "data-foreign": f.id }, svg);
+    const poly = area(f, "foreign", { "data-foreign": f.id, role: "button", "aria-label": f.name.join(" ") });
     poly.addEventListener("click", () => foreignSheet(f.id));
     poly.addEventListener("keydown", (e) => { if (e.key === "Enter") foreignSheet(f.id); });
     poly.addEventListener("mousemove", (e) => showForeignTip(e, f));
     poly.addEventListener("mouseleave", () => ($("#map-tip").hidden = true));
-    svgEl("polygon", { points: f.shape, class: "foreign-hatch" }, svg);
+    svgEl("path", { d: f.shape, class: "foreign-hatch" }, svg);
   }
   for (const r of REGIONS) {
-    const poly = svgEl("polygon", { points: r.shape, class: "region", "data-id": r.id, tabindex: 0 }, svg);
+    const poly = area(r, "region", { "data-id": r.id, role: "button", "aria-label": r.name });
     poly.addEventListener("click", () => selectRegion(r.id));
     poly.addEventListener("keydown", (e) => { if (e.key === "Enter") selectRegion(r.id); });
     poly.addEventListener("mousemove", (e) => showTip(e, r));
     poly.addEventListener("mouseleave", () => ($("#map-tip").hidden = true));
   }
+  // rivers and mountains, drawn in Krita
+  svgEl("image", { href: MAP.features || "assets/map-features.png", width: W, height: H, class: "map-features" }, svg);
+  // cities
+  for (const c of MAP.cities) {
+    const isCap = c.name === MAP.capital;
+    if (isCap) svgEl("path", { d: `M${c.x} ${c.y - 24} l7 14.4 15.9 2.3 -11.5 11.2 2.7 15.8 -14.1 -7.5 -14.1 7.5 2.7 -15.8 -11.5 -11.2 15.9 -2.3Z`, class: "capital" }, svg);
+    else svgEl("circle", { cx: c.x, cy: c.y, r: 5 + c.size * 2.5, class: "city" }, svg);
+    const t = svgEl("text", { x: c.lx, y: c.ly + 9, "text-anchor": "middle", class: isCap ? "label-capital" : "label-city" }, svg);
+    t.textContent = c.name;
+  }
   for (const f of FOREIGN) {
-    f.name.forEach((line, i) => {
-      const t = svgEl("text", { x: f.label[0], y: f.label[1] + i * (f.small ? 38 : 62), "text-anchor": "middle",
-        class: f.small ? "label-small" : "label-foreign" }, svg);
+    const lines = f.name, small = f.small;
+    const x = Math.max(140, Math.min(W - 140, f.label[0]));
+    const y0 = small ? f.label[1] + 64 : f.label[1] - (lines.length - 1) * 31 * (f.label[2] || 1) + 16;
+    const k = small ? 1 : f.label[2] || 1;
+    lines.forEach((line, i) => {
+      const t = svgEl("text", { x, y: y0 + i * (small ? 34 : 62 * k), "text-anchor": "middle", class: small ? "label-small" : "label-foreign", style: small ? "" : `font-size:${Math.round(46 * k)}px` }, svg);
       t.textContent = line;
     });
   }
   for (const r of REGIONS) {
-    const t = svgEl("text", { x: r.label[0], y: r.label[1], "text-anchor": "middle", class: "label-region" }, svg);
+    const k = r.label[2] || 1; // the converter shrinks names that only fit smaller
+    const t = svgEl("text", { x: r.label[0], y: r.label[1] + 2 * k, "text-anchor": "middle", class: "label-region", style: `font-size:${Math.round(62 * k)}px` }, svg);
     t.textContent = r.name;
-    svgEl("text", { x: r.label[0], y: r.label[1] + 46, "text-anchor": "middle", class: "label-share", "data-share": r.id }, svg);
+    svgEl("text", { x: r.label[0], y: r.label[1] + 44 * k, "text-anchor": "middle", class: "label-share", "data-share": r.id, style: `font-size:${Math.round(34 * Math.max(k, 0.75))}px` }, svg);
   }
-  svgEl("path", { d: `M${CAPITAL.x} ${CAPITAL.y - 26} l7.6 15.6 17.2 2.5 -12.4 12.1 2.9 17.1 -15.3 -8.1 -15.3 8.1 2.9 -17.1 -12.4 -12.1 17.2 -2.5Z`, class: "capital" }, svg);
-  const cap = svgEl("text", { x: CAPITAL.x + 24, y: CAPITAL.y + 40, class: "label-capital" }, svg);
-  cap.textContent = CAPITAL.name;
-  svgEl("rect", { width: 2296, height: 1623, filter: "url(#m-paper)", class: "map-grain" }, svg);
+  svgEl("rect", { width: W, height: H, filter: "url(#m-paper)", class: "map-grain" }, svg);
 }
 function leaderOf(shares) {
   const ids = Object.keys(shares).sort((a, b) => shares[b] - shares[a]);
@@ -461,9 +477,9 @@ function emblemHTML(color, emblem, cls = "") {
 
 // ---------- Title screen ----------
 function titleMapSVG() {
-  const foreign = FOREIGN.map((f) => `<polygon points="${f.shape}" class="t-foreign"/>`).join("");
-  const regions = REGIONS.map((r, i) => `<polygon points="${r.shape}" class="t-region" style="animation-delay:${i * 0.12}s"/>`).join("");
-  return `<svg class="title-map" viewBox="0 0 2296 1623" aria-hidden="true">${foreign}${regions}
+  const foreign = FOREIGN.map((f) => `<path d="${f.shape}" class="t-foreign"/>`).join("");
+  const regions = REGIONS.map((r, i) => `<path d="${r.shape}" pathLength="1000" class="t-region" style="animation-delay:${i * 0.12}s"/>`).join("");
+  return `<svg class="title-map" viewBox="0 0 ${MAP.w} ${MAP.h}" aria-hidden="true">${foreign}${regions}
     <circle cx="${CAPITAL.x}" cy="${CAPITAL.y}" r="18" class="t-capital"/></svg>`;
 }
 function renderTitle() {
@@ -626,7 +642,7 @@ function budgetSheet(front) {
     ...REGIONS.map((r) => ({ id: r.id, label: `Rallies in ${r.name}`, note: `${r.adults}M adults. Awareness and goodwill there, a little leader image.`, info: known(preview[r.id]) })),
     { id: "social", label: "Social media", note: "Cheap reach to voters under 46. The reaction is unpredictable.", info: known(preview.young) },
     { id: "tv", label: "TV and newspapers", note: "Reaches voters over 45 across the country.", info: known(preview.old) },
-    { id: "tour", label: `${partyById("player").leader}'s national tour`, note: "Builds the leader as a person. Strongest with the young, the working class and Fauraifai.",
+    { id: "tour", label: `${partyById("player").leader}'s national tour`, note: "Builds the leader as a person. Strongest with the young, the working class and Fauran.",
       info: `<span class="known">Leader image: ${leaderScore(preview.all.leaderBefore)}${preview.all.leaderAfter - preview.all.leaderBefore > 0.005 ? ` → <strong>${leaderScore(preview.all.leaderAfter)}</strong>` : ""}</span>` },
   ];
   const offers = (front.offers || []).map((id) => byId(FUNDING_OFFERS, id));
@@ -895,7 +911,7 @@ function newsSheet(front) {
   const lead = front.items[0];
   openSheet(`
     <div class="paper">
-    <div class="masthead"><span>The Craneapolis Herald</span><span class="small">${dateLabel(S.week, false)}</span></div>
+    <div class="masthead"><span>The Cranebo Herald</span><span class="small">${dateLabel(S.week, false)}</span></div>
     <h2 class="paper-head">${esc(lead.title)}</h2>
     <ul class="news">${front.items.map((n) => `<li class="news-${n.kind} ${n.party ? "has-portrait" : ""}">${n.party ? portraitHTML(partyById(n.party), "portrait-md") : ""}<div class="news-body">
       <span class="news-kind">${label[n.kind] || "News"}${n.party ? ` · <span class="dot" style="background:${partyById(n.party).color}"></span> ${esc(partyById(n.party).short)}` : ""}</span>
@@ -1102,7 +1118,7 @@ function profileSheet() {
   const told = (text, spoken) => spoken === false ? `saw you ${esc(lowerFirst(text))}` : `were told "${esc(text)}"`;
   openSheet(`
     <div class="paper">
-      <div class="masthead"><span>The Craneapolis Herald</span><span class="small">${dateLabel(S.week, false)} · Election special</span></div>
+      <div class="masthead"><span>The Cranebo Herald</span><span class="small">${dateLabel(S.week, false)} · Election special</span></div>
       <h2 class="paper-head">${esc(p.headline)}</h2>
       <div class="profile-top">${portraitHTML(player, "portrait-xl")}
         <div><p class="eyebrow">Profile</p><h3>${esc(player.leader)}: ${esc(p.archetype.title)}</h3>
