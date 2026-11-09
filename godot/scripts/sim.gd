@@ -257,6 +257,7 @@ func new_game(opts := {}) -> Dictionary:
 		for key in owns:
 			if not s.ownership.has(key): s.ownership[key] = {}
 			s.ownership[key][p.id] = owns[key]
+		trim_claims(s, p.id)
 	s.pops = build_pops(s)
 	seed_loyalty(s)
 	s.lastSupport = summarize(s, s.pops).support
@@ -618,6 +619,18 @@ func ownership_table(s: Dictionary) -> Array:
 			rows.append({"key": key, "axis": axis, "label": side_label(key), "heat": float(s.salMod.get(axis, 0)), "owners": owners_out})
 	return rows
 
+## Every party campaigns on at most two issues. Anything beyond the strongest
+## two (always keeping `keep`) is lost completely.
+func trim_claims(s: Dictionary, party_id: String, keep := "") -> void:
+	var held = []
+	for key in s.ownership:
+		if float(s.ownership[key].get(party_id, 0)) > 0: held.append(key)
+	held = ssort(held, func(a, b):
+		if a == keep: return -1
+		if b == keep: return 1
+		return s.ownership[b][party_id] - s.ownership[a][party_id])
+	for key in held.slice(int(C.maxSignatureIssues)): s.ownership[key].erase(party_id)
+
 func ownership_of(s: Dictionary, party_id: String, key: String) -> float:
 	return float(s.ownership.get(key, {}).get(party_id, 0))
 
@@ -757,6 +770,7 @@ func rivals_adapt(s: Dictionary, before: Dictionary, now: Dictionary) -> void:
 		p.manifesto[ax.id] = p.perceived[ax.id]
 		var side = "L" if d < 0 else "R"
 		add_ownership(s, p.id, side_key(ax.id, side), 0.12)
+		trim_claims(s, p.id, side_key(ax.id, side))
 		push_news(s, {"party": p.id, "kind": "threat", "title": "%s copies your line on %s" % [p.short, ax.issue.to_lower()],
 			"text": "Worried about losing voters to you, %s has moved %s toward %s. They will compete for the same voters." % [p.leader, p.short, (ax.left if d < 0 else ax.right).to_lower()]})
 
@@ -860,6 +874,7 @@ func champion_preview(s: Dictionary, axis: String, side: String) -> Dictionary:
 
 func drop_signature(s: Dictionary, key: String) -> void:
 	s.signature = s.signature.filter(func(k): return k != key)
+	if s.ownership.has(key): s.ownership[key].erase("player")
 	s.log.append({"week": s.week, "kind": "action", "text": "Stopped campaigning on %s." % side_label(key).to_lower()})
 
 func _log(s: Dictionary, kind: String, text: String) -> void:

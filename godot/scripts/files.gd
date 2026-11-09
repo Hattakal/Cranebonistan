@@ -238,6 +238,11 @@ static func leader_words(v: float) -> String:
 	if v > -0.3: return "Disliked"
 	return "Despised"
 
+## The leader's net rating as a number voters would recognise: -100 .. +100.
+static func leader_score(v: float) -> String:
+	var n = Game.jround(clampf(v, -1, 1) * 100)
+	return ("+%d" % n) if n > 0 else str(n)
+
 static func charisma_word(c: float) -> String:
 	if c >= 75: return "Magnetic"
 	if c >= 60: return "Compelling"
@@ -311,7 +316,7 @@ func _electorate() -> void:
 		["Turnout", "%d%%" % Game.jround(sum.turnout * 100)],
 		["Know your party", "%d%%" % Game.jround(sum.aware * 100)],
 		["Your core supporters", "%dk" % Game.jround((entry.core.player if entry else 0.0) / 1000.0)],
-		["View of " + G.player_party(S).leader, leader_words(sum.leader)],
+		["View of " + G.player_party(S).leader, "%s (%s)" % [leader_words(sum.leader), leader_score(sum.leader)]],
 		["Fed up with the system", "Very" if dis > 1.25 else ("Quite" if dis > 1.05 else ("Somewhat" if dis > 0.85 else "Hardly"))],
 	], d)
 	if sum.leaderPull > 1.12: _p("Looks for a strong, charismatic leader.", d, Look.RED)
@@ -343,7 +348,7 @@ func _platform() -> void:
 	var dev: float = nation.devotion
 	_facts([
 		["Charisma", charisma_word(player.charisma)],
-		["Personal image", leader_words(nation.leader)],
+		["Personal image", "%s (%s)" % [leader_words(nation.leader), leader_score(nation.leader)]],
 		["Speaking style", G.style_profile(S).label],
 		["Devotion", "Fanatical" if dev > 0.4 else ("Strong" if dev > 0.2 else ("Growing" if dev > 0.08 else "Little"))],
 		["Would follow you anywhere", ("%sM" % Game.fmt1(nation.followers / 1e6)) if nation.followers >= 1e6 else "%dk" % Game.jround(nation.followers / 1000.0)],

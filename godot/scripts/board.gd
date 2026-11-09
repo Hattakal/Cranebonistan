@@ -196,48 +196,38 @@ func render(s: Dictionary) -> void:
 		v.add_child(Look.caps(G.date_label(s.week), 11, Color("6d5d4a")))
 		v.add_child(Look.label("Nothing on fire", "news_bold", 26))
 		v.add_child(Look.label("Plan your month in the files above, or move the clock forward.", "news", 15, Color("3a3128"), true))
-	# 2. the latest poll
-	if s.polls.size():
-		var poll: Dictionary = s.polls[-1]
-		var c = _card(Color("f4ecd9"), "blue", 2.0)
-		c.string_to = true
-		var v = _vbox(c)
-		v.add_child(Look.caps("%s · %s" % [poll.label, G.date_label(poll.week, false)], 11, Color("6d5d4a")))
-		var ids: Array = Game.ssort(poll.national.keys(), func(a, b): return poll.national[b] - poll.national[a])
-		var mx: float = poll.national[ids[0]]
-		var prev = s.polls[-2] if s.polls.size() > 1 else null
-		var fresh = _poll_seen != s.polls.size()
-		for id in ids:
-			var p = G.party_of(s, id)
-			var row = HBoxContainer.new()
-			row.add_theme_constant_override("separation", 6)
-			var nm = Look.label(p.short, "body_bold" if p.isPlayer else "body", 12)
-			nm.custom_minimum_size.x = 36
-			row.add_child(nm)
-			var bar = _Bar.new(Color(p.color), poll.national[id] / mx)
-			if fresh and _poll_fracs.has(id): bar.from = _poll_fracs[id]
-			_poll_fracs[id] = poll.national[id] / mx
-			bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			bar.custom_minimum_size.y = 10
-			row.add_child(bar)
-			var pct = Look.label("%d%%" % Game.jround(poll.national[id] * 100), "body", 11)
-			pct.custom_minimum_size.x = 30
-			pct.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-			row.add_child(pct)
-			var sw = ""
-			var swc = Color("6d5d4a")
-			if prev and prev.national.has(id):
-				var dd = Game.jround((poll.national[id] - prev.national[id]) * 100)
-				if dd != 0:
-					sw = ("+%d" % dd) if dd > 0 else str(dd)
-					swc = Look.GOOD if dd > 0 else Look.RED
-			var swl = Look.label(sw, "body_bold", 10, swc)
-			swl.custom_minimum_size.x = 22
-			swl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-			row.add_child(swl)
-			v.add_child(row)
-		_poll_seen = s.polls.size()
-		c.pressed.connect(func(): open_file.emit("polls"))
+	# 2. what the country is talking about
+	var nation: Dictionary = G.summarize(s, s.pops)
+	var talk: Array = Game.ssort(G.AXES.duplicate(), func(x, y): return nation.sal[y.id] - nation.sal[x.id]).slice(0, 4)
+	var tc = _card(Color("f4ecd9"), "blue", 2.0)
+	tc.string_to = true
+	var tv = _vbox(tc)
+	tv.add_child(Look.caps("The national conversation", 11, Color("6d5d4a")))
+	var top_sal: float = nation.sal[talk[0].id]
+	for ax in talk:
+		var heat: float = float(s.salMod.get(ax.id, 0))
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		var nm = Look.label(ax.issue, "body_bold", 13, Look.INK)
+		nm.custom_minimum_size.x = 120
+		nm.clip_text = true
+		row.add_child(nm)
+		var bar = _Bar.new(Look.RED if heat > 0.45 else Color("8a6d4a"), nation.sal[ax.id] / top_sal)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bar.custom_minimum_size.y = 8
+		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(bar)
+		var trend = "heating up" if heat > 0.45 else ("warming" if heat > 0.15 else ("cooling" if heat < -0.1 else ""))
+		var tl = Look.label(trend, "body", 11, Look.RED if heat > 0.15 else Color("6d5d4a"))
+		tl.custom_minimum_size.x = 62
+		tl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(tl)
+		tv.add_child(row)
+		var owners = G.ownership_table(s).filter(func(r): return r.axis == ax.id)
+		var who = []
+		for r in owners: who.append("%s (%s)" % [G.party_of(s, r.owners[0].party).short, r.label.to_lower()])
+		tv.add_child(Look.label("Owned by " + ", ".join(who) if who.size() else "Nobody owns it yet", "body", 11, Color("6d5d4a"), true))
+	tc.pressed.connect(func(): open_file.emit("actions"))
 	# 3. Pim's note
 	var pim = _card(Color("f8dc58"), "green", -3.0)
 	pim.custom_minimum_size.y = 150
@@ -285,17 +275,6 @@ func render(s: Dictionary) -> void:
 			v.add_child(Look.caps(w[0], 13, Look.INK, 1, "display_bold"))
 			v.add_child(Look.label(w[1], "body", 13, Look.INK, true))
 		c.pressed.connect(func(): open_file.emit("parties"))
-	# 7. coming up
-	var cal = _card(Color("d8b878"), "yellow", -2.0)
-	cal.clickable = false
-	var cv = _vbox(cal)
-	cv.add_child(Look.caps("Coming up", 15, Color("3b2a12"), 2, "display_bold"))
-	var nb = _next_week(s, func(c): return c.isQuarterStart)
-	var np = _next_week(s, func(c): return c.weekOfMonth == 2)
-	if nb >= 0: cv.add_child(_cal_row("Budget", G.date_label(nb, false)))
-	if np >= 0: cv.add_child(_cal_row("Next poll", G.date_label(np, false)))
-	var months_left = int(ceil(float(G.ELECTION_WEEK - s.week) / G.WEEKS_PER_MONTH))
-	cv.add_child(_cal_row("Election", "Held" if s.result else "%d month%s" % [months_left, "" if months_left == 1 else "s"], true))
 	_fit()
 
 class _Bar extends Control:
@@ -419,8 +398,4 @@ func _watch(s: Dictionary) -> Array:
 	for f in game.FOREIGN:
 		var st: Dictionary = s.countries.get(f.id, {})
 		if st.get("hot", false): items.append([" ".join(f.name), st.get("relation", "Trouble on the border")])
-	var hot = []
-	for a in game.AXES:
-		if float(s.salMod.get(a.id, 0)) > 0.45: hot.append(a.issue)
-	if hot.size(): items.append(["In the news", ", ".join(hot)])
 	return items.slice(0, 3)

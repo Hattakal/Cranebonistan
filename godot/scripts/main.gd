@@ -71,7 +71,6 @@ func _build() -> void:
 	_files.changed.connect(func(): _after_change())
 	_files.toast.connect(func(t): _toast(t))
 	_files.open_country.connect(func(id): _country_sheet(id))
-	left.add_child(_files)
 	var right = VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 0)
@@ -86,6 +85,10 @@ func _build() -> void:
 	_ticker = Ticker.new()
 	_ticker.custom_minimum_size.y = 34
 	right.add_child(_ticker)
+	# planning files open over the whole desk, below the top bar
+	add_child(_files)
+	_files.offset_top = 62
+	_files.z_index = 10
 	_sheet_layer = Control.new()
 	_sheet_layer.z_index = 20
 	_sheet_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -270,7 +273,7 @@ func _render_bar() -> void:
 	_chip("Known by", "%d%%" % Game.jround(G.national_awareness(S) * 100), "Share of adults who have heard of your party.", Color.TRANSPARENT,
 		G.national_awareness(S) * 100, func(x): return "%d%%" % Game.jround(x))
 	_chip("Business", biz, "Business donors are %s. Angry donors give less." % Game.business_word(mood), Look.RED.lightened(0.4) if mood < 0.4 else Color.TRANSPARENT)
-	_chip("Trust", Game.trust_label(S.trust), "Trust in the political system. Low trust helps outsiders.")
+	_chip("Trust in politics", Game.trust_label(S.trust), "How much people trust politicians and the system in general (not your party). Low trust helps outsiders.")
 	_date.text = G.date_label(S.week).to_upper()
 	var months_left = int(ceil(float(G.ELECTION_WEEK - S.week) / G.WEEKS_PER_MONTH))
 	_countdown.text = "Election held" if S.result else "Election in %d month%s" % [months_left, "" if months_left == 1 else "s"]
@@ -452,6 +455,20 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 		for x in S.parties:
 			if x.ruling: gov = x
 		p.boxed("The government moved first · " + (gov.short if gov else ""), ev.government.text)
+	var world: Dictionary = ev.get("world", {}).duplicate()
+	if ev.get("government") and ev.government.get("world"):
+		for k in ev.government.world: world[k] = float(world.get(k, 0)) + float(ev.government.world[k])
+	if world.size():
+		var items = []
+		for ind in G.INDICATORS:
+			var dv: float = float(world.get(ind.id, 0))
+			if absf(dv) < 0.5: continue
+			var bad = (ind.good == "high" and dv < 0) or (ind.good == "low" and dv > 0)
+			var col = Look.MUTED if ind.good == null else (Look.RED if bad else Look.GOOD)
+			items.append(["%s %s %d" % [ind.label, "▲" if dv > 0 else "▼", Game.jround(absf(dv))], col])
+		if items.size():
+			p.add(Look.caps("What this does to Cranebonistan", 11, Look.MUTED, 2))
+			p.chips(items)
 	if ev.get("crisisStart") and G.crisis_blames_you(S):
 		p.callout("Your party's campaigning helped bring this about. For months you pushed the country toward exactly this.")
 	if ev.get("echo") and S.record.blamed.size():
@@ -498,7 +515,7 @@ func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
 func _event_result(p: Paper, res: Dictionary) -> void:
 	p.clear()
 	_result_body(p, res.get("title", ""), res)
-	p.actions([p.button("Pin it to the board", func(): _done(p))])
+	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 
 func _result_body(p: Paper, title: String, res: Dictionary) -> void:
@@ -600,7 +617,7 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 		var pr: Dictionary = row[3]
 		var known: String
 		if row[0] == "tour":
-			known = "Leader image: %s%s" % [Files.leader_words(pr.leaderBefore), (" → " + Files.leader_words(pr.leaderAfter)) if pr.leaderAfter - pr.leaderBefore > 0.005 else ""]
+			known = "Leader image: %s%s (%s)" % [Files.leader_score(pr.leaderBefore), (" → " + Files.leader_score(pr.leaderAfter)) if pr.leaderAfter - pr.leaderBefore > 0.005 else "", Files.leader_words(pr.leaderAfter)]
 		else:
 			known = "Know you: %s%%%s" % [Game.fmt1(pr.before * 100), (" → %s%%" % Game.fmt1(pr.after * 100)) if pr.after - pr.before > 0.0005 else ""]
 		info.add_child(Look.label(known, "body", 12, Look.INK))
@@ -795,17 +812,19 @@ func _profile_sheet() -> void:
 
 func _toast(text: String) -> void:
 	var t = Look.label(text, "type", 15, Look.INK, true)
+	t.custom_minimum_size.x = 520
 	var p = PanelContainer.new()
 	var sb = Look.box(Look.PAPER, 0, Look.RED, 0, 10, 12)
 	sb.border_width_left = 5; sb.border_color = Look.RED
 	p.add_theme_stylebox_override("panel", sb)
 	p.add_child(t)
-	p.custom_minimum_size.x = 420
+	p.z_index = 30
 	add_child(p)
 	await get_tree().process_frame
+	p.reset_size()
 	p.position = Vector2((size.x - p.size.x) / 2, size.y - p.size.y - 60)
 	var tw = p.create_tween()
-	tw.tween_interval(2.6)
+	tw.tween_interval(2.6 + text.length() / 40.0)
 	tw.tween_property(p, "modulate:a", 0.0, 0.4)
 	tw.tween_callback(p.queue_free)
 
