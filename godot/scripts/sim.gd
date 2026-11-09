@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 10
+const SAVE_VERSION := 11
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -196,6 +196,39 @@ func date_label(week: int, with_week := true) -> String:
 	return ("Week %d · %s" % [c.weekOfMonth + 1, base]) if with_week else base
 
 # ---------- Stances ----------
+## A short name for a set of positions, the way a commentator would put it.
+## It describes; it is never a goal. Pass `perceived` for how voters see a party.
+func view_label(pos: Dictionary) -> String:
+	var st = {}
+	for ax in AXES: st[ax.id] = stance_of(float(pos.get(ax.id, 0)))
+	var nat = st.nation <= 1
+	var multi = st.nation >= 3
+	var state = st.economy <= 1
+	var market = st.economy >= 3
+	var welf = st.welfare <= 1
+	var prog = st.society <= 1
+	var trad = st.society >= 3
+	var auth = st.order <= 1
+	var lib = st.order >= 3
+	var radical = st.system <= 1
+	var estab = st.system >= 3
+	if nat and auth and radical and (st.nation == 0 or st.order == 0): return "Far right"
+	if nat and radical and (welf or state): return "National populist"
+	if nat and radical: return "Right-wing populist"
+	if state and radical: return "Left populist"
+	if radical: return "Anti-system"
+	if nat and trad: return "National conservative"
+	if trad and market: return "Conservative"
+	if auth and estab: return "Law-and-order conservative"
+	if market and lib: return "Liberal"
+	if state and st.economy == 0: return "Socialist"
+	if state or welf: return "Social democrat"
+	if multi and prog: return "Progressive"
+	if nat: return "Nationalist"
+	if trad: return "Traditionalist"
+	if market: return "Free marketeer"
+	return "Centrist"
+
 func stance_of(value: float) -> int:
 	var i = 0
 	for b in C.stanceBounds:
@@ -319,7 +352,7 @@ func build_pops(s: Dictionary) -> Array:
 						"turnout": clampf2(a.turnout + c.turnout + n.turnout + float(r.get("turnout", 0)), 0.25, 0.95),
 						"engagement": a.engagement * c.engagement,
 						"leaderPull": fixed(_or1(a.get("leaderAppeal")) * _or1(c.get("leaderAppeal")) * _or1(n.get("leaderAppeal")) * _or1(r.get("leaderAppeal")), 2),
-						"disaffection": fixed(clampf2(1 + (-pos.rev) / 60.0 + float(c.get("disaffect", 0)) + float(r.get("disaffect", 0)), 0.3, 2), 2),
+						"disaffection": fixed(clampf2(1 + (-pos.system) / 60.0 + float(c.get("disaffect", 0)) + float(r.get("disaffect", 0)), 0.3, 2), 2),
 						"mobilized": 0.0,
 						"loyal": {}, "goodwill": {}, "aware": {}, "leader": {},
 					}
@@ -754,7 +787,7 @@ func defector_event(s: Dictionary, p: Dictionary, _freed: float) -> Dictionary:
 			{"label": "Take only the local organisers, not the MPs", "effects": {"shift": small, "defect": {"from": p.id, "share": 0.1},
 				"goodwill": [{"who": {"loyalTo": p.id}, "amt": 0.12}]}},
 			{"label": "Refuse: we are not a home for failed politicians", "effects": {"awareness": 0.02, "trust": 1,
-				"goodwill": [{"who": {"lean": {"rev": "<-20"}}, "amt": 0.15}]}},
+				"goodwill": [{"who": {"lean": {"system": "<-20"}}, "amt": 0.15}]}},
 		],
 	}
 
@@ -1015,9 +1048,9 @@ func act_outrage(s: Dictionary) -> Dictionary:
 	s.outrages = recent
 	s.record.outrages += 1
 	var known_before = national_awareness(s)
-	apply_effects(s, {"shift": {"rev": -5}, "awareness": 0.11 * f, "trust": -1,
-		"leader": [{"who": {"lean": {"rev": "<-10"}}, "amt": 0.06 * f}],
-		"goodwill": [{"who": {"class": "middle"}, "amt": -0.2}, {"who": {"class": "upper"}, "amt": -0.3}, {"who": {"age": "61+"}, "amt": -0.1}, {"who": {"lean": {"rev": "<-15"}}, "amt": 0.08 * f}]})
+	apply_effects(s, {"shift": {"system": -5}, "awareness": 0.11 * f, "trust": -1,
+		"leader": [{"who": {"lean": {"system": "<-10"}}, "amt": 0.06 * f}],
+		"goodwill": [{"who": {"class": "middle"}, "amt": -0.2}, {"who": {"class": "upper"}, "amt": -0.3}, {"who": {"age": "61+"}, "amt": -0.1}, {"who": {"lean": {"system": "<-15"}}, "amt": 0.08 * f}]})
 	var known_after = national_awareness(s)
 	var known = "People who know your party: %d%% → %d%%." % [jround(known_before * 100), jround(known_after * 100)]
 	var text = ("Your comments are on every channel. Anti-system voters loved it; the middle class and business donors are horrified." if f == 1.0
@@ -1406,15 +1439,14 @@ func world_monthly(s: Dictionary) -> void:
 func update_climate(s: Dictionary) -> void:
 	var w: Dictionary = s.world
 	s.climate = {
-		"econ": maxf(0, 55 - w.jobs) / 40.0 + maxf(0, w.prices - 50) / 50.0,
-		"labor": maxf(0, 55 - w.jobs) / 35.0,
-		"immig": maxf(0, w.migration - 55) / 50.0,
-		"war": maxf(0, w.border - 40) / 40.0,
-		"gov": maxf(0, w.prices - 50) / 60.0,
-		"rev": maxf(0, w.unrest - 40) / 45.0,
-		"nat": maxf(0, w.border - 50) / 60.0 + maxf(0, w.unrest - 50) / 80.0,
+		"economy": maxf(0, 55 - w.jobs) / 35.0 + maxf(0, w.prices - 50) / 50.0,
+		"welfare": maxf(0, w.prices - 50) / 60.0,
+		"nation": maxf(0, w.migration - 55) / 50.0 + maxf(0, w.border - 50) / 60.0,
+		"foreign": maxf(0, w.border - 40) / 40.0,
+		"system": maxf(0, w.unrest - 40) / 45.0,
+		"order": maxf(0, w.unrest - 45) / 50.0,
 	}
-	s.regionClimate = {"yamlin": {"immig": maxf(0, w.migration - 50) / 30.0, "labor": maxf(0, w.migration - 55) / 50.0}}
+	s.regionClimate = {"yamlin": {"nation": maxf(0, w.migration - 50) / 30.0, "economy": maxf(0, w.migration - 55) / 50.0}}
 
 # ---------- Initiatives ----------
 func offer_initiatives(s: Dictionary) -> void:

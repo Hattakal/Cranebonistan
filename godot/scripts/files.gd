@@ -346,6 +346,9 @@ func _platform() -> void:
 	c1.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Your leader", c1)
 	_h(player.leader, 26, c1)
+	var seen = G.view_label(player.perceived)
+	var meant = G.view_label(player.manifesto)
+	_add(Look.label("Voters see you as: %s%s" % [seen, "" if seen == meant else " (your manifesto says %s)" % meant.to_lower()], "body_bold", 14, Look.RED if seen != meant else Look.INK, true), c1)
 	var dev: float = nation.devotion
 	_facts([
 		["Charisma", charisma_word(player.charisma)],
@@ -875,7 +878,7 @@ func _country() -> void:
 		nm.add_theme_constant_override("separation", 0)
 		top.add_child(nm)
 		nm.add_child(Look.label(p.name, "display", 19, Color(p.color).darkened(0.25)))
-		nm.add_child(Look.label(p.leader + (" · governing" if p.ruling else ""), "body", 13, Look.MUTED))
+		nm.add_child(Look.label("%s · %s%s" % [G.view_label(p.perceived), p.leader, " · governing" if p.ruling else ""], "body", 13, Look.MUTED))
 		if poll: top.add_child(Look.label("%s%%" % Game.fmt1(poll.national[p.id] * 100), "display", 22, Look.INK))
 		var est: float = p.establishment
 		var meta = "%s leader · %s · %sM core voters" % [charisma_word(p.charisma), "The establishment" if est >= 0.8 else ("Mainstream" if est >= 0.55 else ("Semi-outsider" if est >= 0.3 else "Outsider")), "%.2f" % (nation.core[p.id] / 1e6)]

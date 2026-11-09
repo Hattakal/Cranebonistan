@@ -7,7 +7,7 @@ func _init() -> void:
 	var G = load("res://scripts/sim.gd").new()
 	var args = OS.get_cmdline_user_args()
 	var seed = int(args[0]) if args.size() else 42
-	var M = {"nat": 1, "econ": 3, "prog": 2, "war": 2, "gov": 3, "labor": 1, "immig": 3, "rev": 1}
+	var M = {"nation": 2, "economy": 1, "society": 2, "foreign": 2, "welfare": 1, "system": 1, "order": 2}
 	var s: Dictionary = G.new_game({"seed": seed, "partyName": "Test", "manifesto": M})
 	var last = -1
 	var guard = 0

@@ -3,6 +3,7 @@
 The Godot 4.7 version of the game. The browser version in the repository root is the reference until this one catches up.
 
 - `scripts/sim.gd`: the rules (autoload `Game`). It started as a line-for-line port of `sim.js`, `world.js` and `voice.js`; since November 2026 the Godot version has its own rules (see below), so the browser version is now behind.
+- `data/content.json`: all game content. Since the axis rework it is edited here directly; `tools/export_content.js` would overwrite it with the old browser content, so don't run it. `tools/remap_axes.py` is the one-off script that moved the content to the seven axes.
 - `data/debates.json`: debate topics, including the ones the economy starts by itself.
 - `data/content.json`: all content (regions, parties, events, sound bites, crises, the map). Generated from the browser files with `node tools/export_content.js`; edit the browser files, then regenerate.
 - `tests/parity.gd`: plays a seeded game with a fixed script. It matched `tools/parity.js` exactly until the Godot rules changed; now it is a smoke test that a whole game runs.

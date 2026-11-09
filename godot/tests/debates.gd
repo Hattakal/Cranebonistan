@@ -5,7 +5,7 @@ extends SceneTree
 func _init() -> void:
 	var G = load("res://scripts/sim.gd").new()
 	var seed = int(OS.get_cmdline_user_args()[0]) if OS.get_cmdline_user_args().size() else 7
-	var s = G.new_game({"seed": seed, "partyName": "People's Awakening", "manifesto": {"nat": 1, "econ": 2, "prog": 3, "war": 1, "gov": 3, "labor": 1, "immig": 4, "rev": 0}})
+	var s = G.new_game({"seed": seed, "partyName": "People's Awakening", "manifesto": {"nation": 1, "economy": 2, "society": 3, "foreign": 1, "welfare": 1, "system": 0, "order": 1}})
 	var events = 0
 	var months = 0
 	while not s.result:

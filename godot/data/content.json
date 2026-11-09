@@ -89,10 +89,40 @@
  },
  "AXES": [
   {
-   "id": "nat",
-   "left": "Nationalism",
-   "right": "Multiculturalism",
-   "issue": "National identity",
+   "id": "economy",
+   "left": "State",
+   "right": "Market",
+   "issue": "The economy",
+   "leftGroup": "supporters of state control",
+   "rightGroup": "free marketeers",
+   "stances": [
+    "Socialist",
+    "Statist",
+    "Mixed economy",
+    "Pro-market",
+    "Free-market purist"
+   ]
+  },
+  {
+   "id": "welfare",
+   "left": "Welfare",
+   "right": "Austerity",
+   "issue": "Welfare & public services",
+   "leftGroup": "welfare supporters",
+   "rightGroup": "tax-cutters",
+   "stances": [
+    "Cradle to grave",
+    "Generous",
+    "Moderate",
+    "Lean",
+    "Austerity"
+   ]
+  },
+  {
+   "id": "nation",
+   "left": "Nationalist",
+   "right": "Multicultural",
+   "issue": "Nation & immigration",
    "leftGroup": "nationalists",
    "rightGroup": "multiculturalists",
    "stances": [
@@ -100,28 +130,13 @@
     "Nationalist",
     "Neutral",
     "Multicultural",
-    "Radically multicultural"
+    "Open borders"
    ]
   },
   {
-   "id": "econ",
-   "left": "Laissez-faire economy",
-   "right": "Central planning",
-   "issue": "The economy",
-   "leftGroup": "free marketeers",
-   "rightGroup": "central planners",
-   "stances": [
-    "Free-market purist",
-    "Free-market",
-    "Mixed economy",
-    "Interventionist",
-    "Command economy"
-   ]
-  },
-  {
-   "id": "prog",
+   "id": "society",
    "left": "Progressive",
-   "right": "Traditionalist",
+   "right": "Traditional",
    "issue": "Social values",
    "leftGroup": "progressives",
    "rightGroup": "traditionalists",
@@ -129,14 +144,29 @@
     "Radical progressive",
     "Progressive",
     "Moderate",
-    "Traditionalist",
-    "Ultra-traditionalist"
+    "Traditional",
+    "Ultra-traditional"
    ]
   },
   {
-   "id": "war",
-   "left": "Hawkish",
-   "right": "Doveish",
+   "id": "order",
+   "left": "Authority",
+   "right": "Liberty",
+   "issue": "Law & order",
+   "leftGroup": "law-and-order voters",
+   "rightGroup": "civil libertarians",
+   "stances": [
+    "Iron fist",
+    "Tough",
+    "Balanced",
+    "Rights first",
+    "Hands off"
+   ]
+  },
+  {
+   "id": "foreign",
+   "left": "Hawk",
+   "right": "Dove",
    "issue": "Defence & foreign policy",
    "leftGroup": "hawks",
    "rightGroup": "doves",
@@ -149,63 +179,18 @@
    ]
   },
   {
-   "id": "gov",
-   "left": "Small government",
-   "right": "Big government",
-   "issue": "Public services",
-   "leftGroup": "small-government voters",
-   "rightGroup": "big-government voters",
-   "stances": [
-    "Minimal state",
-    "Small government",
-    "Moderate",
-    "Big government",
-    "All-encompassing state"
-   ]
-  },
-  {
-   "id": "labor",
-   "left": "Worker rights",
-   "right": "Corporate support",
-   "issue": "Jobs & wages",
-   "leftGroup": "union supporters",
-   "rightGroup": "business-minded voters",
-   "stances": [
-    "Militantly pro-worker",
-    "Pro-worker",
-    "Balanced",
-    "Pro-business",
-    "Corporate champion"
-   ]
-  },
-  {
-   "id": "immig",
-   "left": "Pro-immigration",
-   "right": "Restricted immigration",
-   "issue": "Immigration",
-   "leftGroup": "pro-immigration voters",
-   "rightGroup": "immigration restrictionists",
-   "stances": [
-    "Open borders",
-    "Pro-immigration",
-    "Moderate",
-    "Restrictive",
-    "Closed borders"
-   ]
-  },
-  {
-   "id": "rev",
-   "left": "Revolutionary",
-   "right": "Reactionary",
+   "id": "system",
+   "left": "Radical",
+   "right": "Establishment",
    "issue": "The political system",
-   "leftGroup": "revolutionaries",
-   "rightGroup": "reactionaries",
+   "leftGroup": "anti-system voters",
+   "rightGroup": "establishment voters",
    "stances": [
-    "Revolutionary",
+    "Radical",
     "Reformist",
+    "Moderate",
     "Establishment",
-    "Conservative",
-    "Reactionary"
+    "Old guard"
    ]
   }
  ],
@@ -218,15 +203,14 @@
    "engagement": 0.9,
    "leaderAppeal": 1.35,
    "lean": {
-    "prog": -25,
-    "rev": -18,
-    "econ": 10,
-    "immig": -10,
-    "nat": 8
+    "society": -25,
+    "system": -18,
+    "economy": -10,
+    "nation": 9,
+    "order": 20
    },
    "sal": {
-    "econ": 1.3,
-    "labor": 1.3
+    "economy": 1.3
    }
   },
   {
@@ -237,11 +221,12 @@
    "engagement": 1,
    "leaderAppeal": 1.1,
    "lean": {
-    "prog": -8
+    "society": -8,
+    "order": 5
    },
    "sal": {
-    "econ": 1.2,
-    "gov": 1.1
+    "economy": 1.2,
+    "welfare": 1.1
    }
   },
   {
@@ -252,12 +237,13 @@
    "engagement": 1.1,
    "leaderAppeal": 0.95,
    "lean": {
-    "prog": 12,
-    "rev": 6,
-    "nat": -6
+    "society": 12,
+    "system": 6,
+    "nation": -6,
+    "order": -5
    },
    "sal": {
-    "gov": 1.2
+    "welfare": 1.2
    }
   },
   {
@@ -268,15 +254,17 @@
    "engagement": 1.2,
    "leaderAppeal": 1,
    "lean": {
-    "prog": 30,
-    "rev": 18,
-    "nat": -15,
-    "war": -8,
-    "gov": 10
+    "society": 30,
+    "system": 18,
+    "nation": -15,
+    "foreign": -8,
+    "welfare": -10,
+    "order": -20
    },
    "sal": {
-    "prog": 1.4,
-    "gov": 1.3
+    "society": 1.4,
+    "welfare": 1.3,
+    "order": 1.2
    }
   }
  ],
@@ -290,14 +278,13 @@
    "leaderAppeal": 1.25,
    "disaffect": 0.25,
    "lean": {
-    "labor": -35,
-    "econ": 20,
-    "gov": 25,
-    "immig": 8
+    "economy": -27.5,
+    "welfare": -25,
+    "nation": -8,
+    "order": -10
    },
    "sal": {
-    "labor": 1.6,
-    "econ": 1.4
+    "economy": 1.6
    }
   },
   {
@@ -309,13 +296,14 @@
    "leaderAppeal": 0.9,
    "disaffect": 0,
    "lean": {
-    "econ": -8,
-    "prog": -6,
-    "gov": -5
+    "economy": 8,
+    "society": -6,
+    "welfare": 5,
+    "order": 0
    },
    "sal": {
-    "econ": 1.2,
-    "gov": 1.2
+    "economy": 1.2,
+    "welfare": 1.2
    }
   },
   {
@@ -327,16 +315,15 @@
    "leaderAppeal": 0.7,
    "disaffect": -0.35,
    "lean": {
-    "labor": 45,
-    "econ": -40,
-    "gov": -30,
-    "immig": -20,
-    "rev": 8
+    "economy": 42.5,
+    "welfare": 30,
+    "nation": 20,
+    "system": 8,
+    "order": -5
    },
    "sal": {
-    "labor": 1.5,
-    "econ": 1.5,
-    "gov": 1.3
+    "economy": 1.5,
+    "welfare": 1.3
    }
   }
  ],
@@ -357,15 +344,17 @@
    "turnout": -0.08,
    "leaderAppeal": 0.8,
    "lean": {
-    "nat": 60,
-    "war": 40,
-    "rev": -30,
-    "prog": 5
+    "nation": 60,
+    "foreign": 40,
+    "system": -30,
+    "society": 5,
+    "order": 35
    },
    "sal": {
-    "nat": 2,
-    "rev": 1.5,
-    "war": 1.5
+    "nation": 2,
+    "system": 1.5,
+    "foreign": 1.5,
+    "order": 1.5
    }
   },
   {
@@ -375,14 +364,14 @@
    "turnout": -0.12,
    "leaderAppeal": 0.9,
    "lean": {
-    "immig": -60,
-    "nat": 40,
-    "labor": -20,
-    "war": 20
+    "nation": 50,
+    "economy": -20,
+    "foreign": 20,
+    "order": 15
    },
    "sal": {
-    "immig": 2,
-    "labor": 1.3
+    "nation": 2,
+    "economy": 1.3
    }
   }
  ],
@@ -406,12 +395,13 @@
     "norbanian": 0.07
    },
    "lean": {
-    "prog": -25,
-    "nat": 15,
-    "labor": -10
+    "society": -25,
+    "nation": 15,
+    "economy": -10,
+    "order": 5
    },
    "sal": {
-    "labor": 1.2
+    "economy": 1.2
    },
    "label": [
     1076,
@@ -438,22 +428,22 @@
     "norbanian": 0.23
    },
    "lean": {
-    "econ": -15,
-    "war": 10,
-    "prog": -8
+    "economy": 15,
+    "foreign": 10,
+    "society": -8,
+    "order": 0
    },
    "sal": {
-    "immig": 1.5,
-    "econ": 1.2
+    "nation": 1.5,
+    "economy": 1.2
    },
    "local": {
     "cranebonian": {
      "lean": {
-      "immig": 28,
-      "nat": -15
+      "nation": -21.5
      },
      "sal": {
-      "immig": 1.3
+      "nation": 1.3
      }
     }
    },
@@ -482,15 +472,15 @@
     "norbanian": 0.02
    },
    "lean": {
-    "nat": -35,
-    "prog": 35,
-    "war": -20,
-    "immig": 30,
-    "rev": 15
+    "nation": -32.5,
+    "society": 35,
+    "foreign": -20,
+    "system": 15,
+    "order": -15
    },
    "sal": {
-    "nat": 1.5,
-    "prog": 1.4
+    "nation": 1.5,
+    "society": 1.4
    },
    "label": [
     1349,
@@ -517,18 +507,19 @@
     "norbanian": 0.02
    },
    "lean": {
-    "war": 5
+    "foreign": 5,
+    "order": -10
    },
    "sal": {
-    "nat": 1.6,
-    "war": 1.5
+    "nation": 1.6,
+    "foreign": 1.5
    },
    "local": {
     "cranebonian": {
      "lean": {
-      "nat": -30,
-      "war": -25,
-      "rev": 10
+      "nation": -30,
+      "foreign": -25,
+      "system": 10
      }
     }
    },
@@ -557,14 +548,15 @@
     "norbanian": 0.05
    },
    "lean": {
-    "gov": 25,
-    "prog": 20,
-    "rev": -15,
-    "war": -25
+    "welfare": -25,
+    "society": 20,
+    "system": -15,
+    "foreign": -25,
+    "order": -5
    },
    "sal": {
-    "gov": 1.6,
-    "war": 1.4
+    "welfare": 1.6,
+    "foreign": 1.4
    },
    "label": [
     1886,
@@ -693,7 +685,7 @@
    "label": "Nationalists",
    "who": {
     "lean": {
-     "nat": "<-30"
+     "nation": "<-30"
     }
    }
   },
@@ -702,7 +694,16 @@
    "label": "Multiculturalists",
    "who": {
     "lean": {
-     "nat": ">30"
+     "nation": ">30"
+    }
+   }
+  },
+  {
+   "id": "statists",
+   "label": "State-economy voters",
+   "who": {
+    "lean": {
+     "economy": "<-25"
     }
    }
   },
@@ -711,16 +712,16 @@
    "label": "Free marketeers",
    "who": {
     "lean": {
-     "econ": "<-25"
+     "economy": ">25"
     }
    }
   },
   {
-   "id": "planners",
-   "label": "Central planners",
+   "id": "welfare",
+   "label": "Welfare supporters",
    "who": {
     "lean": {
-     "econ": ">25"
+     "welfare": "<-30"
     }
    }
   },
@@ -729,7 +730,7 @@
    "label": "Progressives",
    "who": {
     "lean": {
-     "prog": "<-25"
+     "society": "<-25"
     }
    }
   },
@@ -738,25 +739,25 @@
    "label": "Traditionalists",
    "who": {
     "lean": {
-     "prog": ">25"
+     "society": ">25"
     }
    }
   },
   {
-   "id": "restrict",
-   "label": "Immigration restrictionists",
+   "id": "lawandorder",
+   "label": "Law-and-order voters",
    "who": {
     "lean": {
-     "immig": ">30"
+     "order": "<-25"
     }
    }
   },
   {
-   "id": "unionists",
-   "label": "Union supporters",
+   "id": "antisystem",
+   "label": "Anti-system voters",
    "who": {
     "lean": {
-     "labor": "<-30"
+     "system": "<-25"
     }
    }
   }
@@ -785,19 +786,17 @@
    "establishment": 1,
    "blurb": "The ruling party. Nationalist, traditional, strongest in Erland.",
    "owns": {
-    "nat:L": 0.6,
-    "prog:R": 0.4,
-    "immig:R": 0.3
+    "nation:L": 0.6,
+    "society:R": 0.4
    },
    "manifesto": {
-    "nat": -45,
-    "econ": -15,
-    "prog": 35,
-    "war": -30,
-    "gov": -5,
-    "labor": 20,
-    "immig": 40,
-    "rev": 25
+    "nation": -42.5,
+    "economy": 17.5,
+    "society": 35,
+    "foreign": -30,
+    "welfare": 5,
+    "system": 25,
+    "order": -35
    }
   },
   {
@@ -814,19 +813,17 @@
    "establishment": 0.75,
    "blurb": "The old left. Unions, factories, public services.",
    "owns": {
-    "labor:L": 0.7,
-    "gov:R": 0.45,
-    "econ:R": 0.3
+    "economy:L": 0.7,
+    "welfare:L": 0.45
    },
    "manifesto": {
-    "nat": 15,
-    "econ": 45,
-    "prog": -15,
-    "war": 20,
-    "gov": 50,
-    "labor": -55,
-    "immig": -5,
-    "rev": -10
+    "nation": 10,
+    "economy": -50,
+    "society": -15,
+    "foreign": 20,
+    "welfare": -50,
+    "system": -10,
+    "order": 5
    }
   },
   {
@@ -843,19 +840,18 @@
    "establishment": 0.6,
    "blurb": "Liberal and pro-business. Popular with Yamlin's traders and the urban rich.",
    "owns": {
-    "econ:L": 0.6,
-    "prog:L": 0.4,
-    "immig:L": 0.35
+    "economy:R": 0.6,
+    "society:L": 0.4,
+    "nation:R": 0.35
    },
    "manifesto": {
-    "nat": 45,
-    "econ": -60,
-    "prog": -40,
-    "war": 30,
-    "gov": -45,
-    "labor": 40,
-    "immig": -45,
-    "rev": -15
+    "nation": 45,
+    "economy": 50,
+    "society": -40,
+    "foreign": 30,
+    "welfare": 45,
+    "system": -15,
+    "order": 35
    }
   },
   {
@@ -876,18 +872,17 @@
     "alinni": 1
    },
    "owns": {
-    "nat:R": 0.6,
-    "war:R": 0.35
+    "nation:R": 0.6,
+    "foreign:R": 0.35
    },
    "manifesto": {
-    "nat": 80,
-    "econ": 20,
-    "prog": 5,
-    "war": 60,
-    "gov": 30,
-    "labor": -20,
-    "immig": -5,
-    "rev": -40
+    "nation": 42.5,
+    "economy": -20,
+    "society": 5,
+    "foreign": 60,
+    "welfare": -30,
+    "system": -40,
+    "order": 40
    }
   }
  ],
@@ -965,14 +960,13 @@
    "pitch": "Bread, wages and dignity. Take on the factory owners and the comfortable politicians who protect them.",
    "targets": "Working class, young voters, Cranbia and Fauran",
    "manifesto": {
-    "nat": 2,
-    "econ": 3,
-    "prog": 2,
-    "war": 3,
-    "gov": 3,
-    "labor": 1,
-    "immig": 2,
-    "rev": 1
+    "nation": 2,
+    "economy": 1,
+    "society": 2,
+    "foreign": 3,
+    "welfare": 1,
+    "system": 1,
+    "order": 2
    }
   },
   {
@@ -986,14 +980,13 @@
    "pitch": "Close the borders, stand up to the Trueants and Dillihan, and give the country back to ordinary Cranebonians.",
    "targets": "Erland, older voters, fed-up nationalists in Yamlin",
    "manifesto": {
-    "nat": 1,
-    "econ": 2,
-    "prog": 3,
-    "war": 1,
-    "gov": 2,
-    "labor": 2,
-    "immig": 3,
-    "rev": 1
+    "nation": 1,
+    "economy": 2,
+    "society": 3,
+    "foreign": 1,
+    "welfare": 2,
+    "system": 1,
+    "order": 1
    }
   },
   {
@@ -1007,14 +1000,13 @@
    "pitch": "Competent, modern and above the old quarrels. Sell yourself as the adults the country never had.",
    "targets": "Middle class, educated Cranbia, young professionals",
    "manifesto": {
-    "nat": 3,
-    "econ": 1,
-    "prog": 1,
-    "war": 3,
-    "gov": 2,
-    "labor": 2,
-    "immig": 2,
-    "rev": 2
+    "nation": 2,
+    "economy": 2,
+    "society": 1,
+    "foreign": 3,
+    "welfare": 2,
+    "system": 2,
+    "order": 3
    }
   },
   {
@@ -1028,14 +1020,13 @@
    "pitch": "The capital has forgotten the villages. Farmers, herders and small towns deserve their fair share.",
    "targets": "Erland and Fauran, rural working class",
    "manifesto": {
-    "nat": 2,
-    "econ": 3,
-    "prog": 3,
-    "war": 2,
-    "gov": 3,
-    "labor": 1,
-    "immig": 3,
-    "rev": 2
+    "nation": 2,
+    "economy": 1,
+    "society": 3,
+    "foreign": 2,
+    "welfare": 1,
+    "system": 2,
+    "order": 1
    }
   },
   {
@@ -1049,14 +1040,13 @@
    "pitch": "They are all the same. Burn the old system down and let the people decide directly.",
    "targets": "Anyone fed up with politics: the young, Fauran, Alinni",
    "manifesto": {
-    "nat": 2,
-    "econ": 2,
-    "prog": 1,
-    "war": 2,
-    "gov": 1,
-    "labor": 1,
-    "immig": 2,
-    "rev": 0
+    "nation": 2,
+    "economy": 2,
+    "society": 1,
+    "foreign": 2,
+    "welfare": 3,
+    "system": 0,
+    "order": 2
    }
   },
   {
@@ -1070,14 +1060,13 @@
    "pitch": "Start from a blank manifesto and decide everything yourself.",
    "targets": "Up to you",
    "manifesto": {
-    "nat": 2,
-    "econ": 2,
-    "prog": 2,
-    "war": 2,
-    "gov": 2,
-    "labor": 2,
-    "immig": 2,
-    "rev": 2
+    "nation": 2,
+    "economy": 2,
+    "society": 2,
+    "foreign": 2,
+    "welfare": 2,
+    "system": 2,
+    "order": 2
    }
   }
  ],
@@ -1206,17 +1195,17 @@
      "label": "Argue for tariffs on Golban imports",
      "effects": {
       "shift": {
-       "econ": 12,
-       "prog": 5
+       "economy": -12,
+       "society": 5
       },
       "salience": {
-       "econ": 0.4
+       "economy": 0.4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": ">20"
+          "economy": "<20"
          }
         },
         "amt": 0.35
@@ -1224,7 +1213,7 @@
        {
         "who": {
          "lean": {
-          "prog": ">25"
+          "society": ">25"
          }
         },
         "amt": 0.2
@@ -1283,17 +1272,17 @@
      "label": "Demand high interest rates to stop the bleeding",
      "effects": {
       "shift": {
-       "econ": 6,
-       "prog": -5
+       "economy": -6,
+       "society": -5
       },
       "salience": {
-       "econ": 0.3
+       "economy": 0.3
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": 0.3
@@ -1339,11 +1328,11 @@
      "label": "Blame the Alinnian minority for being lazy",
      "effects": {
       "shift": {
-       "nat": -16,
-       "rev": 10
+       "nation": -16,
+       "order": -4
       },
       "salience": {
-       "nat": 0.5
+       "nation": 0.5
       },
       "awareness": 0.06,
       "flag": "blamed_alinnians",
@@ -1358,7 +1347,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.5
@@ -1366,7 +1355,7 @@
        {
         "who": {
          "lean": {
-          "rev": ">20"
+          "system": ">20"
          }
         },
         "amt": 0.3
@@ -1380,7 +1369,7 @@
        {
         "who": {
          "lean": {
-          "nat": ">25"
+          "nation": ">25"
          }
         },
         "amt": -0.5
@@ -1404,7 +1393,7 @@
         {
          "who": {
           "lean": {
-           "nat": "<-30"
+           "nation": "<-30"
           }
          },
          "amt": 0.1
@@ -1430,7 +1419,7 @@
         {
          "who": {
           "lean": {
-           "rev": "<-15"
+           "system": "<-15"
           }
          },
          "amt": 0.1
@@ -1443,13 +1432,13 @@
      "label": "Call it a temporary slide that will pass soon",
      "effects": {
       "shift": {
-       "econ": -7
+       "economy": 7
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": "<-20"
+          "economy": ">-20"
          }
         },
         "amt": 0.3
@@ -1513,11 +1502,11 @@
      "label": "Back the full 20% rise",
      "effects": {
       "shift": {
-       "labor": -12,
-       "gov": 5
+       "economy": -12,
+       "welfare": -5
       },
       "salience": {
-       "labor": 0.4
+       "economy": 0.4
       },
       "goodwill": [
        {
@@ -1545,7 +1534,7 @@
      "label": "Propose a smaller rise with tax relief for small firms",
      "effects": {
       "shift": {
-       "labor": -4
+       "economy": -4
       },
       "goodwill": [
        {
@@ -1567,8 +1556,7 @@
      "label": "Oppose it. Jobs first",
      "effects": {
       "shift": {
-       "labor": 12,
-       "econ": -6
+       "economy": 15.6
       },
       "goodwill": [
        {
@@ -1580,7 +1568,7 @@
        {
         "who": {
          "lean": {
-          "econ": "<-25"
+          "economy": ">-25"
          }
         },
         "amt": 0.2
@@ -1610,8 +1598,8 @@
      "label": "Promise a rent cap",
      "effects": {
       "shift": {
-       "econ": 12,
-       "gov": 8
+       "economy": -12,
+       "welfare": -8
       },
       "goodwill": [
        {
@@ -1627,7 +1615,7 @@
        {
         "who": {
          "lean": {
-          "econ": ">25"
+          "economy": "<25"
          }
         },
         "amt": 0.2
@@ -1641,7 +1629,7 @@
        {
         "who": {
          "lean": {
-          "econ": "<-30"
+          "economy": ">-30"
          }
         },
         "amt": -0.3
@@ -1667,7 +1655,7 @@
      "label": "Promise a huge public housing programme",
      "effects": {
       "shift": {
-       "gov": 14
+       "welfare": -14
       },
       "goodwill": [
        {
@@ -1688,7 +1676,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-25"
+          "welfare": ">-25"
          }
         },
         "amt": -0.35
@@ -1714,14 +1702,14 @@
      "label": "Call for cutting red tape so developers can build",
      "effects": {
       "shift": {
-       "gov": -10,
-       "econ": -8
+       "welfare": 10,
+       "economy": 8
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": "<-25"
+          "economy": ">-25"
          }
         },
         "amt": 0.35
@@ -1768,14 +1756,13 @@
      "label": "Say immigrants are driving up rents",
      "effects": {
       "shift": {
-       "immig": 12,
-       "nat": -6
+       "nation": -15.6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.4
@@ -1789,7 +1776,7 @@
        {
         "who": {
          "lean": {
-          "immig": "<-20"
+          "nation": ">-20"
          }
         },
         "amt": -0.4
@@ -1842,8 +1829,8 @@
      "label": "Fight it in the streets",
      "effects": {
       "shift": {
-       "rev": -10,
-       "gov": 8
+       "system": -10,
+       "welfare": -8
       },
       "trust": -3,
       "stability": {
@@ -1879,7 +1866,7 @@
      "label": "Support it as the responsible choice",
      "effects": {
       "shift": {
-       "gov": -8
+       "welfare": 8
       },
       "goodwill": [
        {
@@ -1891,7 +1878,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-25"
+          "welfare": ">-25"
          }
         },
         "amt": 0.25
@@ -1915,7 +1902,7 @@
      "label": "Say the young should pay more instead",
      "effects": {
       "shift": {
-       "gov": 5
+       "welfare": -5
       },
       "goodwill": [
        {
@@ -1955,11 +1942,11 @@
      "label": "Promise a state job guarantee for under-30s",
      "effects": {
       "shift": {
-       "gov": 12,
-       "econ": 10
+       "welfare": -12,
+       "economy": -10
       },
       "salience": {
-       "econ": 0.3
+       "economy": 0.3
       },
       "goodwill": [
        {
@@ -1971,7 +1958,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">20"
+          "welfare": "<20"
          }
         },
         "amt": 0.2
@@ -2003,14 +1990,14 @@
      "label": "Call for tax cuts for start-ups",
      "effects": {
       "shift": {
-       "gov": -10,
-       "econ": -8
+       "welfare": 10,
+       "economy": 8
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": "<-25"
+          "economy": ">-25"
          }
         },
         "amt": 0.35
@@ -2104,8 +2091,8 @@
      "label": "Blame the older generation",
      "effects": {
       "shift": {
-       "rev": -8,
-       "prog": -6
+       "system": -8,
+       "society": -6
       },
       "goodwill": [
        {
@@ -2170,9 +2157,8 @@
      "label": "Demand a ban on port automation",
      "effects": {
       "shift": {
-       "labor": -10,
-       "econ": 8,
-       "rev": 6
+       "economy": -13,
+       "society": 3
       },
       "goodwill": [
        {
@@ -2191,7 +2177,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-30"
+          "society": "<-30"
          }
         },
         "amt": -0.15
@@ -2203,7 +2189,7 @@
      "label": "Promise retraining for every laid-off worker",
      "effects": {
       "shift": {
-       "gov": 10
+       "welfare": -10
       },
       "goodwill": [
        {
@@ -2215,7 +2201,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">20"
+          "welfare": "<20"
          }
         },
         "amt": 0.2
@@ -2223,7 +2209,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-30"
+          "welfare": ">-30"
          }
         },
         "amt": -0.2
@@ -2235,8 +2221,8 @@
      "label": "Welcome it: progress can't be stopped",
      "effects": {
       "shift": {
-       "labor": 10,
-       "prog": -6
+       "economy": 10,
+       "society": -6
       },
       "goodwill": [
        {
@@ -2248,7 +2234,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-30"
+          "society": "<-30"
          }
         },
         "amt": 0.1
@@ -2267,8 +2253,7 @@
      "label": "Blame Norbanian workers for the cheap labour race",
      "effects": {
       "shift": {
-       "immig": 14,
-       "nat": -8
+       "nation": -18.2
       },
       "goodwill": [
        {
@@ -2282,7 +2267,7 @@
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.2
@@ -2296,7 +2281,7 @@
        {
         "who": {
          "lean": {
-          "nat": ">25"
+          "nation": ">25"
          }
         },
         "amt": -0.35
@@ -2326,8 +2311,7 @@
      "label": "Urge the government to sign the deal",
      "effects": {
       "shift": {
-       "econ": -10,
-       "labor": 6
+       "economy": 13
       },
       "goodwill": [
        {
@@ -2339,7 +2323,7 @@
        {
         "who": {
          "lean": {
-          "econ": "<-25"
+          "economy": ">-25"
          }
         },
         "amt": 0.3
@@ -2357,8 +2341,8 @@
      "label": "Demand it be rejected to protect Erland's farmers",
      "effects": {
       "shift": {
-       "econ": 10,
-       "nat": -6
+       "economy": -10,
+       "nation": -6
       },
       "goodwill": [
        {
@@ -2370,7 +2354,7 @@
        {
         "who": {
          "lean": {
-          "econ": ">25"
+          "economy": "<25"
          }
         },
         "amt": 0.2
@@ -2389,13 +2373,13 @@
      "label": "Back it only with strong worker protections",
      "effects": {
       "shift": {
-       "labor": -10
+       "economy": -10
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "labor": "<-30"
+          "economy": "<-30"
          }
         },
         "amt": 0.35
@@ -2413,15 +2397,15 @@
      "label": "Call it Golban economic colonialism",
      "effects": {
       "shift": {
-       "nat": -10,
-       "rev": -8
+       "nation": -10,
+       "system": -8
       },
       "awareness": 0.05,
       "leader": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -2431,7 +2415,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.3
@@ -2439,7 +2423,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-20"
+          "system": "<-20"
          }
         },
         "amt": 0.3
@@ -2471,17 +2455,16 @@
      "label": "Welcome them and demand a fair asylum process",
      "effects": {
       "shift": {
-       "immig": -12,
-       "nat": 8
+       "nation": 15.6
       },
       "salience": {
-       "immig": 0.6
+       "nation": 0.6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "immig": "<-20"
+          "nation": ">-20"
          }
         },
         "amt": 0.45
@@ -2503,7 +2486,7 @@
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": -0.35
@@ -2550,11 +2533,10 @@
      "label": "Demand the ports be closed: Cranebonistan is full",
      "effects": {
       "shift": {
-       "immig": 15,
-       "nat": -8
+       "nation": -19.5
       },
       "salience": {
-       "immig": 0.6
+       "nation": 0.6
       },
       "awareness": 0.05,
       "followup": {
@@ -2568,7 +2550,7 @@
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.55
@@ -2588,7 +2570,7 @@
        {
         "who": {
          "lean": {
-          "immig": "<-20"
+          "nation": ">-20"
          }
         },
         "amt": -0.4
@@ -2617,7 +2599,7 @@
         {
          "who": {
           "lean": {
-           "rev": "<-15"
+           "system": "<-15"
           }
          },
          "amt": 0.1
@@ -2636,8 +2618,8 @@
      "label": "Say Yamlin's businesses need the workers",
      "effects": {
       "shift": {
-       "labor": 10,
-       "immig": -6
+       "economy": 10,
+       "nation": 6
       },
       "money": 2,
       "goodwill": [
@@ -2682,13 +2664,13 @@
      "label": "Demand that Golba and Potania share the burden",
      "effects": {
       "shift": {
-       "war": 5
+       "foreign": 5
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": 0.2
@@ -2723,7 +2705,7 @@
         {
          "who": {
           "lean": {
-           "nat": "<-25"
+           "nation": "<-25"
           }
          },
          "amt": 0.1
@@ -2763,7 +2745,7 @@
      "label": "Support the bill",
      "effects": {
       "shift": {
-       "nat": 12
+       "nation": 12
       },
       "goodwill": [
        {
@@ -2775,7 +2757,7 @@
        {
         "who": {
          "lean": {
-          "nat": ">25"
+          "nation": ">25"
          }
         },
         "amt": 0.3
@@ -2783,7 +2765,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.45
@@ -2805,7 +2787,7 @@
      "label": "Propose optional Alinnian lessons instead",
      "effects": {
       "shift": {
-       "nat": 3
+       "nation": 3
       },
       "goodwill": [
        {
@@ -2827,14 +2809,14 @@
      "label": "Say one country needs one language",
      "effects": {
       "shift": {
-       "nat": -12,
-       "prog": 6
+       "nation": -12,
+       "society": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.45
@@ -2870,13 +2852,13 @@
      "label": "Champion the bill",
      "effects": {
       "shift": {
-       "prog": -14
+       "society": -14
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": 0.5
@@ -2890,7 +2872,7 @@
        {
         "who": {
          "lean": {
-          "prog": ">30"
+          "society": ">30"
          }
         },
         "amt": -0.55
@@ -2902,7 +2884,7 @@
      "label": "Call it a matter of conscience and give your MPs a free vote",
      "effects": {
       "shift": {
-       "prog": -3
+       "society": -3
       },
       "goodwill": [
        {
@@ -2918,13 +2900,13 @@
      "label": "Oppose it to protect the traditional family",
      "effects": {
       "shift": {
-       "prog": 14
+       "society": 14
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "prog": ">30"
+          "society": ">30"
          }
         },
         "amt": 0.5
@@ -2938,7 +2920,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": -0.55
@@ -2958,7 +2940,7 @@
      "label": "Back the petition and dance at the festival",
      "effects": {
       "shift": {
-       "prog": 5
+       "society": 5
       },
       "awareness": 0.05,
       "leader": [
@@ -2979,7 +2961,7 @@
        {
         "who": {
          "lean": {
-          "prog": ">25"
+          "society": ">25"
          }
         },
         "amt": 0.2
@@ -2997,7 +2979,7 @@
      "label": "Propose a 'Festival of All Peoples' including Alinnian traditions",
      "effects": {
       "shift": {
-       "nat": 8
+       "nation": 8
       },
       "goodwill": [
        {
@@ -3009,7 +2991,7 @@
        {
         "who": {
          "lean": {
-          "nat": ">25"
+          "nation": ">25"
          }
         },
         "amt": 0.2
@@ -3027,7 +3009,7 @@
      "label": "Say the country can't afford another holiday",
      "effects": {
       "shift": {
-       "labor": 6
+       "economy": 6
       },
       "goodwill": [
        {
@@ -3064,8 +3046,7 @@
      "label": "Demand 10,000 more police officers",
      "effects": {
       "shift": {
-       "gov": 8,
-       "rev": 5
+       "order": -12
       },
       "goodwill": [
        {
@@ -3086,7 +3067,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-30"
+          "welfare": ">-30"
          }
         },
         "amt": -0.15
@@ -3112,14 +3093,15 @@
      "label": "Blame poverty and promise youth centres",
      "effects": {
       "shift": {
-       "prog": -8,
-       "gov": 6
+       "society": -8,
+       "welfare": -6,
+       "order": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": 0.3
@@ -3165,15 +3147,14 @@
      "label": "Blame Norbanian gangs",
      "effects": {
       "shift": {
-       "immig": 12,
-       "nat": -10
+       "nation": -15.6
       },
       "awareness": 0.05,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.45
@@ -3193,7 +3174,7 @@
        {
         "who": {
          "lean": {
-          "nat": ">25"
+          "nation": ">25"
          }
         },
         "amt": -0.4
@@ -3298,18 +3279,18 @@
      "label": "Demand troops on the Trueant border",
      "effects": {
       "shift": {
-       "war": -15,
-       "nat": -6
+       "foreign": -15,
+       "nation": -6
       },
       "salience": {
-       "war": 0.6
+       "foreign": 0.6
       },
       "awareness": 0.05,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.5
@@ -3329,7 +3310,7 @@
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": -0.35
@@ -3369,16 +3350,16 @@
      "label": "Call for calm talks with the Trueants",
      "effects": {
       "shift": {
-       "war": 12
+       "foreign": 12
       },
       "salience": {
-       "war": 0.3
+       "foreign": 0.3
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": 0.4
@@ -3392,7 +3373,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-35"
+          "nation": "<-35"
          }
         },
         "amt": -0.35
@@ -3422,7 +3403,7 @@
         {
          "who": {
           "lean": {
-           "war": "<-25"
+           "foreign": "<-25"
           }
          },
          "amt": -0.1
@@ -3435,8 +3416,8 @@
      "label": "Promise a development fund for Alinni",
      "effects": {
       "shift": {
-       "gov": 10,
-       "nat": 5
+       "welfare": -10,
+       "nation": 5
       },
       "goodwill": [
        {
@@ -3448,7 +3429,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">25"
+          "welfare": "<25"
          }
         },
         "amt": 0.2
@@ -3456,7 +3437,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-25"
+          "welfare": ">-25"
          }
         },
         "amt": -0.2
@@ -3493,14 +3474,14 @@
      "label": "Mock the Trueant economy on live TV",
      "effects": {
       "shift": {
-       "nat": -6
+       "nation": -6
       },
       "awareness": 0.07,
       "leader": [
        {
         "who": {
          "lean": {
-          "nat": "<-20"
+          "nation": "<-20"
          }
         },
         "amt": 0.25
@@ -3510,7 +3491,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": 0.25
@@ -3588,10 +3569,10 @@
      "label": "Demand a firm military response",
      "effects": {
       "shift": {
-       "war": -12
+       "foreign": -12
       },
       "salience": {
-       "war": 0.4
+       "foreign": 0.4
       },
       "goodwill": [
        {
@@ -3603,7 +3584,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.3
@@ -3624,13 +3605,13 @@
      "label": "Propose a joint grazing agreement",
      "effects": {
       "shift": {
-       "war": 10
+       "foreign": 10
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": 0.3
@@ -3644,7 +3625,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-35"
+          "nation": "<-35"
          }
         },
         "amt": -0.2
@@ -3659,7 +3640,7 @@
      "label": "Blame the weak government in Cranebo",
      "effects": {
       "shift": {
-       "rev": -10
+       "system": -10
       },
       "trust": -3,
       "awareness": 0.04,
@@ -3667,7 +3648,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.35
@@ -3717,14 +3698,14 @@
      "label": "Promise to defend James's sovereignty",
      "effects": {
       "shift": {
-       "war": -10,
-       "nat": -5
+       "foreign": -10,
+       "nation": -5
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.35
@@ -3732,7 +3713,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -3740,7 +3721,7 @@
        {
         "who": {
          "lean": {
-          "war": ">30"
+          "foreign": ">30"
          }
         },
         "amt": -0.25
@@ -3755,8 +3736,7 @@
      "label": "Say the mining companies should cut their own deal with Potania",
      "effects": {
       "shift": {
-       "labor": 10,
-       "econ": -8
+       "economy": 13
       },
       "money": 3,
       "goodwill": [
@@ -3769,7 +3749,7 @@
        {
         "who": {
          "lean": {
-          "econ": ">25"
+          "economy": "<25"
          }
         },
         "amt": -0.25
@@ -3781,18 +3761,18 @@
      "label": "Call for nationalising Cranebonian mining stakes",
      "effects": {
       "shift": {
-       "econ": 15,
-       "rev": -10
+       "economy": -15,
+       "system": -10
       },
       "salience": {
-       "econ": 0.3
+       "economy": 0.3
       },
       "awareness": 0.05,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": ">30"
+          "economy": "<30"
          }
         },
         "amt": 0.45
@@ -3800,7 +3780,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-20"
+          "system": "<-20"
          }
         },
         "amt": 0.25
@@ -3821,13 +3801,13 @@
      "label": "Say this is a matter for James and Potania",
      "effects": {
       "shift": {
-       "war": 6
+       "foreign": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": 0.2
@@ -3853,18 +3833,18 @@
      "label": "Call for the southern border to be sealed",
      "effects": {
       "shift": {
-       "immig": 10,
-       "war": -8
+       "nation": -10,
+       "foreign": -8
       },
       "salience": {
-       "immig": 0.3,
-       "war": 0.3
+       "nation": 0.3,
+       "foreign": 0.3
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.35
@@ -3888,13 +3868,13 @@
      "label": "Urge the government to offer itself as a mediator",
      "effects": {
       "shift": {
-       "war": 10
+       "foreign": 10
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": 0.3
@@ -3915,16 +3895,15 @@
      "label": "Hint that Cranebonistan could gain land if it falls",
      "effects": {
       "shift": {
-       "war": -18,
-       "nat": -12,
-       "rev": 8
+       "foreign": -18,
+       "nation": -12
       },
       "awareness": 0.06,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": 0.5
@@ -3932,7 +3911,7 @@
        {
         "who": {
          "lean": {
-          "war": ">15"
+          "foreign": ">15"
          }
         },
         "amt": -0.55
@@ -3983,14 +3962,14 @@
      "label": "Urge the government to join the sanctions",
      "effects": {
       "shift": {
-       "war": -8,
-       "nat": 4
+       "foreign": -8,
+       "nation": 4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.3
@@ -4015,13 +3994,13 @@
      "label": "Say Cranebonistan must refuse: we are nobody's servant",
      "effects": {
       "shift": {
-       "nat": -10
+       "nation": -10
       },
       "leader": [
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": 0.2
@@ -4031,7 +4010,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.35
@@ -4055,7 +4034,7 @@
      "label": "Back sanctions only if Golba pays for the higher gas bills",
      "effects": {
       "shift": {
-       "war": -3
+       "foreign": -3
       },
       "awareness": 0.04,
       "goodwill": [
@@ -4095,9 +4074,8 @@
      "label": "Back the pipeline",
      "effects": {
       "shift": {
-       "econ": -8,
-       "labor": 6,
-       "war": 5
+       "economy": 10.4,
+       "foreign": 5
       },
       "goodwill": [
        {
@@ -4125,14 +4103,14 @@
      "label": "Back it only if the state owns half",
      "effects": {
       "shift": {
-       "econ": 10,
-       "gov": 6
+       "economy": -10,
+       "welfare": -6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": ">25"
+          "economy": "<25"
          }
         },
         "amt": 0.35
@@ -4156,8 +4134,8 @@
      "label": "Not one metre of Fauran soil for Dillihan",
      "effects": {
       "shift": {
-       "nat": -10,
-       "war": -6
+       "nation": -10,
+       "foreign": -6
       },
       "leader": [
        {
@@ -4177,7 +4155,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.25
@@ -4210,14 +4188,14 @@
      "label": "Urge the government to send troops",
      "effects": {
       "shift": {
-       "war": -12,
-       "gov": 5
+       "foreign": -12,
+       "welfare": -5
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.4
@@ -4225,7 +4203,7 @@
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": -0.35
@@ -4233,7 +4211,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-30"
+          "welfare": ">-30"
          }
         },
         "amt": -0.15
@@ -4248,7 +4226,7 @@
      "label": "Propose training and equipment instead",
      "effects": {
       "shift": {
-       "war": -3
+       "foreign": -3
       },
       "goodwill": [
        {
@@ -4260,7 +4238,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.1
@@ -4272,14 +4250,14 @@
      "label": "Say our soldiers are not mine guards for corporations",
      "effects": {
       "shift": {
-       "war": 10,
-       "labor": -6
+       "foreign": 10,
+       "economy": -6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": 0.35
@@ -4287,7 +4265,7 @@
        {
         "who": {
          "lean": {
-          "labor": "<-30"
+          "economy": "<-30"
          }
         },
         "amt": 0.25
@@ -4367,7 +4345,7 @@
      "label": "Attack the prime minister for being on holiday",
      "effects": {
       "shift": {
-       "rev": -5
+       "system": -5
       },
       "trust": -2,
       "stability": {
@@ -4390,7 +4368,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.2
@@ -4511,14 +4489,14 @@
      "label": "Say the win proves Cranebonians are superior to Dillihanis",
      "effects": {
       "shift": {
-       "nat": -8
+       "nation": -8
       },
       "awareness": 0.05,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": 0.25
@@ -4526,7 +4504,7 @@
        {
         "who": {
          "lean": {
-          "nat": ">15"
+          "nation": ">15"
          }
         },
         "amt": -0.35
@@ -4544,7 +4522,7 @@
      "label": "Promise free football pitches in every town",
      "effects": {
       "shift": {
-       "gov": 6
+       "welfare": -6
       },
       "awareness": 0.04,
       "goodwill": [
@@ -4608,7 +4586,7 @@
      "label": "Attack the host as a puppet of the elites",
      "effects": {
       "shift": {
-       "rev": -10
+       "system": -10
       },
       "trust": -3,
       "awareness": 0.12,
@@ -4616,7 +4594,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.45
@@ -4632,7 +4610,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.3
@@ -4707,7 +4685,7 @@
      "label": "Demand an emergency reconstruction fund",
      "effects": {
       "shift": {
-       "gov": 8
+       "welfare": -8
       },
       "goodwill": [
        {
@@ -4719,7 +4697,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">20"
+          "welfare": "<20"
          }
         },
         "amt": 0.15
@@ -4731,8 +4709,8 @@
      "label": "Say nomads should finally settle in proper towns",
      "effects": {
       "shift": {
-       "prog": -4,
-       "gov": 5
+       "society": -4,
+       "welfare": -5
       },
       "awareness": 0.05,
       "goodwill": [
@@ -4745,7 +4723,7 @@
        {
         "who": {
          "lean": {
-          "prog": ">30"
+          "society": ">30"
          }
         },
         "amt": -0.2
@@ -4826,7 +4804,7 @@
      "label": "Promise to hire 20,000 nurses",
      "effects": {
       "shift": {
-       "gov": 10
+       "welfare": -10
       },
       "goodwill": [
        {
@@ -4847,7 +4825,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-30"
+          "welfare": ">-30"
          }
         },
         "amt": -0.25
@@ -4859,8 +4837,8 @@
      "label": "Call for opening hospitals to private investors",
      "effects": {
       "shift": {
-       "gov": -10,
-       "labor": 8
+       "welfare": 10,
+       "economy": 8
       },
       "goodwill": [
        {
@@ -4872,7 +4850,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-25"
+          "welfare": ">-25"
          }
         },
         "amt": 0.25
@@ -4926,15 +4904,15 @@
      "label": "Demand the worst factories close now",
      "effects": {
       "shift": {
-       "prog": -8,
-       "labor": -4,
-       "gov": 6
+       "society": -8,
+       "economy": -4,
+       "welfare": -6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "prog": "<-30"
+          "society": "<-30"
          }
         },
         "amt": 0.4
@@ -4960,8 +4938,8 @@
      "label": "Propose five years and state money for factories to clean up",
      "effects": {
       "shift": {
-       "gov": 8,
-       "econ": 5
+       "welfare": -8,
+       "economy": -5
       },
       "goodwill": [
        {
@@ -4973,7 +4951,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-30"
+          "welfare": ">-30"
          }
         },
         "amt": -0.2
@@ -4985,8 +4963,8 @@
      "label": "Say smog is the price of jobs",
      "effects": {
       "shift": {
-       "labor": 8,
-       "prog": 5
+       "economy": 8,
+       "society": 5
       },
       "goodwill": [
        {
@@ -5020,8 +4998,8 @@
      "label": "Promise national funding if you win",
      "effects": {
       "shift": {
-       "gov": 8,
-       "prog": -4
+       "welfare": -8,
+       "society": -4
       },
       "goodwill": [
        {
@@ -5033,7 +5011,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": 0.15
@@ -5041,7 +5019,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-30"
+          "welfare": ">-30"
          }
         },
         "amt": -0.15
@@ -5053,8 +5031,8 @@
      "label": "Demand compulsory schooling, strictly enforced",
      "effects": {
       "shift": {
-       "gov": 6,
-       "prog": 6
+       "welfare": -6,
+       "society": 6
       },
       "goodwill": [
        {
@@ -5076,13 +5054,13 @@
      "label": "Say it should be left to the charity",
      "effects": {
       "shift": {
-       "gov": -6
+       "welfare": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "gov": "<-30"
+          "welfare": ">-30"
          }
         },
         "amt": 0.15
@@ -5109,8 +5087,8 @@
      "label": "Demand emergency subsidies for farmers",
      "effects": {
       "shift": {
-       "gov": 10,
-       "econ": 8
+       "welfare": -10,
+       "economy": -8
       },
       "goodwill": [
        {
@@ -5122,7 +5100,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">25"
+          "welfare": "<25"
          }
         },
         "amt": 0.2
@@ -5130,7 +5108,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-25"
+          "welfare": ">-25"
          }
         },
         "amt": -0.25
@@ -5164,14 +5142,14 @@
      "label": "Say the market should be left to adjust",
      "effects": {
       "shift": {
-       "econ": -10,
-       "gov": -6
+       "economy": 10,
+       "welfare": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": "<-30"
+          "economy": ">-30"
          }
         },
         "amt": 0.35
@@ -5211,8 +5189,8 @@
      "label": "Call for cheap grain imports from Bordon",
      "effects": {
       "shift": {
-       "econ": -5,
-       "nat": 5
+       "economy": 5,
+       "nation": 5
       },
       "goodwill": [
        {
@@ -5267,7 +5245,7 @@
      "label": "Pray for rain with farmers at a village shrine",
      "effects": {
       "shift": {
-       "prog": 10
+       "society": 10
       },
       "awareness": 0.04,
       "leader": [
@@ -5282,7 +5260,7 @@
        {
         "who": {
          "lean": {
-          "prog": ">30"
+          "society": ">30"
          }
         },
         "amt": 0.35
@@ -5296,7 +5274,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-30"
+          "society": "<-30"
          }
         },
         "amt": -0.3
@@ -5319,7 +5297,7 @@
         {
          "who": {
           "lean": {
-           "prog": "<-30"
+           "society": "<-30"
           }
          },
          "amt": -0.12
@@ -5347,11 +5325,11 @@
      "label": "Join the picket line",
      "effects": {
       "shift": {
-       "labor": -14,
-       "rev": -5
+       "economy": -14,
+       "system": -5
       },
       "salience": {
-       "labor": 0.5
+       "economy": 0.5
       },
       "awareness": 0.05,
       "leader": [
@@ -5366,7 +5344,7 @@
        {
         "who": {
          "lean": {
-          "labor": "<-30"
+          "economy": "<-30"
          }
         },
         "amt": 0.5
@@ -5405,7 +5383,7 @@
      "label": "Side with the factory owners",
      "effects": {
       "shift": {
-       "labor": 14
+       "economy": 14
       },
       "money": 3,
       "goodwill": [
@@ -5450,7 +5428,7 @@
      "label": "Call for state arbitration",
      "effects": {
       "shift": {
-       "gov": 6
+       "welfare": -6
       },
       "goodwill": [
        {
@@ -5462,7 +5440,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">20"
+          "welfare": "<20"
          }
         },
         "amt": 0.1
@@ -5488,15 +5466,15 @@
      "label": "Say the strike is funded by foreign agitators",
      "effects": {
       "shift": {
-       "rev": 12,
-       "nat": -8,
-       "labor": 5
+       "order": -8,
+       "nation": -8,
+       "economy": 5
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "rev": ">25"
+          "system": ">25"
          }
         },
         "amt": 0.4
@@ -5504,7 +5482,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -5512,7 +5490,7 @@
        {
         "who": {
          "lean": {
-          "labor": "<-30"
+          "economy": "<-30"
          }
         },
         "amt": -0.6
@@ -5586,7 +5564,7 @@
      "label": "Double down: someone has to say it",
      "effects": {
       "shift": {
-       "prog": -6
+       "society": -6
       },
       "awareness": 0.08,
       "leader": [
@@ -5607,7 +5585,7 @@
        {
         "who": {
          "lean": {
-          "prog": ">25"
+          "society": ">25"
          }
         },
         "amt": -0.35
@@ -5626,7 +5604,7 @@
      "label": "Claim the clip is a Dillihani deepfake",
      "effects": {
       "shift": {
-       "rev": -6
+       "system": -6
       },
       "awareness": 0.05,
       "followup": {
@@ -5646,7 +5624,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-20"
+          "system": "<-20"
          }
         },
         "amt": 0.15
@@ -5666,8 +5644,8 @@
      "label": "\"Yes. They deserve to run their own schools and roads.\"",
      "effects": {
       "shift": {
-       "nat": 10,
-       "war": 5
+       "nation": 10,
+       "foreign": 5
       },
       "goodwill": [
        {
@@ -5679,7 +5657,7 @@
        {
         "who": {
          "lean": {
-          "nat": ">25"
+          "nation": ">25"
          }
         },
         "amt": 0.2
@@ -5687,7 +5665,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.45
@@ -5706,13 +5684,13 @@
      "label": "\"Never. Alinni is Cranebonistan, full stop.\"",
      "effects": {
       "shift": {
-       "nat": -10
+       "nation": -10
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.4
@@ -5743,7 +5721,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.2
@@ -5775,7 +5753,7 @@
      "label": "Promise: \"Not one new tax, ever!\"",
      "effects": {
       "shift": {
-       "gov": -12
+       "welfare": 12
       },
       "awareness": 0.06,
       "leader": [
@@ -5790,7 +5768,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-20"
+          "welfare": ">-20"
          }
         },
         "amt": 0.35
@@ -5804,7 +5782,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">25"
+          "welfare": "<25"
          }
         },
         "amt": -0.4
@@ -5816,8 +5794,7 @@
      "label": "Promise to tax the rich instead",
      "effects": {
       "shift": {
-       "econ": 8,
-       "labor": -6
+       "economy": -10.4
       },
       "awareness": 0.05,
       "goodwill": [
@@ -5840,7 +5817,7 @@
      "label": "Tell them honestly that schools cost money",
      "effects": {
       "shift": {
-       "gov": 5
+       "welfare": -5
       },
       "leader": [
        {
@@ -5860,7 +5837,7 @@
        {
         "who": {
          "lean": {
-          "gov": ">25"
+          "welfare": "<25"
          }
         },
         "amt": 0.15
@@ -5916,14 +5893,14 @@
      "label": "Defend him: the elites want to bring us down",
      "effects": {
       "shift": {
-       "rev": -6
+       "system": -6
       },
       "awareness": 0.05,
       "leader": [
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.2
@@ -5942,7 +5919,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.15
@@ -5982,7 +5959,7 @@
      "label": "Lead the charge: \"The whole system is rotten!\"",
      "effects": {
       "shift": {
-       "rev": -10
+       "system": -10
       },
       "trust": -5,
       "awareness": 0.08,
@@ -5990,7 +5967,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-10"
+          "system": "<-10"
          }
         },
         "amt": 0.3
@@ -6006,7 +5983,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.4
@@ -6109,7 +6086,7 @@
         {
          "who": {
           "lean": {
-           "rev": "<-15"
+           "system": "<-15"
           }
          },
          "amt": -0.1
@@ -6167,7 +6144,7 @@
      "label": "Invite disappointed Labour voters to join you",
      "effects": {
       "shift": {
-       "labor": -4
+       "economy": -4
       },
       "defect": {
        "from": "clf",
@@ -6178,7 +6155,7 @@
        {
         "who": {
          "lean": {
-          "labor": "<-30"
+          "economy": "<-30"
          }
         },
         "amt": 0.35
@@ -6226,13 +6203,13 @@
      "label": "Apologise to the Alinnian community",
      "effects": {
       "shift": {
-       "nat": 8
+       "nation": 8
       },
       "leader": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.3
@@ -6248,7 +6225,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.3
@@ -6260,15 +6237,15 @@
      "label": "Say the protests prove the Trueants are behind it",
      "effects": {
       "shift": {
-       "nat": -8,
-       "war": -6
+       "nation": -8,
+       "foreign": -6
       },
       "awareness": 0.06,
       "leader": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.3
@@ -6278,7 +6255,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-35"
+          "nation": "<-35"
          }
         },
         "amt": 0.35
@@ -6325,13 +6302,13 @@
      "label": "Insist the ship stays out: rules are rules",
      "effects": {
       "shift": {
-       "immig": 5
+       "nation": -5
       },
       "leader": [
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.2
@@ -6341,7 +6318,7 @@
        {
         "who": {
          "lean": {
-          "immig": ">35"
+          "nation": "<35"
          }
         },
         "amt": 0.2
@@ -6355,7 +6332,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-20"
+          "society": "<-20"
          }
         },
         "amt": -0.4
@@ -6367,7 +6344,7 @@
      "label": "Demand an exception for the children",
      "effects": {
       "shift": {
-       "immig": -6
+       "nation": 6
       },
       "goodwill": [
        {
@@ -6379,7 +6356,7 @@
        {
         "who": {
          "lean": {
-          "immig": ">35"
+          "nation": "<35"
          }
         },
         "amt": -0.3
@@ -6420,7 +6397,7 @@
      "label": "Call the labs part of the conspiracy",
      "effects": {
       "shift": {
-       "rev": -10
+       "system": -10
       },
       "trust": -4,
       "awareness": 0.07,
@@ -6428,7 +6405,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-20"
+          "system": "<-20"
          }
         },
         "amt": 0.3
@@ -6459,7 +6436,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-25"
+          "system": "<-25"
          }
         },
         "amt": 0.2
@@ -6498,7 +6475,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.6
@@ -6526,7 +6503,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.35
@@ -6563,7 +6540,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": -1
@@ -6592,7 +6569,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": -0.6
@@ -6629,7 +6606,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-20"
+          "foreign": "<-20"
          }
         },
         "amt": -0.5
@@ -6692,7 +6669,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": -0.6
@@ -6714,15 +6691,15 @@
      "label": "Say Golba is a friend and there's nothing to hide",
      "effects": {
       "shift": {
-       "nat": 8,
-       "econ": -6
+       "nation": 8,
+       "economy": 6
       },
       "awareness": 0.05,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": -0.45
@@ -6762,7 +6739,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": -0.5
@@ -6820,7 +6797,7 @@
      "label": "Call it fake news and rally your base",
      "effects": {
       "shift": {
-       "rev": -8
+       "system": -8
       },
       "awareness": 0.06,
       "leader": [
@@ -6871,7 +6848,7 @@
      "label": "Blame the nationalist thugs",
      "effects": {
       "shift": {
-       "nat": 4
+       "nation": 4
       },
       "goodwill": [
        {
@@ -6883,7 +6860,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.3
@@ -6908,7 +6885,7 @@
      "label": "Quietly drop the referendum",
      "effects": {
       "shift": {
-       "nat": -8
+       "nation": -8
       },
       "goodwill": [
        {
@@ -6920,7 +6897,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -6945,13 +6922,14 @@
      "label": "Take the credit: \"We said it first\"",
      "effects": {
       "shift": {
-       "immig": 5
+       "nation": -5,
+       "order": -5
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.3
@@ -6970,7 +6948,8 @@
      "label": "Ask for mercy for families with children",
      "effects": {
       "shift": {
-       "immig": -6
+       "nation": 6,
+       "order": 4
       },
       "goodwill": [
        {
@@ -6982,7 +6961,7 @@
        {
         "who": {
          "lean": {
-          "immig": ">35"
+          "nation": "<35"
          }
         },
         "amt": -0.3
@@ -6994,7 +6973,7 @@
      "label": "Attack the government for doing it badly",
      "effects": {
       "shift": {
-       "rev": -4
+       "system": -4
       },
       "goodwill": [
        {
@@ -7028,7 +7007,7 @@
      "label": "Call them traitors",
      "effects": {
       "shift": {
-       "nat": -4
+       "nation": -4
       },
       "goodwill": [
        {
@@ -7050,7 +7029,7 @@
      "label": "Soften it to a smaller tax",
      "effects": {
       "shift": {
-       "econ": -6
+       "economy": 6
       },
       "goodwill": [
        {
@@ -7072,13 +7051,13 @@
      "label": "Propose a tax on leaving with your money",
      "effects": {
       "shift": {
-       "econ": 6
+       "economy": -6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": ">25"
+          "economy": "<25"
          }
         },
         "amt": 0.25
@@ -7105,13 +7084,13 @@
      "label": "Say security has no price",
      "effects": {
       "shift": {
-       "war": -4
+       "foreign": -4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.2
@@ -7119,7 +7098,7 @@
        {
         "who": {
          "lean": {
-          "gov": "<-25"
+          "welfare": ">-25"
          }
         },
         "amt": -0.25
@@ -7131,7 +7110,7 @@
      "label": "Pay for it with a tax on the rich",
      "effects": {
       "shift": {
-       "econ": 6
+       "economy": -6
       },
       "goodwill": [
        {
@@ -7153,13 +7132,13 @@
      "label": "Quietly halve the figure",
      "effects": {
       "shift": {
-       "war": 6
+       "foreign": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": -0.3
@@ -7197,7 +7176,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.2
@@ -7209,14 +7188,14 @@
      "label": "Loudly condemn the Trueant regime",
      "effects": {
       "shift": {
-       "war": -6,
-       "nat": -4
+       "foreign": -6,
+       "nation": -4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -7234,13 +7213,13 @@
      "label": "Defend the talks",
      "effects": {
       "shift": {
-       "war": 4
+       "foreign": 4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": 0.25
@@ -7248,7 +7227,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.35
@@ -7275,7 +7254,7 @@
      "label": "Fight it in court",
      "effects": {
       "shift": {
-       "rev": -4
+       "system": -4
       },
       "money": -3,
       "awareness": 0.06,
@@ -7283,7 +7262,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.3
@@ -7295,14 +7274,14 @@
      "label": "Apologise and settle",
      "effects": {
       "shift": {
-       "rev": 6
+       "system": 6
       },
       "leader": -0.2,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": -0.4
@@ -7314,14 +7293,15 @@
      "label": "Say the courts are corrupt too",
      "effects": {
       "shift": {
-       "rev": -8
+       "system": -8,
+       "order": -4
       },
       "trust": -4,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "rev": "<-20"
+          "system": "<-20"
          }
         },
         "amt": 0.3
@@ -7348,7 +7328,7 @@
      "label": "Stand by every word",
      "effects": {
       "shift": {
-       "gov": 4
+       "welfare": -4
       },
       "goodwill": [
        {
@@ -7370,7 +7350,7 @@
      "label": "Make it \"double by 2040\"",
      "effects": {
       "shift": {
-       "gov": -6
+       "welfare": 6
       },
       "goodwill": [
        {
@@ -7392,14 +7372,14 @@
      "label": "Say the economists work for Golban banks",
      "effects": {
       "shift": {
-       "nat": -5
+       "nation": -5
       },
       "trust": -2,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -7429,7 +7409,7 @@
      "label": "Stand firm",
      "effects": {
       "shift": {
-       "war": -6
+       "foreign": -6
       },
       "crisis": {
        "james": 1
@@ -7438,7 +7418,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.3
@@ -7456,7 +7436,7 @@
      "label": "Reassure Bordon",
      "effects": {
       "shift": {
-       "war": 6
+       "foreign": 6
       },
       "crisis": {
        "james": -1
@@ -7465,7 +7445,7 @@
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": 0.2
@@ -7473,7 +7453,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": -0.2
@@ -7485,7 +7465,7 @@
      "label": "Call the generalissimo a dying tyrant",
      "effects": {
       "shift": {
-       "war": -8
+       "foreign": -8
       },
       "crisis": {
        "james": 1.5
@@ -7495,7 +7475,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -7529,7 +7509,7 @@
      "label": "Back down on the schools part",
      "effects": {
       "shift": {
-       "prog": -6
+       "society": -6
       },
       "goodwill": [
        {
@@ -7541,7 +7521,7 @@
        {
         "who": {
          "lean": {
-          "prog": ">30"
+          "society": ">30"
          }
         },
         "amt": -0.25
@@ -7553,13 +7533,13 @@
      "label": "Call the teachers ideologues",
      "effects": {
       "shift": {
-       "prog": 4
+       "society": 4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "prog": ">30"
+          "society": ">30"
          }
         },
         "amt": 0.25
@@ -7608,7 +7588,7 @@
      "label": "Insist: not one metre",
      "effects": {
       "shift": {
-       "war": -8
+       "foreign": -8
       },
       "world": {
        "border": 4
@@ -7623,7 +7603,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -7635,13 +7615,13 @@
      "label": "Propose a joint border commission",
      "effects": {
       "shift": {
-       "war": 6
+       "foreign": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": 0.2
@@ -7659,7 +7639,7 @@
      "label": "Blame the government's weakness",
      "effects": {
       "shift": {
-       "rev": -5
+       "system": -5
       },
       "goodwill": [
        {
@@ -7701,8 +7681,8 @@
      "label": "Double down",
      "effects": {
       "shift": {
-       "war": -8,
-       "nat": -6
+       "foreign": -8,
+       "nation": -6
       },
       "crisis": {
        "expansion": 1.5
@@ -7711,7 +7691,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": 0.3
@@ -7729,13 +7709,13 @@
      "label": "Say you meant the economy",
      "effects": {
       "shift": {
-       "nat": 6
+       "nation": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": -0.3
@@ -7753,14 +7733,14 @@
      "label": "Blame the media for twisting your words",
      "effects": {
       "shift": {
-       "rev": -6
+       "system": -6
       },
       "trust": -2,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.15
@@ -7798,7 +7778,7 @@
      "label": "Defy Golba",
      "effects": {
       "shift": {
-       "nat": -6
+       "nation": -6
       },
       "crisis": {
        "economy": 1
@@ -7807,7 +7787,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": 0.3
@@ -7825,13 +7805,13 @@
      "label": "Say it's only about consumer choice",
      "effects": {
       "shift": {
-       "nat": 4
+       "nation": 4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": -0.15
@@ -7849,7 +7829,7 @@
      "label": "Propose friendly trade talks",
      "effects": {
       "shift": {
-       "econ": -6
+       "economy": 6
       },
       "goodwill": [
        {
@@ -7861,7 +7841,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.2
@@ -7886,9 +7866,9 @@
      "label": "Demand a crackdown and a ban on the APV",
      "effects": {
       "shift": {
-       "war": -12,
-       "nat": -10,
-       "rev": 6
+       "order": -14,
+       "nation": -10,
+       "foreign": -6
       },
       "stability": {
        "apv": -15
@@ -7899,7 +7879,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.6
@@ -7938,7 +7918,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.3
@@ -7950,8 +7930,8 @@
      "label": "Call for talks with moderate Alinnian leaders",
      "effects": {
       "shift": {
-       "war": 10,
-       "nat": 8
+       "foreign": 10,
+       "nation": 8
       },
       "goodwill": [
        {
@@ -7963,7 +7943,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.6
@@ -7971,7 +7951,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": -0.3
@@ -8005,14 +7985,14 @@
      "label": "Back the curfew",
      "effects": {
       "shift": {
-       "war": -6,
-       "rev": 6
+       "order": -12,
+       "foreign": -4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.3
@@ -8026,7 +8006,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": -0.2
@@ -8038,8 +8018,8 @@
      "label": "Demand that courts review every arrest",
      "effects": {
       "shift": {
-       "rev": -4,
-       "prog": -6
+       "order": 10,
+       "society": -4
       },
       "goodwill": [
        {
@@ -8051,7 +8031,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": 0.25
@@ -8059,7 +8039,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.35
@@ -8071,7 +8051,7 @@
      "label": "Blame the government for letting it happen",
      "effects": {
       "shift": {
-       "rev": -8
+       "system": -8
       },
       "goodwill": [
        {
@@ -8106,13 +8086,13 @@
      "label": "Demand the harshest possible sentence",
      "effects": {
       "shift": {
-       "prog": 10
+       "society": 10
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.4
@@ -8120,7 +8100,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": -0.4
@@ -8138,7 +8118,7 @@
      "label": "Call for a fair trial and a reconciliation commission",
      "effects": {
       "shift": {
-       "nat": 6
+       "nation": 6
       },
       "goodwill": [
        {
@@ -8156,7 +8136,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.3
@@ -8168,7 +8148,7 @@
      "label": "Take credit for pushing the government to act",
      "effects": {
       "shift": {
-       "rev": -2
+       "system": -2
       },
       "awareness": 0.06,
       "goodwill": [
@@ -8181,7 +8161,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-25"
+          "nation": "<-25"
          }
         },
         "amt": 0.1
@@ -8212,14 +8192,14 @@
      "label": "Demand that troops be sent anyway",
      "effects": {
       "shift": {
-       "war": -15
+       "foreign": -15
       },
       "awareness": 0.05,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.6
@@ -8227,7 +8207,7 @@
        {
         "who": {
          "lean": {
-          "war": ">15"
+          "foreign": ">15"
          }
         },
         "amt": -0.6
@@ -8245,13 +8225,13 @@
      "label": "Back supplies-only as the wise choice",
      "effects": {
       "shift": {
-       "war": 6
+       "foreign": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">15"
+          "foreign": ">15"
          }
         },
         "amt": 0.3
@@ -8259,7 +8239,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": -0.4
@@ -8271,8 +8251,8 @@
      "label": "Blame the government for a hollow army",
      "effects": {
       "shift": {
-       "war": -6,
-       "rev": -6
+       "foreign": -6,
+       "system": -6
       },
       "goodwill": [
        {
@@ -8284,7 +8264,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.3
@@ -8322,7 +8302,7 @@
      "label": "Open Erland's towns to them",
      "effects": {
       "shift": {
-       "immig": -8
+       "nation": 8
       },
       "goodwill": [
        {
@@ -8334,7 +8314,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": 0.3
@@ -8342,7 +8322,7 @@
        {
         "who": {
          "lean": {
-          "immig": ">35"
+          "nation": "<35"
          }
         },
         "amt": -0.3
@@ -8354,13 +8334,14 @@
      "label": "Demand camps at the border",
      "effects": {
       "shift": {
-       "immig": 8
+       "nation": -8,
+       "order": -4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "immig": ">30"
+          "nation": "<30"
          }
         },
         "amt": 0.35
@@ -8374,7 +8355,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": -0.3
@@ -8386,8 +8367,8 @@
      "label": "Demand a ban on Bordon grain",
      "effects": {
       "shift": {
-       "econ": 6,
-       "war": -4
+       "economy": -6,
+       "foreign": -4
       },
       "world": {
        "prices": 3
@@ -8402,7 +8383,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-25"
+          "foreign": "<-25"
          }
         },
         "amt": 0.15
@@ -8433,14 +8414,14 @@
      "label": "Call it a national humiliation",
      "effects": {
       "shift": {
-       "nat": -10
+       "nation": -10
       },
       "trust": -4,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.5
@@ -8458,7 +8439,7 @@
      "label": "Call it the least bad outcome",
      "effects": {
       "shift": {
-       "war": 8
+       "foreign": 8
       },
       "goodwill": [
        {
@@ -8470,7 +8451,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.35
@@ -8482,8 +8463,8 @@
      "label": "Demand Cranebonian guards for the remaining mines",
      "effects": {
       "shift": {
-       "war": -8,
-       "labor": 6
+       "foreign": -8,
+       "economy": 6
       },
       "goodwill": [
        {
@@ -8495,7 +8476,7 @@
        {
         "who": {
          "lean": {
-          "war": ">25"
+          "foreign": ">25"
          }
         },
         "amt": -0.3
@@ -8534,14 +8515,14 @@
      "label": "Demand capital controls and nationalised banks",
      "effects": {
       "shift": {
-       "econ": 15,
-       "rev": -6
+       "economy": -15,
+       "system": -6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "econ": ">25"
+          "economy": "<25"
          }
         },
         "amt": 0.5
@@ -8565,8 +8546,8 @@
      "label": "Demand spending cuts to calm the markets",
      "effects": {
       "shift": {
-       "gov": -12,
-       "econ": -8
+       "welfare": 12,
+       "economy": 8
       },
       "goodwill": [
        {
@@ -8594,7 +8575,7 @@
      "label": "Blame foreign speculators",
      "effects": {
       "shift": {
-       "nat": -8
+       "nation": -8
       },
       "trust": -3,
       "blame": "foreign speculators",
@@ -8602,7 +8583,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.4
@@ -8643,8 +8624,8 @@
      "label": "Demand the state take over the factories",
      "effects": {
       "shift": {
-       "econ": 12,
-       "gov": 8
+       "economy": -12,
+       "welfare": -8
       },
       "goodwill": [
        {
@@ -8667,7 +8648,7 @@
      "label": "Demand tax cuts to save businesses",
      "effects": {
       "shift": {
-       "gov": -10
+       "welfare": 10
       },
       "goodwill": [
        {
@@ -8689,8 +8670,7 @@
      "label": "Demand jobs for Cranebonians first",
      "effects": {
       "shift": {
-       "immig": 10,
-       "nat": -6
+       "nation": -13
       },
       "blame": "immigrants",
       "crisis": {},
@@ -8711,7 +8691,7 @@
        {
         "who": {
          "lean": {
-          "prog": "<-25"
+          "society": "<-25"
          }
         },
         "amt": -0.3
@@ -8736,7 +8716,7 @@
      "label": "Demand price controls on food",
      "effects": {
       "shift": {
-       "econ": 10
+       "economy": -10
       },
       "goodwill": [
        {
@@ -8758,8 +8738,7 @@
      "label": "Demand the army restore order",
      "effects": {
       "shift": {
-       "rev": 10,
-       "war": -4
+       "order": -14
       },
       "goodwill": [
        {
@@ -8771,7 +8750,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": -0.4
@@ -8789,14 +8768,15 @@
      "label": "March with the hungry",
      "effects": {
       "shift": {
-       "rev": -10
+       "system": -10,
+       "order": 4
       },
       "awareness": 0.07,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.45
@@ -8828,7 +8808,7 @@
      "label": "Condemn it clearly and visit the families",
      "effects": {
       "shift": {
-       "nat": 6
+       "nation": 6
       },
       "goodwill": [
        {
@@ -8846,7 +8826,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": -0.3
@@ -8858,13 +8838,13 @@
      "label": "Condemn it, but say the anger is understandable",
      "effects": {
       "shift": {
-       "nat": -4
+       "nation": -4
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-35"
+          "nation": "<-35"
          }
         },
         "amt": 0.3
@@ -8888,14 +8868,14 @@
      "label": "Suggest foreign provocateurs did it",
      "effects": {
       "shift": {
-       "rev": -4
+       "system": -4
       },
       "trust": -3,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.15
@@ -8931,8 +8911,8 @@
      "label": "Demand the Black Wheat be declared terrorists",
      "effects": {
       "shift": {
-       "rev": 4,
-       "nat": 4
+       "order": -6,
+       "nation": 4
       },
       "goodwill": [
        {
@@ -8950,7 +8930,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": -0.35
@@ -8965,7 +8945,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.2
@@ -9038,7 +9018,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": -0.15
@@ -9065,15 +9045,16 @@
      "label": "Accuse the police of targeting patriots",
      "effects": {
       "shift": {
-       "nat": -8,
-       "rev": -6
+       "nation": -8,
+       "system": -6,
+       "order": 5
       },
       "trust": -4,
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": 0.4
@@ -9104,14 +9085,14 @@
      "label": "Join the chorus",
      "effects": {
       "shift": {
-       "war": -12,
-       "nat": -10
+       "foreign": -12,
+       "nation": -10
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.5
@@ -9119,7 +9100,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-20"
+          "foreign": "<-20"
          }
         },
         "amt": 0.4
@@ -9127,7 +9108,7 @@
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": -0.5
@@ -9145,13 +9126,13 @@
      "label": "Warn against a war nobody can win",
      "effects": {
       "shift": {
-       "war": 12
+       "foreign": 12
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": 0.5
@@ -9159,7 +9140,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.5
@@ -9177,7 +9158,7 @@
      "label": "Say the government is using war to hide its failures",
      "effects": {
       "shift": {
-       "rev": -6
+       "system": -6
       },
       "goodwill": [
        {
@@ -9195,7 +9176,7 @@
        {
         "who": {
          "lean": {
-          "rev": "<-15"
+          "system": "<-15"
          }
         },
         "amt": 0.25
@@ -9227,7 +9208,7 @@
      "label": "Demand retaliation",
      "effects": {
       "shift": {
-       "war": -10
+       "foreign": -10
       },
       "world": {
        "border": 6
@@ -9236,7 +9217,7 @@
        {
         "who": {
          "lean": {
-          "war": "<-20"
+          "foreign": "<-20"
          }
         },
         "amt": 0.5
@@ -9250,7 +9231,7 @@
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": -0.5
@@ -9262,13 +9243,13 @@
      "label": "Demand a ceasefire and talks",
      "effects": {
       "shift": {
-       "war": 10
+       "foreign": 10
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": 0.4
@@ -9276,7 +9257,7 @@
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": -0.6
@@ -9320,13 +9301,13 @@
      "label": "Say the government won nothing",
      "effects": {
       "shift": {
-       "nat": -6
+       "nation": -6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-30"
+          "nation": "<-30"
          }
         },
         "amt": 0.3
@@ -9344,13 +9325,13 @@
      "label": "Welcome the peace",
      "effects": {
       "shift": {
-       "war": 6
+       "foreign": 6
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "war": ">20"
+          "foreign": ">20"
          }
         },
         "amt": 0.3
@@ -9368,14 +9349,14 @@
      "label": "Say next time it should be finished properly",
      "effects": {
       "shift": {
-       "war": -10,
-       "nat": -8
+       "foreign": -10,
+       "nation": -8
       },
       "goodwill": [
        {
         "who": {
          "lean": {
-          "nat": "<-40"
+          "nation": "<-40"
          }
         },
         "amt": 0.4
@@ -9389,7 +9370,7 @@
        {
         "who": {
          "lean": {
-          "war": ">15"
+          "foreign": ">15"
          }
         },
         "amt": -0.4
@@ -9418,7 +9399,7 @@
    "effects": {
     "money": 5,
     "shift": {
-     "labor": 6
+     "economy": 6
     }
    }
   },
@@ -9431,7 +9412,7 @@
    "effects": {
     "money": 3,
     "shift": {
-     "labor": -6
+     "economy": -6
     }
    }
   },
@@ -9514,11 +9495,11 @@
    "quote": "Let the people of Alinni decide how they want to be governed.",
    "effects": {
     "shift": {
-     "nat": 12,
-     "rev": -4
+     "nation": 12,
+     "system": -4
     },
     "salience": {
-     "nat": 0.4
+     "nation": 0.4
     },
     "world": {
      "border": 2
@@ -9537,7 +9518,7 @@
      {
       "who": {
        "lean": {
-        "nat": ">25"
+        "nation": ">25"
        }
       },
       "amt": 0.3
@@ -9545,7 +9526,7 @@
      {
       "who": {
        "lean": {
-        "nat": "<-30"
+        "nation": "<-30"
        }
       },
       "amt": -0.5
@@ -9579,11 +9560,11 @@
    "quote": "If you came here illegally, you will leave legally.",
    "effects": {
     "shift": {
-     "immig": 14,
-     "nat": -6
+     "nation": -18,
+     "order": -6
     },
     "salience": {
-     "immig": 0.4
+     "nation": 0.4
     },
     "world": {
      "migration": -3
@@ -9596,7 +9577,7 @@
      {
       "who": {
        "lean": {
-        "immig": ">30"
+        "nation": "<30"
        }
       },
       "amt": 0.5
@@ -9617,7 +9598,7 @@
      {
       "who": {
        "lean": {
-        "prog": "<-30"
+        "society": "<-30"
        }
       },
       "amt": -0.3
@@ -9641,11 +9622,10 @@
    "quote": "Five hundred families own half of Cranebonistan. They can spare a little of it.",
    "effects": {
     "shift": {
-     "econ": 12,
-     "labor": -8
+     "economy": -15.6
     },
     "salience": {
-     "econ": 0.3
+     "economy": 0.3
     },
     "goodwill": [
      {
@@ -9663,7 +9643,7 @@
      {
       "who": {
        "lean": {
-        "econ": ">25"
+        "economy": "<25"
        }
       },
       "amt": 0.3
@@ -9690,11 +9670,11 @@
    "quote": "A country that cannot defend itself is a country waiting to be divided.",
    "effects": {
     "shift": {
-     "war": -14,
-     "gov": 5
+     "foreign": -14,
+     "welfare": -5
     },
     "salience": {
-     "war": 0.3
+     "foreign": 0.3
     },
     "world": {
      "border": 3
@@ -9707,7 +9687,7 @@
      {
       "who": {
        "lean": {
-        "war": "<-25"
+        "foreign": "<-25"
        }
       },
       "amt": 0.5
@@ -9715,7 +9695,7 @@
      {
       "who": {
        "lean": {
-        "war": ">25"
+        "foreign": ">25"
        }
       },
       "amt": -0.4
@@ -9746,8 +9726,8 @@
    "quote": "Peace is made with the next government, not the current one.",
    "effects": {
     "shift": {
-     "war": 12,
-     "nat": 6
+     "foreign": 12,
+     "nation": 6
     },
     "world": {
      "border": -3
@@ -9760,7 +9740,7 @@
      {
       "who": {
        "lean": {
-        "war": ">25"
+        "foreign": ">25"
        }
       },
       "amt": 0.4
@@ -9774,7 +9754,7 @@
      {
       "who": {
        "lean": {
-        "nat": "<-30"
+        "nation": "<-30"
        }
       },
       "amt": -0.5
@@ -9798,7 +9778,7 @@
    "quote": "Here are the names. Let them sue me.",
    "effects": {
     "shift": {
-     "rev": -12
+     "system": -12
     },
     "trust": -5,
     "stability": {
@@ -9809,7 +9789,7 @@
      {
       "who": {
        "lean": {
-        "rev": "<-15"
+        "system": "<-15"
        }
       },
       "amt": 0.5
@@ -9848,8 +9828,8 @@
    "quote": "They built this country. They should not have to choose between heating and eating.",
    "effects": {
     "shift": {
-     "gov": 12,
-     "econ": 6
+     "welfare": -12,
+     "economy": -6
     },
     "goodwill": [
      {
@@ -9873,7 +9853,7 @@
      {
       "who": {
        "lean": {
-        "gov": "<-25"
+        "welfare": ">-25"
        }
       },
       "amt": -0.4
@@ -9897,7 +9877,7 @@
    "quote": "James trusted us. A promise to a friend should be written down.",
    "effects": {
     "shift": {
-     "war": -8
+     "foreign": -8
     },
     "world": {
      "border": 3
@@ -9909,7 +9889,7 @@
      {
       "who": {
        "lean": {
-        "war": "<-25"
+        "foreign": "<-25"
        }
       },
       "amt": 0.35
@@ -9917,7 +9897,7 @@
      {
       "who": {
        "lean": {
-        "war": ">25"
+        "foreign": ">25"
        }
       },
       "amt": -0.25
@@ -9941,16 +9921,16 @@
    "quote": "A country that forgets its grandparents' values will not have grandchildren.",
    "effects": {
     "shift": {
-     "prog": 14
+     "society": 14
     },
     "salience": {
-     "prog": 0.3
+     "society": 0.3
     },
     "goodwill": [
      {
       "who": {
        "lean": {
-        "prog": ">30"
+        "society": ">30"
        }
       },
       "amt": 0.5
@@ -9970,7 +9950,7 @@
      {
       "who": {
        "lean": {
-        "prog": "<-25"
+        "society": "<-25"
        }
       },
       "amt": -0.55
@@ -10003,8 +9983,8 @@
    "quote": "The land the herds walk on belongs to the people who walk with them.",
    "effects": {
     "shift": {
-     "gov": 6,
-     "nat": -4
+     "welfare": -6,
+     "nation": -4
     },
     "world": {
      "border": 4
@@ -10042,13 +10022,12 @@
    "quote": "Our grandfathers' maps were bigger than ours. Maybe our grandchildren's will be too.",
    "effects": {
     "shift": {
-     "nat": -14,
-     "war": -10,
-     "rev": 6
+     "nation": -14,
+     "foreign": -10
     },
     "salience": {
-     "nat": 0.3,
-     "war": 0.3
+     "nation": 0.3,
+     "foreign": 0.3
     },
     "world": {
      "border": 6
@@ -10062,7 +10041,7 @@
      {
       "who": {
        "lean": {
-        "nat": "<-40"
+        "nation": "<-40"
        }
       },
       "amt": 0.6
@@ -10070,7 +10049,7 @@
      {
       "who": {
        "lean": {
-        "war": ">15"
+        "foreign": ">15"
        }
       },
       "amt": -0.5
@@ -10109,8 +10088,8 @@
    "quote": "Every Golban phone you buy pays a Golban salary. Buy Cranebonian.",
    "effects": {
     "shift": {
-     "nat": -8,
-     "econ": 8
+     "nation": -8,
+     "economy": -8
     },
     "world": {
      "prices": 2
@@ -10122,7 +10101,7 @@
      {
       "who": {
        "lean": {
-        "nat": "<-25"
+        "nation": "<-25"
        }
       },
       "amt": 0.35
@@ -10164,8 +10143,8 @@
      "border": 15
     },
     "permSal": {
-     "war": 0.3,
-     "nat": 0.4
+     "foreign": 0.3,
+     "nation": 0.4
     },
     "trust": -6,
     "stability": {
@@ -10198,7 +10177,7 @@
      "jobs": -4
     },
     "permSal": {
-     "war": 0.5
+     "foreign": 0.5
     },
     "trust": -3,
     "stability": {
@@ -10231,8 +10210,7 @@
      "migration": -10
     },
     "permSal": {
-     "econ": 0.5,
-     "labor": 0.3
+     "economy": 0.5
     },
     "trust": -10,
     "stability": {
@@ -10264,8 +10242,7 @@
      "unrest": 18
     },
     "permSal": {
-     "nat": 0.4,
-     "immig": 0.3
+     "nation": 0.4
     },
     "trust": -8,
     "stability": {
@@ -10297,8 +10274,8 @@
      "prices": 5
     },
     "permSal": {
-     "war": 0.5,
-     "nat": 0.3
+     "foreign": 0.5,
+     "nation": 0.3
     },
     "trust": 4,
     "stability": {
@@ -10464,7 +10441,7 @@
     {
      "who": {
       "lean": {
-       "rev": "<-25"
+       "system": "<-25"
       }
      },
      "amt": -0.1
@@ -10493,7 +10470,7 @@
     {
      "who": {
       "lean": {
-       "rev": "<-15"
+       "system": "<-15"
       }
      },
      "amt": 0.08
@@ -10564,7 +10541,7 @@
     {
      "who": {
       "lean": {
-       "rev": "<-15"
+       "system": "<-15"
       }
      },
      "amt": 0.14
@@ -10697,7 +10674,7 @@
      {
       "who": {
        "lean": {
-        "rev": ">10"
+        "system": ">10"
        }
       },
       "amt": -0.2

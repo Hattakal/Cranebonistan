@@ -28,7 +28,7 @@ func _ready() -> void:
 	if args.has("shot"):
 		await _shot(args)
 		return
-	S = _load() if FileAccess.file_exists(SAVE_PATH) else G.new_game({"partyName": "People's Awakening", "leaderName": "Dorin Vask", "manifesto": {"econ": 0, "immig": 4, "rev": 0, "gov": 3}})
+	S = _load() if FileAccess.file_exists(SAVE_PATH) else G.new_game({"partyName": "People's Awakening", "leaderName": "Dorin Vask", "manifesto": {"nation": 2, "economy": 1, "society": 2, "foreign": 3, "welfare": 1, "system": 1, "order": 2}})
 	render()
 	_auto_open()
 
@@ -843,7 +843,7 @@ func _load() -> Dictionary:
 
 # ---------- Screenshots for checking the look (godot ... -- --shot=path --weeks=N) ----------
 func _shot(args: Dictionary) -> void:
-	S = G.new_game({"seed": 42, "partyName": "People's Awakening", "leaderName": "Dorin Vask", "manifesto": {"econ": 0, "immig": 4, "rev": 0, "gov": 3}})
+	S = G.new_game({"seed": 42, "partyName": "People's Awakening", "leaderName": "Dorin Vask", "manifesto": {"nation": 2, "economy": 1, "society": 2, "foreign": 3, "welfare": 1, "system": 1, "order": 2}})
 	var weeks = int(args.get("weeks", "20"))
 	var guard = 0
 	while S.week < weeks and guard < 500:

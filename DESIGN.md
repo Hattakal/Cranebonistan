@@ -74,9 +74,21 @@ A pop's vote is a score for each party built from: ideological distance (weighte
 
 ### 3.3 Political axes and the manifesto — Built (revised)
 
-Eight axes, each with five stances:
+Seven axes, each with five stances (*revised November 2026*):
 
-Nationalism ↔ Multiculturalism · Laissez-faire ↔ Central planning · Progressive ↔ Traditionalist · Hawkish ↔ Doveish · Small ↔ Big government · Worker rights ↔ Corporate support · Pro-immigration ↔ Restricted immigration · Revolutionary ↔ Reactionary.
+| Axis | Sides |
+|---|---|
+| Economy | State ↔ Market |
+| Welfare | Welfare ↔ Austerity |
+| Nation | Nationalist ↔ Multicultural |
+| Society | Progressive ↔ Traditional |
+| Order | Authority ↔ Liberty |
+| Foreign | Hawk ↔ Dove |
+| System | Radical ↔ Establishment |
+
+*History:* the first version had eight axes: Nationalism ↔ Multiculturalism · Laissez-faire ↔ Central planning · Progressive ↔ Traditionalist · Hawkish ↔ Doveish · Small ↔ Big government · Worker rights ↔ Corporate support · Pro-immigration ↔ Restricted immigration · Revolutionary ↔ Reactionary. Three economic axes moved together, national identity and immigration overlapped, "Reactionary" was confusing (it was used for both the old guard and for crackdowns), and there was nothing for authoritarianism. *Decided:* economy and labour merge (the market side implies business, the state side helps workers); nationalism and immigration share one axis even though they can differ; welfare stays separate because "market economy, but your pension is sacred" is a classic populist combination; Order is new; System is about changing the system and its institutions. Names are short words rather than accurate phrases. Religion is left out on purpose.
+
+**Combined labels:** the game names a set of positions the way a commentator would ("National populist", "Left populist", "Liberal", "National conservative"). Labels come from how voters *see* a party, and they only describe; no label is a goal.
 
 The player writes a manifesto (one stance per axis) at the start. After that, every statement moves how voters **perceive** the party.
 
