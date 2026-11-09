@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 12
+const SAVE_VERSION := 13
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -53,6 +53,7 @@ var BUDGET_KEYS: Array = []
 var _events_by_id = {}
 var TOPICS: Array = []        # debate topics (data/debates.json)
 var LINES: Dictionary = {}    # what the leader can say in them (data/debate_lines.json)
+var ISSUES: Array = []        # minor issues: local stories (data/issues.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -79,6 +80,7 @@ func load_content(path: String) -> void:
 	for e in EVENTS: _events_by_id[e.id] = e
 	TOPICS = JSON.parse_string(FileAccess.get_file_as_string("res://data/debates.json")).TOPICS
 	LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/debate_lines.json"))
+	ISSUES = JSON.parse_string(FileAccess.get_file_as_string("res://data/issues.json")).ISSUES
 	_event_axis = {}
 	# Godot rules: the national debate is the main game, events are rarer
 	C.actionsPerMonth = 3
@@ -272,7 +274,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {},
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -311,6 +313,10 @@ func new_game(opts := {}) -> Dictionary:
 		var t: Dictionary = pick(s, general)
 		general.erase(t)
 		open_debate(s, t.id, t.axis, t.title, t.text, "news", 28.0 + rand(s) * 20, (rand(s) - 0.5) * 40)
+	for i in 2:
+		var it: Dictionary = pick(s, ISSUES.filter(func(x): return not s.issues.any(func(y): return y.id == x.id)))
+		s.issues.append({"id": it.id, "week": s.week})
+		s.issueCooldown[it.id] = s.week
 	s.lastSupport = summarize(s, s.pops).support
 	run_hooks(s)
 	return s
@@ -848,6 +854,7 @@ func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 func monthly_update(s: Dictionary) -> void:
 	for ax in s.salMod: s.salMod[ax] *= C.salienceDecay
 	debates_monthly(s)
+	issues_monthly(s)
 	if rand(s) < C.newsWaveChance:
 		var ax: Dictionary = pick(s, AXES)
 		s.salMod[ax.id] = clampf2(float(s.salMod.get(ax.id, 0)) + C.newsWaveSize, -0.5, 1.5)
@@ -1569,6 +1576,7 @@ func is_major(d: Dictionary) -> bool:
 func debate_lines(d: Dictionary, side: String) -> Array:
 	var t = LINES.TOPIC_LINES.get(d.get("topic", d.id))
 	if t: return t[side]
+	if d.id.begins_with("issue:"): return issue_by_id(d.id.trim_prefix("issue:")).lines[side]
 	var pid: String = d.id.trim_prefix("ini:")
 	if d.id.begins_with("ini:") and LINES.PROPOSAL_LINES.has(pid):
 		var ini = by_id(INITIATIVES, pid)
@@ -1641,19 +1649,76 @@ func act_claim(s: Dictionary, axis: String, side: String) -> Dictionary:
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
+## Minor issues: local stories that sit in the news for a few months.
+func issues_monthly(s: Dictionary) -> void:
+	s.issues = s.issues.filter(func(x): return s.week - int(x.week) < 5 * WEEKS_PER_MONTH)
+	if s.issues.size() >= 5 or rand(s) > 0.5: return
+	var pool = []
+	var weights = []
+	for it in ISSUES:
+		if s.issues.any(func(x): return x.id == it.id): continue
+		if debate_by_id(s, "issue:" + it.id) != null: continue
+		if s.week - int(s.issueCooldown.get(it.id, -9999)) < 18 * WEEKS_PER_MONTH: continue
+		var w = 1.0
+		for k in it.get("when", {}):
+			var cond: String = it.when[k]
+			var n = float(cond.substr(1))
+			if (s.world[k] < n) if cond[0] == "<" else (s.world[k] > n): w *= 3
+		pool.append(it); weights.append(w)
+	if pool.is_empty(): return
+	var total = 0.0
+	for w in weights: total += w
+	var r = rand(s) * total
+	for i in pool.size():
+		r -= weights[i]
+		if r <= 0 or i == pool.size() - 1:
+			s.issues.append({"id": pool[i].id, "week": s.week})
+			s.issueCooldown[pool[i].id] = s.week
+			push_news(s, {"kind": "issue", "quiet": true, "title": "In the news: " + pool[i].title, "text": pool[i].text})
+			return
+
+func issue_by_id(id: String) -> Dictionary:
+	return by_id(ISSUES, id)
+
+## How bad an indicator is for the country, 0 (fine) to 1 (dire).
+const METRIC_TOPIC := {"jobs": "where_jobs", "prices": "cost_of_living", "migration": "how_many", "border": "border_safe", "unrest": "safe_streets"}
+
+func metric_badness(s: Dictionary, ind: String) -> float:
+	var w = s.world
+	var b = {"jobs": (60 - w.jobs) / 40.0, "prices": (w.prices - 40) / 40.0, "migration": (w.migration - 45) / 40.0,
+		"border": (w.border - 35) / 45.0, "unrest": (w.unrest - 35) / 45.0}
+	return clampf2(b[ind], 0, 1)
+
 ## Things the player can put up for debate this month.
 func raise_options(s: Dictionary) -> Array:
 	var out = []
+	for x in s.issues:
+		var it = issue_by_id(x.id)
+		var fresh = s.week - int(x.week) < WEEKS_PER_MONTH * 2
+		out.append({"kind": "issue", "ref": it.id, "title": it.title, "text": it.text, "axis": it.axis, "side": "",
+			"region": it.region, "fresh": fresh, "chance": 0.75 if fresh else 0.5})
+	for ind in METRIC_TOPIC:
+		var t = by_id(TOPICS, METRIC_TOPIC[ind])
+		if debate_by_id(s, t.id) != null: continue
+		var bad = metric_badness(s, ind)
+		if bad < 0.25: continue
+		out.append({"kind": "metric", "ref": t.id, "metric": ind, "title": t.title, "text": t.text, "axis": t.axis, "side": "", "chance": 0.15 + 0.6 * bad})
+	var gov = null
+	for p in s.parties:
+		if p.ruling: gov = p
+	if gov:
+		var axes: Array = ssort(AXES.duplicate(), func(x, y): return absf(gov.manifesto[y.id]) - absf(gov.manifesto[x.id])).slice(0, 3)
+		for ax in axes:
+			if debate_by_id(s, "gov:" + ax.id) != null: continue
+			out.append({"kind": "gov", "ref": ax.id, "title": "The government's record on %s" % ax.issue.to_lower(),
+				"text": "%s is %s on %s. Hold them to it, or hold it against them." % [gov.short, stance_name(ax.id, stance_of(gov.manifesto[ax.id])).to_lower(), ax.issue.to_lower()],
+				"axis": ax.id, "side": "", "chance": 0.4})
 	for id in s.agenda.offered:
 		var ini = by_id(INITIATIVES, id)
 		var ax = event_axis(ini)
 		if ax == "": continue
 		out.append({"kind": "proposal", "ref": id, "title": ini.title, "text": ini.text, "axis": ax,
 			"side": "L" if float(ini.effects.shift[ax]) < 0 else "R", "chance": 0.55})
-	for t in TOPICS:
-		if t.has("trigger") or debate_by_id(s, t.id) != null: continue
-		if s.week - int(s.debateCooldown.get(t.id, -9999)) < 4 * WEEKS_PER_MONTH: continue
-		out.append({"kind": "topic", "ref": t.id, "title": t.title, "text": t.text, "axis": t.axis, "side": "", "chance": 0.45})
 	return out
 
 func raise_chance(s: Dictionary, opt: Dictionary, line: Dictionary) -> float:
@@ -1661,7 +1726,8 @@ func raise_chance(s: Dictionary, opt: Dictionary, line: Dictionary) -> float:
 	return clampf2(opt.chance * (0.6 + 0.5 * debate_reach(s)) * tone_k, 0.1, 0.95)
 
 func raise_lines(opt: Dictionary, side: String) -> Array:
-	if opt.kind == "topic": return LINES.TOPIC_LINES[opt.ref][side]
+	if opt.kind == "topic" or opt.kind == "metric": return LINES.TOPIC_LINES[opt.ref][side]
+	if opt.kind == "issue": return issue_by_id(opt.ref).lines[side]
 	if opt.kind == "proposal" and LINES.PROPOSAL_LINES.has(opt.ref): return LINES.PROPOSAL_LINES[opt.ref]
 	return LINES.AXIS_LINES[opt.axis][side]
 
@@ -1689,9 +1755,10 @@ func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) ->
 	if caught:
 		var heat = 30 + 15 * debate_reach(s) + (15 if delivery.outcome == "viral" else 0)
 		var lean = sign * (35 if delivery.outcome != "gaffe" else -10)
-		var id = ("ini:" + opt.ref) if opt.kind == "proposal" else opt.ref
+		var id = {"proposal": "ini:", "issue": "issue:", "gov": "gov:"}.get(opt.kind, "") + opt.ref
 		var d = open_debate(s, id, opt.axis, opt.title, opt.text, "player", heat, lean)
-		if opt.kind == "topic": d.topic = opt.ref
+		d.topic = opt.ref if opt.kind in ["topic", "metric"] else id
+		if opt.kind == "issue": s.issues = s.issues.filter(func(x): return x.id != opt.ref)
 		_note_move(d, "player", "start", side, s.week)
 		if opt.kind == "proposal": _launch_proposal(s, opt.ref)
 		text = "It caught on. Everyone is arguing about %s, and you started it." % opt.title.to_lower()

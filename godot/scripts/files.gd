@@ -541,14 +541,18 @@ func _debates() -> void:
 	if S.agenda.done:
 		_p("You have tried to start this month's debate. New ideas next month.", null, Look.INK, 14)
 	else:
-		_p("Put something in front of the country. It may catch on, or nobody may pick it up: your reach and your words decide. Proposals have consequences that come back in the months ahead.", null, Look.MUTED, 13)
-		var ig = GridContainer.new()
-		ig.columns = 3 if size.x > 1100 else 1
-		ig.add_theme_constant_override("h_separation", 14)
-		ig.add_theme_constant_override("v_separation", 14)
-		_add(ig)
-		for opt in G.raise_options(S):
-			_raise_card(opt, ig, blocked or left <= 0)
+		_p("Put something in front of the country. It may catch on, or nobody may pick it up: your reach and your words decide. A story already in the headlines catches most easily. Proposals have consequences that come back in the months ahead.", null, Look.MUTED, 13)
+		var opts: Array = G.raise_options(S)
+		for grp in [["issue", "In the news"], ["metric", "The state of the country"], ["gov", "The government's record"], ["proposal", "Proposals"]]:
+			var these = opts.filter(func(o): return o.kind == grp[0])
+			if these.is_empty(): continue
+			_eyebrow(grp[1])
+			var ig = GridContainer.new()
+			ig.columns = 3 if size.x > 1100 else 1
+			ig.add_theme_constant_override("h_separation", 14)
+			ig.add_theme_constant_override("v_separation", 14)
+			_add(ig)
+			for opt in these: _raise_card(opt, ig, blocked or left <= 0)
 	# settled arguments
 	if S.debatesPast.size():
 		_rule()
@@ -674,7 +678,9 @@ func _raise_card(opt: Dictionary, to: Control, blocked: bool) -> void:
 	if blocked: card.modulate.a = 0.55
 	var v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
-	v.add_child(Look.caps(("Proposal · " if opt.kind == "proposal" else "Topic · ") + ax.issue, 10, Look.MUTED, 1))
+	var kind_word = {"proposal": "Proposal", "issue": ("In the headlines" if opt.get("fresh", false) else "Fading from the news"), "metric": "The state of the country", "gov": "The government's record"}.get(opt.kind, "Topic")
+	var where = (" · " + Game.by_id(G.REGIONS, opt.region).name) if opt.has("region") else ""
+	v.add_child(Look.caps("%s · %s%s · about %d%% to catch on" % [kind_word, ax.issue, where, Game.jround(opt.chance * 100)], 10, Look.RED if opt.get("fresh", false) else Look.MUTED, 1))
 	v.add_child(Look.label(opt.title, "type", 17, Color("1f2a44"), true))
 	var tx = Look.label(opt.text, "body", 13, Look.MUTED, true)
 	tx.max_lines_visible = 3
@@ -718,9 +724,83 @@ const IND_EFFECT := {
 	"unrest": "An angry public makes the political system itself the issue. Outsiders feed on it.",
 }
 
+## The country's problems, big and small. Any of them can be raised as a debate.
+func _country_issues() -> void:
+	var blocked: bool = S.queue.size() > 0 or S.result != null or S.agenda.done or S.actionsLeft <= 0
+	var opts: Array = G.raise_options(S)
+	var two = HBoxContainer.new()
+	two.add_theme_constant_override("separation", 12)
+	_add(two)
+	# major issues
+	var mc = _card(two)
+	mc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mc.get_parent().size_flags_stretch_ratio = 1.0
+	_eyebrow("Major issues", mc)
+	var majors = []
+	if S.crisis:
+		var cr = Game.by_id(G.CRISES, S.crisis.id)
+		majors.append([cr.name, cr.blurb, null])
+	for ind in G.METRIC_TOPIC:
+		var bad: float = G.metric_badness(S, ind)
+		if bad < 0.25: continue
+		var lbl = Game.by_id(G.INDICATORS, ind).label
+		var opt = null
+		for o in opts:
+			if o.kind == "metric" and o.metric == ind: opt = o
+		majors.append(["%s: %s" % [lbl, G.indicator_word(ind, w_of(ind)).to_lower()], IND_EFFECT.get(ind, ""), opt, bad])
+	if majors.is_empty(): _p("Nothing is badly wrong. For now.", mc, Look.INK, 14)
+	for m in majors:
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var tv = VBoxContainer.new()
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.add_theme_constant_override("separation", 0)
+		tv.add_child(Look.label(m[0], "body_bold", 15, Look.RED if m.size() > 3 and m[3] > 0.6 else Look.INK, true))
+		tv.add_child(Look.label(m[1], "body", 12, Look.MUTED, true))
+		row.add_child(tv)
+		if m[2] != null:
+			var opt: Dictionary = m[2]
+			var b = _btn("Raise it", func(): raise.emit(opt), blocked)
+			b.tooltip_text = "Start a national debate about it. About %d%% chance it catches on." % Game.jround(opt.chance * 100)
+			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			row.add_child(b)
+		elif m.size() > 3:
+			var t = Look.caps("Being debated", 10, Look.RED, 1)
+			t.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			row.add_child(t)
+		mc.add_child(row)
+	# minor issues
+	var nc = _card(two)
+	nc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_eyebrow("Smaller issues in the news", nc)
+	var minors = opts.filter(func(o): return o.kind == "issue")
+	if minors.is_empty(): _p("A quiet month in the local papers.", nc, Look.INK, 14)
+	for opt in minors:
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var tv = VBoxContainer.new()
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.add_theme_constant_override("separation", 0)
+		tv.add_child(Look.caps("%s · %s" % [Game.by_id(G.REGIONS, opt.region).name, "in the headlines" if opt.fresh else "fading"], 10, Look.RED if opt.fresh else Look.MUTED, 1))
+		tv.add_child(Look.label(opt.title, "body_bold", 15, Look.INK, true))
+		var tx = Look.label(opt.text, "body", 12, Look.MUTED, true)
+		tv.add_child(tx)
+		row.add_child(tv)
+		var b = _btn("Raise it", func(): raise.emit(opt), blocked)
+		b.tooltip_text = "Make it a national debate. About %d%% chance it catches on." % Game.jround(opt.chance * 100)
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(b)
+		nc.add_child(row)
+	if blocked and not S.agenda.done and S.actionsLeft > 0 and S.queue.size(): _p("Finish the decision on the board first.", null, Look.RED, 13)
+	elif S.agenda.done: _p("You've already tried to start a debate this month.", null, Look.MUTED, 13)
+
+func w_of(ind: String) -> float:
+	return S.world[ind]
+
 func _country() -> void:
 	var w: Dictionary = S.world
 	var hist: Array = S.get("worldHistory", [])
+	_country_issues()
 	_eyebrow("The state of the nation")
 	var g = GridContainer.new()
 	g.columns = 5 if size.x > 1200 else 2
