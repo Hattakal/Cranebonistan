@@ -126,6 +126,7 @@ function buildMap() {
     t.textContent = c.name;
   }
   for (const f of FOREIGN) {
+    if (f.small) continue; // tiny countries get a name plate instead (below)
     const lines = f.name, small = f.small;
     const x = Math.max(140, Math.min(W - 140, f.label[0]));
     const y0 = small ? f.label[1] + 64 : f.label[1] - (lines.length - 1) * 31 * (f.label[2] || 1) + 16;
@@ -141,6 +142,20 @@ function buildMap() {
     t.textContent = r.name;
     svgEl("text", { x: r.label[0], y: r.label[1] + 44 * k, "text-anchor": "middle", class: "label-share", "data-share": r.id, style: `font-size:${Math.round(34 * Math.max(k, 0.75))}px` }, svg);
   }
+  // Tiny countries keep their size (it tells the story) but get a name plate to click.
+  for (const f of FOREIGN.filter((x) => x.small)) {
+    const [cx, cy] = f.label, px = cx + 190, py = cy + 85, w = f.name.join(" ").length * 30 + 56, h = 54;
+    const g = svgEl("g", { class: "plate", tabindex: 0, role: "button", "aria-label": f.name.join(" "), "data-plate": f.id }, svg);
+    svgEl("path", { d: `M${cx} ${cy} L${px} ${py - h / 2}`, class: "plate-line" }, g);
+    svgEl("circle", { cx, cy, r: 7, class: "plate-pin" }, g);
+    svgEl("rect", { x: px - w / 2, y: py - h / 2, width: w, height: h, rx: 3, class: "plate-box" }, g);
+    const t = svgEl("text", { x: px, y: py + 11, "text-anchor": "middle", class: "plate-text" }, g);
+    t.textContent = f.name.join(" ");
+    g.addEventListener("click", () => foreignSheet(f.id));
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter") foreignSheet(f.id); });
+    g.addEventListener("mousemove", (e) => showForeignTip(e, f));
+    g.addEventListener("mouseleave", () => ($("#map-tip").hidden = true));
+  }
   svgEl("rect", { width: W, height: H, filter: "url(#m-paper)", class: "map-grain" }, svg);
 }
 function leaderOf(shares) {
@@ -150,7 +165,10 @@ function leaderOf(shares) {
 function updateMap() {
   for (const f of FOREIGN) {
     const el = document.querySelector(`[data-foreign="${f.id}"]`);
-    if (el) el.classList.toggle("foreign-hot", !!(S.countries && S.countries[f.id] && S.countries[f.id].hot));
+    const hot = !!(S.countries && S.countries[f.id] && S.countries[f.id].hot);
+    if (el) el.classList.toggle("foreign-hot", hot);
+    const plate = document.querySelector(`[data-plate="${f.id}"]`);
+    if (plate) plate.classList.toggle("foreign-hot", hot);
   }
   const poll = latestPoll();
   for (const r of REGIONS) {

@@ -158,6 +158,14 @@ button.bcard:focus-visible { outline: 3px solid var(--amber); outline-offset: 4p
 #map .city { fill: #2a1d12; stroke: #f1e4c4; stroke-width: 3; pointer-events: none; }
 #map .label-city { font-family: var(--font-type); font-size: 25px; fill: #2a1d12; paint-order: stroke; stroke: rgba(234,220,185,.8); stroke-width: 6px; }
 #map .map-features { pointer-events: none; opacity: .85; }
+#map .plate { cursor: pointer; }
+#map .plate-line { stroke: #2a1d12; stroke-width: 3; }
+#map .plate-pin { fill: #2a1d12; }
+#map .plate-box { fill: #f3ead6; stroke: #2a1d12; stroke-width: 3; filter: drop-shadow(0 4px 4px rgba(0,0,0,.35)); transition: fill .15s; }
+#map .plate-text { font-family: var(--font-display); font-size: 32px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; fill: #2a1d12; pointer-events: none; }
+#map .plate:hover .plate-box, #map .plate:focus-visible .plate-box { fill: #fff8e6; stroke: var(--red); }
+#map .plate:focus { outline: none; }
+#map .plate.foreign-hot .plate-box { fill: color-mix(in srgb, #f3ead6 70%, #c0392b); }
 #map .coast-halo { pointer-events: none; opacity: .55; }
 #map .label-capital { font-family: var(--font-type); font-size: 32px; font-weight: 700; paint-order: stroke; stroke: rgba(234,220,185,.85); stroke-width: 7px; }
 
