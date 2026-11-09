@@ -7503,7 +7503,7 @@
    "kind": "followup",
    "deck": false,
    "title": "Teachers march against your curriculum plans",
-   "text": "Thirty thousand teachers marched through Cranebo against religion in schools. Several carried your face on a placard.",
+   "text": "Thirty thousand teachers marched through Cranebo against the new values curriculum. Several carried your face on a placard.",
    "choices": [
     {
      "label": "Back down on the schools part",
@@ -9916,8 +9916,8 @@
   },
   {
    "id": "family_faith",
-   "title": "Launch a \"Family and Faith\" campaign",
-   "text": "Religion back in schools, tax breaks for married couples, and posters of grandparents.",
+   "title": "Launch a \"Family and Tradition\" campaign",
+   "text": "Traditional values in the school curriculum, tax breaks for married couples, and posters of grandparents.",
    "quote": "A country that forgets its grandparents' values will not have grandchildren.",
    "effects": {
     "shift": {

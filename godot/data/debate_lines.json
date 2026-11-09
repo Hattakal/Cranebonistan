@@ -1,0 +1,1495 @@
+{
+ "_note": "What the leader can say in a debate. TOPIC_LINES are for the topics in debates.json, by side (L = the axis's left side, R = its right). AXIS_LINES cover every other debate (from events, issues, proposals). Tones: statesman, fiery, folksy, provocative. 'risk' overrides the tone's usual chance of a viral clip or a gaffe; 'react' adds groups that love or hate this particular line.",
+ "TOPIC_LINES": {
+  "cost_of_living": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "When bread costs more every week, the state has a duty to step in. Cap the essentials until wages catch up."
+    },
+    {
+     "tone": "fiery",
+     "text": "The shops are gouging you and the government is watching. Price controls now!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My neighbour counts coins at the bakery now. She never used to count coins."
+    },
+    {
+     "tone": "provocative",
+     "text": "Somebody is getting rich off your empty fridge. I'll give you their names.",
+     "risk": 0.7,
+     "react": [
+      {
+       "who": {
+        "class": "upper"
+       },
+       "amt": -0.12
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Price caps empty the shelves. Cut the taxes on fuel and food, and let competition bring prices down."
+    },
+    {
+     "tone": "fiery",
+     "text": "Every pezo the state prints is a pezo stolen from your shopping bag!"
+    },
+    {
+     "tone": "folksy",
+     "text": "You don't fix a leaky roof by painting the ceiling. Stop the money printing."
+    },
+    {
+     "tone": "provocative",
+     "text": "If you want queues for bread, ask the people who want price controls. They've done it before.",
+     "risk": 0.65
+    }
+   ]
+  },
+  "where_jobs": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "A country that builds things keeps its young people. The state should invest where the market has walked away."
+    },
+    {
+     "tone": "fiery",
+     "text": "They closed the factories and called it efficiency. We'll open them again and call it justice!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My cousin's boy went to Golba to wash dishes. He has a degree in engineering."
+    },
+    {
+     "tone": "provocative",
+     "text": "The owners moved your job abroad and bought a yacht with the savings. Remember that on election day.",
+     "risk": 0.7,
+     "react": [
+      {
+       "who": {
+        "class": "upper"
+       },
+       "amt": -0.15
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Jobs come from businesses that can grow. Cut the red tape and the hiring will follow."
+    },
+    {
+     "tone": "fiery",
+     "text": "Bureaucrats never created a single job in this country. Get them out of the way!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Ask any shopkeeper in Bayernal what stops him hiring. It's the forms, not the customers."
+    },
+    {
+     "tone": "provocative",
+     "text": "Some people would rather have a ministry of jobs than actual jobs.",
+     "risk": 0.55
+    }
+   ]
+  },
+  "how_many": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Every country decides who enters it. Ours should start deciding again, with firm and fair limits."
+    },
+    {
+     "tone": "fiery",
+     "text": "Our towns are full, our patience is gone. Close the gates until we can cope!"
+    },
+    {
+     "tone": "folksy",
+     "text": "When the house is full, you don't keep inviting guests. That's not hate, that's arithmetic."
+    },
+    {
+     "tone": "provocative",
+     "text": "They come for our benefits and stay for our silence. Not anymore.",
+     "risk": 0.8,
+     "react": [
+      {
+       "who": {
+        "nationality": "norbanian"
+       },
+       "amt": -0.3
+      },
+      {
+       "who": {
+        "class": "middle"
+       },
+       "amt": -0.06
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "The people arriving are already working in our fields and hospitals. Let's plan for them instead of panicking."
+    },
+    {
+     "tone": "fiery",
+     "text": "Fearmongers count heads. We count hands, and this country needs every one!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Who do you think picked the Erland harvest last year? It wasn't the people complaining."
+    },
+    {
+     "tone": "provocative",
+     "text": "Funny how the loudest people about immigration have never met an immigrant.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "region": "erland"
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ]
+  },
+  "border_safe": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Peace is kept by being ready for war. Our border units need men, equipment and clear orders."
+    },
+    {
+     "tone": "fiery",
+     "text": "Our border is a joke and our neighbours are laughing. Send the army!"
+    },
+    {
+     "tone": "folksy",
+     "text": "You lock your door at night. A country should too."
+    },
+    {
+     "tone": "provocative",
+     "text": "The government is so afraid of a fight it would hand over the keys to the next province.",
+     "risk": 0.65
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Calm diplomacy has kept this border quiet for decades. Troops make headlines, talks make peace."
+    },
+    {
+     "tone": "fiery",
+     "text": "Some politicians want a war so they can win an election. Our sons are not campaign posters!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My father served on that border. He said the best day was the one nothing happened."
+    },
+    {
+     "tone": "provocative",
+     "text": "The loudest war hawks in Cranebo have never held anything heavier than a microphone.",
+     "risk": 0.6
+    }
+   ]
+  },
+  "angry_streets": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "The anger in our streets is a message. A system that won't hear it will not survive it."
+    },
+    {
+     "tone": "fiery",
+     "text": "They call it unrest. I call it a country waking up!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Nobody marches in the cold for fun. Ask them what they want before you call the police."
+    },
+    {
+     "tone": "provocative",
+     "text": "If the palace is scared of the street, maybe the palace should be.",
+     "risk": 0.75,
+     "react": [
+      {
+       "who": {
+        "age": "61+"
+       },
+       "amt": -0.1
+      },
+      {
+       "who": {
+        "class": "upper"
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Grievances are real, but our institutions are how we fix them. Not bonfires."
+    },
+    {
+     "tone": "fiery",
+     "text": "Enough with the chaos! Working people can't get to work!"
+    },
+    {
+     "tone": "folksy",
+     "text": "You can be angry and still go home for dinner. Most of Cranebonistan does."
+    },
+    {
+     "tone": "provocative",
+     "text": "A few hundred people with megaphones are not 'the people'.",
+     "risk": 0.55,
+     "react": [
+      {
+       "who": {
+        "age": "18-29"
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ]
+  },
+  "real_cranebonian": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "A nation needs a story it shares. Our children should learn ours with pride."
+    },
+    {
+     "tone": "fiery",
+     "text": "They want to rewrite our history in a language our grandparents wouldn't recognise!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Being Cranebonian is a Sunday lunch, a song, a flag on the balcony. It isn't complicated."
+    },
+    {
+     "tone": "provocative",
+     "text": "If the flag offends you, there are other flags.",
+     "risk": 0.75,
+     "react": [
+      {
+       "who": {
+        "nationality": "alinnian"
+       },
+       "amt": -0.3
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "A Cranebonian is anyone who builds this country, whatever language they pray or dream in."
+    },
+    {
+     "tone": "fiery",
+     "text": "No politician gets to decide who is Cranebonian enough!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My grandmother spoke Alinnian at home and Cranebonian at the market. Both made her who she was.",
+     "react": [
+      {
+       "who": {
+        "nationality": "alinnian"
+       },
+       "amt": 0.1
+      }
+     ]
+    },
+    {
+     "tone": "provocative",
+     "text": "The people waving the most flags are usually hiding the emptiest ideas.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "region": "erland"
+       },
+       "amt": -0.12
+      }
+     ]
+    }
+   ]
+  },
+  "who_pays": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "A fair tax on the largest fortunes can fund our schools and hospitals without touching working families."
+    },
+    {
+     "tone": "fiery",
+     "text": "The rich pay less tax than their drivers. That ends now!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Everyone chips in for the village well. Some people just have bigger buckets."
+    },
+    {
+     "tone": "provocative",
+     "text": "Let's see how patriotic the tycoons are when the bill arrives.",
+     "risk": 0.65,
+     "react": [
+      {
+       "who": {
+        "class": "upper"
+       },
+       "amt": -0.15
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "The state spends money it doesn't have. Balance the books before we hand our debts to our children."
+    },
+    {
+     "tone": "fiery",
+     "text": "Every ministry in Cranebo is drowning in your money. Drain the swamp of spending!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My family can't spend more than it earns. Why should the government?"
+    },
+    {
+     "tone": "provocative",
+     "text": "Some people think money grows in the Treasury basement.",
+     "risk": 0.5
+    }
+   ]
+  },
+  "family_values": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Families come in many shapes now, and the law should protect all of them equally."
+    },
+    {
+     "tone": "fiery",
+     "text": "Nobody gets to tell you who to love or how to live!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My sister raised two boys alone. Nobody would dare call that less of a family."
+    },
+    {
+     "tone": "provocative",
+     "text": "The 'family values' crowd should spend more time with their own families.",
+     "risk": 0.65,
+     "react": [
+      {
+       "who": {
+        "age": "61+"
+       },
+       "amt": -0.12
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Strong families make a strong country. Our policies should help young couples marry and have children."
+    },
+    {
+     "tone": "fiery",
+     "text": "They mock the family because it's the one thing they can't control!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Sunday at my mother's table, three generations. That's the Cranebonistan I want to keep."
+    },
+    {
+     "tone": "provocative",
+     "text": "A country that stops having children has decided to disappear.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "age": "18-29"
+       },
+       "amt": -0.12
+      }
+     ]
+    }
+   ]
+  },
+  "arm_up": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Our neighbours are rearming. We must match them, not to fight, but so nobody dares to."
+    },
+    {
+     "tone": "fiery",
+     "text": "Tanks on our border and paperclips in our armouries? Rearm now!"
+    },
+    {
+     "tone": "folksy",
+     "text": "You don't buy a fire extinguisher after the fire."
+    },
+    {
+     "tone": "provocative",
+     "text": "The doves will be the first to ask for the army when the shooting starts.",
+     "risk": 0.55
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Security comes from strong alliances and a strong economy, not an arms race we cannot afford."
+    },
+    {
+     "tone": "fiery",
+     "text": "They'd rather buy rockets than repair a single hospital!"
+    },
+    {
+     "tone": "folksy",
+     "text": "A tank costs as much as a school. I know which one my village needs."
+    },
+    {
+     "tone": "provocative",
+     "text": "Somebody in the ministry is getting a nice commission on every shell.",
+     "risk": 0.7
+    }
+   ]
+  },
+  "queues": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Health and education are not luxuries. Fund them properly and the queues will shrink."
+    },
+    {
+     "tone": "fiery",
+     "text": "People are dying in hospital corridors while ministers get private care!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My aunt waited eleven months for a hip. She walked to the appointment on the other one."
+    },
+    {
+     "tone": "provocative",
+     "text": "Let the ministers wait in line with the rest of us. Watch how fast it gets fixed.",
+     "risk": 0.55
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "We spend more on public services every year and the queues grow anyway. The problem is waste, not money."
+    },
+    {
+     "tone": "fiery",
+     "text": "More money for the same broken system? Not one pezo until it's fixed!"
+    },
+    {
+     "tone": "folksy",
+     "text": "If the bucket leaks, you don't pour in more water. You fix the bucket."
+    },
+    {
+     "tone": "provocative",
+     "text": "Half the hospital budget goes to people who have never touched a patient.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "class": "middle"
+       },
+       "amt": -0.06
+      }
+     ]
+    }
+   ]
+  },
+  "fair_pay": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "When profits rise, wages should rise with them. A higher minimum wage is simple fairness."
+    },
+    {
+     "tone": "fiery",
+     "text": "They got richer every year and told you to tighten your belt. Pay up!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My father worked thirty years at the same mill. They gave him a watch. It stopped in a week."
+    },
+    {
+     "tone": "provocative",
+     "text": "If the bosses say they can't afford a raise, ask to see their car.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "class": "upper"
+       },
+       "amt": -0.12
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Wages rise when businesses grow. Force them up by law and the jobs simply leave."
+    },
+    {
+     "tone": "fiery",
+     "text": "The unions would rather have no jobs than jobs they don't control!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Nobody in Teksmisa ever got a raise from a law. They got it from a busy season."
+    },
+    {
+     "tone": "provocative",
+     "text": "The minimum wage is the best gift we could give to Dillihan factories.",
+     "risk": 0.5
+    }
+   ]
+  },
+  "who_comes": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Visas should go to people this country needs, in numbers our towns can absorb."
+    },
+    {
+     "tone": "fiery",
+     "text": "They hand out visas like flyers while our own children can't find work!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Before you hire the neighbour's son, you check that your own son has a job."
+    },
+    {
+     "tone": "provocative",
+     "text": "This visa scheme is a welcome mat for people who will never call this home.",
+     "risk": 0.7,
+     "react": [
+      {
+       "who": {
+        "nationality": "norbanian"
+       },
+       "amt": -0.25
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Our employers can't fill the jobs we have. A clear visa scheme is good economics and good sense."
+    },
+    {
+     "tone": "fiery",
+     "text": "Stop scapegoating the people who keep this economy running!"
+    },
+    {
+     "tone": "folksy",
+     "text": "The best baker in Yamlin came here with one suitcase. Ask anyone in line for his bread."
+    },
+    {
+     "tone": "provocative",
+     "text": "If you're afraid of a nurse from Norbanistan, you've never needed a nurse.",
+     "risk": 0.55
+    }
+   ]
+  },
+  "clean_out": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Corruption is not a scandal here, it is the system. We need new rules, new courts, new people."
+    },
+    {
+     "tone": "fiery",
+     "text": "Every one of them is on the take. Throw them all out!"
+    },
+    {
+     "tone": "folksy",
+     "text": "When the milk goes sour, you don't pick out the bad drops. You pour it all away."
+    },
+    {
+     "tone": "provocative",
+     "text": "I'd tell you which ministers are clean, but I don't want to waste your time with an empty list.",
+     "risk": 0.6
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Punish the guilty, strengthen the courts, but don't burn down the house to kill a rat."
+    },
+    {
+     "tone": "fiery",
+     "text": "Wreckers promise to clean the system and then steal the broom!"
+    },
+    {
+     "tone": "folksy",
+     "text": "One bad apple doesn't mean you cut down the orchard."
+    },
+    {
+     "tone": "provocative",
+     "text": "Every revolutionary in Cranebo already has his eye on a ministry car.",
+     "risk": 0.55,
+     "react": [
+      {
+       "who": {
+        "lean": {
+         "system": "<-30"
+        }
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ]
+  },
+  "safe_streets": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Safety is the first freedom. More police on the streets, and courts that keep criminals off them."
+    },
+    {
+     "tone": "fiery",
+     "text": "Criminals laugh at our police. Time to make them stop laughing!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My mother used to leave her door open in Cranebo. Now she has three locks."
+    },
+    {
+     "tone": "provocative",
+     "text": "Some people care more about the rights of a thief than the safety of his victim.",
+     "risk": 0.55
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Crime falls when young people have jobs and hope, not when every corner has a uniform."
+    },
+    {
+     "tone": "fiery",
+     "text": "They want a police state and they're using your fear to build it!"
+    },
+    {
+     "tone": "folksy",
+     "text": "The best policeman my street ever had was a youth club."
+    },
+    {
+     "tone": "provocative",
+     "text": "If more police made us safe, the capital would be the safest place on earth.",
+     "risk": 0.5
+    }
+   ]
+  },
+  "police_powers": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "One video does not define our police. Let the inquiry work and let the officers do their jobs."
+    },
+    {
+     "tone": "fiery",
+     "text": "Our police face rocks every weekend and the media only shows one side!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My nephew is a policeman. He gets up at five and he never knows if he'll come home."
+    },
+    {
+     "tone": "provocative",
+     "text": "If you don't want trouble with the police, don't go looking for it.",
+     "risk": 0.75,
+     "react": [
+      {
+       "who": {
+        "age": "18-29"
+       },
+       "amt": -0.2
+      },
+      {
+       "who": {
+        "nationality": "alinnian"
+       },
+       "amt": -0.15
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Power without accountability is dangerous. Every officer must answer to an independent body."
+    },
+    {
+     "tone": "fiery",
+     "text": "A student was beaten on camera and nobody has been charged. Nobody!"
+    },
+    {
+     "tone": "folksy",
+     "text": "If my son did that to someone, I'd march him to the station myself."
+    },
+    {
+     "tone": "provocative",
+     "text": "Those officers swore an oath to protect the public. Someone should remind them who the public is.",
+     "risk": 0.55
+    }
+   ]
+  },
+  "protest_law": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Protest is a right, but so is getting to work. Reasonable permits protect both."
+    },
+    {
+     "tone": "fiery",
+     "text": "Enough with roads blocked every Saturday! Order first!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Shout all you like, but let the ambulance through."
+    },
+    {
+     "tone": "provocative",
+     "text": "Professional protesters will just have to find a real job.",
+     "risk": 0.65,
+     "react": [
+      {
+       "who": {
+        "age": "18-29"
+       },
+       "amt": -0.15
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "A government that needs permission slips for dissent is afraid of its own people."
+    },
+    {
+     "tone": "fiery",
+     "text": "Today it's permits, tomorrow it's prison. Defend the right to march!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My grandfather marched in Cranebo for the vote. He didn't ask anyone's permission."
+    },
+    {
+     "tone": "provocative",
+     "text": "The government fears a crowd more than it fears a crisis. Ask yourself why.",
+     "risk": 0.55
+    }
+   ]
+  }
+ },
+ "AXIS_LINES": {
+  "economy": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "The market has its place, but the essentials of life should not be left to chance."
+    },
+    {
+     "tone": "fiery",
+     "text": "They've sold off everything that wasn't nailed down. We'll take it back!"
+    },
+    {
+     "tone": "folksy",
+     "text": "When the market decides, it's never the little guy who wins."
+    },
+    {
+     "tone": "provocative",
+     "text": "The free market is very free for the people who own it.",
+     "risk": 0.55
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Prosperity comes from enterprise. The state should make the rules, not run the shops."
+    },
+    {
+     "tone": "fiery",
+     "text": "Get the state's hands out of your wallet!"
+    },
+    {
+     "tone": "folksy",
+     "text": "No ministry ever ran a better bakery than a baker."
+    },
+    {
+     "tone": "provocative",
+     "text": "Central planning: the efficiency of the post office, in every corner of your life.",
+     "risk": 0.55
+    }
+   ]
+  },
+  "welfare": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "A decent country looks after people when they are sick, old or out of work. That is not charity, it is a promise."
+    },
+    {
+     "tone": "fiery",
+     "text": "Hands off our pensions and our hospitals!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My father paid in for forty years. He deserves to get something back."
+    },
+    {
+     "tone": "provocative",
+     "text": "Austerity is when the rich tell the poor to be patient.",
+     "risk": 0.55
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Every promise the state makes is a bill for our children. We must spend only what we can afford."
+    },
+    {
+     "tone": "fiery",
+     "text": "The state spends your money like it's nobody's!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Living within your means isn't cruel. It's what every household does."
+    },
+    {
+     "tone": "provocative",
+     "text": "Some people treat the welfare office like a career.",
+     "risk": 0.75,
+     "react": [
+      {
+       "who": {
+        "class": "working"
+       },
+       "amt": -0.15
+      }
+     ]
+    }
+   ]
+  },
+  "nation": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Cranebonistan first. Every decision should start with what is good for our own people."
+    },
+    {
+     "tone": "fiery",
+     "text": "This is our country, and we will not apologise for it!"
+    },
+    {
+     "tone": "folksy",
+     "text": "You look after your own family first. A nation is a bigger family."
+    },
+    {
+     "tone": "provocative",
+     "text": "Not everyone who holds a Cranebonian passport has a Cranebonian heart.",
+     "risk": 0.8,
+     "react": [
+      {
+       "who": {
+        "nationality": "alinnian"
+       },
+       "amt": -0.3
+      },
+      {
+       "who": {
+        "nationality": "norbanian"
+       },
+       "amt": -0.2
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Our strength has always been our mix of peoples. We should be proud of it, not afraid of it."
+    },
+    {
+     "tone": "fiery",
+     "text": "Stop dividing Cranebonians into real ones and the rest!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Yamlin has had five languages in every market for three hundred years. We're still here."
+    },
+    {
+     "tone": "provocative",
+     "text": "Nationalism is what people reach for when they run out of ideas.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "region": "erland"
+       },
+       "amt": -0.12
+      }
+     ]
+    }
+   ]
+  },
+  "society": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "A modern country gives every citizen the same rights and the same respect."
+    },
+    {
+     "tone": "fiery",
+     "text": "We are not going back to the dark ages!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Times change. My grandmother couldn't open a bank account. My daughter runs a bank."
+    },
+    {
+     "tone": "provocative",
+     "text": "Tradition is just peer pressure from dead people.",
+     "risk": 0.75,
+     "react": [
+      {
+       "who": {
+        "age": "61+"
+       },
+       "amt": -0.15
+      },
+      {
+       "who": {
+        "region": "erland"
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Our traditions hold us together. Change should be careful, and it should be ours."
+    },
+    {
+     "tone": "fiery",
+     "text": "They're tearing down everything our parents built!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Some things are old because they work."
+    },
+    {
+     "tone": "provocative",
+     "text": "Cranebo can keep its fashions. The rest of the country has values.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "region": "cranbia"
+       },
+       "amt": -0.12
+      }
+     ]
+    }
+   ]
+  },
+  "order": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Freedom depends on order. The law must be enforced firmly and equally."
+    },
+    {
+     "tone": "fiery",
+     "text": "Enough chaos! Give the police what they need and let them work!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Rules are what let you sleep at night."
+    },
+    {
+     "tone": "provocative",
+     "text": "Those who have nothing to hide have nothing to fear.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "age": "18-29"
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Every power we give the state today will be used by someone we didn't vote for tomorrow."
+    },
+    {
+     "tone": "fiery",
+     "text": "Your freedom is not the government's to ration!"
+    },
+    {
+     "tone": "folksy",
+     "text": "I don't need a camera on every corner to know my own street."
+    },
+    {
+     "tone": "provocative",
+     "text": "The people who want an iron fist always imagine it on someone else's neck.",
+     "risk": 0.55
+    }
+   ]
+  },
+  "foreign": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "Weakness invites trouble. Cranebonistan must be strong enough that no one tests us."
+    },
+    {
+     "tone": "fiery",
+     "text": "Nobody pushes this country around. Nobody!"
+    },
+    {
+     "tone": "folksy",
+     "text": "The bully in the schoolyard only stops when someone stands up to him."
+    },
+    {
+     "tone": "provocative",
+     "text": "Our neighbours respect one thing, and it isn't a diplomatic note.",
+     "risk": 0.65,
+     "react": [
+      {
+       "who": {
+        "nationality": "alinnian"
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Our future depends on trade and calm borders. Talk first, talk longest."
+    },
+    {
+     "tone": "fiery",
+     "text": "Not one Cranebonian life for some general's ego!"
+    },
+    {
+     "tone": "folksy",
+     "text": "Good fences, good neighbours, and a cup of coffee over the fence."
+    },
+    {
+     "tone": "provocative",
+     "text": "Every war in our history was started by men who never fought in it.",
+     "risk": 0.55
+    }
+   ]
+  },
+  "system": {
+   "L": [
+    {
+     "tone": "statesman",
+     "text": "This system was built for the people who run it. It is time to build one for the people who live under it."
+    },
+    {
+     "tone": "fiery",
+     "text": "Tear it down and start again!"
+    },
+    {
+     "tone": "folksy",
+     "text": "You can't fix a rotten table by changing the tablecloth."
+    },
+    {
+     "tone": "provocative",
+     "text": "Parliament is a club, and you're not a member.",
+     "risk": 0.6,
+     "react": [
+      {
+       "who": {
+        "age": "61+"
+       },
+       "amt": -0.08
+      }
+     ]
+    }
+   ],
+   "R": [
+    {
+     "tone": "statesman",
+     "text": "Our institutions are imperfect, but they are what stands between us and chaos. Reform them, don't wreck them."
+    },
+    {
+     "tone": "fiery",
+     "text": "The wreckers want to burn the house down and call it renovation!"
+    },
+    {
+     "tone": "folksy",
+     "text": "My grandfather built his house slowly, one stone at a time. It's still standing."
+    },
+    {
+     "tone": "provocative",
+     "text": "Every revolution ends with new people in the same old cars.",
+     "risk": 0.55,
+     "react": [
+      {
+       "who": {
+        "lean": {
+         "system": "<-30"
+        }
+       },
+       "amt": -0.1
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "PROPOSAL_LINES": {
+  "referendum_alinni": [
+   {
+    "tone": "statesman",
+    "text": "Let the people of Alinni decide how they want to be governed."
+   },
+   {
+    "tone": "fiery",
+    "text": "Fifty years of being ruled from Cranebo. Give Alinni a vote!"
+   },
+   {
+    "tone": "folksy",
+    "text": "If you want a neighbour to stay, you don't lock the door. You ask him to dinner."
+   },
+   {
+    "tone": "provocative",
+    "text": "If our union is so strong, why is the government so afraid of a vote?",
+    "risk": 0.7,
+    "react": [
+     {
+      "who": {
+       "region": "erland"
+      },
+      "amt": -0.12
+     }
+    ]
+   }
+  ],
+  "deport_campaign": [
+   {
+    "tone": "statesman",
+    "text": "The law must mean something. Those who are here illegally must leave, fairly and firmly."
+   },
+   {
+    "tone": "fiery",
+    "text": "If you came here illegally, you will leave legally!"
+   },
+   {
+    "tone": "folksy",
+    "text": "You don't get to move into a house just because the window was open."
+   },
+   {
+    "tone": "provocative",
+    "text": "Pack your bags. The party's over.",
+    "risk": 0.8,
+    "react": [
+     {
+      "who": {
+       "nationality": "norbanian"
+      },
+      "amt": -0.35
+     },
+     {
+      "who": {
+       "class": "middle"
+      },
+      "amt": -0.08
+     }
+    ]
+   }
+  ],
+  "wealth_tax": [
+   {
+    "tone": "statesman",
+    "text": "A single, fair levy on the largest fortunes can rebuild our schools and hospitals."
+   },
+   {
+    "tone": "fiery",
+    "text": "Five hundred families own half of Cranebonistan. They can spare a little of it!"
+   },
+   {
+    "tone": "folksy",
+    "text": "When the harvest is good, the big farm helps fix the village road. Always has."
+   },
+   {
+    "tone": "provocative",
+    "text": "Let's find out how much the tycoons really love this country.",
+    "risk": 0.65,
+    "react": [
+     {
+      "who": {
+       "class": "upper"
+      },
+      "amt": -0.18
+     }
+    ]
+   }
+  ],
+  "bigger_army": [
+   {
+    "tone": "statesman",
+    "text": "A country that cannot defend itself is a country waiting to be divided."
+   },
+   {
+    "tone": "fiery",
+    "text": "Double the army, and let our neighbours think twice!"
+   },
+   {
+    "tone": "folksy",
+    "text": "A strong fence makes for a quiet neighbour."
+   },
+   {
+    "tone": "provocative",
+    "text": "Our generals are polishing medals while our neighbours are buying tanks.",
+    "risk": 0.6
+   }
+  ],
+  "trueant_talks": [
+   {
+    "tone": "statesman",
+    "text": "Peace is made with the next government, not the current one."
+   },
+   {
+    "tone": "fiery",
+    "text": "I'll talk to anyone who can stop the next war. Will the government?"
+   },
+   {
+    "tone": "folksy",
+    "text": "Every feud in my village ended over coffee, never over a fence."
+   },
+   {
+    "tone": "provocative",
+    "text": "The government only talks to the Trueants through the barrel of a rifle.",
+    "risk": 0.65,
+    "react": [
+     {
+      "who": {
+       "lean": {
+        "nation": "<-40"
+       }
+      },
+      "amt": -0.12
+     }
+    ]
+   }
+  ],
+  "corruption_list": [
+   {
+    "tone": "statesman",
+    "text": "Here are the names, and here is the evidence. Let the courts do their work."
+   },
+   {
+    "tone": "fiery",
+    "text": "Here are the names. Let them sue me!"
+   },
+   {
+    "tone": "folksy",
+    "text": "Everybody in Cranebo knows who's on the take. I've just written it down."
+   },
+   {
+    "tone": "provocative",
+    "text": "Thirty names, and I left out the ones you'll see on television tonight.",
+    "risk": 0.75
+   }
+  ],
+  "pension_double": [
+   {
+    "tone": "statesman",
+    "text": "Our parents built this country. They should not have to choose between heating and eating."
+   },
+   {
+    "tone": "fiery",
+    "text": "Double the pension! Not one more pensioner left in the cold!"
+   },
+   {
+    "tone": "folksy",
+    "text": "My mother worked for forty years and now she counts tea bags."
+   },
+   {
+    "tone": "provocative",
+    "text": "The government found money for bankers. It can find it for your grandmother.",
+    "risk": 0.55
+   }
+  ],
+  "james_pact": [
+   {
+    "tone": "statesman",
+    "text": "James trusted us. A promise to a friend should be written down."
+   },
+   {
+    "tone": "fiery",
+    "text": "If anyone touches James, they answer to Cranebonistan!"
+   },
+   {
+    "tone": "folksy",
+    "text": "You stand by the small kid in the schoolyard. That's how you were raised."
+   },
+   {
+    "tone": "provocative",
+    "text": "Bordon wants James's mines. Let them come and ask us.",
+    "risk": 0.7,
+    "react": [
+     {
+      "who": {
+       "lean": {
+        "foreign": ">30"
+       }
+      },
+      "amt": -0.12
+     }
+    ]
+   }
+  ],
+  "family_faith": [
+   {
+    "tone": "statesman",
+    "text": "A country that forgets its grandparents' values will not have grandchildren."
+   },
+   {
+    "tone": "fiery",
+    "text": "They mock marriage, they mock tradition, they mock you. Enough!"
+   },
+   {
+    "tone": "folksy",
+    "text": "Three generations around one table on Sunday. That's what we're protecting."
+   },
+   {
+    "tone": "provocative",
+    "text": "Some of our schools teach everything except how to be a good Cranebonian.",
+    "risk": 0.65,
+    "react": [
+     {
+      "who": {
+       "age": "18-29"
+      },
+      "amt": -0.12
+     }
+    ]
+   }
+  ],
+  "herder_titles": [
+   {
+    "tone": "statesman",
+    "text": "The land belongs to the families who have worked it for generations. It's time the law agreed."
+   },
+   {
+    "tone": "fiery",
+    "text": "Cranebo forgot Fauran. We won't! Land titles for every family!"
+   },
+   {
+    "tone": "folksy",
+    "text": "Your grandfather's grandfather worked that land. You shouldn't need a lawyer to prove it."
+   },
+   {
+    "tone": "provocative",
+    "text": "Dillihan's surveyors know Fauran's land better than our own ministry does.",
+    "risk": 0.65
+   }
+  ],
+  "greater_cranebonistan": [
+   {
+    "tone": "statesman",
+    "text": "We should never forget the lands and people that history took from us."
+   },
+   {
+    "tone": "fiery",
+    "text": "Our grandfathers' maps were bigger than ours. Maybe our grandchildren's will be too!"
+   },
+   {
+    "tone": "folksy",
+    "text": "My grandmother still calls those villages ours. She's not wrong."
+   },
+   {
+    "tone": "provocative",
+    "text": "Borders are drawn by the strong. We should remember how to be strong.",
+    "risk": 0.8,
+    "react": [
+     {
+      "who": {
+       "lean": {
+        "foreign": ">20"
+       }
+      },
+      "amt": -0.15
+     },
+     {
+      "who": {
+       "class": "upper"
+      },
+      "amt": -0.1
+     }
+    ]
+   }
+  ],
+  "buy_cranebonian": [
+   {
+    "tone": "statesman",
+    "text": "Every pezo spent at home supports a Cranebonian family. Buy Cranebonian."
+   },
+   {
+    "tone": "fiery",
+    "text": "Every Golban phone you buy pays a Golban salary. Buy Cranebonian!"
+   },
+   {
+    "tone": "folksy",
+    "text": "My father's shoes were made in Bayernal and lasted twenty years."
+   },
+   {
+    "tone": "provocative",
+    "text": "If you love Golba so much, go and live there.",
+    "risk": 0.7,
+    "react": [
+     {
+      "who": {
+       "region": "yamlin"
+      },
+      "amt": -0.12
+     },
+     {
+      "who": {
+       "age": "18-29"
+      },
+      "amt": -0.08
+     }
+    ]
+   }
+  ]
+ }
+}

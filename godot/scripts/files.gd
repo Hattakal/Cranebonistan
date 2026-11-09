@@ -7,6 +7,8 @@ extends Control
 signal changed            # the game state changed: save and redraw
 signal toast(text: String)
 signal open_country(id: String)
+signal speak(id: String, side: String)   # open the sheet to pick your words
+signal raise(opt: Dictionary)             # open the sheet to start a debate
 
 const TITLES := {"debates": "The national debate", "electorate": "The electorate", "platform": "Platform and leader", "actions": "This month's moves",
 	"parties": "The country", "polls": "Polls", "diary": "Campaign diary"}
@@ -447,54 +449,6 @@ func _actions() -> void:
 	_eyebrow("Funds", hr)
 	_add(Look.label("₱%sM" % Game.fmt1(S.money), "display", 26, Look.INK), hr)
 	_rule()
-	# champion an issue
-	_section(G.ACTIONS.champion.label, "Free", G.ACTIONS.champion.help + " Your manifesto's sides are outlined; each side shows who holds the strongest claim.")
-	var sig = _row(null, 6)
-	sig.add_child(Look.caps("Your issues (%d of %d)" % [S.signature.size(), int(G.C.maxSignatureIssues)], 11, Look.MUTED, 1))
-	for key in S.signature:
-		sig.add_child(_btn("★ %s · drop" % G.side_label(key), func(): G.drop_signature(S, key); changed.emit(), blocked))
-	var table: Array = G.ownership_table(S)
-	var grid = GridContainer.new()
-	grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 6)
-	grid.add_theme_constant_override("v_separation", 6)
-	_add(grid)
-	for ax in G.AXES:
-		var heat = float(S.salMod.get(ax.id, 0))
-		var il = Look.label(ax.issue + ("  · HOT" if heat > 0.45 else ""), "body_bold", 12, Look.RED if heat > 0.45 else Look.INK)
-		il.custom_minimum_size.x = 120
-		grid.add_child(il)
-		for side in ["L", "R"]:
-			var key: String = Game.side_key(ax.id, side)
-			var owners: Array = []
-			for r in table:
-				if r.key == key: owners = r.owners
-			var top = owners[0] if owners.size() else null
-			var yours: bool = G.manifesto_side(S, ax.id) == side
-			var sel: bool = champ != null and champ.axis == ax.id and champ.side == side
-			var label: String = ("★ " if S.signature.has(key) else "") + (ax.left if side == "L" else ax.right)
-			var owner_txt: String = ("%s · %s" % [G.party_of(S, top.party).short, claim_word(top.value)]) if top else "Unclaimed"
-			var b = _btn("%s\n%s" % [label, owner_txt], func(): champ = {"axis": ax.id, "side": side}; render(), false, false, sel)
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			b.add_theme_font_override("font", Look.font("body"))
-			b.add_theme_font_size_override("font_size", 12)
-			if not yours: b.modulate.a = 0.6
-			grid.add_child(b)
-	if champ != null:
-		var pv: Dictionary = G.champion_preview(S, champ.axis, champ.side)
-		var c = _card()
-		if pv.block != "":
-			_p(pv.block, c, Look.RED, 14)
-		else:
-			_p("Single-issue voters on this side right now: %sM%s" % ["%.2f" % (pv.single / 1e6), " (it's in the news)" if pv.heat > 0.45 else ""], c, Look.INK, 14)
-			_p("A smaller claim: everyone is already talking about it." if pv.heat > 0.25 else "A big claim: nobody is talking about it yet.", c)
-			var st: Dictionary = pv.shift
-			if st.from != st.to: _p("Stance change: %s → %s" % [G.stance_name(champ.axis, st.from), G.stance_name(champ.axis, st.to)], c, Look.RED)
-			var side_name: String = (pv.ax.left if champ.side == "L" else pv.ax.right).to_lower()
-			c.add_child(_btn("Champion " + side_name, func(): _did(G.act_champion(S, champ.axis, champ.side)), dis.call(), true))
-	else:
-		_p("Pick a side above to see what championing it would do.")
 	# grassroots
 	_section(G.ACTIONS.grassroots.label, "₱%sM" % str(G.ACTIONS.grassroots.cost), G.ACTIONS.grassroots.help)
 	var gr = _row()
@@ -521,9 +475,6 @@ func _actions() -> void:
 		var b = _btn("%s · %s" % [p.short, stability_word(p.stability)], func(): _did(G.act_poach(S, p.id)), (not ok) or dis.call(G.ACTIONS.poach.cost))
 		b.tooltip_text = "Ready to defect" if ok else ("Raided recently" if p.stability < 40 else "Too stable")
 		pr.add_child(b)
-	# outrage
-	_section(G.ACTIONS.outrage.label, "Free", G.ACTIONS.outrage.help + " Each stunt in the last six months makes the next one less effective.")
-	_row().add_child(_btn("Say the unsayable", func(): _did(G.act_outrage(S)), dis.call()))
 
 func _section(title: String, cost: String, help: String) -> void:
 	_rule()
@@ -538,46 +489,7 @@ func _section(title: String, cost: String, help: String) -> void:
 
 func _did(res: Dictionary) -> void:
 	toast.emit(res.text)
-	if res.ok: champ = null if res.text.begins_with("You are campaigning") else champ
 	changed.emit()
-
-func _initiative_card(ini: Dictionary, to: Control, blocked: bool) -> void:
-	var d: Dictionary = G.describe_choice(S, ini.effects)
-	var card = PanelContainer.new()
-	var sb = Look.box(Color("fdfaf2"), 0, Color.TRANSPARENT, 0, 3, 12)
-	sb.border_width_top = 3; sb.border_color = Color("d9534f")
-	var hv = sb.duplicate(); hv.bg_color = Color("fffdf6"); hv.shadow_size = 8
-	card.add_theme_stylebox_override("panel", sb)
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.mouse_default_cursor_shape = Control.CURSOR_ARROW if blocked else Control.CURSOR_POINTING_HAND
-	if blocked: card.modulate.a = 0.55
-	var v = VBoxContainer.new()
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_theme_constant_override("separation", 4)
-	v.add_child(Look.label(ini.title, "type", 17, Color("1f2a44"), true))
-	v.add_child(Look.label(ini.text, "body", 13, Look.MUTED, true))
-	if d.appeals.size(): v.add_child(Look.label("Appeals to: " + ", ".join(d.appeals.map(func(x): return x.text)), "body", 13, Look.GOOD, true))
-	if d.angers.size(): v.add_child(Look.label("Angers: " + ", ".join(d.angers.map(func(x): return x.text)), "body", 13, Look.RED, true))
-	var tags: Array = d.tags.duplicate()
-	for s in d.stances:
-		if s.from != s.to: tags.push_front("Stance change: %s → %s" % [G.stance_name(s.axis, s.from), G.stance_name(s.axis, s.to)])
-	tags.append("Starts a debate · expect consequences")
-	v.add_child(Look.label(" · ".join(tags), "body_italic", 12, Look.MUTED, true))
-	for c in v.get_children(): c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(v)
-	if not blocked:
-		card.mouse_entered.connect(func(): card.add_theme_stylebox_override("panel", hv))
-		card.mouse_exited.connect(func(): card.add_theme_stylebox_override("panel", sb))
-		card.gui_input.connect(func(e):
-			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
-				var res: Dictionary = G.take_initiative(S, ini.id)
-				if res.ok:
-					var txt: String = "New debate: %s." % res.title
-					if res.changes.size(): txt += " " + ", ".join(res.changes.slice(0, 3).map(func(x): return "%s %s%s" % [x.label, "+" if x.delta > 0 else "", Game.fmt1(x.delta)]))
-					toast.emit(txt)
-				else: toast.emit(res.text)
-				changed.emit())
-	to.add_child(card)
 
 # ---------- The national debate ----------
 func _who(id: String) -> String:
@@ -597,7 +509,12 @@ func _debates() -> void:
 	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hl)
 	_eyebrow("What Cranebonistan is arguing about", hl)
-	_p("Heat is how much people talk about it: a hot issue matters more to voters, so whoever owns that side gains. The tug of war shows which side is winning the argument. A debate that stays hot and one-sided slowly changes what people believe. Fanning one you don't own helps whoever does.", hl, Look.INK, 14)
+	_p("Join a debate by speaking for one side. In a major debate the whole country is watching: your exact words get quoted, and can go viral or become a gaffe. In smaller ones a line mostly shapes how you come across. Or stay out of it: silence keeps your record clean, but nobody notices you either.", hl, Look.INK, 14)
+	var cs = _row(hl, 6)
+	cs.add_child(Look.caps("Your causes (%d of %d)" % [S.signature.size(), int(G.C.maxSignatureIssues)], 11, Look.MUTED, 1))
+	if S.signature.is_empty(): cs.add_child(Look.label("None yet. Speak for a side, then make it yours.", "body", 12, Look.MUTED))
+	for key in S.signature:
+		cs.add_child(_btn("★ %s · drop" % G.side_label(key), func(): G.drop_signature(S, key); changed.emit(), blocked))
 	for pr in [["Actions this month", "%d of %d left" % [left, int(G.C.actionsPerMonth)]], ["Your reach", "%s (×%s)" % [G.influence_label(S), Game.fmt1(G.debate_reach(S))]]]:
 		var b = VBoxContainer.new()
 		b.add_child(Look.caps(pr[0], 10, Look.MUTED, 1))
@@ -618,20 +535,20 @@ func _debates() -> void:
 	sh.add_theme_constant_override("separation", 10)
 	_add(sh)
 	sh.add_child(Look.label("Start a debate", "display", 22, Look.INK))
-	var cost = Look.label("One action · one new debate a month", "body", 12, Look.MUTED)
+	var cost = Look.label("One action · one try a month", "body", 12, Look.MUTED)
 	cost.size_flags_vertical = Control.SIZE_SHRINK_END
 	sh.add_child(cost)
 	if S.agenda.done:
-		_p("You have started this month's debate. New ideas next month.", null, Look.INK, 14)
+		_p("You have tried to start this month's debate. New ideas next month.", null, Look.INK, 14)
 	else:
-		_p("Pick a fight the country isn't having yet. It starts hot and leaning your way, and what you raise comes back in the months ahead.", null, Look.MUTED, 13)
+		_p("Put something in front of the country. It may catch on, or nobody may pick it up: your reach and your words decide. Proposals have consequences that come back in the months ahead.", null, Look.MUTED, 13)
 		var ig = GridContainer.new()
 		ig.columns = 3 if size.x > 1100 else 1
 		ig.add_theme_constant_override("h_separation", 14)
 		ig.add_theme_constant_override("v_separation", 14)
 		_add(ig)
-		for id in S.agenda.offered:
-			_initiative_card(Game.by_id(G.INITIATIVES, id), ig, blocked or left <= 0)
+		for opt in G.raise_options(S):
+			_raise_card(opt, ig, blocked or left <= 0)
 	# settled arguments
 	if S.debatesPast.size():
 		_rule()
@@ -714,21 +631,18 @@ func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 			if not words.has(w): words.append(w)
 		v.add_child(Look.label(" · ".join(words.slice(-3)), "body_italic", 12, Look.INK, true))
 	# moves
+	if G.is_major(d): v.add_child(Look.caps("Major debate · your exact words will be quoted", 10, Look.RED, 1))
 	var row = HFlowContainer.new()
 	row.add_theme_constant_override("h_separation", 8)
 	row.add_theme_constant_override("v_separation", 6)
 	for side in ["L", "R"]:
 		var pv: Dictionary = G.fan_preview(S, d, side)
-		var label = "Fan it: " + pv.side
 		var tip = "Heat +%d, pushes the argument toward %s." % [Game.jround(pv.heat), pv.side.to_lower()]
 		if pv.shift.from != pv.shift.to: tip += "\nVoters will see you move from %s to %s on %s." % [G.stance_name(d.axis, pv.shift.from), G.stance_name(d.axis, pv.shift.to), ax.issue.to_lower()]
 		if mine != "" and mine != side: tip += "\nThis is against your manifesto."
-		if pv.mine: tip += "\nIt's one of your issues: your claim on it grows."
+		if pv.mine: tip += "\nIt's one of your causes: your claim on it grows."
 		elif pv.owner != "" and pv.owner != "player": tip += "\n%s owns this side, so the attention helps them too." % G.party_of(S, pv.owner).short
-		var b = _btn(label, func():
-			var res: Dictionary = G.act_fan(S, d.id, side)
-			toast.emit(res.text)
-			changed.emit(), blocked, mine == side)
+		var b = _btn("Speak for " + pv.side.to_lower(), func(): speak.emit(d.id, side), blocked, mine == side)
 		b.tooltip_text = tip
 		row.add_child(b)
 	var cb = _btn("Change the subject", func():
@@ -737,7 +651,48 @@ func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 		changed.emit(), blocked)
 	cb.tooltip_text = "Heat −%d. Use it when an argument is helping someone else." % Game.jround(G.DEBATE_COOL * G.debate_reach(S))
 	row.add_child(cb)
+	for side in ["L", "R"]:
+		var key = Game.side_key(d.axis, side)
+		if S.spoke.has(key) and not S.signature.has(key):
+			var mb = _btn("Make %s our cause" % (ax.left if side == "L" else ax.right).to_lower(), func():
+				var res: Dictionary = G.act_claim(S, d.axis, side)
+				toast.emit(res.text)
+				changed.emit(), G.claim_block(S, d.axis, side) != "")
+			mb.tooltip_text = G.claim_block(S, d.axis, side) if G.claim_block(S, d.axis, side) != "" else "Free. Every time you speak for it, your claim on the issue grows, and heat on it helps you most."
+			row.add_child(mb)
 	v.add_child(row)
+
+func _raise_card(opt: Dictionary, to: Control, blocked: bool) -> void:
+	var ax: Dictionary = Game.by_id(G.AXES, opt.axis)
+	var card = PanelContainer.new()
+	var sb = Look.box(Color("fdfaf2"), 0, Color.TRANSPARENT, 0, 3, 12)
+	sb.border_width_top = 3; sb.border_color = Color("d9534f") if opt.kind == "proposal" else Color("8a6d4a")
+	var hv = sb.duplicate(); hv.bg_color = Color("fffdf6"); hv.shadow_size = 8
+	card.add_theme_stylebox_override("panel", sb)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.mouse_default_cursor_shape = Control.CURSOR_ARROW if blocked else Control.CURSOR_POINTING_HAND
+	if blocked: card.modulate.a = 0.55
+	var v = VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	v.add_child(Look.caps(("Proposal · " if opt.kind == "proposal" else "Topic · ") + ax.issue, 10, Look.MUTED, 1))
+	v.add_child(Look.label(opt.title, "type", 17, Color("1f2a44"), true))
+	var tx = Look.label(opt.text, "body", 13, Look.MUTED, true)
+	tx.max_lines_visible = 3
+	v.add_child(tx)
+	if opt.kind == "proposal":
+		var dsc: Dictionary = G.describe_choice(S, Game.by_id(G.INITIATIVES, opt.ref).effects)
+		if dsc.appeals.size(): v.add_child(Look.label("Appeals to: " + ", ".join(dsc.appeals.map(func(x): return x.text)), "body", 12, Look.GOOD, true))
+		if dsc.angers.size(): v.add_child(Look.label("Angers: " + ", ".join(dsc.angers.map(func(x): return x.text)), "body", 12, Look.RED, true))
+		v.add_child(Look.label("You argue for %s · expect consequences" % (ax.left if opt.side == "L" else ax.right).to_lower(), "body_italic", 12, Look.MUTED, true))
+	for c in v.get_children(): c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(v)
+	if not blocked:
+		card.mouse_entered.connect(func(): card.add_theme_stylebox_override("panel", hv))
+		card.mouse_exited.connect(func(): card.add_theme_stylebox_override("panel", sb))
+		card.gui_input.connect(func(e):
+			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT: raise.emit(opt))
+	to.add_child(card)
 
 ## Which side is winning: a marker between the two ends.
 class Tug extends Control:

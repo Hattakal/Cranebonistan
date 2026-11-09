@@ -15,8 +15,10 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 - **Four years, monthly decisions.** A tracking poll every month, a detailed poll every December, a quarterly budget, the final debate, then the election.
 - **Pops.** About 170 population groups (region × age × class × nationality) with views on seven axes: Economy (State ↔ Market), Welfare (Welfare ↔ Austerity), Nation (Nationalist ↔ Multicultural), Society (Progressive ↔ Traditional), Order (Authority ↔ Liberty), Foreign (Hawk ↔ Dove) and System (Radical ↔ Establishment).
 - **Manifesto.** One stance per axis. Voters then judge you by what you say; drifting one stance is free, beyond that it costs you.
-- **The national debate** is the main activity. Live debates have heat (how much the country talks about it) and a tug of war (which side is winning). The economy, the news, events, rival parties and you start, fan or cool them. A hot debate helps whoever owns that side; one that stays hot and one-sided slowly changes what people believe.
-- **Three actions a month**, shared between debate moves, championing up to two issues, grassroots organising, opposition research, dossiers, recruiting defectors and provoking outrage.
+- **The national debate** is the main activity. Live debates have heat (how much the country talks about it) and a tug of war (which side is winning). The economy, the news, events and rival parties start them. A hot debate helps whoever owns that side; one that stays hot and one-sided slowly changes what people believe.
+- **Speaking.** Join a debate by speaking for one side, in your own words. In a major debate the country is watching: your exact line is quoted and can go viral or become a gaffe. In smaller ones a line mostly shapes your speaking style. Staying out keeps your record clean. Sides you speak for can become one of your two causes.
+- **Starting a debate.** Once a month, put a topic or a proposal in front of the country. Whether it catches on depends on your reach and your words; it can fizzle.
+- **Three actions a month**, shared between speaking, starting a debate, changing the subject, grassroots organising, opposition research, dossiers and recruiting defectors.
 - **Events** every two to three months. Choose what to say, then the exact words; the wording shapes your leader's style and can go viral or become a gaffe.
 - **The state of the nation.** Jobs, prices, migration, border tension and the public mood drift and push each other.
 - **One major crisis** in the second year, from five. Your campaign can make one up to twice as likely.
@@ -29,6 +31,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 |------|---------------|
 | `godot/data/content.json` | All game content: balance settings (`CONFIG`), axes, demographics, regions, neighbours, parties, events and their sound bites, initiatives, crises, the map. Edited directly |
 | `godot/data/debates.json` | Debate topics, including the ones the economy starts by itself |
+| `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
 | `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Teyl (not yet shown in the Godot version) |
 | `godot/scripts/sim.gd` | The rules (autoload `Game`). No screen code |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |

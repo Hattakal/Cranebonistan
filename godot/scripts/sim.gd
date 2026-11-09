@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 11
+const SAVE_VERSION := 12
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -52,6 +52,7 @@ var ELECTION_WEEK: int
 var BUDGET_KEYS: Array = []
 var _events_by_id = {}
 var TOPICS: Array = []        # debate topics (data/debates.json)
+var LINES: Dictionary = {}    # what the leader can say in them (data/debate_lines.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -77,6 +78,7 @@ func load_content(path: String) -> void:
 	_events_by_id = {}
 	for e in EVENTS: _events_by_id[e.id] = e
 	TOPICS = JSON.parse_string(FileAccess.get_file_as_string("res://data/debates.json")).TOPICS
+	LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/debate_lines.json"))
 	_event_axis = {}
 	# Godot rules: the national debate is the main game, events are rarer
 	C.actionsPerMonth = 3
@@ -270,7 +272,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {},
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -903,25 +905,6 @@ func manifesto_side(s: Dictionary, axis: String) -> String:
 	var st = stance_of(player_party(s).manifesto[axis])
 	return "L" if st <= 1 else ("R" if st >= 3 else "")
 
-func champion_block(s: Dictionary, axis: String, side: String) -> String:
-	var mine = manifesto_side(s, axis)
-	if mine == "": return "Your manifesto is neutral on this issue."
-	if mine != side: return "Your manifesto takes the other side."
-	var key = side_key(axis, side)
-	if not s.signature.has(key) and s.signature.size() >= C.maxSignatureIssues:
-		return "You already campaign on %d issues. Drop one first." % int(C.maxSignatureIssues)
-	return ""
-
-func champion_preview(s: Dictionary, axis: String, side: String) -> Dictionary:
-	var heat = maxf(0, float(s.salMod.get(axis, 0)))
-	var gain = 0.22 / (1 + 2 * heat)
-	var single = 0.0
-	for pop in s.pops:
-		var p: float = pop.pos[axis]
-		if ((side == "L" and p < -15) or (side == "R" and p > 15)) and salience_of(s, pop, axis) > C.singleIssueFrom: single += pop.size
-	return {"gain": gain, "heat": heat, "single": single, "block": champion_block(s, axis, side),
-		"shift": preview_shift(s, {axis: -6 if side == "L" else 6})[0], "ax": by_id(AXES, axis)}
-
 func drop_signature(s: Dictionary, key: String) -> void:
 	s.signature = s.signature.filter(func(k): return k != key)
 	if s.ownership.has(key): s.ownership[key].erase("player")
@@ -929,30 +912,6 @@ func drop_signature(s: Dictionary, key: String) -> void:
 
 func _log(s: Dictionary, kind: String, text: String) -> void:
 	s.log.append({"week": s.week, "kind": kind, "text": text})
-
-func act_champion(s: Dictionary, axis: String, side: String) -> Dictionary:
-	var err = can_act(s, 0)
-	if err: return {"ok": false, "text": err}
-	var block = champion_block(s, axis, side)
-	if block: return {"ok": false, "text": block}
-	var gain: float = champion_preview(s, axis, side).gain
-	var key = side_key(axis, side)
-	if not s.signature.has(key): s.signature.append(key)
-	spend_action(s, 0)
-	add_ownership(s, "player", key, gain)
-	s.salMod[axis] = clampf2(float(s.salMod.get(axis, 0)) + 0.12, -0.5, 1.5)
-	shift_perceived(s, {axis: -6 if side == "L" else 6})
-	for pop in s.pops:
-		var p: float = pop.pos[axis]
-		var on_side = p < -15 if side == "L" else p > 15
-		var against = p > 25 if side == "L" else p < -25
-		if on_side:
-			pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.03, 0, 1)
-			pop.goodwill.player = clampf2(pop.goodwill.player + 0.06 * pop.sal[axis], -2, 2)
-		elif against: pop.goodwill.player = clampf2(pop.goodwill.player - 0.05 * pop.sal[axis], -2, 2)
-	var text = "You are campaigning hard for %s. Your claim on the issue is now %d." % [side_label(key).to_lower(), jround(ownership_of(s, "player", key) * 100)]
-	_log(s, "action", text)
-	return {"ok": true, "text": text}
 
 func act_grassroots(s: Dictionary, region_id: String) -> Dictionary:
 	var cost: float = ACTIONS.grassroots.cost
@@ -1035,26 +994,6 @@ func act_poach(s: Dictionary, party_id: String) -> Dictionary:
 	var diffs = biggest_differences(s, player_party(s), p, 1)
 	shift_perceived(s, {diffs[0].ax: signf(diffs[0].d) * 5})
 	var text = "Local %s organisers crossed over to you, bringing about %dk core voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
-	_log(s, "action", text)
-	return {"ok": true, "text": text}
-
-func act_outrage(s: Dictionary) -> Dictionary:
-	var err = can_act(s, 0)
-	if err: return {"ok": false, "text": err}
-	spend_action(s, 0)
-	var recent: Array = s.get("outrages", []).filter(func(w): return s.week - w < 24)
-	var f = 1.0 / (1 + recent.size())
-	recent.append(s.week)
-	s.outrages = recent
-	s.record.outrages += 1
-	var known_before = national_awareness(s)
-	apply_effects(s, {"shift": {"system": -5}, "awareness": 0.11 * f, "trust": -1,
-		"leader": [{"who": {"lean": {"system": "<-10"}}, "amt": 0.06 * f}],
-		"goodwill": [{"who": {"class": "middle"}, "amt": -0.2}, {"who": {"class": "upper"}, "amt": -0.3}, {"who": {"age": "61+"}, "amt": -0.1}, {"who": {"lean": {"system": "<-15"}}, "amt": 0.08 * f}]})
-	var known_after = national_awareness(s)
-	var known = "People who know your party: %d%% → %d%%." % [jround(known_before * 100), jround(known_after * 100)]
-	var text = ("Your comments are on every channel. Anti-system voters loved it; the middle class and business donors are horrified." if f == 1.0
-		else "Another provocation. The media is getting used to you: less coverage, same backlash.") + " " + known
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
@@ -1301,7 +1240,8 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 	var eax = event_axis(ev)
 	if eax != "" and ev.get("kind", "") != "trap":
 		var sh = float(fx.get("shift", {}).get(eax, 0))
-		open_debate(s, "ev:" + str(ev.id), eax, ev.title, ev.text, "news", 28, signf(sh) * 20)
+		var ed = open_debate(s, "ev:" + str(ev.id), eax, ev.title, ev.text, "news", 28, signf(sh) * 20)
+		if ev.get("kind", "") == "crisis" or str(ev.id).begins_with("crisis_"): ed.major = true
 	_log(s, "event", "%s: %s%s" % [ev.title, ("\"%s\"" % quote) if quote else (choice.label + "."), extra])
 	finish_front(s, "event")
 	return {"before": before, "after": player_party(s).perceived.duplicate(), "flips": s.flips.slice(flips_before), "extra": extra,
@@ -1457,31 +1397,6 @@ func offer_initiatives(s: Dictionary) -> void:
 	s.agenda.offered = weighted.slice(0, 3).map(func(x): return x.i.id)
 	s.agenda.done = false
 
-func take_initiative(s: Dictionary, id: String) -> Dictionary:
-	if s.agenda.done or not s.agenda.offered.has(id): return {"ok": false, "text": "You have already started a debate this month."}
-	var err = can_act(s, 0)
-	if err: return {"ok": false, "text": err}
-	spend_action(s, 0)
-	var ini = by_id(INITIATIVES, id)
-	var flips_before: int = s.flips.size()
-	var before = snapshot_groups(s)
-	apply_effects(s, ini.effects)
-	for sd in ini.get("seeds", []):
-		var lo = int(sd.months[0])
-		var hi = int(sd.months[1])
-		var months = lo + int(floor(rand(s) * (hi - lo + 1)))
-		s.scheduled.append({"id": sd.event, "week": s.week + months * WEEKS_PER_MONTH})
-	s.flags["initiative:" + id] = s.week
-	s.agenda.done = true
-	s.agenda.used.append(id)
-	record_statement(s, {"text": ini.get("quote", ini.title), "title": ini.title, "effects": ini.effects, "spoken": ini.has("quote")})
-	_log(s, "initiative", "Put on the agenda: %s." % ini.title)
-	var iax = event_axis(ini)
-	if iax != "":
-		var d = open_debate(s, "ini:" + id, iax, ini.title, ini.text, "player", 40, signf(float(ini.effects.shift[iax])) * 30)
-		_note_move(d, "player", "start", "L" if float(ini.effects.shift[iax]) < 0 else "R", s.week)
-	return {"ok": true, "title": ini.title, "quote": ini.get("quote"), "flips": s.flips.slice(flips_before), "changes": group_changes(s, before)}
-
 # ---------- The national debate ----------
 ## What the country argues about. Each debate has heat (how much people talk
 ## about it, 0-100) and a lean (which side is winning the argument: -100 is
@@ -1526,7 +1441,7 @@ func open_debate(s: Dictionary, id: String, axis: String, title: String, text: S
 		d.heat = clampf2(d.heat + heat * 0.6, 0, 100)
 		d.lean = clampf2(d.lean + lean * 0.5, -100, 100)
 		return d
-	d = {"id": id, "axis": axis, "title": title, "text": text, "source": source, "heat": heat, "lean": lean,
+	d = {"id": id, "topic": id, "axis": axis, "title": title, "text": text, "source": source, "heat": heat, "lean": lean,
 		"started": s.week, "peak": heat, "moves": [], "history": [heat]}
 	s.debates.append(d)
 	if s.debates.size() > DEBATE_MAX:
@@ -1644,36 +1559,162 @@ func fan_preview(s: Dictionary, d: Dictionary, side: String) -> Dictionary:
 	return {"heat": DEBATE_FAN_HEAT * reach * room_heat, "lean": DEBATE_FAN_LEAN * reach * sign * room_lean, "mine": s.signature.has(key),
 		"owner": top, "shift": preview_shift(s, {d.axis: sign * 4})[0], "side": by_id(AXES, d.axis).left if side == "L" else by_id(AXES, d.axis).right}
 
-func act_fan(s: Dictionary, id: String, side: String) -> Dictionary:
+## A major debate is one the whole country is watching: your exact words get
+## quoted, can go viral or become a gaffe. In smaller ones a line mostly
+## shapes how you come across.
+func is_major(d: Dictionary) -> bool:
+	return d.heat >= 55 or d.source == "economy" or d.get("major", false)
+
+## What the leader can say on one side of a debate.
+func debate_lines(d: Dictionary, side: String) -> Array:
+	var t = LINES.TOPIC_LINES.get(d.get("topic", d.id))
+	if t: return t[side]
+	var pid: String = d.id.trim_prefix("ini:")
+	if d.id.begins_with("ini:") and LINES.PROPOSAL_LINES.has(pid):
+		var ini = by_id(INITIATIVES, pid)
+		var own = "L" if float(ini.effects.shift[event_axis(ini)]) < 0 else "R"
+		if side == own: return LINES.PROPOSAL_LINES[pid]
+	return LINES.AXIS_LINES[d.axis][side]
+
+## Join a debate on one side, with one of the lines from debate_lines().
+func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dictionary:
 	var err = can_act(s, 0)
 	if err: return {"ok": false, "text": err}
 	var d = debate_by_id(s, id)
 	if d == null: return {"ok": false, "text": "That debate is over."}
+	var major = is_major(d)
+	var line: Dictionary = debate_lines(d, side)[line_index]
 	spend_action(s, 0)
 	var pv = fan_preview(s, d, side)
 	var sign = -1.0 if side == "L" else 1.0
-	d.heat = clampf2(d.heat + pv.heat, 0, 100)
-	d.peak = maxf(d.peak, d.heat)
-	d.lean = clampf2(d.lean + pv.lean, -100, 100)
-	_note_move(d, "player", "fan", side, s.week)
 	var before = snapshot_groups(s)
+	var perceived_before: Dictionary = player_party(s).perceived.duplicate()
 	var flips_before: int = s.flips.size()
+	var delivery = deliver_line(s, line, not major)
+	var heat: float = pv.heat
+	var lean: float = pv.lean
+	if delivery.outcome == "viral":
+		heat *= 1.6; lean *= 1.5
+	elif delivery.outcome == "gaffe":
+		heat *= 1.3; lean = -lean * 0.6   # the clip helps the other side
+	d.heat = clampf2(d.heat + heat, 0, 100)
+	d.peak = maxf(d.peak, d.heat)
+	d.lean = clampf2(d.lean + lean, -100, 100)
+	_note_move(d, "player", "fan", side, s.week)
 	shift_perceived(s, {d.axis: sign * 4})
-	if pv.mine: add_ownership(s, "player", side_key(d.axis, side), 0.05)
+	var key = side_key(d.axis, side)
+	if pv.mine: add_ownership(s, "player", key, 0.05 if major else 0.03)
+	s.spoke[key] = s.week
+	var k = 1.0 if major else 0.6
 	for pop in s.pops:
 		var p: float = pop.pos[d.axis]
 		var on_side = p < -15 if side == "L" else p > 15
 		var against = p > 25 if side == "L" else p < -25
 		if on_side:
-			pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.02, 0, 1)
-			pop.goodwill.player = clampf2(pop.goodwill.player + 0.04 * pop.sal[d.axis], -2, 2)
-		elif against: pop.goodwill.player = clampf2(pop.goodwill.player - 0.03 * pop.sal[d.axis], -2, 2)
-	record_statement(s, {"text": "On %s: %s." % [d.title.to_lower(), pv.side.to_lower()], "title": d.title, "effects": {"shift": {d.axis: sign * 4}}, "spoken": false})
+			pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.025 * k, 0, 1)
+			pop.goodwill.player = clampf2(pop.goodwill.player + 0.05 * k * pop.sal[d.axis], -2, 2)
+		elif against: pop.goodwill.player = clampf2(pop.goodwill.player - 0.04 * k * pop.sal[d.axis], -2, 2)
+	record_statement(s, {"text": line.text, "title": d.title, "effects": {"shift": {d.axis: sign * 4}}, "tone": line.tone, "spoken": true})
 	var helps = ""
 	if not pv.mine and pv.owner != "" and pv.owner != "player": helps = " %s owns that side, so the attention helps them too." % party_of(s, pv.owner).short
-	var text = "You threw yourself into the argument over %s, for %s.%s" % [d.title.to_lower(), pv.side.to_lower(), helps]
+	_log(s, "action", "%s: \"%s\"" % [d.title, line.text])
+	return {"ok": true, "major": major, "title": d.title, "quote": line.text, "delivery": delivery, "extra": helps,
+		"text": "You spoke on %s, for %s.%s" % [d.title.to_lower(), pv.side.to_lower(), helps],
+		"before": perceived_before, "after": player_party(s).perceived.duplicate(),
+		"flips": s.flips.slice(flips_before), "changes": group_changes(s, before)}
+
+## Make a side you have spoken for one of your two causes.
+func claim_block(s: Dictionary, axis: String, side: String) -> String:
+	var key = side_key(axis, side)
+	if s.signature.has(key): return "It's already one of your causes."
+	if not s.spoke.has(key): return "Speak for it in a debate first."
+	if s.signature.size() >= C.maxSignatureIssues: return "You already have %d causes. Drop one first." % int(C.maxSignatureIssues)
+	return ""
+
+func act_claim(s: Dictionary, axis: String, side: String) -> Dictionary:
+	var block = claim_block(s, axis, side)
+	if block: return {"ok": false, "text": block}
+	var key = side_key(axis, side)
+	s.signature.append(key)
+	add_ownership(s, "player", key, 0.12)
+	var text = "%s is now one of your causes. Every time you speak for it, your claim grows." % side_label(key)
 	_log(s, "action", text)
-	return {"ok": true, "text": text, "flips": s.flips.slice(flips_before), "changes": group_changes(s, before)}
+	return {"ok": true, "text": text}
+
+## Things the player can put up for debate this month.
+func raise_options(s: Dictionary) -> Array:
+	var out = []
+	for id in s.agenda.offered:
+		var ini = by_id(INITIATIVES, id)
+		var ax = event_axis(ini)
+		if ax == "": continue
+		out.append({"kind": "proposal", "ref": id, "title": ini.title, "text": ini.text, "axis": ax,
+			"side": "L" if float(ini.effects.shift[ax]) < 0 else "R", "chance": 0.55})
+	for t in TOPICS:
+		if t.has("trigger") or debate_by_id(s, t.id) != null: continue
+		if s.week - int(s.debateCooldown.get(t.id, -9999)) < 4 * WEEKS_PER_MONTH: continue
+		out.append({"kind": "topic", "ref": t.id, "title": t.title, "text": t.text, "axis": t.axis, "side": "", "chance": 0.45})
+	return out
+
+func raise_chance(s: Dictionary, opt: Dictionary, line: Dictionary) -> float:
+	var tone_k = {"statesman": 0.85, "folksy": 1.0, "fiery": 1.1, "provocative": 1.25}.get(line.tone, 1.0)
+	return clampf2(opt.chance * (0.6 + 0.5 * debate_reach(s)) * tone_k, 0.1, 0.95)
+
+func raise_lines(opt: Dictionary, side: String) -> Array:
+	if opt.kind == "topic": return LINES.TOPIC_LINES[opt.ref][side]
+	if opt.kind == "proposal" and LINES.PROPOSAL_LINES.has(opt.ref): return LINES.PROPOSAL_LINES[opt.ref]
+	return LINES.AXIS_LINES[opt.axis][side]
+
+## Try to start a debate. It can fizzle: nobody picks it up.
+func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) -> Dictionary:
+	if s.agenda.done: return {"ok": false, "text": "You have already tried to start a debate this month."}
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, 0)
+	s.agenda.done = true
+	var line: Dictionary = raise_lines(opt, side)[line_index]
+	var before = snapshot_groups(s)
+	var perceived_before: Dictionary = player_party(s).perceived.duplicate()
+	var flips_before: int = s.flips.size()
+	var delivery = deliver_line(s, line)
+	var chance = raise_chance(s, opt, line)
+	if delivery.outcome == "viral": chance = 1.0
+	elif delivery.outcome == "gaffe": chance *= 0.5
+	var caught = rand(s) < chance
+	var sign = -1.0 if side == "L" else 1.0
+	shift_perceived(s, {opt.axis: sign * 4})
+	s.spoke[side_key(opt.axis, side)] = s.week
+	record_statement(s, {"text": line.text, "title": opt.title, "effects": {"shift": {opt.axis: sign * 4}}, "tone": line.tone, "spoken": true})
+	var text = ""
+	if caught:
+		var heat = 30 + 15 * debate_reach(s) + (15 if delivery.outcome == "viral" else 0)
+		var lean = sign * (35 if delivery.outcome != "gaffe" else -10)
+		var id = ("ini:" + opt.ref) if opt.kind == "proposal" else opt.ref
+		var d = open_debate(s, id, opt.axis, opt.title, opt.text, "player", heat, lean)
+		if opt.kind == "topic": d.topic = opt.ref
+		_note_move(d, "player", "start", side, s.week)
+		if opt.kind == "proposal": _launch_proposal(s, opt.ref)
+		text = "It caught on. Everyone is arguing about %s, and you started it." % opt.title.to_lower()
+	else:
+		for pop in s.pops: pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.005, 0, 1)
+		text = "Nobody picked it up. The papers ran it on page eleven, under the weather."
+	_log(s, "initiative", "Tried to start a debate on %s: %s" % [opt.title.to_lower(), "it caught on." if caught else "it fizzled."])
+	return {"ok": true, "caught": caught, "title": opt.title, "quote": line.text, "delivery": delivery, "text": text, "extra": text,
+		"before": perceived_before, "after": player_party(s).perceived.duplicate(),
+		"flips": s.flips.slice(flips_before), "changes": group_changes(s, before)}
+
+## A proposal that caught on: its consequences start rolling.
+func _launch_proposal(s: Dictionary, id: String) -> void:
+	var ini = by_id(INITIATIVES, id)
+	var fx: Dictionary = ini.effects.duplicate(true)
+	fx.erase("shift")   # the stance change came with the words
+	apply_effects(s, fx)
+	for sd in ini.get("seeds", []):
+		var lo = int(sd.months[0])
+		var hi = int(sd.months[1])
+		s.scheduled.append({"id": sd.event, "week": s.week + (lo + int(floor(rand(s) * (hi - lo + 1)))) * WEEKS_PER_MONTH})
+	s.flags["initiative:" + id] = s.week
+	s.agenda.used.append(id)
 
 func act_cool(s: Dictionary, id: String) -> Dictionary:
 	var err = can_act(s, 0)
@@ -1803,20 +1844,24 @@ func contradictions(s: Dictionary) -> Array:
 			out.append(c); used[c.fi] = true; used[c.si] = true; axes[c.axis] = true
 	return out
 
-func deliver_line(s: Dictionary, line: Dictionary) -> Dictionary:
+## quick: a line in a smaller debate. No viral clip or gaffe; it mostly
+## shapes your speaking style, and groups react less.
+func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary:
 	var player = player_party(s)
 	var tone: String = line.tone if TONES.has(line.get("tone", "")) else "statesman"
 	var risk: float = line.risk if line.has("risk") and line.risk != null else TONE_RISK[tone]
 	var r = rand(s)
 	var charm: float = player.charisma / 100.0
 	var outcome = "normal"
-	if r < risk * (0.3 + charm * 0.6): outcome = "viral"
+	if quick: pass
+	elif r < risk * (0.3 + charm * 0.6): outcome = "viral"
 	elif r > 1 - risk * (0.55 - charm * 0.35): outcome = "gaffe"
 	var pos = 1.6 if outcome == "viral" else 1.0
 	var neg = 1.8 if outcome == "gaffe" else (1.3 if outcome == "viral" else 1.0)
 	var reacts: Array = TONES[tone].react.duplicate()
 	reacts.append_array(line.get("react", []))
-	var scaled = reacts.map(func(g): return {"who": g.get("who"), "amt": g.amt * (pos if g.amt > 0 else neg)})
+	var qk = 0.4 if quick else 1.0
+	var scaled = reacts.map(func(g): return {"who": g.get("who"), "amt": g.amt * qk * (pos if g.amt > 0 else neg)})
 	apply_effects(s, {"goodwill": scaled, "awareness": 0.06 if outcome == "viral" else (0.035 if outcome == "gaffe" else 0.01)})
 	for g in scaled:
 		for pop in s.pops:

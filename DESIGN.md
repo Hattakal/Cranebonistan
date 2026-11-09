@@ -272,6 +272,10 @@ The designer's aims: the game should be enjoyable first, and it should look like
 - **Sound.** New sounds were added for the pin, typing and the folder. Sound still has a long way to go.
 - **Still to come:** more cartoonish politician portraits (the designer will look for public-domain material), event pictures, the redrawn map with provinces, and election night.
 
+### Speaking (November 2026)
+
+*Decided:* almost every action is about how you say things. Joining a debate means picking a line. In **major debates** (hot ones, or ones the economy or a crisis started) the exact words matter: they are quoted and can go viral or become a gaffe, and a gaffe pushes the argument the other way. In **smaller debates** a line mostly shapes your speaking style. Starting a debate also asks for your exact words, and it can **fizzle**. **Staying out** is a choice: no attention, but a clean record. Championing and "provoke outrage" were folded into speaking: a side you have spoken for can become one of your two causes, and provocation is a tone. Some lines are simply the wrong way to say something (marked risky).
+
 ### Technology
 
 **Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.

@@ -17,8 +17,8 @@ func _init() -> void:
 			var m: int = s.week / 4
 			if m != last:
 				last = m
-				if s.agenda.offered.size() and not s.agenda.done and m % 2 == 0: G.take_initiative(s, s.agenda.offered[0])
-				if s.actionsLeft > 0 and m % 3 == 0: G.act_outrage(s)
+				var opts = G.raise_options(s)
+				if opts.size() and not s.agenda.done and m % 2 == 0: G.act_raise(s, opts[0], opts[0].side if opts[0].side != "" else "L", 0)
 				if s.actionsLeft > 0 and m % 5 == 1 and s.money > 2: G.act_grassroots(s, G.REGIONS[m % 5].id)
 			G.advance_week(s)
 			continue

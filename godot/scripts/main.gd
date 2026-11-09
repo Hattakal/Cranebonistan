@@ -71,6 +71,8 @@ func _build() -> void:
 	_files.changed.connect(func(): _after_change())
 	_files.toast.connect(func(t): _toast(t))
 	_files.open_country.connect(func(id): _country_sheet(id))
+	_files.speak.connect(func(id, side): _speak_sheet(id, side))
+	_files.raise.connect(func(opt): _raise_sheet(opt))
 	var right = VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 0)
@@ -538,6 +540,97 @@ func _result_body(p: Paper, title: String, res: Dictionary) -> void:
 		p.add(Look.caps("Who moved", 11, Look.MUTED, 2))
 		_changes_chips(p, res.changes)
 
+# ----- Speaking in a debate -----
+const TONE_NAMES := {"statesman": "Measured", "fiery": "Fiery", "folksy": "Folksy", "provocative": "Provocative"}
+
+func _tone_tag(box: VBoxContainer, line: Dictionary, extra := "") -> void:
+	var risky: bool = float(line.get("risk", G.TONE_RISK.get(line.tone, 0.3))) >= 0.6
+	box.add_child(Look.caps(TONE_NAMES.get(line.tone, line.tone) + (" · risky" if risky else "") + extra, 10, Look.RED if risky else Look.MUTED, 1))
+
+func _speak_sheet(id: String, side: String) -> void:
+	var d = G.debate_by_id(S, id)
+	if d == null: return
+	var ax: Dictionary = Game.by_id(G.AXES, d.axis)
+	var major: bool = G.is_major(d)
+	var p = _paper(760, false)
+	p.kicker(("Major debate · " if major else "The national debate · ") + ax.issue)
+	p.heading(d.title, 34)
+	p.text(d.text, 16)
+	p.step("Speaking for", (ax.left if side == "L" else ax.right))
+	if major: p.small("The whole country is watching. Your exact words will be quoted: they can go viral, or become a gaffe that helps the other side.")
+	else: p.small("A smaller argument. Your line mostly shapes how people hear you; it won't make the evening news.")
+	var lines: Array = G.debate_lines(d, side)
+	for j in lines.size():
+		var line: Dictionary = lines[j]
+		p.card("slip", func(box):
+			_tone_tag(box, line)
+			box.add_child(Look.label("“%s”" % line.text, "news_italic", 20, Look.INK, true)),
+			func():
+				var res: Dictionary = G.act_speak(S, id, side, j)
+				if not res.ok:
+					_toast(res.text); return
+				if res.major:
+					p.clear()
+					_result_body(p, res.title, res)
+					p.actions([p.button("Back to work", func(): _done(p))])
+					p.top()
+				else:
+					_toast(res.text + (" " + res.delivery.styleNote if res.delivery.styleNote != "" else ""))
+					_done(p))
+	p.actions([p.button("Stay out of it", func(): p.close())])
+
+func _raise_sheet(opt: Dictionary) -> void:
+	var p = _paper(760, false)
+	if opt.side != "": _raise_words(p, opt, opt.side)
+	else: _raise_side(p, opt)
+
+func _raise_head(p: Paper, opt: Dictionary) -> void:
+	var ax: Dictionary = Game.by_id(G.AXES, opt.axis)
+	p.kicker(("Proposal · " if opt.kind == "proposal" else "Start a debate · ") + ax.issue)
+	p.heading(opt.title, 34)
+	p.text(opt.text, 16)
+
+func _raise_side(p: Paper, opt: Dictionary) -> void:
+	p.clear()
+	_raise_head(p, opt)
+	p.step("Step 1 of 2", "Which side are you on?")
+	var ax: Dictionary = Game.by_id(G.AXES, opt.axis)
+	var mine = G.manifesto_side(S, opt.axis)
+	for side in ["L", "R"]:
+		p.card("index", func(box):
+			box.add_child(Look.label(("★ " if mine == side else "") + (ax.left if side == "L" else ax.right), "display", 22, Look.INK))
+			if mine != "" and mine != side: box.add_child(Look.label("Against your manifesto", "body", 13, Look.RED)),
+			func(): _raise_words(p, opt, side))
+	p.actions([p.button("Not now", func(): p.close())])
+
+func _raise_words(p: Paper, opt: Dictionary, side: String) -> void:
+	p.clear()
+	_raise_head(p, opt)
+	var ax: Dictionary = Game.by_id(G.AXES, opt.axis)
+	p.step("Step 2 of 2" if opt.side == "" else "Your words", "How do you put it to the country?")
+	p.small("Arguing for %s. Whether it catches on depends on your reach and on how you say it. Bold lines catch more easily, and blow up more easily." % (ax.left if side == "L" else ax.right).to_lower())
+	var lines: Array = G.raise_lines(opt, side)
+	for j in lines.size():
+		var line: Dictionary = lines[j]
+		p.card("slip", func(box):
+			_tone_tag(box, line, " · %d%% chance it catches on" % Game.jround(G.raise_chance(S, opt, line) * 100))
+			box.add_child(Look.label("“%s”" % line.text, "news_italic", 20, Look.INK, true)),
+			func():
+				var res: Dictionary = G.act_raise(S, opt, side, j)
+				if not res.ok:
+					_toast(res.text); return
+				p.clear()
+				_result_body(p, opt.title, res)
+				p.stamp("It caught on" if res.caught else "It fizzled", Look.GOOD if res.caught else Look.MUTED)
+				p.actions([p.button("Back to work", func(): _done(p))])
+				p.top())
+	if opt.side == "":
+		var back = p.button("← Other side", func(): _raise_side(p, opt), false)
+		back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		p.add(back)
+	else:
+		p.actions([p.button("Not now", func(): p.close())])
+
 # ----- The budget: a ledger -----
 func _budget_sheet(front: Dictionary, keep_scroll := 0) -> void:
 	var key = _front_key()
@@ -849,7 +942,7 @@ func _shot(args: Dictionary) -> void:
 	while S.week < weeks and guard < 500:
 		guard += 1
 		if S.queue.is_empty():
-			if S.actionsLeft > 0 and S.week % 8 == 0: G.act_outrage(S)
+			pass
 			G.advance_week(S); continue
 		var f: Dictionary = S.queue[0]
 		match f.type:
@@ -894,6 +987,13 @@ func _shot(args: Dictionary) -> void:
 			_files._scroll.scroll_vertical = int(args.scroll)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
 	if args.has("country"): _country_sheet(args.country)
+	if args.has("speak"):
+		S.queue.clear()
+		var ds: Array = Game.ssort(S.debates.duplicate(), func(a, b): return b.heat - a.heat)
+		_speak_sheet(ds[int(args.speak)].id, "L")
+	if args.has("raise"):
+		S.queue.clear()
+		_raise_sheet(G.raise_options(S)[int(args.raise)])
 	if args.has("then"):
 		# move on to the next poll and catch the motion part-way
 		var target = S.polls.size() + 1

@@ -24,7 +24,7 @@ func _init() -> void:
 			if s.debates.size() and s.actionsLeft > 0:
 				var d = s.debates[0]
 				for x in s.debates: if x.heat > d.heat: d = x
-				G.act_fan(s, d.id, "R" if G.player_party(s).manifesto[d.axis] > 0 else "L")
+				G.act_speak(s, d.id, "R" if G.player_party(s).manifesto[d.axis] > 0 else "L", months % 4)
 			if months % 6 == 0:
 				var line = "m%d sup=%.3f ev=%d |" % [months, s.lastSupport.player, events]
 				for d in s.debates: line += " %s h%d l%d [%s];" % [d.title.substr(0, 22), d.heat, d.lean, d.source]
