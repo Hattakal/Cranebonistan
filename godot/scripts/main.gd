@@ -16,6 +16,7 @@ var _btn_week: Button
 var _btn_skip: Button
 var _menu = {}
 var _board: Board
+var _files: Files
 var _map: MapView
 var _ticker: Ticker
 var _sheet_layer: Control
@@ -53,13 +54,23 @@ func _build() -> void:
 	hq.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	hq.add_theme_constant_override("separation", 0)
 	root.add_child(hq)
+	var left = Control.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = 0.82
+	hq.add_child(left)
 	_board = Board.new()
 	_board.game = G
-	_board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_board.size_flags_stretch_ratio = 0.82
+	_board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_board.open_decision.connect(func(): _open_front())
-	_board.open_file.connect(func(tab): _toast("The %s file arrives in the next stage." % tab))
-	hq.add_child(_board)
+	_board.open_file.connect(func(tab): _show_file(tab))
+	left.add_child(_board)
+	_files = Files.new()
+	_files.G = G
+	_files.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_files.changed.connect(func(): _after_change())
+	_files.toast.connect(func(t): _toast(t))
+	_files.open_country.connect(func(id): _country_sheet(id))
+	left.add_child(_files)
 	var right = VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 0)
@@ -68,8 +79,8 @@ func _build() -> void:
 	_map.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_map.setup(G)
 	_map.tip_provider = _tip
-	_map.region_clicked.connect(func(id): _toast("%s: the electorate file arrives in the next stage." % Game.by_id(G.REGIONS, id).name))
-	_map.foreign_clicked.connect(func(id): _toast("%s: country profiles arrive in the next stage." % " ".join(Game.by_id(G.FOREIGN, id).name)))
+	_map.region_clicked.connect(func(id): _files.S = S; _files.open_region(id); _sync_menu())
+	_map.foreign_clicked.connect(func(id): _country_sheet(id))
 	right.add_child(_map)
 	_ticker = Ticker.new()
 	_ticker.custom_minimum_size.y = 34
@@ -101,7 +112,7 @@ func _build_bar() -> Control:
 	menu.add_theme_constant_override("separation", 0)
 	for m in [["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["actions", "megaphone", "Actions"], ["parties", "landmark", "Country"], ["polls", "chart-line", "Polls"], ["diary", "book-open", "Diary"]]:
 		var b = _menu_button(m[1], m[2])
-		b.pressed.connect(func(): _toast("The %s file arrives in the next stage." % m[2].to_lower()))
+		b.pressed.connect(func(): _show_file(m[0]))
 		menu.add_child(b)
 		_menu[m[0]] = b
 	h.add_child(menu)
@@ -191,6 +202,38 @@ func render() -> void:
 	_render_map()
 	_board.render(S)
 	_ticker.set_items(_ticker_items())
+	_files.S = S
+	_files.render()
+	_sync_menu()
+
+func _show_file(tab: String) -> void:
+	_files.S = S
+	_files.show_tab(tab)
+	_sync_menu()
+
+func _sync_menu() -> void:
+	for k in _menu:
+		var on: bool = _files.visible and _files.tab == k
+		_menu[k].add_theme_stylebox_override("normal", Look.box(Color("5a2a1d") if on else Color(0, 0, 0, 0), 0, Color.TRANSPARENT, 0, 0, 6))
+		_menu[k].add_theme_color_override("font_color", Look.HEAD if on else Color("cdbb9b"))
+		_menu[k].add_theme_color_override("icon_normal_color", Look.HEAD if on else Color("cdbb9b"))
+
+func _country_sheet(id: String) -> void:
+	var f = Game.by_id(G.FOREIGN, id)
+	var st: Dictionary = S.countries.get(id, {})
+	var sheet = Sheet.new()
+	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	_sheet_layer.add_child(sheet)
+	sheet.closed.connect(func(): _sheet_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE)
+	sheet.kicker("Neighbouring country · " + st.get("relation", f.relation))
+	sheet.title(" ".join(f.name), f.summary)
+	sheet.note("%s: %s" % [f.leader.title, f.leader.name])
+	for x in f.facts: sheet.bullet(x)
+	var notes: Array = st.get("notes", [])
+	if notes.size():
+		sheet.kicker("Recent developments")
+		for i in range(notes.size() - 1, -1, -1): sheet.bullet("%s — %s" % [G.date_label(notes[i].week, false), notes[i].text])
+	sheet.choice("Close", func(): sheet.close())
 
 func _after_change() -> void:
 	_save()
@@ -404,6 +447,9 @@ func _shot(args: Dictionary) -> void:
 	for i in 20: await get_tree().process_frame
 	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
 	if args.has("open"): _open_front()
+	if args.has("file"): _show_file(args.file)
+	if args.has("region"): _files.S = S; _files.open_region(args.region)
+	if args.has("country"): _country_sheet(args.country)
 	for i in 10: await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(args.shot)
 	print("shot saved ", args.shot)
@@ -500,6 +546,12 @@ class Sheet extends Control:
 	func note(t: String) -> void:
 		var l = Look.label(t, "type", 15, Look.INK, true)
 		_v.add_child(l)
+		if _choices.get_parent() == _v: _v.move_child(_choices, -1)
+	func kicker(t: String) -> void:
+		_v.add_child(Look.caps(t, 12, Look.RED, 2))
+		if _choices.get_parent() == _v: _v.move_child(_choices, -1)
+	func bullet(t: String) -> void:
+		_v.add_child(Look.label("•  " + t, "news", 15, Look.INK, true))
 		if _choices.get_parent() == _v: _v.move_child(_choices, -1)
 	func clear_choices() -> void:
 		for c in _choices.get_children(): c.queue_free()
