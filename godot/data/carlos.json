@@ -1,0 +1,134 @@
+{
+ "_note": "Carlos Aster, your advisor: the voice of the interface. Each line has an id; a recording saved as godot/assets/voice/carlos/<id>.ogg (or .wav) plays with it. 'tutorial' lines play in order on the first month; the rest are picked at random without repeating until a situation's lines run out. He spins, but never lies about a number: the numbers are always shown next to him.",
+ "LINES": {
+  "tutorial": [
+   {"id": "tut_1", "text": "Boss! Welcome to headquarters. It's not much yet: a desk, a map, a kettle. But it's yours, and I've got a feeling about you."},
+   {"id": "tut_2", "text": "The board on the left is what needs you right now. The map shows who leads where. Everything else is in the files along the top."},
+   {"id": "tut_3", "text": "The whole country argues about something every month. Open Debates, pick a side, and say it your way. People remember how you said it."},
+   {"id": "tut_4", "text": "You get three moves a month. Speak, start your own argument, open an office somewhere, dig into the competition. No wrong answers, boss. Well. Mostly."},
+   {"id": "tut_5", "text": "When you're ready, press play and the weeks roll on. I'll be right here. I'm always right here."}
+  ],
+  "month_start": [
+   {"id": "month_1", "text": "New month, boss. Three fresh moves. The country's waiting."},
+   {"id": "month_2", "text": "A new month! I've cleared your diary. Well, I've cleared it of things I didn't think you'd enjoy."},
+   {"id": "month_3", "text": "Morning, boss. Coffee's on the desk, the debates are on the board."},
+   {"id": "month_4", "text": "Another month. You know, I keep a list of everything you get right. I need a bigger notebook."},
+   {"id": "month_5", "text": "Three moves this month. Make them count. Not that you'd do anything else."},
+   {"id": "month_6", "text": "Fresh month, fresh headlines. Somebody out there is saying something you could answer."}
+  ],
+  "poll_up": [
+   {"id": "pollup_1", "text": "Up! Up, boss! I told the office you'd do this. I told them in writing."},
+   {"id": "pollup_2", "text": "The poll's up. The pollsters are finally catching up with what I already knew."},
+   {"id": "pollup_3", "text": "That's the trend, boss. That's the beginning of something."},
+   {"id": "pollup_4", "text": "Another rise. At this rate I'll have to learn how to address a minister."},
+   {"id": "pollup_5", "text": "Look at that line go. It's your instincts, boss. You can't teach that."}
+  ],
+  "poll_down": [
+   {"id": "polldown_1", "text": "A small dip. Pollsters. They phone people during dinner and expect honesty."},
+   {"id": "polldown_2", "text": "It's down a little, but the people who matter haven't moved. I checked. Well, I'm fairly sure."},
+   {"id": "polldown_3", "text": "Polls go up, polls go down. Your vision stays the same. That's what they'll remember."},
+   {"id": "polldown_4", "text": "Margins of error, boss. Margins of error everywhere you look."},
+   {"id": "polldown_5", "text": "A dip before the jump. Every great comeback starts with one."}
+  ],
+  "poll_flat": [
+   {"id": "pollflat_1", "text": "Steady. Solid. A foundation, boss. You can build a palace on a foundation."},
+   {"id": "pollflat_2", "text": "Holding firm while everyone else wobbles. That's leadership."},
+   {"id": "pollflat_3", "text": "No change this month. The calm before something, I'd say."}
+  ],
+  "annual_poll": [
+   {"id": "annual_1", "text": "The big December poll is in, region by region. I've read it twice. I liked it more the second time."},
+   {"id": "annual_2", "text": "The annual numbers, boss. A year of your work, all on one sheet of paper."}
+  ],
+  "budget": [
+   {"id": "budget_1", "text": "Budget time! The fun part. Where shall we put the money, boss?"},
+   {"id": "budget_2", "text": "The quarterly ledger. I've sharpened your pencils."},
+   {"id": "budget_3", "text": "Money in, money out. You always know where it does the most good."},
+   {"id": "budget_4", "text": "A few donors have been in touch. Generous people. Very generous. I'm sure it's because they believe in you."}
+  ],
+  "event": [
+   {"id": "event_1", "text": "Something's happened, boss. Every channel wants your reaction."},
+   {"id": "event_2", "text": "Big news. The country's turning to you for an answer."},
+   {"id": "event_3", "text": "The phones are ringing. They want you, boss. Specifically you."},
+   {"id": "event_4", "text": "A story's breaking. Whatever you say, say it like you mean it."}
+  ],
+  "viral": [
+   {"id": "viral_1", "text": "It's everywhere! My cousin sent it to me. My cousin doesn't even like politics!"},
+   {"id": "viral_2", "text": "That clip is on every phone in Cranebo. They're making songs out of it, boss."},
+   {"id": "viral_3", "text": "Did you see that? Of course you did. You were there. You were magnificent."},
+   {"id": "viral_4", "text": "That's the one they'll play at your retirement party. Decades from now, obviously."}
+  ],
+  "gaffe": [
+   {"id": "gaffe_1", "text": "I think you made a great point, boss."},
+   {"id": "gaffe_2", "text": "Bold. Very bold. The country isn't ready for that kind of honesty yet. They will be."},
+   {"id": "gaffe_3", "text": "The commentators didn't get it. Commentators never get it."},
+   {"id": "gaffe_4", "text": "Let's call that a conversation starter."}
+  ],
+  "speak": [
+   {"id": "speak_1", "text": "That's telling them, boss."},
+   {"id": "speak_2", "text": "Lovely. I'd have said it the same way. Well, not as well."},
+   {"id": "speak_3", "text": "That one's going on the wall."},
+   {"id": "speak_4", "text": "They'll be quoting that in the cafés tonight."},
+   {"id": "speak_5", "text": "Short, clear, unmistakably you."}
+  ],
+  "raise_caught": [
+   {"id": "caught_1", "text": "It caught! Everyone's arguing about it now. And who started it? You did."},
+   {"id": "caught_2", "text": "That's agenda-setting, boss. Textbook. They'll write textbooks."},
+   {"id": "caught_3", "text": "The whole country took the bait. I mean, took up the issue."}
+  ],
+  "raise_fizzled": [
+   {"id": "fizzle_1", "text": "Ahead of its time, boss. Ideas like that need a few months to ripen."},
+   {"id": "fizzle_2", "text": "The papers buried it. Their loss. Literally, their readers' loss."},
+   {"id": "fizzle_3", "text": "Not everyone's ready to hear the truth on a Tuesday."}
+  ],
+  "major_debate": [
+   {"id": "major_1", "text": "This one's big, boss. The whole country's arguing. Whatever you say gets quoted."},
+   {"id": "major_2", "text": "Everyone's talking about it. If you're going to say something, now's the time. If you're not, that's a statement too."}
+  ],
+  "community": [
+   {"id": "community_1", "text": "A new office! I've ordered a sign. A big one."},
+   {"id": "community_2", "text": "Volunteers, a noticeboard and a kettle. That's how empires start, boss."},
+   {"id": "community_3", "text": "The locals love it. Well, the ones who came. They brought cake."}
+  ],
+  "steer": [
+   {"id": "steer_1", "text": "A new direction. Visionary. Some of our people will grumble, but they always come round. Mostly."},
+   {"id": "steer_2", "text": "Changing course takes courage. Lucky we have plenty."}
+  ],
+  "figure_quit": [
+   {"id": "quit_1", "text": "Between us, boss, they were holding you back."},
+   {"id": "quit_2", "text": "One door closes. Frankly, it was a draughty door."},
+   {"id": "quit_3", "text": "They'll regret it. People always do, once you've won."}
+  ],
+  "dirty_money": [
+   {"id": "money_1", "text": "Generous people, those donors. And so discreet."},
+   {"id": "money_2", "text": "Money's money, boss. It doesn't come with opinions. Usually."}
+  ],
+  "debate_night": [
+   {"id": "debate_1", "text": "Tonight's the big debate. Lights, cameras, and you. They don't stand a chance."},
+   {"id": "debate_2", "text": "The final debate, boss. Just be yourself. Your self is very electable."}
+  ],
+  "election_near": [
+   {"id": "near_1", "text": "Three months to the election. I've stopped sleeping. You should keep sleeping; one of us needs to look fresh."},
+   {"id": "near_2", "text": "The home stretch, boss. Every move counts double now. Well, it feels that way."}
+  ],
+  "won": [
+   {"id": "won_1", "text": "We did it! You did it! I always said so. I have it in writing!"},
+   {"id": "won_2", "text": "The largest party in the Assembly. I'd like to say I'm surprised, boss, but I'm not."}
+  ],
+  "lost": [
+   {"id": "lost_1", "text": "The country wasn't ready for you, boss. Not yet."},
+   {"id": "lost_2", "text": "A moral victory. The best kind. The other kind is overrated."}
+  ],
+  "tip": [
+   {"id": "tip_1", "text": "Tip, boss: a story already in the headlines is far easier to turn into a national argument."},
+   {"id": "tip_2", "text": "Speak for the sides that are yours. Heat on someone else's issue warms someone else's voters."},
+   {"id": "tip_3", "text": "Offices take a while to pay off, but they never stop working. Like me."},
+   {"id": "tip_4", "text": "Provocative lines catch fire. Sometimes the fire is on us. Mostly it's on them."},
+   {"id": "tip_5", "text": "Say the same kind of thing often enough and people start to recognise your voice. That's charisma, boss."},
+   {"id": "tip_6", "text": "If an argument is helping the competition, change the subject. Nobody notices. Nobody important."},
+   {"id": "tip_7", "text": "Staying out of a fight is allowed. Nobody can quote what you didn't say."},
+   {"id": "tip_8", "text": "Business money is easy money. Just don't let anyone see the receipt."},
+   {"id": "tip_9", "text": "The Country file lists every problem we could talk about. Problems are opportunities, boss."},
+   {"id": "tip_10", "text": "Your causes are your brand. Two is the limit; pick the ones with the most angry voters."}
+  ]
+ }
+}

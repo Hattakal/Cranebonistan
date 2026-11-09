@@ -26,6 +26,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 - **The state of the nation.** Jobs, prices, migration, border tension and the public mood drift and push each other.
 - **One major crisis** in the second year, from five. Your campaign can make one up to twice as likely.
 - **Living rivals, trust in politics, a leader cult, dirty money.**
+- **Carlos and Margaret.** Carlos Aster, your advisor, talks from the corner of headquarters: the tutorial, polls, the budget, viral clips (and, now and then, praise for a gaffe). Click him for a tip. Margaret Teyl, the party secretary, leaves a note when you cross a line; agree or brush her off, and she remembers.
 - **The final debate and the profile.** Rivals quote you against yourself; at the end a hostile newspaper writes your story.
 
 ## Files
@@ -37,6 +38,8 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/issues.json` | Minor issues: local stories, each with its own lines |
 | `godot/data/party.json` | Your party's politicians |
 | `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
+| `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |
+| `godot/data/margaret.json` | Margaret's notes and the two ways to answer her |
 | `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Teyl (not yet shown in the Godot version) |
 | `godot/scripts/sim.gd` | The rules (autoload `Game`). No screen code |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |
@@ -44,10 +47,12 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/scripts/files.gd` | The planning files along the top bar |
 | `godot/scripts/paper.gd` | Decision sheets as paper: front pages, index cards, the ledger |
 | `godot/scripts/map_view.gd` | The map |
+| `godot/scripts/advisor.gd` | Carlos in the corner of headquarters, and Margaret's notes |
 | `godot/scripts/look.gd` | Colours, fonts and small builders |
-| `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `events/` and `portraits/` for pictures to come |
+| `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `voice/carlos/` for Carlos's recordings; `events/` and `portraits/` for pictures to come |
 | `godot/tests/` | `parity.gd` plays a whole seeded game as a smoke test; `debates.gd` prints how the national debate develops |
 | `tools/build_map.py` | Builds the map from the Krita file |
+| `tools/voice_script.py` | Writes [VOICE.md](VOICE.md), the recording script for Carlos, from his lines |
 | `tools/remap_axes.py` | One-off script that moved the content from eight axes to seven |
 
 Run the tests from the repository root:

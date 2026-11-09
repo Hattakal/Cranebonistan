@@ -96,6 +96,13 @@ func _build() -> void:
 	_sheet_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_sheet_layer)
+	_advisor = Advisor.new()
+	_advisor.z_index = 25
+	add_child(_advisor)
+	_advisor.margaret_answered.connect(func(agreed):
+		var t = G.teyl(S)
+		if t: t.loyalty = clampf(t.loyalty + (6.0 if agreed else -8.0), 0, 100)
+		_save())
 
 func _build_bar() -> Control:
 	_bar = PanelContainer.new()
@@ -212,6 +219,67 @@ func render() -> void:
 	_files.S = S
 	_files.render()
 	_sync_menu()
+	_react()
+
+# ---------- Carlos and Margaret react to what changed ----------
+var _advisor: Advisor
+var _snap = null
+
+func _snapshot() -> Dictionary:
+	var c: Dictionary = G.calendar(S.week)
+	var comm = 0
+	for k in S.communities: comm += int(S.communities[k])
+	return {"month": c.year * 12 + c.monthIndex, "polls": S.polls.size(), "front": S.queue[0].type if S.queue.size() else "",
+		"lost": S.figuresLost.size(), "comm": comm, "steer": S.steer != null, "result": S.result != null,
+		"flips": S.flips.filter(func(f): return f.party == "player").size(),
+		"dirty": S.record.money.filter(func(m): return m.dirty).size()}
+
+func _react() -> void:
+	if _advisor == null: return
+	var now = _snapshot()
+	var was = _snap
+	_snap = now
+	if was == null:
+		if not S.flags.has("tutorial") and S.week < 8:
+			S.flags["tutorial"] = true
+			_advisor.call_deferred("tutorial")
+		return
+	if now.result and not was.result:
+		_advisor.say("won" if S.result.playerWon else "lost", true)
+		return
+	if now.lost > was.lost:
+		_advisor.say("figure_quit", false, 0.8)
+		_margaret("figure_quit")
+	if now.front != was.front:
+		match now.front:
+			"budget": _advisor.say("budget", false, 0.8)
+			"event": _advisor.say("event", false, 0.5)
+			"debate": _advisor.say("debate_night", true)
+	if now.polls > was.polls and S.polls.size() > 1:
+		var d: float = S.polls[-1].national.player - S.polls[-2].national.player
+		if not S.polls[-1].get("tracker", true): _advisor.say("annual_poll", false, 0.9)
+		elif d > 0.004: _advisor.say("poll_up", false, 0.8)
+		elif d < -0.004: _advisor.say("poll_down", false, 0.8)
+		else: _advisor.say("poll_flat", false, 0.4)
+	elif now.month != was.month:
+		var left = int(ceil(float(G.ELECTION_WEEK - S.week) / G.WEEKS_PER_MONTH))
+		if left == 3: _advisor.say("election_near", true)
+		else: _advisor.say("month_start", false, 0.35)
+	if now.comm > was.comm: _advisor.say("community", false, 0.7)
+	if now.steer and not was.steer:
+		_advisor.say("steer", false, 0.8)
+		_margaret("steer")
+	if now.flips > was.flips: _margaret("flip")
+	if now.dirty > was.dirty:
+		_advisor.say("dirty_money", false, 0.7)
+		_margaret("dirty_money")
+
+## Margaret only appears now and then: at most once every two months.
+func _margaret(trigger: String) -> void:
+	if G.teyl(S) == null: return
+	if S.week - int(S.flags.get("margaretLast", -999)) < 8: return
+	S.flags["margaretLast"] = S.week
+	_advisor.margaret(trigger)
 
 func _show_file(tab: String) -> void:
 	_files.S = S
@@ -571,6 +639,7 @@ func _speak_sheet(id: String, side: String) -> void:
 				var res: Dictionary = G.act_speak(S, id, side, j)
 				if not res.ok:
 					_toast(res.text); return
+				_after_speaking(res, line, d.axis, side)
 				if res.major:
 					p.clear()
 					_result_body(p, res.title, res)
@@ -580,6 +649,16 @@ func _speak_sheet(id: String, side: String) -> void:
 					_toast(res.text + (" " + res.delivery.styleNote if res.delivery.styleNote != "" else ""))
 					_done(p))
 	p.actions([p.button("Stay out of it", func(): p.close())])
+
+func _after_speaking(res: Dictionary, line: Dictionary, axis: String, side: String) -> void:
+	var outcome: String = res.delivery.outcome
+	if outcome == "viral": _advisor.say("viral", true)
+	elif outcome == "gaffe":
+		_advisor.say("gaffe", false, 0.35)   # only now and then, so it stays funny
+		if line.tone == "provocative": _margaret("provocative_gaffe")
+	elif res.get("major", false): _advisor.say("speak", false, 0.4)
+	var mine = G.manifesto_side(S, axis)
+	if mine != "" and mine != side: _margaret("against_manifesto")
 
 func _raise_sheet(opt: Dictionary) -> void:
 	var p = _paper(760, false)
@@ -621,6 +700,8 @@ func _raise_words(p: Paper, opt: Dictionary, side: String) -> void:
 				var res: Dictionary = G.act_raise(S, opt, side, j)
 				if not res.ok:
 					_toast(res.text); return
+				_after_speaking(res, line, opt.axis, side)
+				if res.delivery.outcome == "normal": _advisor.say("raise_caught" if res.caught else "raise_fizzled", false, 0.8)
 				p.clear()
 				_result_body(p, opt.title, res)
 				p.stamp("It caught on" if res.caught else "It fizzled", Look.GOOD if res.caught else Look.MUTED)
@@ -989,6 +1070,10 @@ func _shot(args: Dictionary) -> void:
 			_files._scroll.scroll_vertical = int(args.scroll)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
 	if args.has("country"): _country_sheet(args.country)
+	if args.has("margaret"):
+		_advisor.margaret(args.margaret)
+	if args.has("carlos"):
+		_advisor.say(args.carlos, true)
 	if args.has("build"):
 		for name in ["Cranebo", "Tarrpolis", "Bayernal"]:
 			S.actionsLeft = 3; S.money = 9.0

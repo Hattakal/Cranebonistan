@@ -1,0 +1,31 @@
+{
+ "_note": "Margaret Teyl, party secretary. She speaks in text only and appears rarely: when you cross a line. At most once every two months. 'Agree' raises her loyalty; 'dismiss' lowers it. If her loyalty falls below 25 she leaves the party.",
+ "LINES": {
+  "flip": [
+   "You said the opposite of what you said in spring. People keep cuttings, you know. So do I.",
+   "That's a different position from the one on our posters. Either change the posters or change your mind back."
+  ],
+  "against_manifesto": [
+   "That's not what our manifesto says. If we're changing our minds, the party should hear it from you, not from the evening news.",
+   "Our members knocked on doors for the other side of that argument. I'd like to be able to tell them why."
+  ],
+  "dirty_money": [
+   "I've seen where that money came from. When it comes out, and it will, I won't be the one explaining it.",
+   "We said we weren't for sale. That donor clearly thinks we are."
+  ],
+  "provocative_gaffe": [
+   "That line will follow you for years. Some of our people had to apologise on your behalf today.",
+   "You can be angry without being cruel. The voters know the difference, even when the cameras don't."
+  ],
+  "steer": [
+   "You're moving the party. Fine, it's your party. But talk to the people who built it before you move it.",
+   "Some of us joined for what the manifesto said. I hope you know what you're trading it for."
+  ],
+  "figure_quit": [
+   "That's a good person gone. I'd like to know whose turn it is next.",
+   "When people like that leave, it isn't because of the coffee."
+  ]
+ },
+ "AGREE": ["You're right, Margaret.", "Point taken.", "I'll think about it. Seriously."],
+ "DISMISS": ["Not now, Margaret.", "It's politics. Everyone does it.", "We'll talk after the election."]
+}
