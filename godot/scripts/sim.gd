@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 9
+const SAVE_VERSION := 10
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -51,6 +51,8 @@ var WEEKS_PER_YEAR: int
 var ELECTION_WEEK: int
 var BUDGET_KEYS: Array = []
 var _events_by_id = {}
+var TOPICS: Array = []        # debate topics (data/debates.json)
+var _event_axis = {}
 
 func _init() -> void:
 	load_content("res://data/content.json")
@@ -74,6 +76,13 @@ func load_content(path: String) -> void:
 	BUDGET_KEYS.append_array(["social", "tv", "tour"])
 	_events_by_id = {}
 	for e in EVENTS: _events_by_id[e.id] = e
+	TOPICS = JSON.parse_string(FileAccess.get_file_as_string("res://data/debates.json")).TOPICS
+	_event_axis = {}
+	# Godot rules: the national debate is the main game, events are rarer
+	C.actionsPerMonth = 3
+	C.eventChance = 0.22
+	C.maxQuietMonths = 3
+	C.newsWaveChance = 0.0
 
 # ---------- Small helpers ----------
 static func clampf2(v: float, lo: float, hi: float) -> float:
@@ -228,6 +237,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {},
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -260,6 +270,12 @@ func new_game(opts := {}) -> Dictionary:
 		trim_claims(s, p.id)
 	s.pops = build_pops(s)
 	seed_loyalty(s)
+	# the country is already arguing about something
+	var general = TOPICS.filter(func(t): return not t.has("trigger"))
+	for i in 2:
+		var t: Dictionary = pick(s, general)
+		general.erase(t)
+		open_debate(s, t.id, t.axis, t.title, t.text, "news", 28.0 + rand(s) * 20, (rand(s) - 0.5) * 40)
 	s.lastSupport = summarize(s, s.pops).support
 	run_hooks(s)
 	return s
@@ -796,6 +812,7 @@ func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 # ---------- Monthly dynamics ----------
 func monthly_update(s: Dictionary) -> void:
 	for ax in s.salMod: s.salMod[ax] *= C.salienceDecay
+	debates_monthly(s)
 	if rand(s) < C.newsWaveChance:
 		var ax: Dictionary = pick(s, AXES)
 		s.salMod[ax.id] = clampf2(float(s.salMod.get(ax.id, 0)) + C.newsWaveSize, -0.5, 1.5)
@@ -1163,6 +1180,9 @@ func event_weight(s: Dictionary, e: Dictionary) -> float:
 		var cond: String = when[k]
 		var n = float(cond.substr(1))
 		if (v < n) if cond[0] == "<" else (v > n): w *= 3
+	var ax = event_axis(e)
+	for d in s.get("debates", []):
+		if ax != "" and d.axis == ax and d.heat >= 50: w *= 2.5
 	return w
 
 func draw_event(s: Dictionary) -> Variant:
@@ -1192,6 +1212,10 @@ func monthly_event(s: Dictionary) -> void:
 	var forced = false
 	for x in s.scheduled:
 		if x.week <= s.week: forced = true
+	for d in s.debates:
+		if d.heat >= 75 and not d.get("sparked", false):
+			d.sparked = true
+			forced = true
 	if not forced and s.quietMonths < C.maxQuietMonths and rand(s) > C.eventChance:
 		s.quietMonths += 1
 		return
@@ -1241,6 +1265,10 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 	var statement: bool = not fx.has("defect") and not str(ev.id).begins_with("defectors_")
 	record_statement(s, {"text": quote if quote else choice.label, "title": ev.title, "effects": fx, "tone": tone, "spoken": quote != null, "statement": statement})
 	s.flags["seen:" + str(ev.id)] = s.week
+	var eax = event_axis(ev)
+	if eax != "" and ev.get("kind", "") != "trap":
+		var sh = float(fx.get("shift", {}).get(eax, 0))
+		open_debate(s, "ev:" + str(ev.id), eax, ev.title, ev.text, "news", 28, signf(sh) * 20)
 	_log(s, "event", "%s: %s%s" % [ev.title, ("\"%s\"" % quote) if quote else (choice.label + "."), extra])
 	finish_front(s, "event")
 	return {"before": before, "after": player_party(s).perceived.duplicate(), "flips": s.flips.slice(flips_before), "extra": extra,
@@ -1249,8 +1277,12 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 # ---------- News ----------
 func flush_news(s: Dictionary) -> void:
 	if s.news.is_empty(): return
-	s.queue.push_front({"type": "news", "items": s.news})
-	for n in s.news: s.log.append({"week": n.week, "kind": "news", "text": n.title + "."})
+	# debate headlines only reach the ticker and the board; the rest stop the clock
+	var loud = s.news.filter(func(n): return not n.get("quiet", false))
+	if loud.size(): s.queue.push_front({"type": "news", "items": loud})
+	for n in s.news:
+		var t: String = n.title
+		s.log.append({"week": n.week, "kind": "news", "text": t if t.right(1) in [".", "?", "!"] else t + "."})
 	s.news = []
 
 # ---------- Polls ----------
@@ -1366,6 +1398,10 @@ func world_monthly(s: Dictionary) -> void:
 	if ruling and w.border > 65: ruling.stability = clampf2(ruling.stability + 1, 0, 100)
 	update_climate(s)
 	s.worldPrev = prev
+	if not s.has("worldHistory"): s.worldHistory = []
+	s.worldHistory.append(merged(prev, {"week": s.week}))
+	if s.worldHistory.size() > 48: s.worldHistory = s.worldHistory.slice(-48)
+	debates_from_world(s)
 
 func update_climate(s: Dictionary) -> void:
 	var w: Dictionary = s.world
@@ -1390,7 +1426,10 @@ func offer_initiatives(s: Dictionary) -> void:
 	s.agenda.done = false
 
 func take_initiative(s: Dictionary, id: String) -> Dictionary:
-	if s.agenda.done or not s.agenda.offered.has(id): return {"ok": false, "text": "You have already set this month's agenda."}
+	if s.agenda.done or not s.agenda.offered.has(id): return {"ok": false, "text": "You have already started a debate this month."}
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, 0)
 	var ini = by_id(INITIATIVES, id)
 	var flips_before: int = s.flips.size()
 	var before = snapshot_groups(s)
@@ -1405,7 +1444,216 @@ func take_initiative(s: Dictionary, id: String) -> Dictionary:
 	s.agenda.used.append(id)
 	record_statement(s, {"text": ini.get("quote", ini.title), "title": ini.title, "effects": ini.effects, "spoken": ini.has("quote")})
 	_log(s, "initiative", "Put on the agenda: %s." % ini.title)
+	var iax = event_axis(ini)
+	if iax != "":
+		var d = open_debate(s, "ini:" + id, iax, ini.title, ini.text, "player", 40, signf(float(ini.effects.shift[iax])) * 30)
+		_note_move(d, "player", "start", "L" if float(ini.effects.shift[iax]) < 0 else "R", s.week)
 	return {"ok": true, "title": ini.title, "quote": ini.get("quote"), "flips": s.flips.slice(flips_before), "changes": group_changes(s, before)}
+
+# ---------- The national debate ----------
+## What the country argues about. Each debate has heat (how much people talk
+## about it, 0-100) and a lean (which side is winning the argument: -100 is
+## the axis's left side, +100 its right). Heat raises the issue's salience,
+## so whoever owns that side gains; a debate that stays hot and one-sided
+## slowly moves what voters believe. The economy, the news, events, rival
+## parties and the player all start, fan or cool debates.
+const DEBATE_MAX := 6
+const DEBATE_FAN_HEAT := 14.0
+const DEBATE_FAN_LEAN := 15.0
+const DEBATE_COOL := 18.0
+
+func debate_by_id(s: Dictionary, id: String) -> Variant:
+	for d in s.debates:
+		if d.id == id: return d
+	return null
+
+## The issue an event or initiative is mostly about: the axis its choices move most.
+func event_axis(ev: Dictionary) -> String:
+	if _event_axis.has(ev.id): return _event_axis[ev.id]
+	var tot = {}
+	var lists: Array = ev.get("choices", []).map(func(c): return c.get("effects", {}))
+	if ev.has("effects"): lists.append(ev.effects)
+	for fx in lists:
+		for ax in fx.get("shift", {}): tot[ax] = float(tot.get(ax, 0)) + absf(float(fx.shift[ax]))
+	var best = ""
+	for ax in tot:
+		if best == "" or tot[ax] > tot[best]: best = ax
+	_event_axis[ev.id] = best
+	return best
+
+func side_of_lean(axis: String, lean: float) -> String:
+	var ax = by_id(AXES, axis)
+	return ax.left if lean < 0 else ax.right
+
+func debate_reach(s: Dictionary) -> float:
+	return 0.6 + influence_of(s) * 0.5
+
+func open_debate(s: Dictionary, id: String, axis: String, title: String, text: String, source: String, heat: float, lean := 0.0) -> Dictionary:
+	var d = debate_by_id(s, id)
+	if d:
+		d.heat = clampf2(d.heat + heat * 0.6, 0, 100)
+		d.lean = clampf2(d.lean + lean * 0.5, -100, 100)
+		return d
+	d = {"id": id, "axis": axis, "title": title, "text": text, "source": source, "heat": heat, "lean": lean,
+		"started": s.week, "peak": heat, "moves": [], "history": [heat]}
+	s.debates.append(d)
+	if s.debates.size() > DEBATE_MAX:
+		var coolest = null
+		for x in s.debates:
+			if x != d and (coolest == null or x.heat < coolest.heat): coolest = x
+		end_debate(s, coolest)
+	return d
+
+func end_debate(s: Dictionary, d: Dictionary) -> void:
+	s.debates.erase(d)
+	s.debateCooldown[d.id] = s.week
+	s.debatesPast.append({"title": d.title, "axis": d.axis, "lean": d.lean, "peak": d.peak, "week": s.week})
+	if d.peak >= 40 and absf(d.lean) >= 35:
+		push_news(s, {"kind": "issue", "quiet": true, "title": "%s: the argument is settling" % d.title,
+			"text": "The country has stopped shouting about it, but the %s side won the argument. Voters' minds moved, and they won't move back quickly." % side_of_lean(d.axis, d.lean).to_lower()})
+
+func _note_move(d: Dictionary, party: String, kind: String, side: String, week: int) -> void:
+	d.moves.append({"party": party, "kind": kind, "side": side, "week": week})
+	if d.moves.size() > 8: d.moves = d.moves.slice(-8)
+
+## Who is pushing a debate lately (this month and last).
+func debate_movers(s: Dictionary, d: Dictionary) -> Array:
+	return d.moves.filter(func(m): return s.week - int(m.week) <= WEEKS_PER_MONTH * 2)
+
+func debates_monthly(s: Dictionary) -> void:
+	for d in s.debates.duplicate():
+		# arguments tire with age: the longer one runs, the faster it cools
+		var age: float = float(s.week - int(d.started)) / WEEKS_PER_MONTH
+		d.heat = d.heat * maxf(0.6, 0.86 - 0.012 * age) - 2.0
+		d.lean *= 0.92
+		if d.heat < 8:
+			end_debate(s, d)
+			continue
+		d.history.append(d.heat)
+		if d.history.size() > 12: d.history = d.history.slice(-12)
+		s.salMod[d.axis] = clampf2(float(s.salMod.get(d.axis, 0)) + d.heat / 100.0 * 0.12, -0.5, 1.5)
+		# a hot, one-sided debate moves what people believe
+		if d.heat >= 25 and absf(d.lean) > 10:
+			var push: float = d.lean / 100.0 * d.heat / 100.0 * 0.8
+			for pop in s.pops:
+				pop.pos[d.axis] = clampf2(pop.pos[d.axis] + push * minf(1.5, pop.sal[d.axis]), -100, 100)
+	rivals_debate(s)
+	# the news starts something new now and then
+	if rand(s) < 0.3:
+		var pool = TOPICS.filter(func(t): return not t.has("trigger") and debate_by_id(s, t.id) == null \
+			and s.week - int(s.debateCooldown.get(t.id, -9999)) > 8 * WEEKS_PER_MONTH)
+		if pool.size():
+			var t: Dictionary = pick(s, pool)
+			open_debate(s, t.id, t.axis, t.title, t.text, "news", 30)
+			push_news(s, {"kind": "issue", "quiet": true, "title": "New argument: " + t.title, "text": t.text})
+
+func debates_from_world(s: Dictionary) -> void:
+	for t in TOPICS:
+		if not t.has("trigger") or debate_by_id(s, t.id) != null: continue
+		if s.week - int(s.debateCooldown.get(t.id, -9999)) < 6 * WEEKS_PER_MONTH: continue
+		var ok = true
+		for k in t.trigger:
+			var cond: String = t.trigger[k]
+			var n = float(cond.substr(1))
+			if not ((s.world[k] < n) if cond[0] == "<" else (s.world[k] > n)): ok = false
+		if not ok: continue
+		open_debate(s, t.id, t.axis, t.title, t.text, "economy", 38)
+		push_news(s, {"kind": "issue", "quiet": true, "title": "Everyone is talking about it: " + t.title, "text": t.text})
+
+func rivals_debate(s: Dictionary) -> void:
+	for p in rivals(s):
+		var best = null
+		var best_score = 0.0
+		var best_kind = ""
+		for d in s.debates:
+			var ol = ownership_of(s, p.id, side_key(d.axis, "L"))
+			var orr = ownership_of(s, p.id, side_key(d.axis, "R"))
+			var sc = 0.0
+			var kind = ""
+			if ol + orr > 0.03:
+				sc = (ol + orr) * (0.5 + d.heat / 100.0)
+				kind = "fan:" + ("L" if ol > orr else "R")
+			elif p.ruling and d.source == "economy":
+				sc = d.heat / 100.0 * 0.4
+				kind = "cool"
+			if sc > best_score:
+				best = d; best_score = sc; best_kind = kind
+		if best and rand(s) < 0.7:
+			if best_kind == "cool":
+				best.heat = clampf2(best.heat - 9, 0, 100)
+				_note_move(best, p.id, "cool", "", s.week)
+			else:
+				var side = best_kind.substr(4)
+				var sg = -1.0 if side == "L" else 1.0
+				best.heat = clampf2(best.heat + 8 * (1.0 - best.heat / 120.0), 0, 100)
+				best.lean = clampf2(best.lean + sg * 10 * (1.0 - maxf(0, best.lean * sg) / 110.0), -100, 100)
+				_note_move(best, p.id, "fan", side, s.week)
+		elif rand(s) < 0.12:
+			# start an argument on one of their own issues
+			var claims = ownership_table(s).filter(func(r): return r.owners.any(func(o): return o.party == p.id))
+			if claims.is_empty(): continue
+			var row: Dictionary = claims[0]
+			var pool = TOPICS.filter(func(t): return t.axis == row.axis and not t.has("trigger") and debate_by_id(s, t.id) == null)
+			if pool.is_empty(): continue
+			var t: Dictionary = pick(s, pool)
+			var side: String = row.key.split(":")[1]
+			var d = open_debate(s, t.id, t.axis, t.title, t.text, p.id, 30, -25.0 if side == "L" else 25.0)
+			_note_move(d, p.id, "start", side, s.week)
+			push_news(s, {"party": p.id, "kind": "threat", "quiet": true, "title": "%s starts a fight: %s" % [p.short, t.title], "text": t.text})
+
+func fan_preview(s: Dictionary, d: Dictionary, side: String) -> Dictionary:
+	var reach = debate_reach(s)
+	var key = side_key(d.axis, side)
+	var owners: Array = ownership_table(s).filter(func(r): return r.key == key)
+	var top = owners[0].owners[0].party if owners.size() and owners[0].owners.size() else ""
+	var sign = -1.0 if side == "L" else 1.0
+	var room_heat = 1.0 - d.heat / 120.0
+	var room_lean = 1.0 - maxf(0, d.lean * sign) / 110.0
+	return {"heat": DEBATE_FAN_HEAT * reach * room_heat, "lean": DEBATE_FAN_LEAN * reach * sign * room_lean, "mine": s.signature.has(key),
+		"owner": top, "shift": preview_shift(s, {d.axis: sign * 4})[0], "side": by_id(AXES, d.axis).left if side == "L" else by_id(AXES, d.axis).right}
+
+func act_fan(s: Dictionary, id: String, side: String) -> Dictionary:
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	var d = debate_by_id(s, id)
+	if d == null: return {"ok": false, "text": "That debate is over."}
+	spend_action(s, 0)
+	var pv = fan_preview(s, d, side)
+	var sign = -1.0 if side == "L" else 1.0
+	d.heat = clampf2(d.heat + pv.heat, 0, 100)
+	d.peak = maxf(d.peak, d.heat)
+	d.lean = clampf2(d.lean + pv.lean, -100, 100)
+	_note_move(d, "player", "fan", side, s.week)
+	var before = snapshot_groups(s)
+	var flips_before: int = s.flips.size()
+	shift_perceived(s, {d.axis: sign * 4})
+	if pv.mine: add_ownership(s, "player", side_key(d.axis, side), 0.05)
+	for pop in s.pops:
+		var p: float = pop.pos[d.axis]
+		var on_side = p < -15 if side == "L" else p > 15
+		var against = p > 25 if side == "L" else p < -25
+		if on_side:
+			pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.02, 0, 1)
+			pop.goodwill.player = clampf2(pop.goodwill.player + 0.04 * pop.sal[d.axis], -2, 2)
+		elif against: pop.goodwill.player = clampf2(pop.goodwill.player - 0.03 * pop.sal[d.axis], -2, 2)
+	record_statement(s, {"text": "On %s: %s." % [d.title.to_lower(), pv.side.to_lower()], "title": d.title, "effects": {"shift": {d.axis: sign * 4}}, "spoken": false})
+	var helps = ""
+	if not pv.mine and pv.owner != "" and pv.owner != "player": helps = " %s owns that side, so the attention helps them too." % party_of(s, pv.owner).short
+	var text = "You threw yourself into the argument over %s, for %s.%s" % [d.title.to_lower(), pv.side.to_lower(), helps]
+	_log(s, "action", text)
+	return {"ok": true, "text": text, "flips": s.flips.slice(flips_before), "changes": group_changes(s, before)}
+
+func act_cool(s: Dictionary, id: String) -> Dictionary:
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	var d = debate_by_id(s, id)
+	if d == null: return {"ok": false, "text": "That debate is over."}
+	spend_action(s, 0)
+	d.heat = clampf2(d.heat - DEBATE_COOL * debate_reach(s), 0, 100)
+	_note_move(d, "player", "cool", "", s.week)
+	var text = "You changed the subject whenever %s came up. The argument is losing steam." % d.title.to_lower()
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
 
 # ---------- The major crisis ----------
 func crisis_odds(s: Dictionary) -> Dictionary:

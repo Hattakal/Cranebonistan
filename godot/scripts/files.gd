@@ -8,7 +8,7 @@ signal changed            # the game state changed: save and redraw
 signal toast(text: String)
 signal open_country(id: String)
 
-const TITLES := {"electorate": "The electorate", "platform": "Platform and leader", "actions": "This month's moves",
+const TITLES := {"debates": "The national debate", "electorate": "The electorate", "platform": "Platform and leader", "actions": "This month's moves",
 	"parties": "The country", "polls": "Polls", "diary": "Campaign diary"}
 
 var G
@@ -99,6 +99,7 @@ func render() -> void:
 	var keep = _scroll.scroll_vertical
 	for c in _body.get_children(): c.queue_free()
 	match tab:
+		"debates": _debates()
 		"electorate": _electorate()
 		"platform": _platform()
 		"actions": _actions()
@@ -430,21 +431,6 @@ func _actions() -> void:
 	var blocked: bool = S.queue.size() > 0 or S.result != null
 	var left: int = S.actionsLeft
 	var dis = func(cost := 0.0) -> bool: return blocked or left <= 0 or S.money < cost
-	# the agenda
-	if not S.result:
-		var c = _card()
-		_h("This month's agenda", 20, c)
-		if S.agenda.done:
-			var last = ""
-			for i in range(S.log.size() - 1, -1, -1):
-				if S.log[i].kind == "initiative":
-					last = S.log[i].text; break
-			_p((last if last != "" else "You have set this month's agenda.") + " New debates open next month.", c)
-		else:
-			_p("Put a debate on the national agenda. It doesn't use an action, but what you raise will come back in the months ahead.", c)
-			for id in S.agenda.offered:
-				var ini = Game.by_id(G.INITIATIVES, id)
-				_initiative_card(ini, c, blocked)
 	if blocked and not S.result: _p("Finish the decision on the board first.", null, Look.RED, 14)
 	var head = HBoxContainer.new()
 	_add(head)
@@ -559,6 +545,7 @@ func _initiative_card(ini: Dictionary, to: Control, blocked: bool) -> void:
 	sb.border_width_top = 3; sb.border_color = Color("d9534f")
 	var hv = sb.duplicate(); hv.bg_color = Color("fffdf6"); hv.shadow_size = 8
 	card.add_theme_stylebox_override("panel", sb)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.mouse_default_cursor_shape = Control.CURSOR_ARROW if blocked else Control.CURSOR_POINTING_HAND
 	if blocked: card.modulate.a = 0.55
 	var v = VBoxContainer.new()
@@ -571,7 +558,7 @@ func _initiative_card(ini: Dictionary, to: Control, blocked: bool) -> void:
 	var tags: Array = d.tags.duplicate()
 	for s in d.stances:
 		if s.from != s.to: tags.push_front("Stance change: %s → %s" % [G.stance_name(s.axis, s.from), G.stance_name(s.axis, s.to)])
-	tags.append("Expect consequences")
+	tags.append("Starts a debate · expect consequences")
 	v.add_child(Look.label(" · ".join(tags), "body_italic", 12, Look.MUTED, true))
 	for c in v.get_children(): c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(v)
@@ -582,50 +569,305 @@ func _initiative_card(ini: Dictionary, to: Control, blocked: bool) -> void:
 			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 				var res: Dictionary = G.take_initiative(S, ini.id)
 				if res.ok:
-					var txt: String = "On the agenda: %s." % res.title
+					var txt: String = "New debate: %s." % res.title
 					if res.changes.size(): txt += " " + ", ".join(res.changes.slice(0, 3).map(func(x): return "%s %s%s" % [x.label, "+" if x.delta > 0 else "", Game.fmt1(x.delta)]))
 					toast.emit(txt)
 				else: toast.emit(res.text)
 				changed.emit())
 	to.add_child(card)
 
+# ---------- The national debate ----------
+func _who(id: String) -> String:
+	if id == "player": return "you"
+	if id == "news": return "the news"
+	if id == "economy": return "the economy"
+	var p = G.party_of(S, id)
+	return p.short if p else id
+
+func _debates() -> void:
+	var blocked: bool = S.queue.size() > 0 or S.result != null
+	var left: int = S.actionsLeft
+	var head = HBoxContainer.new()
+	head.add_theme_constant_override("separation", 40)
+	_add(head)
+	var hl = VBoxContainer.new()
+	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(hl)
+	_eyebrow("What Cranebonistan is arguing about", hl)
+	_p("Heat is how much people talk about it: a hot issue matters more to voters, so whoever owns that side gains. The tug of war shows which side is winning the argument. A debate that stays hot and one-sided slowly changes what people believe. Fanning one you don't own helps whoever does.", hl, Look.INK, 14)
+	for pr in [["Actions this month", "%d of %d left" % [left, int(G.C.actionsPerMonth)]], ["Your reach", "%s (×%s)" % [G.influence_label(S), Game.fmt1(G.debate_reach(S))]]]:
+		var b = VBoxContainer.new()
+		b.add_child(Look.caps(pr[0], 10, Look.MUTED, 1))
+		b.add_child(Look.label(pr[1], "display", 24, Look.INK))
+		head.add_child(b)
+	if blocked and not S.result: _p("Finish the decision on the board first.", null, Look.RED, 14)
+	var grid = GridContainer.new()
+	grid.columns = 2 if size.x > 1100 else 1
+	grid.add_theme_constant_override("h_separation", 16)
+	grid.add_theme_constant_override("v_separation", 16)
+	_add(grid)
+	var list: Array = Game.ssort(S.debates.duplicate(), func(a, b): return b.heat - a.heat)
+	if list.is_empty(): _p("The country is quiet. Nobody is arguing about anything in particular. Start something.", null, Look.INK, 15)
+	for d in list: _debate_card(d, grid, blocked or left <= 0)
+	# start a debate
+	_rule()
+	var sh = HBoxContainer.new()
+	sh.add_theme_constant_override("separation", 10)
+	_add(sh)
+	sh.add_child(Look.label("Start a debate", "display", 22, Look.INK))
+	var cost = Look.label("One action · one new debate a month", "body", 12, Look.MUTED)
+	cost.size_flags_vertical = Control.SIZE_SHRINK_END
+	sh.add_child(cost)
+	if S.agenda.done:
+		_p("You have started this month's debate. New ideas next month.", null, Look.INK, 14)
+	else:
+		_p("Pick a fight the country isn't having yet. It starts hot and leaning your way, and what you raise comes back in the months ahead.", null, Look.MUTED, 13)
+		var ig = GridContainer.new()
+		ig.columns = 3 if size.x > 1100 else 1
+		ig.add_theme_constant_override("h_separation", 14)
+		ig.add_theme_constant_override("v_separation", 14)
+		_add(ig)
+		for id in S.agenda.offered:
+			_initiative_card(Game.by_id(G.INITIATIVES, id), ig, blocked or left <= 0)
+	# settled arguments
+	if S.debatesPast.size():
+		_rule()
+		_eyebrow("Arguments that have settled")
+		var n = 0
+		for i in range(S.debatesPast.size() - 1, -1, -1):
+			if n >= 6: break
+			var x: Dictionary = S.debatesPast[i]
+			var verdict = "nobody won" if absf(x.lean) < 20 else ("%s won" % G.side_of_lean(x.axis, x.lean).to_lower())
+			_p("%s · %s — %s (peak heat %d)" % [G.date_label(x.week, false), x.title, verdict, Game.jround(x.peak)], null, Look.INK, 13)
+			n += 1
+
+func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
+	var ax: Dictionary = Game.by_id(G.AXES, d.axis)
+	var p = PanelContainer.new()
+	var hot: bool = d.heat >= 50
+	var sb = Look.box(Color("fdfaf2"), 0, Color.TRANSPARENT, 0, 3, 14)
+	sb.border_width_top = 4; sb.border_color = Look.RED if hot else Color("8a6d4a")
+	p.add_theme_stylebox_override("panel", sb)
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	to.add_child(p)
+	var v = VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	p.add_child(v)
+	var hist: Array = d.history
+	var trend = ""
+	if hist.size() > 1:
+		var dd: float = d.heat - hist[-2]
+		trend = "rising" if dd > 3 else ("cooling" if dd < -3 else "steady")
+	v.add_child(Look.caps("%s · started by %s · %s" % [ax.issue, _who(d.source), G.date_label(d.started, false)], 10, Look.MUTED, 1))
+	v.add_child(Look.label(d.title, "news_bold", 22, Look.INK, true))
+	var tx = Look.label(d.text, "body", 13, Look.MUTED, true)
+	tx.max_lines_visible = 3
+	v.add_child(tx)
+	# heat
+	var hr = HBoxContainer.new()
+	hr.add_theme_constant_override("separation", 8)
+	var hl = Look.caps("Heat", 10, Look.MUTED, 1)
+	hl.custom_minimum_size.x = 46
+	hr.add_child(hl)
+	var bar = Bar.new(Look.RED if hot else Color("c08a3e"), d.heat / 100.0)
+	bar.custom_minimum_size.y = 12
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hr.add_child(bar)
+	var hv = Look.label("%d %s" % [Game.jround(d.heat), trend], "body_bold", 12, Look.RED if trend == "rising" else Look.INK)
+	hv.custom_minimum_size.x = 84
+	hr.add_child(hv)
+	v.add_child(hr)
+	# tug of war
+	var owners = {}
+	for r in G.ownership_table(S):
+		if r.axis == d.axis and r.owners.size(): owners[r.key.split(":")[1]] = r.owners
+	var mine: String = G.manifesto_side(S, d.axis)
+	var tug = Tug.new(d.lean)
+	tug.custom_minimum_size.y = 16
+	v.add_child(tug)
+	var sides = HBoxContainer.new()
+	for side in ["L", "R"]:
+		var b = VBoxContainer.new()
+		b.add_theme_constant_override("separation", 0)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var name: String = ax.left if side == "L" else ax.right
+		var nl = Look.label(("★ " if mine == side else "") + name, "body_bold", 13, Look.INK)
+		var own_txt = "owned by " + ", ".join(owners[side].slice(0, 2).map(func(o): return G.party_of(S, o.party).short)) if owners.has(side) else "nobody owns it"
+		var ol = Look.label(own_txt, "body", 11, Look.MUTED)
+		if side == "R":
+			nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			ol.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		b.add_child(nl); b.add_child(ol)
+		sides.add_child(b)
+	v.add_child(sides)
+	var movers: Array = G.debate_movers(S, d)
+	if movers.size():
+		var words = []
+		for m in movers:
+			var who = _who(m.party)
+			var w = "%s %s" % [who.substr(0, 1).to_upper() + who.substr(1), {"fan": "fanned it", "cool": "tried to change the subject", "start": "started it"}[m.kind]]
+			if m.side != "" and m.kind != "cool": w += " (%s)" % (ax.left if m.side == "L" else ax.right).to_lower()
+			if not words.has(w): words.append(w)
+		v.add_child(Look.label(" · ".join(words.slice(-3)), "body_italic", 12, Look.INK, true))
+	# moves
+	var row = HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
+	row.add_theme_constant_override("v_separation", 6)
+	for side in ["L", "R"]:
+		var pv: Dictionary = G.fan_preview(S, d, side)
+		var label = "Fan it: " + pv.side
+		var tip = "Heat +%d, pushes the argument toward %s." % [Game.jround(pv.heat), pv.side.to_lower()]
+		if pv.shift.from != pv.shift.to: tip += "\nVoters will see you move from %s to %s on %s." % [G.stance_name(d.axis, pv.shift.from), G.stance_name(d.axis, pv.shift.to), ax.issue.to_lower()]
+		if mine != "" and mine != side: tip += "\nThis is against your manifesto."
+		if pv.mine: tip += "\nIt's one of your issues: your claim on it grows."
+		elif pv.owner != "" and pv.owner != "player": tip += "\n%s owns this side, so the attention helps them too." % G.party_of(S, pv.owner).short
+		var b = _btn(label, func():
+			var res: Dictionary = G.act_fan(S, d.id, side)
+			toast.emit(res.text)
+			changed.emit(), blocked, mine == side)
+		b.tooltip_text = tip
+		row.add_child(b)
+	var cb = _btn("Change the subject", func():
+		var res: Dictionary = G.act_cool(S, d.id)
+		toast.emit(res.text)
+		changed.emit(), blocked)
+	cb.tooltip_text = "Heat −%d. Use it when an argument is helping someone else." % Game.jround(G.DEBATE_COOL * G.debate_reach(S))
+	row.add_child(cb)
+	v.add_child(row)
+
+## Which side is winning: a marker between the two ends.
+class Tug extends Control:
+	var lean := 0.0
+	func _init(l: float) -> void:
+		lean = l
+	func _draw() -> void:
+		var y = size.y / 2
+		draw_rect(Rect2(0, y - 3, size.x, 6), Color(0, 0, 0, 0.1))
+		var mid = size.x / 2
+		var x = mid + lean / 100.0 * mid
+		draw_rect(Rect2(minf(mid, x), y - 3, absf(x - mid), 6), Look.RED if absf(lean) > 35 else Color("8a6d4a"))
+		draw_line(Vector2(mid, 0), Vector2(mid, size.y), Look.MUTED, 1)
+		draw_circle(Vector2(x, y), 7, Look.INK)
+		draw_circle(Vector2(x, y), 4, Look.PAPER)
+
 # ---------- The country ----------
+const IND_EFFECT := {
+	"jobs": "When jobs are scarce, jobs and the economy matter more to voters, trust falls and the government suffers.",
+	"prices": "Rising prices make the economy and public services matter more, cost the government support and push up unrest.",
+	"migration": "High migration makes immigration a bigger issue, especially in Yamlin, and holds down wages.",
+	"border": "Border tension makes defence and national identity matter more, and pushes prices up. Governments gain a little from a crisis.",
+	"unrest": "An angry public makes the political system itself the issue. Outsiders feed on it.",
+}
+
 func _country() -> void:
 	var w: Dictionary = S.world
-	var prev: Dictionary = S.get("worldPrev", {})
-	var c = _card()
-	_eyebrow("The state of the nation", c)
+	var hist: Array = S.get("worldHistory", [])
+	_eyebrow("The state of the nation")
 	var g = GridContainer.new()
-	g.columns = 5
-	g.add_theme_constant_override("h_separation", 18)
-	c.add_child(g)
+	g.columns = 5 if size.x > 1200 else 2
+	g.add_theme_constant_override("h_separation", 12)
+	g.add_theme_constant_override("v_separation", 12)
+	_add(g)
 	for ind in G.INDICATORS:
-		var v = VBoxContainer.new()
-		v.add_child(Look.caps(ind.label, 10, Look.MUTED, 1))
-		v.add_child(Look.label(G.indicator_word(ind.id, w[ind.id]), "display", 17, Look.INK, true))
-		if prev.has(ind.id):
-			var dlt: float = w[ind.id] - prev[ind.id]
-			var txt = "steady" if absf(dlt) < 1.5 else ("↑ rising" if dlt > 0 else "↓ falling")
-			var good = null if ind.good == null else ((dlt > 0) if ind.good == "high" else (dlt < 0))
-			v.add_child(Look.label(txt, "body", 12, Look.MUTED if (good == null or absf(dlt) < 1.5) else (Look.GOOD if good else Look.RED)))
-		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		g.add_child(v)
+		var c = _card(g)
+		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		c.add_child(Look.caps(ind.label, 10, Look.MUTED, 1))
+		var top = HBoxContainer.new()
+		var wl = Look.label(G.indicator_word(ind.id, w[ind.id]), "display", 20, Look.INK, true)
+		wl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(wl)
+		top.add_child(Look.label(str(Game.jround(w[ind.id])), "display", 20, Look.MUTED))
+		c.add_child(top)
+		var vals: Array = hist.slice(-24).map(func(x): return x[ind.id])
+		vals.append(w[ind.id])
+		var bad_up = ind.good == "low"
+		var sp = Spark.new(vals, Look.RED if (ind.good != null and ((vals[-1] > vals[0]) == bad_up) and absf(vals[-1] - vals[0]) > 2) else Look.INK)
+		sp.custom_minimum_size = Vector2(0, 40)
+		c.add_child(sp)
+		var dl: float = vals[-1] - (vals[-2] if vals.size() > 1 else vals[-1])
+		var good = null if ind.good == null else ((dl > 0) if ind.good == "high" else (dl < 0))
+		c.add_child(Look.label("steady this month" if absf(dl) < 1.5 else ("%s %d this month" % ["▲" if dl > 0 else "▼", Game.jround(absf(dl))]), "body_bold", 12, Look.MUTED if (good == null or absf(dl) < 1.5) else (Look.GOOD if good else Look.RED)))
+		c.add_child(Look.label(IND_EFFECT.get(ind.id, ""), "body", 12, Look.MUTED, true))
 	if S.crisis:
 		var cr = Game.by_id(G.CRISES, S.crisis.id)
-		_p("%s: %s" % [cr.name, cr.blurb], c, Look.RED, 14)
-	_p("Your statements move these a little, more as your party grows. Your influence: %s." % G.influence_label(S), c)
-	var t = _card()
-	_eyebrow("Trust in the political system", t)
-	_h(Game.trust_label(S.trust), 26, t)
-	var sp = Spark.new(S.trustHistory.slice(-36).map(func(x): return x.trust))
-	sp.custom_minimum_size = Vector2(0, 46)
-	t.add_child(sp)
-	_p("Low trust sends fed-up voters to outsiders. It slowly recovers toward the middle on its own.", t)
-	_eyebrow("The parties")
-	var poll = S.polls[-1] if S.polls.size() else null
-	var nation: Dictionary = G.summarize(S, S.pops)
+		_p("%s: %s" % [cr.name, cr.blurb], null, Look.RED, 15)
+	_p("Your statements nudge these a little, more as your party grows. Your influence: %s." % G.influence_label(S))
+	# government and trust
+	var two = HBoxContainer.new()
+	two.add_theme_constant_override("separation", 12)
+	_add(two)
+	var gov = null
 	for p in S.parties:
-		var pc = _card()
+		if p.ruling: gov = p
+	var gc = _card(two)
+	gc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_eyebrow("The government", gc)
+	if gov:
+		gc.add_child(Look.label("%s · %s" % [gov.name, gov.leader], "display", 22, Color(gov.color).darkened(0.25), true))
+		var troubles = []
+		if w.jobs < 42: troubles.append("jobs")
+		if w.prices > 60: troubles.append("prices")
+		if w.unrest > 60: troubles.append("the public mood")
+		_facts([["Hold on power", stability_word(gov.stability)], ["Blamed for", ", ".join(troubles).capitalize() if troubles.size() else "Nothing in particular"], ["Border crisis", "Rallies people behind it" if w.border > 65 else "No effect"]], gc)
+		_p("A government in trouble loses voters to whoever looks ready to replace it, and its own party gets restless.", gc)
+	var tc = _card(two)
+	tc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_eyebrow("Trust in politics", tc)
+	var th = HBoxContainer.new()
+	var tl = Look.label(Game.trust_label(S.trust), "display", 22, Look.INK)
+	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	th.add_child(tl)
+	th.add_child(Look.label(str(Game.jround(S.trust)), "display", 22, Look.MUTED))
+	tc.add_child(th)
+	var sp2 = Spark.new(S.trustHistory.slice(-36).map(func(x): return x.trust))
+	sp2.custom_minimum_size = Vector2(0, 46)
+	tc.add_child(sp2)
+	_p("How much people trust politicians and the system, not any one party. Low trust sends fed-up voters to outsiders. It slowly recovers toward the middle on its own.", tc)
+	# the regions
+	_eyebrow("The regions")
+	var poll = S.polls[-1] if S.polls.size() else null
+	var rg = GridContainer.new()
+	rg.columns = 6
+	rg.add_theme_constant_override("h_separation", 18)
+	rg.add_theme_constant_override("v_separation", 8)
+	var rc = _card()
+	rc.add_child(rg)
+	for h in ["Region", "Adults", "Leading", "You", "Cares most about", "Fed up with the system"]:
+		rg.add_child(Look.caps(h, 10, Look.MUTED, 1))
+	for r in G.REGIONS:
+		var sum: Dictionary = G.summarize(S, G.pops_matching(S, {"region": r.id}))
+		var nb = _btn(r.name, func(): open_region(r.id))
+		nb.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		rg.add_child(nb)
+		rg.add_child(Look.label("%sM" % Game.fmt1(r.adults), "body", 14, Look.INK))
+		var lead_txt = "—"
+		var you_txt = "—"
+		if poll:
+			var sh: Dictionary = poll.regions[r.id]
+			var ids: Array = Game.ssort(sh.keys(), func(x, y): return sh[y] - sh[x])
+			var lp = G.party_of(S, ids[0])
+			lead_txt = "%s %d%%" % [lp.short, Game.jround(sh[ids[0]] * 100)]
+			you_txt = "%d%%" % Game.jround(sh.player * 100)
+		rg.add_child(Look.label(lead_txt, "body_bold", 14, Look.INK))
+		rg.add_child(Look.label(you_txt, "body", 14, Look.INK))
+		var issues: Array = Game.ssort(G.AXES.duplicate(), func(x, y): return sum.sal[y.id] - sum.sal[x.id]).slice(0, 2)
+		var il = Look.label(", ".join(issues.map(func(x): return x.issue)), "body", 14, Look.INK)
+		il.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		rg.add_child(il)
+		var dis: float = sum.disaffection
+		rg.add_child(Look.label("Very" if dis > 1.25 else ("Quite" if dis > 1.05 else ("Somewhat" if dis > 0.85 else "Hardly")), "body", 14, Look.INK))
+	# the parties
+	_eyebrow("The parties")
+	var nation: Dictionary = G.summarize(S, S.pops)
+	var pg = GridContainer.new()
+	pg.columns = 2 if size.x > 1100 else 1
+	pg.add_theme_constant_override("h_separation", 12)
+	pg.add_theme_constant_override("v_separation", 12)
+	_add(pg)
+	for p in S.parties:
+		var pc = _card(pg)
+		pc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var top = HBoxContainer.new()
 		pc.add_child(top)
 		var nm = VBoxContainer.new()
@@ -639,15 +881,30 @@ func _country() -> void:
 		var meta = "%s leader · %s · %sM core voters" % [charisma_word(p.charisma), "The establishment" if est >= 0.8 else ("Mainstream" if est >= 0.55 else ("Semi-outsider" if est >= 0.3 else "Outsider")), "%.2f" % (nation.core[p.id] / 1e6)]
 		if not p.isPlayer: meta += " · " + stability_word(p.stability)
 		_p(meta, pc, Look.INK)
+		var claims = G.ownership_table(S).filter(func(r): return r.owners.any(func(o): return o.party == p.id))
+		_p("Campaigns on: " + (", ".join(claims.map(func(r): return r.label.to_lower())) if claims.size() else "nothing in particular"), pc)
+	# neighbours
 	_eyebrow("Neighbours")
-	var nr = _row()
+	var ng = GridContainer.new()
+	ng.columns = 4 if size.x > 1100 else 2
+	ng.add_theme_constant_override("h_separation", 12)
+	ng.add_theme_constant_override("v_separation", 12)
+	_add(ng)
 	for f in G.FOREIGN:
 		var st: Dictionary = S.countries.get(f.id, {})
-		nr.add_child(_btn(" ".join(f.name) + (" · " + st.relation if st.get("relation") else ""), func(): open_country.emit(f.id)))
+		var fc = _card(ng)
+		fc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fc.add_child(Look.label(" ".join(f.name), "display", 18, Look.INK, true))
+		fc.add_child(Look.label(st.get("relation", f.relation) + (" · trouble on the border" if st.get("hot", false) else ""), "body_bold", 12, Look.RED if st.get("hot", false) else Look.MUTED, true))
+		var notes: Array = st.get("notes", [])
+		fc.add_child(Look.label(notes[-1].text if notes.size() else f.blurb, "body", 12, Look.INK, true))
+		fc.add_child(_btn("Read the brief", func(): open_country.emit(f.id)))
 
 class Spark extends Control:
 	var vals: Array
-	func _init(v: Array) -> void: vals = v
+	var col := Look.RED
+	func _init(v: Array, c := Look.RED) -> void:
+		vals = v; col = c
 	func _draw() -> void:
 		if vals.size() < 2: return
 		var pts = PackedVector2Array()
@@ -655,8 +912,8 @@ class Spark extends Control:
 			pts.append(Vector2(i / float(vals.size() - 1) * (size.x - 6) + 3, size.y - 4 - vals[i] / 100.0 * (size.y - 8)))
 		var mid = size.y - 4 - 0.5 * (size.y - 8)
 		draw_dashed_line(Vector2(0, mid), Vector2(size.x, mid), Look.LINE, 1.0, 4.0)
-		draw_polyline(pts, Look.RED, 2.0, true)
-		draw_circle(pts[-1], 3, Look.RED)
+		draw_polyline(pts, col, 2.0, true)
+		draw_circle(pts[-1], 3, col)
 
 # ---------- Polls ----------
 func _polls() -> void:

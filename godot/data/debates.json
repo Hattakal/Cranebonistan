@@ -1,0 +1,37 @@
+{
+ "_note": "Debate topics. 'trigger' topics start by themselves when the country is in that state; the rest are started by news, parties or events. Lean runs from the axis's left side (-100) to its right side (+100).",
+ "TOPICS": [
+  {"id": "cost_of_living", "axis": "econ", "title": "The cost of living",
+   "text": "Prices keep climbing faster than wages. Everyone has a theory about whose fault it is.",
+   "trigger": {"prices": ">55"}},
+  {"id": "where_jobs", "axis": "labor", "title": "Where are the jobs?",
+   "text": "Factories are cutting shifts and young people are leaving for the cities, or for abroad.",
+   "trigger": {"jobs": "<42"}},
+  {"id": "how_many", "axis": "immig", "title": "How many is too many?",
+   "text": "Arrivals are at a record high. Some towns say they can't cope; employers say they can't do without them.",
+   "trigger": {"migration": ">62"}},
+  {"id": "border_safe", "axis": "war", "title": "Is the border safe?",
+   "text": "Trouble across the border has people asking whether the army is ready, and whether it should be.",
+   "trigger": {"border": ">55"}},
+  {"id": "angry_streets", "axis": "rev", "title": "Angry streets",
+   "text": "Protests most weekends. Commentators argue about whether the anger is a symptom or the problem.",
+   "trigger": {"unrest": ">52"}},
+
+  {"id": "real_cranebonian", "axis": "nat", "title": "Who is a real Cranebonian?",
+   "text": "A row over a school textbook has turned into a fight about who belongs here and what the flag means."},
+  {"id": "who_pays", "axis": "econ", "title": "Who pays for the state?",
+   "text": "The deficit is back in the headlines. Cut spending, or tax the people who can afford it?"},
+  {"id": "family_values", "axis": "prog", "title": "The family under pressure",
+   "text": "Fewer marriages, fewer children, more of everything else. Is that freedom, or decline?"},
+  {"id": "arm_up", "axis": "war", "title": "Should we arm up?",
+   "text": "Neighbours are spending on tanks. Cranebonistan is spending on pensions. Which is the mistake?"},
+  {"id": "queues", "axis": "gov", "title": "Hospitals and schools",
+   "text": "Waiting lists are long and classrooms are full. More money, or less waste?"},
+  {"id": "fair_pay", "axis": "labor", "title": "A fair day's pay",
+   "text": "Profits are up, pay is flat. Unions want a share; owners warn that jobs will move abroad."},
+  {"id": "who_comes", "axis": "immig", "title": "Who gets to come in?",
+   "text": "A new visa scheme has split the country between those who see workers and those who see strangers."},
+  {"id": "clean_out", "axis": "rev", "title": "Clean out the capital",
+   "text": "Another minister, another envelope. Fix the system, or tear it down?"}
+ ]
+}

@@ -148,7 +148,7 @@ func _process(_d: float) -> void:
 
 # ---------- Building the cards ----------
 func render(s: Dictionary) -> void:
-	var key = JSON.stringify([s.week, s.queue.size(), s.queue[0] if s.queue.size() else null, s.log.size(), s.polls.size(), s.actionsLeft, s.agenda.done, s.money])
+	var key = JSON.stringify([s.week, s.queue.size(), s.queue[0] if s.queue.size() else null, s.log.size(), s.polls.size(), s.actionsLeft, s.agenda.done, s.money, s.debates.map(func(d): return [d.id, int(d.heat), int(d.lean)])])
 	if key == _key: return
 	_key = key
 	for c in _cards: c.get_parent().queue_free()
@@ -196,38 +196,35 @@ func render(s: Dictionary) -> void:
 		v.add_child(Look.caps(G.date_label(s.week), 11, Color("6d5d4a")))
 		v.add_child(Look.label("Nothing on fire", "news_bold", 26))
 		v.add_child(Look.label("Plan your month in the files above, or move the clock forward.", "news", 15, Color("3a3128"), true))
-	# 2. what the country is talking about
-	var nation: Dictionary = G.summarize(s, s.pops)
-	var talk: Array = Game.ssort(G.AXES.duplicate(), func(x, y): return nation.sal[y.id] - nation.sal[x.id]).slice(0, 4)
+	# 2. what the country is arguing about
 	var tc = _card(Color("f4ecd9"), "blue", 2.0)
 	tc.string_to = true
 	var tv = _vbox(tc)
-	tv.add_child(Look.caps("The national conversation", 11, Color("6d5d4a")))
-	var top_sal: float = nation.sal[talk[0].id]
-	for ax in talk:
-		var heat: float = float(s.salMod.get(ax.id, 0))
+	tv.add_child(Look.caps("The national debate", 11, Color("6d5d4a")))
+	var list: Array = Game.ssort(s.debates.duplicate(), func(x, y): return y.heat - x.heat).slice(0, 4)
+	if list.is_empty(): tv.add_child(Look.label("Nobody is arguing about anything. Start something.", "news", 14, Look.INK, true))
+	for d in list:
+		var ax = Game.by_id(G.AXES, d.axis)
+		var hot: bool = d.heat >= 50
+		var tl = Look.label(d.title, "news_bold", 14, Look.INK)
+		tl.clip_text = true
+		tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		tv.add_child(tl)
 		var row = HBoxContainer.new()
 		row.add_theme_constant_override("separation", 6)
-		var nm = Look.label(ax.issue, "body_bold", 13, Look.INK)
-		nm.custom_minimum_size.x = 120
-		nm.clip_text = true
-		row.add_child(nm)
-		var bar = _Bar.new(Look.RED if heat > 0.45 else Color("8a6d4a"), nation.sal[ax.id] / top_sal)
+		var bar = _Bar.new(Look.RED if hot else Color("c08a3e"), d.heat / 100.0)
 		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		bar.custom_minimum_size.y = 8
+		bar.custom_minimum_size.y = 7
 		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(bar)
-		var trend = "heating up" if heat > 0.45 else ("warming" if heat > 0.15 else ("cooling" if heat < -0.1 else ""))
-		var tl = Look.label(trend, "body", 11, Look.RED if heat > 0.15 else Color("6d5d4a"))
-		tl.custom_minimum_size.x = 62
-		tl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		row.add_child(tl)
+		var lean_txt = "even" if absf(d.lean) < 15 else ("%s ahead" % (ax.left if d.lean < 0 else ax.right).to_lower())
+		var ll = Look.label(lean_txt, "body", 11, Color("6d5d4a"))
+		ll.custom_minimum_size.x = 118
+		ll.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		ll.clip_text = true
+		row.add_child(ll)
 		tv.add_child(row)
-		var owners = G.ownership_table(s).filter(func(r): return r.axis == ax.id)
-		var who = []
-		for r in owners: who.append("%s (%s)" % [G.party_of(s, r.owners[0].party).short, r.label.to_lower()])
-		tv.add_child(Look.label("Owned by " + ", ".join(who) if who.size() else "Nobody owns it yet", "body", 11, Color("6d5d4a"), true))
-	tc.pressed.connect(func(): open_file.emit("actions"))
+	tc.pressed.connect(func(): open_file.emit("debates"))
 	# 3. Pim's note
 	var pim = _card(Color("f8dc58"), "green", -3.0)
 	pim.custom_minimum_size.y = 150
@@ -377,9 +374,12 @@ func _pim_note(s: Dictionary) -> String:
 	var agenda: bool = not s.agenda.done
 	var nb = _next_week(s, func(c): return c.isQuarterStart)
 	if s.result: return "Whatever happens next, it was an honour, boss. Really."
-	if n > 0 and agenda: return "Two things this month: %d action%s left and the agenda slot is open. No pressure. You always pick the right ones." % [n, "" if n == 1 else "s"]
+	var hottest = null
+	for d in s.debates:
+		if hottest == null or d.heat > hottest.heat: hottest = d
+	if n > 0 and hottest and hottest.heat >= 50: return "Everyone's talking about %s. %d action%s left. Whatever you say about it, I'm sure it'll be the right thing." % [hottest.title.to_lower(), n, "" if n == 1 else "s"]
+	if n > 0 and agenda: return "%d action%s left this month, and nobody has started this month's argument yet. Could be you, boss." % [n, "" if n == 1 else "s"]
 	if n > 0: return "%d action%s left this month. Whenever you're ready." % [n, "" if n == 1 else "s"]
-	if agenda: return "The agenda slot is still open. People are waiting to hear what you care about."
 	if s.money > 6 and nb >= 0: return "We're sitting on ₱%sM. Next budget in %s. I've kept the donors happy." % [Game.fmt1(s.money), game.date_label(nb, false)]
 	return "Quiet week. I've moved the bad news to Monday."
 

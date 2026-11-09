@@ -115,7 +115,7 @@ func _build_bar() -> Control:
 	h.add_child(_section(_stats, 10))
 	var menu = HBoxContainer.new()
 	menu.add_theme_constant_override("separation", 0)
-	for m in [["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["actions", "megaphone", "Actions"], ["parties", "landmark", "Country"], ["polls", "chart-line", "Polls"], ["diary", "book-open", "Diary"]]:
+	for m in [["debates", "flame", "Debates"], ["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["actions", "megaphone", "Actions"], ["parties", "landmark", "Country"], ["polls", "chart-line", "Polls"], ["diary", "book-open", "Diary"]]:
 		var b = _menu_button(m[1], m[2])
 		b.pressed.connect(func(): _show_file(m[0]))
 		menu.add_child(b)
@@ -174,7 +174,7 @@ func _menu_button(icon_name: String, text: String) -> Button:
 	b.add_theme_color_override("font_hover_color", Look.HEAD)
 	b.add_theme_color_override("icon_normal_color", Color("cdbb9b"))
 	b.add_theme_color_override("icon_hover_color", Look.HEAD)
-	b.custom_minimum_size.x = 82
+	b.custom_minimum_size.x = 72
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	return b
 
@@ -885,7 +885,13 @@ func _shot(args: Dictionary) -> void:
 	if args.has("result"):
 		var ev2: Dictionary = G.event_of(S.queue[0])
 		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1))
-	if args.has("file"): _show_file(args.file)
+	if args.has("file"):
+		if args.has("clear"): S.queue.clear()
+		_show_file(args.file)
+		if args.has("scroll"):
+			await get_tree().process_frame
+			await get_tree().process_frame
+			_files._scroll.scroll_vertical = int(args.scroll)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
 	if args.has("country"): _country_sheet(args.country)
 	if args.has("then"):
