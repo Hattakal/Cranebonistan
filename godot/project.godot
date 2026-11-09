@@ -5,6 +5,7 @@ config_version=5
 config/name="Cranebonistan"
 config/description="A political election simulator."
 config/features=PackedStringArray("4.7")
+run/main_scene="res://scenes/main.tscn"
 
 [autoload]
 Game="*res://scripts/sim.gd"
