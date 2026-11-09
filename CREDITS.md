@@ -8,4 +8,4 @@
 | Fonts: Oswald, Old Standard TT, IBM Plex Sans Condensed | Google Fonts | SIL Open Font License 1.1 (licence files in `godot/assets/fonts/`) |
 | Typewriter font: Special Elite (Astigmatic) | Google Fonts | Apache License 2.0 (`godot/assets/fonts/LICENSE-SpecialElite.txt`) |
 
-The browser prototype's drawn portraits, event illustrations and synthesised sounds are in the repository history under the tag `browser-version`.
+The browser prototype's drawn portraits, event illustrations and synthesised sounds are in the repository history on the branch `browser-version`.

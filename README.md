@@ -8,7 +8,7 @@ Art, fonts and licences are listed in [CREDITS.md](CREDITS.md). Every design dec
 
 Open the `godot` folder in Godot 4.7 (Import, then pick `godot/project.godot`) and press F5. The game saves to Godot's user folder; a change to the rules starts a new game.
 
-The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept in the repository history under the tag `browser-version`.
+The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept in the repository history on the branch `browser-version`.
 
 ## How it plays
 

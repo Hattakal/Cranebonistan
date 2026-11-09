@@ -276,7 +276,7 @@ The designer's aims: the game should be enjoyable first, and it should look like
 
 **Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.
 
-*History:* the first versions were a browser game in HTML, CSS and JavaScript. It was meant as a prototype, never the release format; the rules were kept separate from the screens so they could move to an engine. In November 2026 the game moved to Godot, the rules were ported line for line (and checked to give identical results), and the Godot version then took its own direction (the national debate, seven axes). The browser version was retired and is kept in the repository history under the tag `browser-version`.
+*History:* the first versions were a browser game in HTML, CSS and JavaScript. It was meant as a prototype, never the release format; the rules were kept separate from the screens so they could move to an engine. In November 2026 the game moved to Godot, the rules were ported line for line (and checked to give identical results), and the Godot version then took its own direction (the national debate, seven axes). The browser version was retired and is kept in the repository history on the branch `browser-version`.
 
 ---
 
