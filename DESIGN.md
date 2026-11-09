@@ -254,7 +254,7 @@ Not a list of events, but **a profile of the leader written by a hostile newspap
 | Sound effects | Built | Synthesised in code; the designer is happy with them |
 | Leader portraits | Built | Drawn in code. *History:* the first set (CC0 "Notionists" avatars) didn't look like politicians; replaced with drawn older men and women in suits. The designer finds them endearing but different from what they imagined and will look for public-domain portraits. |
 | Flags | Built | Original designs. *History:* first shown on the map, where some didn't line up. Moved into country profiles: clicking a neighbour shows its flag, leader and summary. |
-| Event illustrations | Built (placeholder) | Drawn scenes. The designer wants public-domain images; `images.js` lets any picture replace a drawing, with a credit line. Photos are shown through one shared newsprint treatment so different sources look like one newspaper. |
+| Event illustrations | Built (placeholder) | Drawn scenes in the browser prototype; not yet in the Godot version. The designer wants public-domain images (folders ready in `godot/assets/`). Plan: show every picture through one shared newsprint treatment so different sources look like one newspaper. |
 | Monthly news as a newspaper front page | Built | |
 | The designer's map | Built | Drawn in Krita by the designer and converted by `tools/build_map.py`: regions and countries come from the border lines (rivers and mountains are decoration, never borders), cities from the dots and a text layer. *Decided:* Inkscape was tried for drawing and dropped as counter-intuitive; drawing stays in Krita and the converter does the rest. Provinces will be added the same way. |
 | Map-centred play | Planned | Events pinned to places, rallies by clicking the map, election night. Waits for the map. |
@@ -274,7 +274,9 @@ The designer's aims: the game should be enjoyable first, and it should look like
 
 ### Technology
 
-Browser game in HTML, CSS and JavaScript, no installation. *Discussed:* a desktop program instead. Decided that the browser doesn't limit this kind of game and can be wrapped later (Electron or Tauri) for Steam. The rules live in `sim.js` with no screen code, so the game can be tested in bulk and moved to another engine if ever needed. Hosted on GitHub.
+**Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.
+
+*History:* the first versions were a browser game in HTML, CSS and JavaScript. It was meant as a prototype, never the release format; the rules were kept separate from the screens so they could move to an engine. In November 2026 the game moved to Godot, the rules were ported line for line (and checked to give identical results), and the Godot version then took its own direction (the national debate, seven axes). The browser version was retired and is kept in the repository history under the tag `browser-version`.
 
 ---
 
@@ -304,21 +306,7 @@ Original targets:
 
 ## 9. Files
 
-| File | Holds |
-|---|---|
-| `data.js` | Balance settings, axes, demographics, regions, neighbours, parties, templates |
-| `events.js` | Events, funding offers, and each event's context (government response, state of the nation, crisis pressure) |
-| `soundbites.js` | The sound bites for each event (pure writing; tones and reactions hidden) |
-| `initiatives.js` | The monthly agenda and the follow-up events each initiative sets off |
-| `crises.js` | The five major crises and their events |
-| `sim.js` | Core rules: pops, opinion, effects, rivals, actions, budget, polls, elections, calendar |
-| `world.js` | State of the nation, initiatives, the major crisis |
-| `voice.js` | Delivery, leader style, the record of statements, the final debate, the end profile |
-| `ui.js`, `style.css`, `index.html` | Screens: top bar, map, planning files, sheets, title |
-| `board.js` | The evidence board (current and urgent items only) |
-| `scene.js` | Back-room dialogue scenes; the opening scene is the tutorial |
-| `portraits.js`, `flags.js`, `art.js`, `icons.js`, `sfx.js` | Drawn art, flags, illustrations, icons, sound |
-| `images.js` | Public-domain pictures that replace drawings (see IMAGES.md) |
+See the file table in [README.md](README.md). *History:* the browser prototype split the game into `data.js`, `events.js`, `soundbites.js`, `initiatives.js`, `crises.js`, `sim.js`, `world.js`, `voice.js` and screen files; in the Godot version all content lives in `godot/data/` (JSON) and all rules in `godot/scripts/sim.gd`.
 
 ## 10. Out of scope for now / future work
 

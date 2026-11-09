@@ -1,5 +1,5 @@
-## Plays one seeded game with a fixed script of decisions and prints a trace.
-## The same script lives in tools/parity.js for the browser rules; the traces should match.
+## Plays one seeded game with a fixed script of decisions and prints a trace (a smoke test).
+## It once matched the browser version exactly; the browser version is retired.
 ##   godot --headless --path godot -s tests/parity.gd -- 42
 extends SceneTree
 

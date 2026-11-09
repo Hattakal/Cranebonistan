@@ -1,0 +1,82 @@
+{
+ "_note": "Back-room dialogue scenes with Pim and Teyl, moved from the browser version. {who} is the leader first name. The intro still describes the old rules (two actions, the agenda slot) and needs rewriting for the debate system.",
+ "CAST": {
+  "pim": {
+   "name": "Pim Aster",
+   "role": "your advisor",
+   "color": "#3b4a6b"
+  },
+  "teyl": {
+   "name": "Marta Teyl",
+   "role": "party secretary",
+   "color": "#7a1f1a"
+  }
+ },
+ "SCENES": {
+  "intro": {
+   "lines": [
+    [
+     "pim",
+     "Evening, {who}. Welcome to headquarters. It isn't much yet, but neither was the Founder's first office."
+    ],
+    [
+     "pim",
+     "The board on the left is for whatever needs you right now. When something lands, it gets a red pin. Deal with it, or put it down and look at the map first."
+    ],
+    [
+     "pim",
+     "The files along the top are for planning: who the voters are, what we stand for, what we can do this month. Two actions a month, and one slot to put a debate on the national agenda."
+    ],
+    [
+     "pim",
+     "Every quarter we decide where the money goes. Every month there's a poll. The good ones I'll read out loud."
+    ],
+    [
+     "pim",
+     "When the press calls, you decide what to say, and then the exact words. The words matter more than people think. I'd trust your instincts on them. They're better than my drafts."
+    ],
+    [
+     "teyl",
+     "His drafts are fine. Your instincts haven't been tested yet. Sit down, Pim."
+    ],
+    [
+     "teyl",
+     "Four years to the election, {who}. The voters forget what you said. The papers don't. Neither do I."
+    ],
+    [
+     "pim",
+     "Marta's point is fair. And I think you've already taken it on board. It's why people trust you."
+    ],
+    [
+     "teyl",
+     "My point is: don't sell the movement for one good week in the polls."
+    ]
+   ],
+   "choice": {
+    "prompt": "teyl",
+    "options": [
+     {
+      "label": "“You're right, Marta.”",
+      "story": "heard_teyl",
+      "reply": [
+       "teyl",
+       "Good. Remember you said that. I will."
+      ]
+     },
+     {
+      "label": "“Let's not overthink it.”",
+      "story": "waved_teyl",
+      "reply": [
+       "teyl",
+       "Of course. Wake me when the polls turn."
+      ]
+     }
+    ]
+   },
+   "close": [
+    "pim",
+    "Right. The first poll is in. Shall we see where we stand?"
+   ]
+  }
+ }
+}
