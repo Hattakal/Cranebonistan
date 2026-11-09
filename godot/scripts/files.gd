@@ -220,7 +220,10 @@ func _bars(support: Dictionary, previous = null, to: Control = null) -> void:
 
 class Bar extends Control:
 	var col: Color
-	var frac: float
+	var frac: float:
+		set(v):
+			frac = clampf(v, 0, 1)
+			queue_redraw()
 	func _init(c: Color, f: float) -> void:
 		col = c; frac = clampf(f, 0, 1)
 	func _draw() -> void:

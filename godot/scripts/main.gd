@@ -30,6 +30,7 @@ func _ready() -> void:
 		return
 	S = _load() if FileAccess.file_exists(SAVE_PATH) else G.new_game({"partyName": "People's Awakening", "leaderName": "Dorin Vask", "manifesto": {"econ": 0, "immig": 4, "rev": 0, "gov": 3}})
 	render()
+	_auto_open()
 
 func _args() -> Dictionary:
 	var out = {}
@@ -86,6 +87,7 @@ func _build() -> void:
 	_ticker.custom_minimum_size.y = 34
 	right.add_child(_ticker)
 	_sheet_layer = Control.new()
+	_sheet_layer.z_index = 20
 	_sheet_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_sheet_layer)
@@ -221,23 +223,27 @@ func _sync_menu() -> void:
 func _country_sheet(id: String) -> void:
 	var f = Game.by_id(G.FOREIGN, id)
 	var st: Dictionary = S.countries.get(id, {})
-	var sheet = Sheet.new()
-	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	_sheet_layer.add_child(sheet)
-	sheet.closed.connect(func(): _sheet_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE)
-	sheet.kicker("Neighbouring country · " + st.get("relation", f.relation))
-	sheet.title(" ".join(f.name), f.summary)
-	sheet.note("%s: %s" % [f.leader.title, f.leader.name])
-	for x in f.facts: sheet.bullet(x)
+	var p = _paper(760, false)
+	p.masthead("Foreign desk", "Diplomatic Brief", st.get("relation", f.relation))
+	p.heading(" ".join(f.name), 38)
+	p.text(f.summary, 17)
+	p.text("%s: %s" % [f.leader.title, f.leader.name], 15, "type")
+	p.rule(1)
+	p.kicker("Background")
+	for x in f.facts: p.text("•  " + x, 15)
 	var notes: Array = st.get("notes", [])
 	if notes.size():
-		sheet.kicker("Recent developments")
-		for i in range(notes.size() - 1, -1, -1): sheet.bullet("%s — %s" % [G.date_label(notes[i].week, false), notes[i].text])
-	sheet.choice("Close", func(): sheet.close())
+		p.rule(1)
+		p.kicker("Recent developments")
+		for i in range(notes.size() - 1, -1, -1):
+			p.small(G.date_label(notes[i].week, false).to_upper(), Look.RED)
+			p.text(notes[i].text, 15)
+	p.actions([p.button("Close", func(): p.close(), true)])
 
 func _after_change() -> void:
 	_save()
 	render()
+	_auto_open()
 
 func _render_bar() -> void:
 	var player: Dictionary = G.player_party(S)
@@ -335,66 +341,421 @@ func _ticker_items() -> Array:
 	for i in range(S.log.size() - 1, maxi(-1, S.log.size() - 7), -1): out.append(S.log[i].text)
 	return out if out.size() else ["Welcome to the campaign."]
 
-# ---------- Decisions (a plain sheet for now; stage 3 gives them their real look) ----------
-func _open_front() -> void:
-	if S.result and S.queue.is_empty(): return
-	var front: Dictionary = S.queue[0]
-	var sheet = Sheet.new()
-	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	_sheet_layer.add_child(sheet)
-	sheet.closed.connect(func():
-		_sheet_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_after_change())
-	match front.type:
-		"event":
-			var ev: Dictionary = G.event_of(front)
-			sheet.title(ev.title, ev.text)
-			for i in ev.choices.size():
-				var ch: Dictionary = ev.choices[i]
-				sheet.choice(ch.label, func():
-					var lines: Array = ch.get("lines", [])
-					if lines.size():
-						sheet.clear_choices()
-						sheet.note("You will %s. How do you say it?" % ch.label.to_lower())
-						for j in lines.size():
-							sheet.choice("“%s”" % lines[j].text, func(): _result(sheet, G.resolve_event(S, i, j)))
-					else:
-						_result(sheet, G.resolve_event(S, i, -1)))
-		"budget":
-			sheet.title("The quarterly budget", "₱%sM to spend. (The full budget screen arrives in the next stage.)" % Game.fmt1(S.money))
-			sheet.choice("Spread it across the country", func():
-				var alloc = {}
-				var tot = 0.0
-				for r in G.REGIONS: tot += r.adults
-				for r in G.REGIONS: alloc[r.id] = S.money * 0.55 * r.adults / tot
-				alloc.social = S.money * 0.15; alloc.tv = S.money * 0.15; alloc.tour = S.money * 0.15
-				G.resolve_budget(S, alloc, [])
-				sheet.close())
-			sheet.choice("Save it for later", func(): G.resolve_budget(S, {}, []); sheet.close())
-		"poll":
-			var p: Dictionary = S.polls[front.index]
-			sheet.title(p.label, "You: %s%%. The map and the board are updated." % Game.fmt1(p.national.player * 100))
-			sheet.choice("Pin it to the board", func(): G.dismiss_front(S); sheet.close())
-		"news":
-			sheet.title(front.items[0].title, front.items[0].text)
-			sheet.choice("Read on", func(): G.dismiss_front(S); sheet.close())
-		"debate":
-			var rd: Dictionary = S.debate.rounds[S.debate.step]
-			sheet.title(rd.title, rd.prompt)
-			for j in rd.lines.size():
-				sheet.choice(rd.lines[j].text, func(): G.answer_debate(S, j); sheet.close())
-		"election":
-			var r: Dictionary = S.result
-			sheet.title("Election night", "You won %s%% of the vote and %d seats." % [Game.fmt1(r.votes.player * 100), r.seats.national.player])
-			sheet.choice("Close", func(): G.dismiss_front(S); sheet.close())
+# ---------- Decisions: each one zooms up as paper ----------
+var _down_key = ""        # the decision the player put down to look around first
+var _budget = {}
+var _offers = []
+var _budget_for = ""
 
-func _result(sheet: Sheet, res: Dictionary) -> void:
-	sheet.clear_choices()
-	var txt = ""
-	if res.delivery: txt += res.delivery.press + " "
-	for c in res.changes.slice(0, 4): txt += "%s %s%.1f. " % [c.label, "+" if c.delta > 0 else "", c.delta]
-	sheet.note(txt)
-	sheet.choice("Pin it to the board", func(): sheet.close())
+func _front_key() -> String:
+	return JSON.stringify([S.week, S.queue[0]]) if S.queue.size() else ""
+
+func _sheet_open() -> bool:
+	for c in _sheet_layer.get_children():
+		if not c.is_queued_for_deletion(): return true
+	return false
+
+func _paper(width := 820, can_down := true) -> Paper:
+	var p = Paper.new(width, can_down)
+	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	_sheet_layer.add_child(p)
+	p.closed.connect(func(): if _sheet_layer.get_child_count() <= 1: _sheet_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE)
+	p.put_down.connect(func(): _down_key = _front_key())
+	return p
+
+## Called after every change: a new decision zooms up by itself, unless it was put down.
+func _auto_open() -> void:
+	if S.queue.is_empty() or _sheet_open(): return
+	if _front_key() == _down_key: return
+	_open_front()
+
+func _open_front() -> void:
+	if S.queue.is_empty():
+		if S.result: _election_sheet()
+		return
+	_down_key = ""
+	var front: Dictionary = S.queue[0]
+	match front.type:
+		"event": _event_sheet(front)
+		"budget": _budget_sheet(front)
+		"poll": _poll_sheet(front)
+		"news": _news_sheet(front)
+		"debate": _debate_sheet()
+		"election": _election_sheet()
+
+func _done(p: Paper) -> void:
+	p.close()
+	await p.closed
+	_after_change()
+
+func _changes_chips(p: Paper, changes: Array) -> void:
+	if changes.is_empty(): return
+	p.chips(changes.slice(0, 6).map(func(c): return ["%s  %s%s" % [c.label, "+" if c.delta > 0 else "", Game.fmt1(c.delta)], Look.GOOD if c.delta > 0 else Look.RED]))
+
+func _effects_lines(box: VBoxContainer, fx: Dictionary) -> void:
+	var d: Dictionary = G.describe_choice(S, fx)
+	if d.appeals.size(): box.add_child(Look.label("Appeals to: " + ", ".join(d.appeals.map(func(x): return x.text)), "body", 13, Look.GOOD, true))
+	if d.angers.size(): box.add_child(Look.label("Angers: " + ", ".join(d.angers.map(func(x): return x.text)), "body", 13, Look.RED, true))
+	var tags: Array = []
+	for s in d.stances:
+		if s.from != s.to: tags.append("Stance change: %s → %s" % [G.stance_name(s.axis, s.from), G.stance_name(s.axis, s.to)])
+	tags.append_array(d.tags)
+	if tags.size(): box.add_child(Look.label(" · ".join(tags), "body_italic", 12, Look.MUTED, true))
+
+# ----- Events: the front page, what you say, how you say it, how it played -----
+const KINDS := {"crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences"}
+
+func _event_header(p: Paper, ev: Dictionary) -> void:
+	var crisis = ""
+	if ev.get("kind", "") == "crisis" and S.crisis: crisis = Game.by_id(G.CRISES, S.crisis.id).name
+	p.masthead(G.date_label(S.week, false), "The Morning Post", ("Crisis · " + crisis) if crisis != "" else KINDS.get(ev.get("kind", ""), "Event"))
+	p.heading(ev.title, 42)
+	p.text(ev.text, 18)
+	if ev.get("government"):
+		var gov = null
+		for x in S.parties:
+			if x.ruling: gov = x
+		p.boxed("The government moved first · " + (gov.short if gov else ""), ev.government.text)
+	if ev.get("crisisStart") and G.crisis_blames_you(S):
+		p.callout("Your party's campaigning helped bring this about. For months you pushed the country toward exactly this.")
+	if ev.get("echo") and S.record.blamed.size():
+		var b: Dictionary = S.record.blamed[-1]
+		p.quote(b.text, "%s, %s. Your words were quoted at the scene." % [G.player_party(S).leader, G.date_label(b.week, false)])
+
+func _event_sheet(front: Dictionary) -> void:
+	var ev: Dictionary = G.event_of(front)
+	var p = _paper()
+	_event_step1(p, ev)
+
+func _event_step1(p: Paper, ev: Dictionary) -> void:
+	p.clear()
+	_event_header(p, ev)
+	var any_lines = false
+	for ch in ev.choices:
+		if ch.get("lines", []).size(): any_lines = true
+	p.step("Step 1 of 2" if any_lines else "Your decision", "What do you say?")
+	for i in ev.choices.size():
+		var ch: Dictionary = ev.choices[i]
+		p.card("index", func(box):
+			box.add_child(Look.label(ch.label, "type", 19, Color("1f2a44"), true))
+			_effects_lines(box, ch.effects),
+			func():
+				if ch.get("lines", []).size(): _event_step2(p, ev, i)
+				else: _event_result(p, G.resolve_event(S, i, -1)))
+	p.top()
+
+func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
+	var ch: Dictionary = ev.choices[i]
+	p.clear()
+	_event_header(p, ev)
+	p.step("Step 2 of 2", "How do you say it?")
+	p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 15, "type")
+	p.small("The wording matters. The same position can win people over or blow up in your face.")
+	for j in ch.lines.size():
+		var line: Dictionary = ch.lines[j]
+		p.card("slip", func(box): box.add_child(Look.label("“%s”" % line.text, "news_italic", 21, Look.INK, true)),
+			func(): _event_result(p, G.resolve_event(S, i, j)))
+	var back = p.button("← Say something else", func(): _event_step1(p, ev), false)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	p.add(back)
+
+func _event_result(p: Paper, res: Dictionary) -> void:
+	p.clear()
+	_result_body(p, res.get("title", ""), res)
+	p.actions([p.button("Pin it to the board", func(): _done(p))])
+	p.top()
+
+func _result_body(p: Paper, title: String, res: Dictionary) -> void:
+	var player: Dictionary = G.player_party(S)
+	p.tv_strap("CBC · Evening news", "How it played · " + title)
+	if res.get("quote"):
+		p.add(Look.label("%s: “%s”" % [player.leader, res.quote], "news_bold", 26, Look.INK, true))
+	else:
+		p.add(Look.label("You chose to %s." % (res.label.substr(0, 1).to_lower() + res.label.substr(1).trim_suffix(".")), "news_bold", 24, Look.INK, true))
+	var dl = res.get("delivery")
+	if dl:
+		p.text(dl.press, 17, "news_italic")
+		if dl.outcome == "viral": p.stamp("It went viral", Look.GOOD)
+		elif dl.outcome == "gaffe": p.stamp("Gaffe", Look.RED)
+		if dl.styleNote != "": p.small(dl.styleNote, Look.INK)
+	if res.get("extra", "") != "": p.small(res.extra.strip_edges(), Look.INK)
+	for f in res.get("flips", []):
+		p.callout("Stance change on %s: %s → %s" % [Game.by_id(G.AXES, f.axis).issue.to_lower(), G.stance_name(f.axis, f.from), G.stance_name(f.axis, f.to)])
+	if res.get("changes", []).size():
+		p.add(Look.caps("Who moved", 11, Look.MUTED, 2))
+		_changes_chips(p, res.changes)
+
+# ----- The budget: a ledger -----
+func _budget_sheet(front: Dictionary, keep_scroll := 0) -> void:
+	var key = _front_key()
+	if _budget_for != key:
+		_budget_for = key
+		_budget = {}
+		for k in G.BUDGET_KEYS: _budget[k] = 0.0
+		_offers = []
+		if S.lastBudget: _same_as_last()
+	var p = _paper(860)
+	_budget_build(p, front)
+
+func _same_as_last() -> void:
+	var avail = _available()
+	for k in G.BUDGET_KEYS: _budget[k] = 0.0
+	var spent = 0.0
+	for k in G.BUDGET_KEYS:
+		var want = float(S.lastBudget.get(k, 0))
+		var take = minf(want, maxf(0, avail - spent))
+		take = floorf(take * 2) / 2.0
+		_budget[k] = take
+		spent += take
+
+func _available() -> float:
+	var extra = 0.0
+	for id in _offers: extra += float(Game.by_id(G.FUNDING_OFFERS, id).effects.get("money", 0))
+	return S.money + extra
+
+func _budget_build(p: Paper, front: Dictionary) -> void:
+	var sc: int = p._scroll.scroll_vertical
+	p.clear()
+	var c: Dictionary = G.calendar(S.week)
+	var spent = 0.0
+	for k in _budget: spent += _budget[k]
+	var left = _available() - spent
+	var pv: Dictionary = G.preview_budget(S, _budget)
+	var inc: Dictionary = S.get("lastIncome", {"total": 0.0, "grassroots": 0.0, "business": 0.0, "mood": 0.0})
+	p.kicker("Quarterly budget · Q%d %d" % [c.monthIndex / 3 + 1, c.year])
+	p.heading("Where does the money go?", 38)
+	p.text("This quarter you raised ₱%sM: ₱%sM from members and small donors, who give more as your party grows, and ₱%sM from business, which is %s. %d%% of adults know your party. Whatever you don't spend is saved." % [Game.fmt1(inc.total), Game.fmt1(inc.grassroots), Game.fmt1(inc.business), Game.business_word(inc.mood), Game.jround(pv.all.before * 100)], 16)
+	var offers: Array = front.get("offers", [])
+	if offers.size():
+		p.add(Look.caps("Money on the table", 11, Look.MUTED, 2))
+		for id in offers:
+			var o = Game.by_id(G.FUNDING_OFFERS, id)
+			var taken: bool = _offers.has(id)
+			var dirty: bool = o.effects.has("scandal")
+			p.card("index", func(box):
+				box.add_child(Look.label(("✓ Taking it · " if taken else "") + o.title, "type", 17, Look.RED if dirty else Color("1f2a44"), true))
+				box.add_child(Look.label(o.note, "body", 13, Look.MUTED, true)),
+				func():
+					if taken: _offers.erase(id)
+					else: _offers.append(id)
+					_budget_build(p, front))
+	var tools = HBoxContainer.new()
+	tools.add_theme_constant_override("separation", 8)
+	tools.add_child(p.button("Same as last quarter", func(): _same_as_last(); _budget_build(p, front), false, S.lastBudget == null))
+	tools.add_child(p.button("Clear", func():
+		for k in _budget: _budget[k] = 0.0
+		_budget_build(p, front), false))
+	p.add(tools)
+	p.rule(2)
+	var player: Dictionary = G.player_party(S)
+	var rows = []
+	for r in G.REGIONS: rows.append([r.id, "Rallies in " + r.name, "%sM adults. Awareness and goodwill there, a little leader image." % str(r.adults), pv[r.id]])
+	rows.append(["social", "Social media", "Cheap reach to voters under 46. The reaction is unpredictable.", pv.young])
+	rows.append(["tv", "TV and newspapers", "Reaches voters over 45 across the country.", pv.old])
+	rows.append(["tour", player.leader + "'s national tour", "Builds the leader as a person. Strongest with the young, the working class and Fauran.", pv.all])
+	for row in rows:
+		var h = HBoxContainer.new()
+		h.add_theme_constant_override("separation", 12)
+		var info = VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_theme_constant_override("separation", 1)
+		info.add_child(Look.label(row[1], "body_bold", 15, Look.INK))
+		info.add_child(Look.label(row[2], "body", 12, Look.MUTED, true))
+		var pr: Dictionary = row[3]
+		var known: String
+		if row[0] == "tour":
+			known = "Leader image: %s%s" % [Files.leader_words(pr.leaderBefore), (" → " + Files.leader_words(pr.leaderAfter)) if pr.leaderAfter - pr.leaderBefore > 0.005 else ""]
+		else:
+			known = "Know you: %s%%%s" % [Game.fmt1(pr.before * 100), (" → %s%%" % Game.fmt1(pr.after * 100)) if pr.after - pr.before > 0.0005 else ""]
+		info.add_child(Look.label(known, "body", 12, Look.INK))
+		h.add_child(info)
+		var k: String = row[0]
+		h.add_child(p.button("−", func():
+			_budget[k] = maxf(0, _budget[k] - 0.5)
+			_budget_build(p, front), false, _budget[k] <= 0))
+		var amt = Look.label("₱%sM" % Game.fmt1(_budget[k]), "type", 17, Look.INK)
+		amt.custom_minimum_size.x = 72
+		amt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		h.add_child(amt)
+		h.add_child(p.button("+", func():
+			if left >= 0.5 - 1e-9: _budget[k] += 0.5
+			_budget_build(p, front), false, left < 0.5 - 1e-9))
+		p.add(h)
+		p.rule(1, Look.LINE)
+	var foot = HBoxContainer.new()
+	var lt = Look.label("Unspent: ₱%sM" % Game.fmt1(left), "type", 20, Look.INK)
+	lt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	foot.add_child(lt)
+	foot.add_child(p.button("Confirm spending", func():
+		var before: Dictionary = G.preview_budget(S, {})
+		var res: Dictionary = G.resolve_budget(S, _budget, _offers)
+		var after: Dictionary = G.preview_budget(S, {})
+		_budget_for = ""
+		var msg = "Spent ₱%sM. People who know your party: %s%% → %s%%." % [Game.fmt1(res.spent), Game.fmt1(before.all.before * 100), Game.fmt1(after.all.before * 100)]
+		if res.socialSwing: msg += " Your social media posts went down well." if res.socialSwing > 0 else " Your social media posts backfired."
+		_toast(msg)
+		_done(p)))
+	p.add(foot)
+	await get_tree().process_frame
+	p._scroll.scroll_vertical = sc
+
+# ----- Polls, news, the debate and election night -----
+func _bars_into(p: Paper, support: Dictionary, prev) -> void:
+	var box = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	var ids: Array = Game.ssort(support.keys(), func(a, b): return support[b] - support[a])
+	var mx: float = support[ids[0]]
+	for id in ids:
+		var party = G.party_of(S, id)
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var nm = Look.label(party.name, "body_bold" if party.isPlayer else "body", 14, Look.INK)
+		nm.custom_minimum_size.x = 220
+		row.add_child(nm)
+		var bar = Files.Bar.new(Color(party.color), support[id] / mx)
+		bar.custom_minimum_size.y = 18
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(bar)
+		var val = Look.label("%s%%" % Game.fmt1(support[id] * 100), "display", 18, Look.INK)
+		val.custom_minimum_size.x = 64
+		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(val)
+		if prev != null:
+			var d: float = support[id] - prev.get(id, support[id])
+			var dl = Look.label(("+" if d >= 0 else "") + Game.fmt1(d * 100), "body_bold", 13, Look.GOOD if d >= 0 else Look.RED)
+			dl.custom_minimum_size.x = 44
+			row.add_child(dl)
+		box.add_child(row)
+		bar.frac = 0.0
+		bar.create_tween().tween_property(bar, "frac", support[id] / mx, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		bar.set_process(true)
+	p.add(box)
+
+func _poll_sheet(front: Dictionary) -> void:
+	var poll: Dictionary = S.polls[front.index]
+	var prev = null
+	for i in range(int(front.index) - 1, -1, -1):
+		prev = S.polls[i]; break
+	var p = _paper(820)
+	p.kicker("%s · %s" % [poll.label, G.date_label(poll.week, false)])
+	p.heading("The poll is in", 38)
+	_bars_into(p, poll.national, prev.national if prev else null)
+	p.small("Expected turnout %d%%. Margin of error about ±%s points." % [Game.jround(poll.turnout * 100), Game.fmt1(G.C.pollError * 200)])
+	p.add(Look.caps("Region by region", 11, Look.MUTED, 2))
+	for r in G.REGIONS:
+		var sh: Dictionary = poll.regions[r.id]
+		var ids: Array = Game.ssort(sh.keys(), func(a, b): return sh[b] - sh[a])
+		p.add(Look.label("%s — %s leads with %d%%. You: %d%%." % [r.name, G.party_of(S, ids[0]).short, Game.jround(sh[ids[0]] * 100), Game.jround(sh.player * 100)], "type", 15, Look.INK, true))
+	p.actions([p.button("Pin it to the board", func(): G.dismiss_front(S); _done(p))])
+
+func _news_sheet(front: Dictionary) -> void:
+	var labels = {"vacuum": "Power vacuum", "bad": "Trouble", "good": "Comeback", "neutral": "Change", "threat": "Threat", "issue": "Hot issue"}
+	var p = _paper(820)
+	p.masthead(G.date_label(S.week, false), "The Cranebo Herald", "Late edition")
+	var lead: Dictionary = front.items[0]
+	p.kicker(labels.get(lead.get("kind", ""), "News"))
+	p.heading(lead.title, 40)
+	p.text(lead.text, 18)
+	if front.items.size() > 1:
+		p.rule(1)
+		p.add(Look.caps("Also in this edition", 11, Look.MUTED, 2))
+		for it in front.items.slice(1):
+			p.add(Look.caps(labels.get(it.get("kind", ""), "News"), 11, Look.RED, 2))
+			p.add(Look.label(it.title, "news_bold", 20, Look.INK, true))
+			p.text(it.text, 15)
+	p.actions([p.button("Read on", func(): G.dismiss_front(S); _done(p))])
+
+func _debate_sheet() -> void:
+	var p = _paper(860)
+	_debate_round(p)
+
+func _debate_round(p: Paper) -> void:
+	p.clear()
+	var d: Dictionary = S.debate
+	var rd: Dictionary = d.rounds[d.step]
+	p.tv_strap("CBC · Live", "The final debate · question %d of %d" % [d.step + 1, d.rounds.size()])
+	p.heading(rd.title, 36)
+	p.text(rd.prompt, 18)
+	p.step("Your answer", "What do you say?")
+	for j in rd.lines.size():
+		var line: Dictionary = rd.lines[j]
+		p.card("slip", func(box): box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
+			var res: Dictionary = G.answer_debate(S, j)
+			p.clear()
+			p.tv_strap("CBC · Live", "The final debate · " + res.round)
+			p.add(Look.label(res.quote, "news_bold", 24, Look.INK, true))
+			p.text(res.press, 17, "news_italic")
+			if res.outcome == "viral": p.stamp("The clip of the night", Look.GOOD)
+			elif res.outcome == "gaffe": p.stamp("Gaffe", Look.RED)
+			_changes_chips(p, res.changes)
+			var more: bool = S.queue.size() and S.queue[0].type == "debate"
+			p.actions([p.button("Next question" if more else "Leave the studio", func():
+				if more: _debate_round(p)
+				else: _done(p))])
+			p.top())
+	p.top()
+
+func _election_sheet() -> void:
+	var r: Dictionary = S.result
+	var p = _paper(860, false)
+	p.tv_strap("CBC · Election night", "The results")
+	var you: Dictionary = G.player_party(S)
+	var first = G.party_of(S, r.ranking[0])
+	p.heading("%s wins the election" % first.name if not r.playerWon else ("%s wins a majority" % you.name if r.majority else "%s becomes the largest party" % you.name), 38)
+	_bars_into(p, r.votes, null)
+	p.add(Look.caps("Seats (%d to win)" % int(G.C.seats / 2 + 1), 11, Look.MUTED, 2))
+	var seatbar = SeatBar.new(r.ranking.map(func(id): return [Color(G.party_of(S, id).color), r.seats.national[id]]), int(G.C.seats))
+	seatbar.custom_minimum_size.y = 30
+	p.add(seatbar)
+	for id in r.ranking:
+		p.add(Look.label("%s — %d seats" % [G.party_of(S, id).name, r.seats.national[id]], "type", 15, Look.INK))
+	p.actions([
+		p.button("Read what the papers say", func(): _profile_sheet(), false),
+		p.button("Close", func():
+			if S.queue.size() and S.queue[0].type == "election": G.dismiss_front(S)
+			_done(p)),
+	])
+
+class SeatBar extends Control:
+	var parts: Array
+	var total: int
+	func _init(p: Array, t: int) -> void:
+		parts = p; total = t
+	func _draw() -> void:
+		var x = 0.0
+		for part in parts:
+			var w: float = size.x * part[1] / total
+			draw_rect(Rect2(x, 0, w, size.y), part[0])
+			x += w
+		draw_rect(Rect2(Vector2.ZERO, size), Look.INK, false, 2.0)
+		draw_line(Vector2(size.x / 2, -4), Vector2(size.x / 2, size.y + 4), Look.INK, 2.0)
+
+func _profile_sheet() -> void:
+	var pr: Dictionary = G.build_profile(S)
+	var you: Dictionary = G.player_party(S)
+	var p = _paper(860, false)
+	p.masthead(G.date_label(S.week, false), "The Cranebo Herald", "Profile")
+	p.heading(pr.headline, 40)
+	p.text("%s: %s" % [pr.archetype.title, pr.archetype.line], 19, "news_italic")
+	if pr.signature: p.quote(pr.signature.text, "%s, %s" % [you.leader, G.date_label(pr.signature.week, false)])
+	if pr.contradictions.size():
+		p.rule(1)
+		p.add(Look.caps("Said and unsaid", 12, Look.RED, 2))
+		for c in pr.contradictions:
+			p.add(Look.caps("On " + Game.by_id(G.AXES, c.axis).issue.to_lower(), 11, Look.MUTED, 2))
+			for q in [c.first, c.second]:
+				var told: String = ("“%s”" % q.text) if q.get("spoken", true) else ("Chose to " + q.text.substr(0, 1).to_lower() + q.text.substr(1))
+				p.add(Look.label("%s — %s" % [G.date_label(q.week, false), told], "news", 16, Look.INK, true))
+	if pr.betrayed.size():
+		p.rule(1)
+		p.add(Look.caps("Promises broken", 12, Look.RED, 2))
+		for b in pr.betrayed: p.text("To %s: first “%s”, then “%s”." % [b.group, b.promised, b.now], 15)
+	if pr.blamed.size(): p.text("Blamed along the way: %s." % ", ".join(pr.blamed), 15)
+	var dirty: Array = pr.money.filter(func(m): return m.dirty)
+	if dirty.size(): p.text("Took money from %s." % ", ".join(dirty.map(func(m): return m.source)), 15)
+	if pr.crisis: p.text("The crisis: %s.%s" % [pr.crisis.name, " Its campaign helped bring it about." if pr.crisis.blamed else ""], 15)
+	p.small("Speaking style: %s · %d statements · %d viral moments · %d gaffes" % [pr.style, pr.statements, pr.memes, pr.gaffes], Look.INK)
+	p.actions([p.button("Close", func(): p.close())])
 
 func _toast(text: String) -> void:
 	var t = Look.label(text, "type", 15, Look.INK, true)
@@ -441,12 +802,34 @@ func _shot(args: Dictionary) -> void:
 			"budget": G.resolve_budget(S, {"tour": S.money * 0.5, "cranbia": S.money * 0.3}, [])
 			"debate": G.answer_debate(S, 0)
 			_: G.dismiss_front(S)
-	# stop on the next decision so the board shows one
+	# stop on the next decision so the board shows one (or on a given kind)
 	G.advance_to_decision(S)
+	var until: String = args.get("until", "")
+	var g2 = 0
+	while until != "" and g2 < 400 and not (S.queue.size() and S.queue[0].type == until):
+		g2 += 1
+		if S.queue.is_empty():
+			G.advance_week(S); continue
+		var f2: Dictionary = S.queue[0]
+		match f2.type:
+			"event": G.resolve_event(S, 0, -1)
+			"budget": G.resolve_budget(S, {"tour": S.money * 0.5}, [])
+			"debate": G.answer_debate(S, 0)
+			_: G.dismiss_front(S)
 	render()
 	for i in 20: await get_tree().process_frame
 	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
 	if args.has("open"): _open_front()
+	await get_tree().process_frame
+	if args.has("step2"):
+		var ev: Dictionary = G.event_of(S.queue[0])
+		var ci = 0
+		for i in ev.choices.size():
+			if ev.choices[i].get("lines", []).size(): ci = i
+		_event_step2(_sheet_layer.get_child(-1), ev, ci)
+	if args.has("result"):
+		var ev2: Dictionary = G.event_of(S.queue[0])
+		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1))
 	if args.has("file"): _show_file(args.file)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
 	if args.has("country"): _country_sheet(args.country)
@@ -504,77 +887,3 @@ class Portrait extends Control:
 		var fs = int(r * 0.9)
 		var w = f.get_string_size(initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(f, c + Vector2(-w / 2, fs * 0.36), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("fff3dc"))
-
-class Sheet extends Control:
-	signal closed
-	var _paper: PanelContainer
-	var _v: VBoxContainer
-	var _choices: VBoxContainer
-	func _init() -> void:
-		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		var dim = ColorRect.new()
-		dim.color = Color(0.03, 0.02, 0.01, 0.82)
-		dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		add_child(dim)
-		var center = CenterContainer.new()
-		center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		add_child(center)
-		_paper = PanelContainer.new()
-		_paper.add_theme_stylebox_override("panel", Look.box(Look.PAPER, 0, Color.TRANSPARENT, 0, 24, 30))
-		_paper.custom_minimum_size.x = 720
-		center.add_child(_paper)
-		_v = VBoxContainer.new()
-		_v.add_theme_constant_override("separation", 14)
-		_paper.add_child(_v)
-		_choices = VBoxContainer.new()
-		_choices.add_theme_constant_override("separation", 10)
-	func _ready() -> void:
-		_v.add_child(_choices)
-		_paper.pivot_offset = _paper.size / 2
-		_paper.scale = Vector2(0.5, 0.5)
-		_paper.rotation_degrees = -5
-		modulate.a = 0
-		var tw = create_tween().set_parallel().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tw.tween_property(self, "modulate:a", 1.0, 0.2)
-		tw.tween_property(_paper, "scale", Vector2.ONE, 0.4)
-		tw.tween_property(_paper, "rotation_degrees", 0.0, 0.4)
-		_paper.resized.connect(func(): _paper.pivot_offset = _paper.size / 2)
-	func title(t: String, text: String) -> void:
-		_v.add_child(Look.label(t, "news_bold", 34, Look.INK, true))
-		if text != "": _v.add_child(Look.label(text, "news", 17, Look.INK, true))
-		if _choices.get_parent() == _v: _v.move_child(_choices, -1)
-	func note(t: String) -> void:
-		var l = Look.label(t, "type", 15, Look.INK, true)
-		_v.add_child(l)
-		if _choices.get_parent() == _v: _v.move_child(_choices, -1)
-	func kicker(t: String) -> void:
-		_v.add_child(Look.caps(t, 12, Look.RED, 2))
-		if _choices.get_parent() == _v: _v.move_child(_choices, -1)
-	func bullet(t: String) -> void:
-		_v.add_child(Look.label("•  " + t, "news", 15, Look.INK, true))
-		if _choices.get_parent() == _v: _v.move_child(_choices, -1)
-	func clear_choices() -> void:
-		for c in _choices.get_children(): c.queue_free()
-	func choice(text: String, cb: Callable) -> void:
-		var b = Button.new()
-		b.text = text
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.add_theme_font_override("font", Look.font("type"))
-		b.add_theme_font_size_override("font_size", 16)
-		b.add_theme_color_override("font_color", Color("1f2a44"))
-		b.add_theme_color_override("font_hover_color", Look.RED)
-		var sb = Look.box(Color("fdfaf2"), 0, Color.TRANSPARENT, 0, 3, 12)
-		sb.border_width_top = 3; sb.border_color = Color("d9534f")
-		b.add_theme_stylebox_override("normal", sb)
-		var hv = sb.duplicate(); hv.bg_color = Color("fffdf6")
-		b.add_theme_stylebox_override("hover", hv)
-		b.add_theme_stylebox_override("pressed", hv)
-		b.add_theme_stylebox_override("focus", sb)
-		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		b.pressed.connect(cb)
-		_choices.add_child(b)
-	func close() -> void:
-		var tw = create_tween()
-		tw.tween_property(self, "modulate:a", 0.0, 0.15)
-		tw.tween_callback(func(): closed.emit(); queue_free())
