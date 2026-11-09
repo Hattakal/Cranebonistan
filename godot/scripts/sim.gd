@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 13
+const SAVE_VERSION := 14
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -54,6 +54,7 @@ var _events_by_id = {}
 var TOPICS: Array = []        # debate topics (data/debates.json)
 var LINES: Dictionary = {}    # what the leader can say in them (data/debate_lines.json)
 var ISSUES: Array = []        # minor issues: local stories (data/issues.json)
+var FIGURES: Array = []       # your party's politicians (data/party.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -81,6 +82,7 @@ func load_content(path: String) -> void:
 	TOPICS = JSON.parse_string(FileAccess.get_file_as_string("res://data/debates.json")).TOPICS
 	LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/debate_lines.json"))
 	ISSUES = JSON.parse_string(FileAccess.get_file_as_string("res://data/issues.json")).ISSUES
+	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	_event_axis = {}
 	# Godot rules: the national debate is the main game, events are rarer
 	C.actionsPerMonth = 3
@@ -274,7 +276,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null,
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -307,6 +309,7 @@ func new_game(opts := {}) -> Dictionary:
 		trim_claims(s, p.id)
 	s.pops = build_pops(s)
 	seed_loyalty(s)
+	s.figures = new_figures(s)
 	# the country is already arguing about something
 	var general = TOPICS.filter(func(t): return not t.has("trigger"))
 	for i in 2:
@@ -855,6 +858,9 @@ func monthly_update(s: Dictionary) -> void:
 	for ax in s.salMod: s.salMod[ax] *= C.salienceDecay
 	debates_monthly(s)
 	issues_monthly(s)
+	communities_monthly(s)
+	steer_monthly(s)
+	figures_monthly(s)
 	if rand(s) < C.newsWaveChance:
 		var ax: Dictionary = pick(s, AXES)
 		s.salMod[ax.id] = clampf2(float(s.salMod.get(ax.id, 0)) + C.newsWaveSize, -0.5, 1.5)
@@ -920,27 +926,153 @@ func drop_signature(s: Dictionary, key: String) -> void:
 func _log(s: Dictionary, kind: String, text: String) -> void:
 	s.log.append({"week": s.week, "kind": kind, "text": text})
 
-func act_grassroots(s: Dictionary, region_id: String) -> Dictionary:
-	var cost: float = ACTIONS.grassroots.cost
+# ---------- Communities ----------
+## A local chapter in one city: slow to grow, and it lasts. It turns
+## supporters in that region into core voters, gets them to the polls, and
+## pays a little in members' dues.
+const COMMUNITY_COST := [1.0, 1.5, 2.0]
+const COMMUNITY_MAX := 3
+
+func community_level(s: Dictionary, city: String) -> int:
+	return int(s.communities.get(city, 0))
+
+func city_by_name(name: String) -> Dictionary:
+	for c in MAP.cities:
+		if c.name == name: return c
+	return {}
+
+func act_community(s: Dictionary, city: String) -> Dictionary:
+	var lvl = community_level(s, city)
+	if lvl >= COMMUNITY_MAX: return {"ok": false, "text": "Your community in %s is as big as it gets." % city}
+	var cost: float = COMMUNITY_COST[lvl]
 	var err = can_act(s, cost)
 	if err: return {"ok": false, "text": err}
 	spend_action(s, cost)
-	var player = player_party(s)
-	var ctx = score_context(s)
-	var new_core = 0.0
-	for pop in s.pops:
-		if pop.region != region_id: continue
-		var sup = pop_support(s, pop, null, ctx)
-		var floating = maxf(0, sup.player - pop.loyal.player)
-		var m = floating * 0.08
-		pop.loyal.player = clampf2(pop.loyal.player + m, 0, 0.9)
-		new_core += m * pop.size
-		pop.mobilized = clampf2(pop.mobilized + 0.05, 0, 0.15)
-		pop.leader.player = clampf2(pop.leader.player + 0.04 * pop.leaderPull * (player.charisma / 50.0), -2, 2)
-	var r = by_id(REGIONS, region_id)
-	var text = "Volunteers knocked on doors across %s. %dk supporters became core voters, and turnout among your supporters there is up." % [r.name, jround(new_core / 1000.0)]
+	s.communities[city] = lvl + 1
+	var c = city_by_name(city)
+	_community_tick(s, c, 3.0)
+	var text = ("You opened a party office in %s. Volunteers, a noticeboard and a kettle." if lvl == 0 else "Your community in %s is growing: more volunteers, more events, more people who'll knock on doors.") % city
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
+
+## One month of a community's work (k scales it, e.g. for the opening push).
+func _community_tick(s: Dictionary, c: Dictionary, k := 1.0) -> void:
+	var lvl = community_level(s, c.name)
+	var weight = lvl * (1.0 + 0.5 * float(c.get("size", 0))) * (2.0 if c.name == MAP.capital else 1.0)
+	var ctx = score_context(s)
+	for pop in s.pops:
+		if pop.region != c.area: continue
+		var sup = pop_support(s, pop, null, ctx)
+		var floating = maxf(0, sup.player - pop.loyal.player)
+		pop.loyal.player = clampf2(pop.loyal.player + floating * 0.006 * weight * k, 0, 0.9)
+		pop.mobilized = clampf2(pop.mobilized + 0.002 * weight * k, 0, 0.15)
+		pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.003 * weight * k, 0, 1)
+
+func communities_monthly(s: Dictionary) -> void:
+	for name in s.communities:
+		_community_tick(s, city_by_name(name))
+
+# ---------- The party's politicians ----------
+## Named people in your party. Each cares most about one side of one issue.
+## Steering the manifesto away from it costs their loyalty; below 25 they quit,
+## and take a little of the party's reach and their region's goodwill with them.
+func new_figures(s: Dictionary) -> Array:
+	var out = []
+	var man: Dictionary = player_party(s).manifesto
+	for f in FIGURES:
+		var mine = manifesto_side(s, f.axis)
+		var loyal = 70.0 if mine == f.side else (45.0 if mine == "" else 35.0)
+		if f.id == "teyl": loyal = 65.0
+		var x = f.duplicate()
+		x.loyalty = loyal
+		out.append(x)
+	return out
+
+func figure_by_id(s: Dictionary, id: String) -> Variant:
+	for f in s.figures:
+		if f.id == id: return f
+	return null
+
+## How strong the party's bench is: 1.0 with everyone you started with.
+func party_bench(s: Dictionary) -> float:
+	return clampf2(float(s.figures.size()) / maxf(1, FIGURES.size()), 0.3, 1.3)
+
+static func loyalty_word(l: float) -> String:
+	if l >= 75: return "Devoted"
+	if l >= 55: return "Loyal"
+	if l >= 40: return "Uneasy"
+	if l >= 25: return "Unhappy"
+	return "Leaving"
+
+func figures_monthly(s: Dictionary) -> void:
+	for f in s.figures.duplicate():
+		if f.loyalty >= 25: continue
+		s.figures.erase(f)
+		s.figuresLost.append({"name": f.name, "role": f.role, "week": s.week})
+		for pop in s.pops:
+			if pop.region == f.region: pop.goodwill.player = clampf2(pop.goodwill.player - 0.06, -2, 2)
+		push_news(s, {"kind": "threat", "title": "%s quits %s" % [f.name, player_party(s).short],
+			"text": "%s, %s, says the party is no longer the one %s joined. %s local supporters are not happy either." % [f.name, f.role.to_lower(), "she" if f.get("sex", "m") == "f" else "he", "Her" if f.get("sex", "m") == "f" else "His"]})
+
+# ---------- Steering the party ----------
+## Moving the manifesto one stance takes three months. The politicians who
+## care about the other side get angrier every month it goes on.
+const STEER_MONTHS := 3
+
+func steer_block(s: Dictionary, axis: String, dir: int) -> String:
+	if s.steer: return "You are already steering the party on %s." % by_id(AXES, s.steer.axis).issue.to_lower()
+	var st = stance_of(player_party(s).manifesto[axis])
+	if st + dir < 0 or st + dir > 4: return "The manifesto can't go further that way."
+	return ""
+
+## Who would be upset, and who pleased, by moving `axis` one stance in `dir`.
+func steer_reactions(s: Dictionary, axis: String, dir: int) -> Dictionary:
+	var toward = "L" if dir < 0 else "R"
+	var angry = []
+	var pleased = []
+	for f in s.figures:
+		if f.axis != axis: continue
+		if f.side == toward: pleased.append(f)
+		else: angry.append(f)
+	return {"angry": angry, "pleased": pleased}
+
+func act_steer(s: Dictionary, axis: String, dir: int) -> Dictionary:
+	var block = steer_block(s, axis, dir)
+	if block: return {"ok": false, "text": block}
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, 0)
+	s.steer = {"axis": axis, "dir": dir, "started": s.week, "months": 0}
+	var rx = steer_reactions(s, axis, dir)
+	for f in rx.angry: f.loyalty = clampf2(f.loyalty - 15, 0, 100)
+	for f in rx.pleased: f.loyalty = clampf2(f.loyalty + 5, 0, 100)
+	var t = teyl(s)
+	if t: t.loyalty = clampf2(t.loyalty - 5, 0, 100)
+	var ax = by_id(AXES, axis)
+	var to_name = stance_name(axis, stance_of(player_party(s).manifesto[axis]) + dir)
+	var text = "You told the party's leadership it is time to move toward \"%s\" on %s. It will take three months, and not everyone is happy." % [to_name.to_lower(), ax.issue.to_lower()]
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+func steer_monthly(s: Dictionary) -> void:
+	if not s.steer: return
+	var st: Dictionary = s.steer
+	st.months += 1
+	var rx = steer_reactions(s, st.axis, st.dir)
+	for f in rx.angry: f.loyalty = clampf2(f.loyalty - 8, 0, 100)
+	if st.months < STEER_MONTHS: return
+	var player = player_party(s)
+	var cur = stance_of(player.manifesto[st.axis])
+	player.manifesto[st.axis] = C.stanceCenters[clampi(cur + st.dir, 0, 4)]
+	shift_perceived(s, {st.axis: st.dir * 6}, false)
+	var ax = by_id(AXES, st.axis)
+	push_news(s, {"kind": "issue", "quiet": true, "title": "%s changes course on %s" % [player.short, ax.issue.to_lower()],
+		"text": "The party's manifesto now says %s." % stance_name(st.axis, stance_of(player.manifesto[st.axis])).to_lower()})
+	_log(s, "action", "The party's new line on %s is %s." % [ax.issue.to_lower(), stance_name(st.axis, stance_of(player.manifesto[st.axis])).to_lower()])
+	s.steer = null
+
+func teyl(s: Dictionary) -> Variant:
+	return figure_by_id(s, "teyl")
 
 func act_research(s: Dictionary, party_id: String) -> Dictionary:
 	var cost: float = ACTIONS.research.cost
@@ -1001,6 +1133,14 @@ func act_poach(s: Dictionary, party_id: String) -> Dictionary:
 	var diffs = biggest_differences(s, player_party(s), p, 1)
 	shift_perceived(s, {diffs[0].ax: signf(diffs[0].d) * 5})
 	var text = "Local %s organisers crossed over to you, bringing about %dk core voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
+	var claims = ownership_table(s).filter(func(r): return r.owners.any(func(o): return o.party == party_id))
+	var pool = LEADER_POOL.filter(func(x): return not s.figures.any(func(f): return f.name == x.name) and not s.parties.any(func(q): return q.leader == x.name))
+	if claims.size() and pool.size():
+		var who: Dictionary = pick(s, pool)
+		var key: String = claims[0].key
+		s.figures.append({"id": "poach_%d" % s.week, "name": who.name, "sex": who.sex, "role": "Former %s politician" % p.short, "region": pick(s, REGIONS).id,
+			"axis": key.split(":")[0], "side": key.split(":")[1], "loyalty": 45.0, "note": "Came over from %s. Still thinks like them on %s." % [p.short, side_label(key).to_lower()]})
+		text += " %s, one of their politicians, came with them." % who.name
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
@@ -1114,7 +1254,9 @@ func business_mood(s: Dictionary) -> float:
 
 func quarterly_income(s: Dictionary) -> Dictionary:
 	var share: float = s.lastSupport.player if s.lastSupport else 0.03
-	var grassroots: float = C.incomeBase + share * C.incomePerShare
+	var dues = 0.0
+	for name in s.get("communities", {}): dues += 0.12 * s.communities[name]
+	var grassroots: float = C.incomeBase + share * C.incomePerShare + dues
 	var mood = business_mood(s)
 	var business: float = C.businessBase * mood
 	return {"grassroots": grassroots, "business": business, "mood": mood, "total": grassroots + business}
@@ -1440,7 +1582,7 @@ func side_of_lean(axis: String, lean: float) -> String:
 	return ax.left if lean < 0 else ax.right
 
 func debate_reach(s: Dictionary) -> float:
-	return 0.6 + influence_of(s) * 0.5
+	return (0.6 + influence_of(s) * 0.5) * (0.85 + 0.15 * party_bench(s))
 
 func open_debate(s: Dictionary, id: String, axis: String, title: String, text: String, source: String, heat: float, lean := 0.0) -> Dictionary:
 	var d = debate_by_id(s, id)

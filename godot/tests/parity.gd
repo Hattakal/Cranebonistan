@@ -19,7 +19,7 @@ func _init() -> void:
 				last = m
 				var opts = G.raise_options(s)
 				if opts.size() and not s.agenda.done and m % 2 == 0: G.act_raise(s, opts[0], opts[0].side if opts[0].side != "" else "L", 0)
-				if s.actionsLeft > 0 and m % 5 == 1 and s.money > 2: G.act_grassroots(s, G.REGIONS[m % 5].id)
+				if s.actionsLeft > 0 and m % 5 == 1 and s.money > 2: G.act_community(s, G.MAP.cities[m % 16].name)
 			G.advance_week(s)
 			continue
 		var f: Dictionary = s.queue[0]

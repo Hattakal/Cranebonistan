@@ -344,6 +344,8 @@ func _render_map() -> void:
 	_map.fills = {}
 	_map.shares = {}
 	_map.hot = {}
+	_map.communities = S.communities
+	_map.party_color = Color(G.player_party(S).color)
 	if poll:
 		for r in G.REGIONS:
 			var sh: Dictionary = poll.regions[r.id]
@@ -987,6 +989,12 @@ func _shot(args: Dictionary) -> void:
 			_files._scroll.scroll_vertical = int(args.scroll)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
 	if args.has("country"): _country_sheet(args.country)
+	if args.has("build"):
+		for name in ["Cranebo", "Tarrpolis", "Bayernal"]:
+			S.actionsLeft = 3; S.money = 9.0
+			G.act_community(S, name)
+			if name == "Cranebo": G.act_community(S, name)
+		render()
 	if args.has("speak"):
 		S.queue.clear()
 		var ds: Array = Game.ssort(S.debates.duplicate(), func(a, b): return b.heat - a.heat)

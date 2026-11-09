@@ -378,10 +378,58 @@ func _platform() -> void:
 	lg.add_child(Look.label("■ Manifesto", "body", 12, Color("b3261e")))
 	lg.add_child(Look.label("● How voters see you", "body", 12, Look.RED))
 	for p in G.rivals(S): lg.add_child(Look.label("● " + p.short, "body", 12, Color(p.color)))
+	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
+	if S.steer:
+		var sax = Game.by_id(G.AXES, S.steer.axis)
+		_p("Steering the party on %s toward %s: month %d of %d. The people who disagree get angrier every month." % [sax.issue.to_lower(), G.stance_name(S.steer.axis, G.stance_of(player.manifesto[S.steer.axis]) + S.steer.dir).to_lower(), S.steer.months + 1, G.STEER_MONTHS], null, Look.RED, 14)
+	else:
+		_p("Steering the party moves the manifesto one stance. It takes three months and an action, and the politicians who care about the other side may quit. Once it's done, saying the new line no longer counts as drifting.", null, Look.MUTED, 13)
 	for ax in G.AXES:
 		var t = AxisTrack.new(G, S, ax, player)
 		t.custom_minimum_size.y = 62
 		_add(t)
+		var st: int = G.stance_of(player.manifesto[ax.id])
+		var sr = _row(null, 8)
+		for dir in [-1, 1]:
+			if st + dir < 0 or st + dir > 4: continue
+			var rx: Dictionary = G.steer_reactions(S, ax.id, dir)
+			var b = _btn(("◀ Steer toward %s" if dir < 0 else "Steer toward %s ▶") % ax.stances[st + dir].to_lower(), func():
+				var res: Dictionary = G.act_steer(S, ax.id, dir)
+				toast.emit(res.text)
+				changed.emit(), blocked or G.steer_block(S, ax.id, dir) != "")
+			var tip = "One action, three months."
+			if rx.angry.size(): tip += "\nAngers: " + ", ".join(rx.angry.map(func(f): return f.name))
+			if rx.pleased.size(): tip += "\nPleases: " + ", ".join(rx.pleased.map(func(f): return f.name))
+			b.tooltip_text = tip
+			b.add_theme_font_size_override("font_size", 11)
+			sr.add_child(b)
+	# the people in the party
+	_rule()
+	_eyebrow("Your party's politicians")
+	_p("They are the party's faces in the regions. Each cares most about one issue; steer the manifesto away from it and their loyalty drops. Below 25 they quit, and the party's reach shrinks.", null, Look.MUTED, 13)
+	var pg = GridContainer.new()
+	pg.columns = 3 if size.x > 1100 else 1
+	pg.add_theme_constant_override("h_separation", 12)
+	pg.add_theme_constant_override("v_separation", 12)
+	_add(pg)
+	for f in S.figures:
+		var c = _card(pg)
+		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var top2 = HBoxContainer.new()
+		c.add_child(top2)
+		var nm = Look.label(f.name, "display", 18, Look.INK)
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top2.add_child(nm)
+		top2.add_child(Look.label(G.loyalty_word(f.loyalty), "body_bold", 13, Look.RED if f.loyalty < 40 else (Look.GOOD if f.loyalty >= 55 else Look.INK)))
+		c.add_child(Look.label("%s · %s" % [f.role, Game.by_id(G.REGIONS, f.region).name], "body", 12, Look.MUTED, true))
+		var lb = Bar.new(Look.RED if f.loyalty < 40 else Color("8a6d4a"), f.loyalty / 100.0)
+		lb.custom_minimum_size.y = 6
+		c.add_child(lb)
+		var fax = Game.by_id(G.AXES, f.axis)
+		c.add_child(Look.label("Cares about: %s" % (fax.left if f.side == "L" else fax.right).to_lower() + (" ★" if G.manifesto_side(S, f.axis) == f.side else (" (against your manifesto)" if G.manifesto_side(S, f.axis) != "" else "")), "body_bold", 12, Look.INK, true))
+		c.add_child(Look.label(f.note, "body_italic", 12, Look.MUTED, true))
+	if S.figuresLost.size():
+		_p("Gone: " + ", ".join(S.figuresLost.map(func(x): return "%s (%s)" % [x.name, x.role.to_lower()])), null, Look.RED, 13)
 
 class DriftMeter extends Control:
 	var v: float
@@ -450,9 +498,26 @@ func _actions() -> void:
 	_add(Look.label("₱%sM" % Game.fmt1(S.money), "display", 26, Look.INK), hr)
 	_rule()
 	# grassroots
-	_section(G.ACTIONS.grassroots.label, "₱%sM" % str(G.ACTIONS.grassroots.cost), G.ACTIONS.grassroots.help)
-	var gr = _row()
-	for r in G.REGIONS: gr.add_child(_btn(r.name, func(): _did(G.act_grassroots(S, r.id)), dis.call(G.ACTIONS.grassroots.cost)))
+	_section("Build communities", "₱1–2M", "Open a party office in a city, then grow it. A community works every month: it turns your supporters in that region into core voters, gets them to the polls, and pays a little in members' dues. Slow, but it lasts. The capital and big cities count for more.")
+	var cg = GridContainer.new()
+	cg.columns = 5 if size.x > 1100 else 2
+	cg.add_theme_constant_override("h_separation", 12)
+	cg.add_theme_constant_override("v_separation", 8)
+	_add(cg)
+	for r in G.REGIONS:
+		var col = VBoxContainer.new()
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(Look.caps(r.name, 10, Look.MUTED, 1))
+		for c in G.MAP.cities:
+			if c.area != r.id: continue
+			var lvl: int = G.community_level(S, c.name)
+			var pips = "●".repeat(lvl) + "○".repeat(G.COMMUNITY_MAX - lvl)
+			var cost: float = G.COMMUNITY_COST[lvl] if lvl < G.COMMUNITY_MAX else 0.0
+			var b = _btn("%s  %s" % [c.name, pips], func(): _did(G.act_community(S, c.name)), lvl >= G.COMMUNITY_MAX or dis.call(cost), lvl > 0)
+			b.tooltip_text = ("Full size." if lvl >= G.COMMUNITY_MAX else ("Open an office: ₱%sM" % Game.fmt1(cost) if lvl == 0 else "Grow it: ₱%sM" % Game.fmt1(cost)))
+			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			col.add_child(b)
+		cg.add_child(col)
 	# opposition research
 	_section(G.ACTIONS.research.label, "₱%sM" % str(G.ACTIONS.research.cost), G.ACTIONS.research.help + " About half the time you find something; one time in seven you get caught.")
 	var rr = _row()

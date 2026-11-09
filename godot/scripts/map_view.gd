@@ -15,6 +15,8 @@ var capital = ""
 var fills = {}                # area id -> Color
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
+var communities = {}          # city name -> level of your party's community
+var party_color := Look.RED
 var _shown = {}               # colours on screen, easing towards fills
 var _flash = {}               # region id -> 1..0, after it changes hands
 var tip_provider: Callable     # (id, kind) -> Array of lines; first is the title
@@ -237,6 +239,11 @@ func _draw() -> void:
 			var r = maxf(2.5, (5 + c.size * 2.5) * s)
 			draw_circle(p, r + maxf(1.0, 2.5 * s), Color("f1e4c4"))
 			draw_circle(p, r, Look.BORDER)
+		# your party's community there: a ring, thicker as it grows
+		var lvl = int(communities.get(c.name, 0))
+		if lvl > 0:
+			var rr = maxf(8.0, (20 + lvl * 6) * s)
+			draw_arc(p, rr, 0, TAU, 32, party_color, maxf(1.5, (2 + lvl) * s), true)
 	_plates.clear()
 	_labels(s)
 	# paper grain over everything

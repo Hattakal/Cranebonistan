@@ -1,0 +1,75 @@
+{
+ "_note": "The people in your party. Each cares most about one side of one issue; steering the manifesto away from it costs their loyalty, and below 25 they quit. Margaret Teyl is the party secretary and always starts in the party. 'side' is L or R of the axis; a figure whose side matches your manifesto starts more loyal.",
+ "FIGURES": [
+  {
+   "id": "teyl",
+   "name": "Margaret Teyl",
+   "role": "Party secretary",
+   "region": "cranbia",
+   "axis": "system",
+   "side": "R",
+   "note": "Respected by everyone in the party. Hates cutting corners.",
+   "sex": "f"
+  },
+  {
+   "id": "orlik",
+   "name": "Teo Orlik",
+   "role": "Union organiser, Tarrpolis",
+   "region": "cranbia",
+   "axis": "economy",
+   "side": "L",
+   "note": "Brought half the steelworkers with him.",
+   "sex": "m"
+  },
+  {
+   "id": "vanna",
+   "name": "Vanna Ekstrom",
+   "role": "Spokesperson",
+   "region": "yamlin",
+   "axis": "society",
+   "side": "L",
+   "note": "Young, sharp, good on television.",
+   "sex": "f"
+  },
+  {
+   "id": "brandt",
+   "name": "Josef Brandt",
+   "role": "Farmers' leader, Bayernal",
+   "region": "erland",
+   "axis": "nation",
+   "side": "L",
+   "note": "Speaks for the villages. Distrusts Cranebo.",
+   "sex": "m"
+  },
+  {
+   "id": "kaya",
+   "name": "Elsa Kaver",
+   "role": "Party treasurer",
+   "region": "yamlin",
+   "axis": "welfare",
+   "side": "R",
+   "note": "Knows where every pezo goes. Hates promises nobody can pay for.",
+   "sex": "f"
+  },
+  {
+   "id": "aikut",
+   "name": "Jördis Aikütl",
+   "role": "Alinni branch chair",
+   "region": "alinni",
+   "axis": "order",
+   "side": "R",
+   "note": "Grew up with checkpoints. Will not defend them.",
+   "sex": "f"
+  },
+  {
+   "id": "sarn",
+   "name": "Piet Sarn",
+   "role": "Mayor of Kravk",
+   "region": "fauraifai",
+   "axis": "welfare",
+   "side": "L",
+   "note": "Fauran's only well-known politician in the party.",
+   "sex": "m"
+  }
+ ]
+}
