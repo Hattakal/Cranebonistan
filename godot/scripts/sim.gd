@@ -1,0 +1,1781 @@
+## sim.gd — the rules of Cranebonistan (autoload "Game").
+##
+## A line-for-line port of the browser version's sim.js, world.js and voice.js.
+## No drawing and no buttons: it reads the content in data/content.json and
+## changes the game state. The whole game is one Dictionary, `s`; saving is
+## JSON.stringify(s).
+##
+## Sections: helpers · random · calendar · stances · new game & pops ·
+## consistency · opinion · groups · effects · countries · trust · ownership ·
+## rivals · monthly update · actions · budget · events · news · polls ·
+## elections · world · initiatives · crisis · voice · debate · profile ·
+## time · descriptions
+extends Node
+
+const SAVE_VERSION := 9
+
+# ---------- Content (from data/content.json) ----------
+var C: Dictionary            # CONFIG
+var AXES: Array
+var AGES: Array
+var CLASSES: Array
+var NATIONALITIES: Array
+var REGIONS: Array
+var FOREIGN: Array
+var CAPITAL: Dictionary
+var VIEW_GROUPS: Array
+var PARTIES: Array
+var LEADER_POOL: Array
+var PARTY_TEMPLATES: Array
+var PLAYER_COLORS: Array
+var PLAYER_EMBLEMS: Array
+var PLAYER_PORTRAITS: Array
+var CAMPAIGN: Dictionary
+var EVENTS: Array
+var FUNDING_OFFERS: Array
+var INITIATIVES: Array
+var CRISES: Array
+var INDICATORS: Array
+var TONES: Dictionary
+var TONE_RISK: Dictionary
+var ARCHETYPES: Dictionary
+var ACTIONS: Dictionary
+var SCRUTINY_STORIES: Array
+var MONTH_NAMES: Array
+var MAP: Dictionary
+var FLAG_INFO: Dictionary
+var FEEDBACK_GROUPS: Array
+
+var WEEKS_PER_MONTH: int
+var WEEKS_PER_YEAR: int
+var ELECTION_WEEK: int
+var BUDGET_KEYS: Array = []
+var _events_by_id = {}
+
+func _init() -> void:
+	load_content("res://data/content.json")
+
+func load_content(path: String) -> void:
+	var f = FileAccess.open(path, FileAccess.READ)
+	var d: Dictionary = JSON.parse_string(f.get_as_text())
+	C = d.CONFIG; AXES = d.AXES; AGES = d.AGES; CLASSES = d.CLASSES; NATIONALITIES = d.NATIONALITIES
+	REGIONS = d.REGIONS; FOREIGN = d.FOREIGN; CAPITAL = d.CAPITAL; VIEW_GROUPS = d.VIEW_GROUPS
+	PARTIES = d.PARTIES; LEADER_POOL = d.LEADER_POOL; PARTY_TEMPLATES = d.PARTY_TEMPLATES
+	PLAYER_COLORS = d.PLAYER_COLORS; PLAYER_EMBLEMS = d.PLAYER_EMBLEMS; PLAYER_PORTRAITS = d.PLAYER_PORTRAITS
+	CAMPAIGN = d.CAMPAIGN; EVENTS = d.EVENTS; FUNDING_OFFERS = d.FUNDING_OFFERS; INITIATIVES = d.INITIATIVES
+	CRISES = d.CRISES; INDICATORS = d.INDICATORS; TONES = d.TONES; TONE_RISK = d.TONE_RISK
+	ARCHETYPES = d.ARCHETYPES; ACTIONS = d.ACTIONS; SCRUTINY_STORIES = d.SCRUTINY_STORIES
+	MONTH_NAMES = d.MONTH_NAMES; MAP = d.MAP; FLAG_INFO = d.FLAG_INFO; FEEDBACK_GROUPS = d.FEEDBACK_GROUPS
+	WEEKS_PER_MONTH = int(C.weeksPerMonth)
+	WEEKS_PER_YEAR = int(C.weeksPerMonth) * int(C.monthsPerYear)
+	ELECTION_WEEK = int(C.electionYears) * WEEKS_PER_YEAR
+	BUDGET_KEYS = []
+	for r in REGIONS: BUDGET_KEYS.append(r.id)
+	BUDGET_KEYS.append_array(["social", "tv", "tour"])
+	_events_by_id = {}
+	for e in EVENTS: _events_by_id[e.id] = e
+
+# ---------- Small helpers ----------
+static func clampf2(v: float, lo: float, hi: float) -> float:
+	return maxf(lo, minf(hi, v))
+
+static func by_id(list: Array, id) -> Variant:
+	for x in list:
+		if x.id == id: return x
+	return null
+
+func player_party(s: Dictionary) -> Dictionary:
+	for p in s.parties:
+		if p.isPlayer: return p
+	return {}
+
+func party_of(s: Dictionary, id) -> Variant:
+	for p in s.parties:
+		if p.id == id: return p
+	return null
+
+func rivals(s: Dictionary) -> Array:
+	return s.parties.filter(func(p): return not p.isPlayer)
+
+## JavaScript's Math.round: halves round up (toward +infinity).
+static func jround(x: float) -> int:
+	return int(floor(x + 0.5))
+
+## JavaScript's +x.toFixed(n)
+static func fixed(x: float, n: int) -> float:
+	return float(("%." + str(n) + "f") % x)
+
+static func fmt1(x: float) -> String:
+	return "%.1f" % x
+
+static func merged(a: Dictionary, b: Dictionary) -> Dictionary:
+	var out = a.duplicate()
+	for k in b: out[k] = b[k]
+	return out
+
+static func dsum(d: Dictionary) -> float:
+	var t = 0.0
+	for k in d: t += d[k]
+	return t
+
+## A stable sort like JavaScript's Array.sort: cmp(a, b) < 0 puts a first.
+static func ssort(arr: Array, cmp: Callable) -> Array:
+	if arr.size() <= 1: return arr.duplicate()
+	var mid = arr.size() / 2
+	var left = ssort(arr.slice(0, mid), cmp)
+	var right = ssort(arr.slice(mid), cmp)
+	var out = []
+	var i = 0
+	var j = 0
+	while i < left.size() and j < right.size():
+		if cmp.call(left[i], right[j]) <= 0:
+			out.append(left[i]); i += 1
+		else:
+			out.append(right[j]); j += 1
+	while i < left.size(): out.append(left[i]); i += 1
+	while j < right.size(): out.append(right[j]); j += 1
+	return out
+
+# ---------- Random numbers (mulberry32, same sequence as the browser version) ----------
+const M32 := 0xFFFFFFFF
+
+static func _imul(a: int, b: int) -> int:
+	a &= M32; b &= M32
+	var lo = (a & 0xFFFF) * b
+	var hi = ((a >> 16) * b) & 0xFFFF
+	return (lo + (hi << 16)) & M32
+
+func rand(s: Dictionary) -> float:
+	var t: int = (int(s.rng) + 0x6D2B79F5) & M32
+	s.rng = t
+	t = _imul(t ^ (t >> 15), t | 1)
+	t = (t ^ ((t + _imul(t ^ (t >> 7), t | 61)) & M32)) & M32
+	return float((t ^ (t >> 14)) & M32) / 4294967296.0
+
+func rand_normal(s: Dictionary) -> float:
+	var u = maxf(rand(s), 1e-9)
+	var v = rand(s)
+	return sqrt(-2.0 * log(u)) * cos(2.0 * PI * v)
+
+func shuffle(s: Dictionary, arr: Array) -> Array:
+	var i = arr.size() - 1
+	while i > 0:
+		var j = int(floor(rand(s) * (i + 1)))
+		var t = arr[i]; arr[i] = arr[j]; arr[j] = t
+		i -= 1
+	return arr
+
+func pick(s: Dictionary, arr: Array) -> Variant:
+	return arr[int(floor(rand(s) * arr.size()))]
+
+# ---------- Calendar ----------
+func calendar(week: int) -> Dictionary:
+	var month = week / WEEKS_PER_MONTH
+	return {
+		"week": week,
+		"weekOfMonth": week % WEEKS_PER_MONTH,
+		"monthIndex": month % int(C.monthsPerYear),
+		"year": int(C.startYear) + month / int(C.monthsPerYear),
+		"isMonthStart": week % WEEKS_PER_MONTH == 0,
+		"isQuarterStart": week % (WEEKS_PER_MONTH * 3) == 0,
+		"isYearEnd": week % WEEKS_PER_YEAR == WEEKS_PER_YEAR - 1,
+	}
+
+func date_label(week: int, with_week := true) -> String:
+	var c = calendar(week)
+	var base = "%s %d" % [MONTH_NAMES[c.monthIndex], c.year]
+	return ("Week %d · %s" % [c.weekOfMonth + 1, base]) if with_week else base
+
+# ---------- Stances ----------
+func stance_of(value: float) -> int:
+	var i = 0
+	for b in C.stanceBounds:
+		if value >= b: i += 1
+	return i
+
+func stance_name(axis_id: String, index: int) -> String:
+	return by_id(AXES, axis_id).stances[index]
+
+static func side_key(axis: String, side: String) -> String:
+	return axis + ":" + side
+
+func side_label(key: String) -> String:
+	var parts = key.split(":")
+	var a = by_id(AXES, parts[0])
+	return a.left if parts[1] == "L" else a.right
+
+# ---------- Starting a new game ----------
+## opts: seed, partyName, leaderName, manifesto {axisId: 0..4}, color, emblem, portrait
+func new_game(opts := {}) -> Dictionary:
+	var seed: int = opts.get("seed", randi() % 2147483647)
+	var party_name: String = opts.get("partyName", "New Dawn Movement")
+	var leader_name: String = opts.get("leaderName", "Dorin Vask")
+	var manifesto: Dictionary = opts.get("manifesto", {})
+	var color: String = opts.get("color", "#c8402a")
+	var emblem: String = opts.get("emblem", "star")
+	var portrait: int = opts.get("portrait", 1)
+	var player_point = {}
+	for ax in AXES: player_point[ax.id] = C.stanceCenters[int(manifesto.get(ax.id, 2))]
+	var pp: Dictionary = PLAYER_PORTRAITS[portrait - 1] if portrait - 1 < PLAYER_PORTRAITS.size() else PLAYER_PORTRAITS[0]
+	var s = {
+		"version": SAVE_VERSION, "seed": seed, "rng": seed & M32, "week": 0, "money": 0.0,
+		"trust": float(C.trustStart), "trustHistory": [],
+		"salMod": {}, "ownership": {}, "queue": [], "news": [], "polls": [], "log": [], "deck": [],
+		"flips": [], "flags": {}, "scheduled": [], "scandals": [], "dossiers": [], "signature": [],
+		"actionsLeft": int(C.actionsPerMonth), "lastSupport": null, "lastBudget": null,
+		"world": {"jobs": 55.0, "prices": 45.0, "migration": 58.0, "border": 40.0, "unrest": 32.0},
+		"climate": {}, "permSal": {}, "agenda": {"offered": [], "done": false, "used": []},
+		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
+		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
+		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
+	}
+	for p in PARTIES:
+		var me: bool = p.get("isPlayer", false)
+		s.parties.append({
+			"id": p.id,
+			"name": party_name if me else p.name,
+			"short": initials(party_name) if me else p.short,
+			"leader": leader_name if me else p.leader,
+			"leaderSex": pp.sex if me else p.get("leaderSex", "m"),
+			"leaderAge": pp.age if me else p.get("leaderAge", 60),
+			"charisma": float(C.startCharisma) if me else float(p.get("charisma", 50)),
+			"stability": float(p.get("stability", 60)),
+			"establishment": float(p.get("establishment", 0.5)),
+			"color": color if me else p.color,
+			"emblem": emblem if me else p.get("emblem", "star"),
+			"portraitSeed": pp.seed if me else null,
+			"isPlayer": me,
+			"ruling": p.get("ruling", false),
+			"manifesto": full_vector(player_point if me else p.manifesto),
+			"perceived": full_vector(player_point if me else p.manifesto),
+		})
+	var ext = 0.0
+	for ax in AXES: ext += absf(C.stanceCenters[int(manifesto.get(ax.id, 2))]) / 80.0
+	player_party(s).extremity = ext / AXES.size()
+	for p in PARTIES:
+		var owns: Dictionary = p.get("owns", {})
+		for key in owns:
+			if not s.ownership.has(key): s.ownership[key] = {}
+			s.ownership[key][p.id] = owns[key]
+	s.pops = build_pops(s)
+	seed_loyalty(s)
+	s.lastSupport = summarize(s, s.pops).support
+	run_hooks(s)
+	return s
+
+func full_vector(v: Dictionary) -> Dictionary:
+	var out = {}
+	for ax in AXES: out[ax.id] = clampf2(float(v.get(ax.id, 0)), -100, 100)
+	return out
+
+func initials(name: String) -> String:
+	var words = name.strip_edges().split(" ", false)
+	var out = ""
+	if words.size() > 1:
+		for w in words: out += w[0]
+	else:
+		out = name.substr(0, 3)
+	out = out.to_upper().substr(0, 4)
+	return out if out != "" else "YOU"
+
+func build_pops(s: Dictionary) -> Array:
+	var pops = []
+	for r in REGIONS:
+		for a in AGES:
+			for c in CLASSES:
+				for n in NATIONALITIES:
+					var size: float = r.adults * 1e6 * a.share * float(r.classes.get(c.id, 0)) * float(r.nationalities.get(n.id, 0))
+					if size < 15000: continue
+					var local: Dictionary = r.get("local", {}).get(n.id, {})
+					var pos = {}
+					var sal = {}
+					for ax in AXES:
+						var lean: float = float(r.lean.get(ax.id, 0)) + float(a.lean.get(ax.id, 0)) + float(c.lean.get(ax.id, 0)) \
+							+ float(n.lean.get(ax.id, 0)) + float(local.get("lean", {}).get(ax.id, 0))
+						pos[ax.id] = float(jround(clampf2(lean + rand_normal(s) * 7, -100, 100)))
+						sal[ax.id] = fixed(_or1(r.sal.get(ax.id)) * _or1(a.sal.get(ax.id)) * _or1(c.sal.get(ax.id)) \
+							* _or1(n.sal.get(ax.id)) * _or1(local.get("sal", {}).get(ax.id)), 2)
+					var pop = {
+						"id": "%s/%s/%s/%s" % [r.id, a.id, c.id, n.id],
+						"region": r.id, "age": a.id, "class": c.id, "nationality": n.id,
+						"size": float(jround(size)), "pos": pos, "sal": sal,
+						"turnout": clampf2(a.turnout + c.turnout + n.turnout + float(r.get("turnout", 0)), 0.25, 0.95),
+						"engagement": a.engagement * c.engagement,
+						"leaderPull": fixed(_or1(a.get("leaderAppeal")) * _or1(c.get("leaderAppeal")) * _or1(n.get("leaderAppeal")) * _or1(r.get("leaderAppeal")), 2),
+						"disaffection": fixed(clampf2(1 + (-pos.rev) / 60.0 + float(c.get("disaffect", 0)) + float(r.get("disaffect", 0)), 0.3, 2), 2),
+						"mobilized": 0.0,
+						"loyal": {}, "goodwill": {}, "aware": {}, "leader": {},
+					}
+					for p in s.parties:
+						var reach: Dictionary = by_id(PARTIES, p.id).get("reach", {})
+						pop.loyal[p.id] = 0.0
+						pop.goodwill[p.id] = 0.0
+						pop.leader[p.id] = 0.0
+						pop.aware[p.id] = float(C.startAwareness) if p.isPlayer else float(reach.get(r.id, reach.get("default", 1)))
+					pops.append(pop)
+	return pops
+
+static func _or1(v) -> float:
+	return 1.0 if v == null or float(v) == 0.0 else float(v)
+
+func seed_loyalty(s: Dictionary) -> void:
+	var ctx = score_context(s)
+	for pop in s.pops:
+		var sup = pop_support(s, pop, "player", ctx)
+		for id in sup: pop.loyal[id] = C.startLoyalty * sup[id]
+
+# ---------- Consistency ----------
+func inconsistency_of(s: Dictionary, party: Dictionary) -> float:
+	var steps = 0.0
+	for ax in AXES:
+		var off: int = absi(stance_of(party.perceived[ax.id]) - stance_of(party.manifesto[ax.id]))
+		steps += C.stepPenalty[off]
+	return steps
+
+# ---------- Opinion ----------
+func salience_of(s: Dictionary, pop: Dictionary, axis: String) -> float:
+	var climate: float = float(s.climate.get(axis, 0)) + float(s.get("regionClimate", {}).get(pop.region, {}).get(axis, 0))
+	return pop.sal[axis] * maxf(0.3, 1 + float(s.salMod.get(axis, 0)) + climate + float(s.permSal.get(axis, 0)))
+
+func distance(s: Dictionary, pop: Dictionary, pos: Dictionary) -> float:
+	var d = 0.0
+	var w = 0.0
+	for ax in AXES:
+		var sa = salience_of(s, pop, ax.id)
+		d += sa * absf(pop.pos[ax.id] - pos[ax.id])
+		w += sa
+	return d / w
+
+func devotion_of(pop: Dictionary, party: Dictionary) -> float:
+	if not party.isPlayer: return 0.0
+	var attachment: float = pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0) * (0.85 + 0.4 * float(party.get("extremity", 0)))
+	return clampf2((attachment - C.devotionStart) / C.devotionRange, 0, 1)
+
+func score_context(s: Dictionary) -> Dictionary:
+	var inc = {}
+	var own = {}
+	for p in s.parties:
+		inc[p.id] = inconsistency_of(s, p)
+		own[p.id] = []
+	for key in s.ownership:
+		var owners: Dictionary = s.ownership[key]
+		var total = dsum(owners)
+		var parts: PackedStringArray = key.split(":")
+		for pid in owners:
+			var v: float = owners[pid]
+			if v < 0.02 or not own.has(pid): continue
+			own[pid].append({"axis": parts[0], "side": parts[1], "value": v / maxf(total, C.ownShareFloor + v * 0.5)})
+	return {"inc": inc, "own": own, "distrust": (50.0 - s.trust) / 50.0}
+
+func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Dictionary) -> float:
+	var dev = devotion_of(pop, party)
+	var sc = -distance(s, pop, party.perceived) / C.distanceScale * (1 - C.devotionBlind * dev)
+	sc += pop.goodwill[party.id]
+	sc += log(pop.aware[party.id])
+	if party.isPlayer: sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
+	else: sc += C.rivalLeaderWeight * ((party.charisma - 50) / 50.0) * pop.leaderPull
+	var penalty = maxf(0, ctx.inc[party.id] - C.inconsistencyTolerance) / 4.0
+	sc -= penalty * pop.engagement * (1 - C.devotionBlind * dev)
+	sc += C.trustWeight * ctx.distrust * (0.5 - party.establishment) * pop.disaffection
+	for o in ctx.own[party.id]:
+		var p: float = pop.pos[o.axis]
+		if (o.side == "L" and p < -15) or (o.side == "R" and p > 15):
+			var care = salience_of(s, pop, o.axis) - C.singleIssueFrom
+			if care > 0: sc += C.ownWeight * o.value * care
+	return sc
+
+func pop_support(s: Dictionary, pop: Dictionary, exclude, ctx = null) -> Dictionary:
+	if ctx == null: ctx = score_context(s)
+	var parties: Array = s.parties.filter(func(p): return p.id != exclude)
+	var scores = []
+	var top = -INF
+	for p in parties:
+		var v = party_score(s, pop, p, ctx)
+		scores.append(v)
+		top = maxf(top, v)
+	var weights = []
+	var total = 0.0
+	for v in scores:
+		var w = exp(v - top)
+		weights.append(w); total += w
+	var loyal_total = 0.0
+	for p in parties: loyal_total += pop.loyal[p.id]
+	var out = {}
+	for i in parties.size():
+		out[parties[i].id] = pop.loyal[parties[i].id] + (1 - loyal_total) * (weights[i] / total)
+	return out
+
+func pop_votes(pop: Dictionary, sup: Dictionary) -> Dictionary:
+	var out = {}
+	for id in sup:
+		var t: float = minf(0.97, pop.turnout + pop.mobilized) if id == "player" else pop.turnout
+		out[id] = pop.size * t * sup[id]
+	return out
+
+# ---------- Groups ----------
+func group_kinds() -> Array:
+	var ages = AGES.map(func(a): return {"id": a.id, "label": a.label, "who": {"age": a.id}})
+	var nats = NATIONALITIES.map(func(n): return {"id": n.id, "label": n.label, "who": {"nationality": n.id}})
+	var classes = CLASSES.map(func(c): return {"id": c.id, "label": c.label, "who": {"class": c.id}})
+	var regions = REGIONS.map(func(r): return {"id": r.id, "label": r.name, "who": {"region": r.id}})
+	return [
+		{"id": "age", "label": "Age groups", "groups": ages},
+		{"id": "views", "label": "Political views", "groups": VIEW_GROUPS},
+		{"id": "nationality", "label": "Nationality", "groups": nats},
+		{"id": "class", "label": "Social class", "groups": classes},
+		{"id": "region", "label": "Region", "groups": regions},
+	]
+
+func matches(pop: Dictionary, who) -> bool:
+	if who == null: return true
+	for key in who:
+		var val = who[key]
+		if key == "lean":
+			for ax in val:
+				var cond: String = val[ax]
+				var n = float(cond.substr(1))
+				if cond[0] == ">":
+					if not (pop.pos[ax] > n): return false
+				elif not (pop.pos[ax] < n): return false
+		elif key == "loyalTo":
+			if not (float(pop.loyal.get(val, 0)) > 0.2): return false
+		elif val is Array:
+			if not val.has(pop[key]): return false
+		elif pop.get(key) != val: return false
+	return true
+
+func pops_matching(s: Dictionary, who) -> Array:
+	return s.pops.filter(func(p): return matches(p, who))
+
+func size_of(s: Dictionary, who) -> float:
+	var t = 0.0
+	for p in pops_matching(s, who): t += p.size
+	return t
+
+func summarize(s: Dictionary, pops: Array, ctx = null) -> Dictionary:
+	if ctx == null: ctx = score_context(s)
+	var res = {"size": 0.0, "voters": 0.0, "turnout": 0.0, "support": {}, "core": {}, "pos": {}, "sal": {},
+		"aware": 0.0, "leader": 0.0, "leaderPull": 0.0, "backers": 0.0, "devotion": 0.0, "followers": 0.0,
+		"disaffection": 0.0, "mobilized": 0.0}
+	var player = player_party(s)
+	for p in s.parties:
+		res.support[p.id] = 0.0
+		res.core[p.id] = 0.0
+	for ax in AXES:
+		res.pos[ax.id] = 0.0
+		res.sal[ax.id] = 0.0
+	for pop in pops:
+		var sup = pop_support(s, pop, null, ctx)
+		var votes = pop_votes(pop, sup)
+		res.size += pop.size
+		for p in s.parties:
+			res.support[p.id] += votes[p.id]
+			res.voters += votes[p.id]
+			res.core[p.id] += pop.size * pop.loyal[p.id]
+		for ax in AXES:
+			res.pos[ax.id] += pop.size * pop.pos[ax.id]
+			res.sal[ax.id] += pop.size * salience_of(s, pop, ax.id)
+		var dev = devotion_of(pop, player)
+		res.aware += pop.size * pop.aware.player
+		res.leader += pop.size * pop.leader.player
+		res.leaderPull += pop.size * pop.leaderPull
+		res.disaffection += pop.size * pop.disaffection
+		res.mobilized += pop.size * pop.mobilized
+		res.backers += pop.size * sup.player
+		res.devotion += pop.size * sup.player * dev
+		if dev >= 0.8: res.followers += pop.size * sup.player
+	if res.size:
+		var voters: float = res.voters if res.voters else 1.0
+		for id in res.support: res.support[id] /= voters
+		for ax in AXES:
+			res.pos[ax.id] /= res.size
+			res.sal[ax.id] /= res.size
+		res.turnout = res.voters / res.size
+		for k in ["aware", "leader", "leaderPull", "disaffection", "mobilized"]: res[k] /= res.size
+		res.devotion = res.devotion / res.backers if res.backers else 0.0
+	return res
+
+# ---------- Effects ----------
+func shift_perceived(s: Dictionary, shift, record := true) -> void:
+	if shift == null: return
+	var player = player_party(s)
+	for ax in shift:
+		var before = stance_of(player.perceived[ax])
+		player.perceived[ax] = clampf2(player.perceived[ax] + shift[ax], -100, 100)
+		var after = stance_of(player.perceived[ax])
+		if record and before != after:
+			s.flips.append({"party": player.id, "week": s.week, "axis": ax, "from": before, "to": after})
+
+func preview_shift(s: Dictionary, shift) -> Array:
+	var player = player_party(s)
+	var out = []
+	if shift == null: return out
+	for ax in shift:
+		out.append({"axis": ax, "delta": shift[ax], "from": stance_of(player.perceived[ax]),
+			"to": stance_of(clampf2(player.perceived[ax] + shift[ax], -100, 100)), "manifesto": stance_of(player.manifesto[ax])})
+	return out
+
+func influence_of(s: Dictionary) -> float:
+	var share: float = s.lastSupport.player if s.lastSupport else 0.03
+	return clampf2(share / C.influenceAt, C.influenceMin, C.influenceMax)
+
+func influence_label(s: Dictionary) -> String:
+	var i = influence_of(s)
+	if i < 0.4: return "Fringe voice"
+	if i < 0.8: return "Getting noticed"
+	if i < 1.2: return "Agenda-setter"
+	return "Sets the national debate"
+
+static func _leader_list(v) -> Array:
+	if v == null: return []
+	if v is Array: return v
+	return [v]
+
+func apply_effects(s: Dictionary, fx: Dictionary) -> void:
+	var player = player_party(s)
+	var ext: float = player.get("extremity", 0.0)
+	var inf = influence_of(s)
+	var from_news: bool = fx.get("fromNews", false)
+	shift_perceived(s, fx.get("shift"))
+	for g in fx.get("goodwill", []):
+		var party: String = g.get("party", player.id)
+		var amt: float = g.amt
+		if amt < 0 and party == player.id: amt = amt * (1 - C.extremeAnger / 2.0 + C.extremeAnger * ext)
+		for pop in s.pops:
+			if matches(pop, g.get("who")): pop.goodwill[party] = clampf2(pop.goodwill[party] + amt * C.goodwillScale, -2, 2)
+	for id in fx.get("crisis", {}):
+		if s.crisis: break
+		s.crisisPressure[id] = maxf(-3, float(s.crisisPressure.get(id, 0)) + fx.crisis[id] * inf)
+	for k in fx.get("world", {}):
+		if s.world.has(k): s.world[k] = clampf2(s.world[k] + fx.world[k] * (1.0 if from_news else inf), 0, 100)
+	for ax in fx.get("permSal", {}): s.permSal[ax] = float(s.permSal.get(ax, 0)) + fx.permSal[ax]
+	if fx.get("leader"):
+		var scale: float = player.charisma / 50.0 * (1 - C.extremeLeader / 2.0 + C.extremeLeader * ext)
+		var list = _leader_list(fx.leader)
+		for pop in s.pops:
+			for g in list:
+				var who = {} if (g is float or g is int) else g.get("who")
+				var amt: float = float(g) if (g is float or g is int) else g.amt
+				if matches(pop, who): pop.leader.player = clampf2(pop.leader.player + amt * scale, -2, 2)
+	if fx.get("charisma"): player.charisma = clampf2(player.charisma + fx.charisma, 10, 100)
+	for ax in fx.get("salience", {}):
+		s.salMod[ax] = clampf2(float(s.salMod.get(ax, 0)) + fx.salience[ax] * (1.0 if from_news else inf), -0.5, 1.5)
+	if fx.get("trust"): change_trust(s, fx.trust * (1.0 if (from_news or fx.trust > 0) else inf))
+	for pid in fx.get("stability", {}):
+		var p = party_of(s, pid)
+		if p: p.stability = clampf2(p.stability + fx.stability[pid], 0, 100)
+	var coverage: float = fx.awareness if fx.has("awareness") and fx.awareness != null else C.eventAwareness
+	for pop in s.pops:
+		pop.aware[player.id] = clampf2(pop.aware[player.id] + (1 - pop.aware[player.id]) * coverage, 0.01, 1)
+	if fx.get("money"): s.money = maxf(0, s.money + fx.money)
+	for c in fx.get("country", []): note_country(s, c)
+	if fx.get("flag"): s.flags[fx.flag] = s.week
+	if fx.get("scandal"): s.scandals.append(merged(fx.scandal, {"week": s.week}))
+	if fx.get("followup"):
+		var lo: int = int(fx.followup.months[0])
+		var hi: int = int(fx.followup.months[1])
+		var months = lo + int(floor(rand(s) * (hi - lo + 1)))
+		s.scheduled.append({"id": fx.followup.event, "week": s.week + months * WEEKS_PER_MONTH})
+
+# ---------- Neighbouring countries ----------
+func note_country(s: Dictionary, c: Dictionary) -> void:
+	if not s.has("countries"): s.countries = {}
+	if not s.countries.has(c.id): s.countries[c.id] = {"notes": []}
+	var st: Dictionary = s.countries[c.id]
+	if c.get("note"): st.notes.append({"week": s.week, "text": c.note})
+	if c.get("relation"): st.relation = c.relation
+	if c.has("hot") and c.hot != null: st.hot = c.hot
+
+# ---------- Trust ----------
+func change_trust(s: Dictionary, d: float) -> void:
+	s.trust = clampf2(s.trust + d, 0, 100)
+
+static func trust_label(t: float) -> String:
+	if t >= 60: return "High"
+	if t >= 45: return "Steady"
+	if t >= 30: return "Low"
+	if t >= 15: return "Very low"
+	return "Collapsed"
+
+# ---------- Issue ownership ----------
+func add_ownership(s: Dictionary, party_id: String, key: String, amount: float) -> void:
+	if not s.ownership.has(key): s.ownership[key] = {}
+	var owners: Dictionary = s.ownership[key]
+	owners[party_id] = clampf2(float(owners.get(party_id, 0)) + amount, 0, 1)
+
+func ownership_table(s: Dictionary) -> Array:
+	var rows = []
+	for key in s.ownership:
+		var owners: Dictionary = s.ownership[key]
+		var total = dsum(owners)
+		var list = []
+		for pid in owners:
+			if owners[pid] >= 0.02: list.append([pid, owners[pid]])
+		list = ssort(list, func(a, b): return b[1] - a[1])
+		var owners_out = list.map(func(x): return {"party": x[0], "value": x[1], "share": x[1] / total if total else 0.0})
+		var axis: String = key.split(":")[0]
+		if owners_out.size():
+			rows.append({"key": key, "axis": axis, "label": side_label(key), "heat": float(s.salMod.get(axis, 0)), "owners": owners_out})
+	return rows
+
+func ownership_of(s: Dictionary, party_id: String, key: String) -> float:
+	return float(s.ownership.get(key, {}).get(party_id, 0))
+
+# ---------- Rival parties ----------
+func push_news(s: Dictionary, item: Dictionary) -> void:
+	s.news.append(merged({"week": s.week}, item))
+
+func free_core_voters(s: Dictionary, party: Dictionary, share: float) -> float:
+	var freed = 0.0
+	for pop in s.pops:
+		var lost: float = pop.loyal[party.id] * share
+		pop.loyal[party.id] -= lost
+		freed += lost * pop.size
+	return freed
+
+func biggest_differences(s: Dictionary, a: Dictionary, b: Dictionary, n := 2) -> Array:
+	var list = AXES.map(func(ax): return {"ax": ax.id, "d": b.perceived[ax.id] - a.perceived[ax.id]})
+	return ssort(list, func(x, y): return absf(y.d) - absf(x.d)).slice(0, n)
+
+func _happening_weight(id: String, p: Dictionary) -> float:
+	match id:
+		"scandal": return 1 + (60 - p.stability) / 40.0
+		"infighting": return 0.8 + (55 - p.stability) / 30.0
+		"new_leader": return 1.2 if (p.charisma < 48 or p.stability < 40) else 0.3
+		"rebound": return 0.7 if p.stability < 50 else 0.4
+	return 0.0
+
+func _happening_run(id: String, s: Dictionary, p: Dictionary) -> void:
+	match id:
+		"scandal":
+			p.stability = clampf2(p.stability - 18, 0, 100)
+			p.charisma = clampf2(p.charisma - 5, 10, 100)
+			change_trust(s, -4)
+			for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.25, -2, 2)
+			push_news(s, {"party": p.id, "kind": "bad", "title": "%s rocked by scandal" % p.short,
+				"text": "Leaked messages show %s arranging state contracts for party donors. %s is in turmoil and trust in politics has fallen." % [p.leader, p.short]})
+		"infighting":
+			p.stability = clampf2(p.stability - 12, 0, 100)
+			push_news(s, {"party": p.id, "kind": "bad", "title": "Open infighting in %s" % p.short,
+				"text": "A faction inside %s is openly attacking %s. Party members are taking sides." % [p.name, p.leader]})
+		"new_leader":
+			var old: String = p.leader
+			var used = s.parties.map(func(x): return x.leader)
+			var nxt: Dictionary = pick(s, LEADER_POOL.filter(func(n): return not used.has(n.name)))
+			p.leader = nxt.name; p.leaderSex = nxt.sex; p.leaderAge = nxt.age
+			p.charisma = float(jround(28 + rand(s) * 50))
+			p.stability = 58.0
+			var ax: String = pick(s, AXES).id
+			var dir = -1 if rand(s) < 0.5 else 1
+			p.perceived[ax] = clampf2(p.perceived[ax] + dir * 22, -100, 100)
+			p.manifesto[ax] = p.perceived[ax]
+			var a = by_id(AXES, ax)
+			var style = "a charismatic crowd-pleaser" if p.charisma >= 62 else ("a dull party insider" if p.charisma <= 40 else "a capable but unexciting figure")
+			push_news(s, {"party": p.id, "kind": "good" if p.charisma >= 55 else "neutral", "title": "%s replaces %s with %s" % [p.short, old, p.leader],
+				"text": "%s is %s, and is moving %s toward %s." % [p.leader, style, p.short, (a.left if dir < 0 else a.right).to_lower()]})
+		"rebound":
+			p.stability = clampf2(p.stability + 15, 0, 100)
+			p.charisma = clampf2(p.charisma + 6, 10, 100)
+			for pop in s.pops:
+				if pop.loyal[p.id] > 0.15: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] + 0.2, -2, 2)
+			push_news(s, {"party": p.id, "kind": "good", "title": "%s wins back the room" % p.leader,
+				"text": "A strong conference speech has united %s again. Its base is energised." % p.short})
+
+const HAPPENINGS := ["scandal", "infighting", "new_leader", "rebound"]
+
+func rival_happening(s: Dictionary) -> void:
+	var cands = []
+	var total = 0.0
+	for p in rivals(s):
+		for h in HAPPENINGS:
+			var w = maxf(0.05, _happening_weight(h, p))
+			cands.append([p, h, w]); total += w
+	var r = rand(s) * total
+	for c in cands:
+		r -= c[2]
+		if r <= 0:
+			_happening_run(c[1], s, c[0])
+			return
+
+func collapse_party(s: Dictionary, p: Dictionary) -> void:
+	var freed = free_core_voters(s, p, 0.3)
+	for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.3, -2, 2)
+	p.stability = 45.0
+	p.charisma = clampf2(p.charisma - 8, 10, 100)
+	p.collapses = int(p.get("collapses", 0)) + 1
+	p.lastCollapse = s.week
+	p.stability = 55.0
+	change_trust(s, -3)
+	push_news(s, {"party": p.id, "kind": "vacuum", "title": "%s splits apart" % p.name,
+		"text": "After months of infighting, a third of %s's MPs have walked out. About %s million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up." % [p.short, fmt1(freed / 1e6)]})
+	s.queue.append({"type": "event", "event": defector_event(s, p, freed)})
+
+func defector_event(s: Dictionary, p: Dictionary, _freed: float) -> Dictionary:
+	var diffs = biggest_differences(s, player_party(s), p)
+	var shift = {}
+	for x in diffs: shift[x.ax] = signf(x.d) * 10
+	var small = {}
+	for x in diffs.slice(0, 1): small[x.ax] = signf(x.d) * 5
+	return {
+		"id": "defectors_" + p.id, "kind": "opportunity", "title": "%s rebels want to join you" % p.short,
+		"text": "Fifteen MPs who walked out of %s are offering to join your party, with their local organisations. They expect you to make room for their views." % p.name,
+		"choices": [
+			{"label": "Welcome all of them", "effects": {"shift": shift, "awareness": 0.05, "defect": {"from": p.id, "share": 0.22},
+				"goodwill": [{"who": {"loyalTo": p.id}, "amt": 0.3}]}},
+			{"label": "Take only the local organisers, not the MPs", "effects": {"shift": small, "defect": {"from": p.id, "share": 0.1},
+				"goodwill": [{"who": {"loyalTo": p.id}, "amt": 0.12}]}},
+			{"label": "Refuse: we are not a home for failed politicians", "effects": {"awareness": 0.02, "trust": 1,
+				"goodwill": [{"who": {"lean": {"rev": "<-20"}}, "amt": 0.15}]}},
+		],
+	}
+
+func defect(s: Dictionary, from_id: String, share: float) -> float:
+	var from = party_of(s, from_id)
+	var player = player_party(s)
+	var moved = 0.0
+	for pop in s.pops:
+		var closeness = clampf2(1.4 - distance(s, pop, player.perceived) / 60.0, 0, 1)
+		var m: float = pop.loyal[from_id] * share * closeness
+		pop.loyal[from_id] -= m
+		pop.loyal.player = clampf2(pop.loyal.player + m, 0, 0.9)
+		pop.aware.player = maxf(pop.aware.player, minf(1, pop.aware.player + m * 2))
+		moved += m * pop.size
+	from.stability = clampf2(from.stability - 5, 0, 100)
+	return moved
+
+func rivals_adapt(s: Dictionary, before: Dictionary, now: Dictionary) -> void:
+	var player = player_party(s)
+	var nation = summarize(s, s.pops)
+	for p in rivals(s):
+		var lost: float = before[p.id] - now[p.id]
+		var you_gained: float = now.player - before.player
+		if lost < 0.015 or you_gained < 0.01: continue
+		var scored = AXES.map(func(a): return {"a": a, "score": nation.sal[a.id] * absf(player.perceived[a.id] - p.perceived[a.id])})
+		var ax: Dictionary = ssort(scored, func(x, y): return y.score - x.score)[0].a
+		var d = clampf2(player.perceived[ax.id] - p.perceived[ax.id], -15, 15)
+		p.perceived[ax.id] = clampf2(p.perceived[ax.id] + d, -100, 100)
+		p.manifesto[ax.id] = p.perceived[ax.id]
+		var side = "L" if d < 0 else "R"
+		add_ownership(s, p.id, side_key(ax.id, side), 0.12)
+		push_news(s, {"party": p.id, "kind": "threat", "title": "%s copies your line on %s" % [p.short, ax.issue.to_lower()],
+			"text": "Worried about losing voters to you, %s has moved %s toward %s. They will compete for the same voters." % [p.leader, p.short, (ax.left if d < 0 else ax.right).to_lower()]})
+
+func rivals_monthly(s: Dictionary, now_support: Dictionary) -> void:
+	for p in rivals(s):
+		var trend: float = now_support[p.id] - s.lastSupport[p.id] if s.lastSupport else 0.0
+		var d: float = (60 - p.stability) * 0.08 + rand_normal(s) * 3 + clampf2(trend * 120, -4, 4)
+		if p.ruling: d -= 0.8 + maxf(0, 35 - s.trust) * 0.05
+		p.stability = clampf2(p.stability + d, 0, 100)
+	if rand(s) < C.rivalEventChance: rival_happening(s)
+	var falling = null
+	for p in rivals(s):
+		if p.stability < C.collapseAt and s.week - int(p.get("lastCollapse", -999)) > C.collapseCooldownMonths * WEEKS_PER_MONTH:
+			falling = p; break
+	if falling: collapse_party(s, falling)
+
+func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
+	if now.player < C.scrutinyFrom or rand(s) > C.scrutinyChance: return
+	var story: Dictionary = pick(s, SCRUTINY_STORIES)
+	apply_effects(s, merged(story.fx, {"awareness": 0.02}))
+	push_news(s, {"kind": "threat", "title": story.title, "text": story.text + " Leading the polls makes you a target."})
+
+# ---------- Monthly dynamics ----------
+func monthly_update(s: Dictionary) -> void:
+	for ax in s.salMod: s.salMod[ax] *= C.salienceDecay
+	if rand(s) < C.newsWaveChance:
+		var ax: Dictionary = pick(s, AXES)
+		s.salMod[ax.id] = clampf2(float(s.salMod.get(ax.id, 0)) + C.newsWaveSize, -0.5, 1.5)
+		var owners = ownership_table(s).filter(func(r): return r.axis == ax.id and r.owners.size())
+		var who = " and ".join(owners.map(func(r): return "%s (%s)" % [party_of(s, r.owners[0].party).short, r.label.to_lower()]))
+		push_news(s, {"kind": "issue", "title": "All eyes on %s" % ax.issue.to_lower(),
+			"text": "Everyone is suddenly talking about %s, and for many voters it is now the only issue that matters. %s" % [ax.issue.to_lower(), ("The parties that own it gain most: %s." % who) if who != "" else "Nobody owns this issue yet."]})
+	for key in s.ownership:
+		for pid in s.ownership[key]: s.ownership[key][pid] *= C.ownDecay
+	s.trust += (50 - s.trust) * C.trustRecovery
+	s.actionsLeft = int(C.actionsPerMonth)
+	var player = player_party(s)
+	var pull = {}
+	for ax in AXES: pull[ax.id] = (player.manifesto[ax.id] - player.perceived[ax.id]) * C.perceivedPull
+	shift_perceived(s, pull, false)
+	var ctx = score_context(s)
+	for pop in s.pops:
+		var sup = pop_support(s, pop, null, ctx)
+		var dev = devotion_of(pop, player)
+		if dev > 0.5:
+			for ax in AXES: pop.pos[ax.id] += (player.perceived[ax.id] - pop.pos[ax.id]) * C.cultPull * dev
+		pop.mobilized *= C.mobilizeDecay
+		var loyal_total = 0.0
+		for p in s.parties:
+			pop.goodwill[p.id] *= C.goodwillDecay
+			pop.leader[p.id] *= C.leaderDecay
+			if p.isPlayer:
+				pop.aware[p.id] = C.awarenessFloor + (pop.aware[p.id] - C.awarenessFloor) * C.awarenessDecay
+			var floating: float = sup[p.id] - pop.loyal[p.id]
+			var core: float = pop.loyal[p.id] * (1 - C.loyaltyChurn) + floating * C.loyaltyGain
+			var erosion: float = C.coreErosion * maxf(0, ctx.inc[p.id] - C.inconsistencyTolerance)
+			core *= 1 - erosion * (1 - devotion_of(pop, p))
+			pop.loyal[p.id] = clampf2(core, 0, 0.9)
+			loyal_total += pop.loyal[p.id]
+		if loyal_total > 0.85:
+			for p in s.parties: pop.loyal[p.id] *= 0.85 / loyal_total
+	var now: Dictionary = summarize(s, s.pops).support
+	rivals_monthly(s, now)
+	frontrunner_scrutiny(s, now)
+	s.trustHistory.append({"week": s.week, "trust": s.trust})
+	s.lastSupport = now
+
+# ---------- Actions ----------
+func can_act(s: Dictionary, cost := 0.0) -> String:
+	if s.result: return "The election is over."
+	if s.actionsLeft <= 0: return "No actions left this month."
+	if s.money < cost: return "Needs ₱%sM." % str(cost)
+	return ""
+
+func spend_action(s: Dictionary, cost: float) -> void:
+	s.actionsLeft -= 1
+	s.money -= cost
+
+func manifesto_side(s: Dictionary, axis: String) -> String:
+	var st = stance_of(player_party(s).manifesto[axis])
+	return "L" if st <= 1 else ("R" if st >= 3 else "")
+
+func champion_block(s: Dictionary, axis: String, side: String) -> String:
+	var mine = manifesto_side(s, axis)
+	if mine == "": return "Your manifesto is neutral on this issue."
+	if mine != side: return "Your manifesto takes the other side."
+	var key = side_key(axis, side)
+	if not s.signature.has(key) and s.signature.size() >= C.maxSignatureIssues:
+		return "You already campaign on %d issues. Drop one first." % int(C.maxSignatureIssues)
+	return ""
+
+func champion_preview(s: Dictionary, axis: String, side: String) -> Dictionary:
+	var heat = maxf(0, float(s.salMod.get(axis, 0)))
+	var gain = 0.22 / (1 + 2 * heat)
+	var single = 0.0
+	for pop in s.pops:
+		var p: float = pop.pos[axis]
+		if ((side == "L" and p < -15) or (side == "R" and p > 15)) and salience_of(s, pop, axis) > C.singleIssueFrom: single += pop.size
+	return {"gain": gain, "heat": heat, "single": single, "block": champion_block(s, axis, side),
+		"shift": preview_shift(s, {axis: -6 if side == "L" else 6})[0], "ax": by_id(AXES, axis)}
+
+func drop_signature(s: Dictionary, key: String) -> void:
+	s.signature = s.signature.filter(func(k): return k != key)
+	s.log.append({"week": s.week, "kind": "action", "text": "Stopped campaigning on %s." % side_label(key).to_lower()})
+
+func _log(s: Dictionary, kind: String, text: String) -> void:
+	s.log.append({"week": s.week, "kind": kind, "text": text})
+
+func act_champion(s: Dictionary, axis: String, side: String) -> Dictionary:
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	var block = champion_block(s, axis, side)
+	if block: return {"ok": false, "text": block}
+	var gain: float = champion_preview(s, axis, side).gain
+	var key = side_key(axis, side)
+	if not s.signature.has(key): s.signature.append(key)
+	spend_action(s, 0)
+	add_ownership(s, "player", key, gain)
+	s.salMod[axis] = clampf2(float(s.salMod.get(axis, 0)) + 0.12, -0.5, 1.5)
+	shift_perceived(s, {axis: -6 if side == "L" else 6})
+	for pop in s.pops:
+		var p: float = pop.pos[axis]
+		var on_side = p < -15 if side == "L" else p > 15
+		var against = p > 25 if side == "L" else p < -25
+		if on_side:
+			pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.03, 0, 1)
+			pop.goodwill.player = clampf2(pop.goodwill.player + 0.06 * pop.sal[axis], -2, 2)
+		elif against: pop.goodwill.player = clampf2(pop.goodwill.player - 0.05 * pop.sal[axis], -2, 2)
+	var text = "You are campaigning hard for %s. Your claim on the issue is now %d." % [side_label(key).to_lower(), jround(ownership_of(s, "player", key) * 100)]
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+func act_grassroots(s: Dictionary, region_id: String) -> Dictionary:
+	var cost: float = ACTIONS.grassroots.cost
+	var err = can_act(s, cost)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, cost)
+	var player = player_party(s)
+	var ctx = score_context(s)
+	var new_core = 0.0
+	for pop in s.pops:
+		if pop.region != region_id: continue
+		var sup = pop_support(s, pop, null, ctx)
+		var floating = maxf(0, sup.player - pop.loyal.player)
+		var m = floating * 0.08
+		pop.loyal.player = clampf2(pop.loyal.player + m, 0, 0.9)
+		new_core += m * pop.size
+		pop.mobilized = clampf2(pop.mobilized + 0.05, 0, 0.15)
+		pop.leader.player = clampf2(pop.leader.player + 0.04 * pop.leaderPull * (player.charisma / 50.0), -2, 2)
+	var r = by_id(REGIONS, region_id)
+	var text = "Volunteers knocked on doors across %s. %dk supporters became core voters, and turnout among your supporters there is up." % [r.name, jround(new_core / 1000.0)]
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+func act_research(s: Dictionary, party_id: String) -> Dictionary:
+	var cost: float = ACTIONS.research.cost
+	var err = can_act(s, cost)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, cost)
+	var p = party_of(s, party_id)
+	var r = rand(s)
+	var text: String
+	if r < 0.15:
+		apply_effects(s, {"awareness": 0.03, "leader": -0.08,
+			"goodwill": [{"who": {"class": ["middle", "upper"]}, "amt": -0.25}, {"who": {}, "amt": -0.05}]})
+		text = "Your investigators were caught going through %s's bins. The press is calling it a dirty trick." % p.short
+	elif r < 0.65:
+		var severity = 3 if rand(s) < 0.3 else (2 if rand(s) < 0.6 else 1)
+		var what: String = ["an unpaid tax bill", "an expenses fiddle", "secret payments from a tycoon"][severity - 1]
+		s.dossiers.append({"party": party_id, "severity": severity, "what": what, "week": s.week})
+		text = "Found it: %s involving %s. The dossier is ready to release whenever you choose." % [what, p.leader]
+	else:
+		text = "Your investigators found nothing useful on %s." % p.short
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+func act_release(s: Dictionary, index: int) -> Dictionary:
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	if index < 0 or index >= s.dossiers.size(): return {"ok": false, "text": "No such dossier."}
+	var dos: Dictionary = s.dossiers[index]
+	spend_action(s, 0)
+	s.dossiers.remove_at(index)
+	s.record.dossiers += 1
+	var p = party_of(s, dos.party)
+	var sev: float = dos.severity
+	p.stability = clampf2(p.stability - 5 * sev, 0, 100)
+	p.charisma = clampf2(p.charisma - 3 * sev, 10, 100)
+	for pop in s.pops:
+		pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.12 * sev, -2, 2)
+		pop.loyal[p.id] *= 1 - 0.03 * sev
+	change_trust(s, -2 * sev)
+	apply_effects(s, {"awareness": 0.03})
+	var text = "The story broke: %s involving %s. %s is reeling." % [dos.what, p.leader, p.short]
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+func can_poach(s: Dictionary, party_id: String) -> bool:
+	var p = party_of(s, party_id)
+	return p.stability < 40 and s.week - int(p.get("lastPoached", -999)) >= C.poachCooldownMonths * WEEKS_PER_MONTH
+
+func act_poach(s: Dictionary, party_id: String) -> Dictionary:
+	var cost: float = ACTIONS.poach.cost
+	var err = can_act(s, cost)
+	if err: return {"ok": false, "text": err}
+	if not can_poach(s, party_id): return {"ok": false, "text": "Nobody in that party is ready to leave right now."}
+	spend_action(s, cost)
+	var p = party_of(s, party_id)
+	p.lastPoached = s.week
+	var moved = defect(s, party_id, 0.07)
+	var diffs = biggest_differences(s, player_party(s), p, 1)
+	shift_perceived(s, {diffs[0].ax: signf(diffs[0].d) * 5})
+	var text = "Local %s organisers crossed over to you, bringing about %dk core voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+func act_outrage(s: Dictionary) -> Dictionary:
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, 0)
+	var recent: Array = s.get("outrages", []).filter(func(w): return s.week - w < 24)
+	var f = 1.0 / (1 + recent.size())
+	recent.append(s.week)
+	s.outrages = recent
+	s.record.outrages += 1
+	var known_before = national_awareness(s)
+	apply_effects(s, {"shift": {"rev": -5}, "awareness": 0.11 * f, "trust": -1,
+		"leader": [{"who": {"lean": {"rev": "<-10"}}, "amt": 0.06 * f}],
+		"goodwill": [{"who": {"class": "middle"}, "amt": -0.2}, {"who": {"class": "upper"}, "amt": -0.3}, {"who": {"age": "61+"}, "amt": -0.1}, {"who": {"lean": {"rev": "<-15"}}, "amt": 0.08 * f}]})
+	var known_after = national_awareness(s)
+	var known = "People who know your party: %d%% → %d%%." % [jround(known_before * 100), jround(known_after * 100)]
+	var text = ("Your comments are on every channel. Anti-system voters loved it; the middle class and business donors are horrified." if f == 1.0
+		else "Another provocation. The media is getting used to you: less coverage, same backlash.") + " " + known
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+func national_awareness(s: Dictionary) -> float:
+	var size = 0.0
+	var a = 0.0
+	for pop in s.pops:
+		size += pop.size
+		a += pop.size * pop.aware.player
+	return a / size
+
+# ---------- Campaign budget ----------
+func campaign_impact(s: Dictionary, alloc: Dictionary) -> Dictionary:
+	# pop index -> {aware, goodwill, leader}
+	var impact = {}
+	var pops: Array = s.pops
+	var add = func(i: int, k: String, v: float) -> void:
+		if not impact.has(i): impact[i] = {"aware": pops[i].aware.player, "goodwill": 0.0, "leader": 0.0}
+		impact[i][k] += v
+	var aware_gain = func(i: int, rate: float) -> void:
+		var cur: float = impact[i].aware if impact.has(i) else pops[i].aware.player
+		add.call(i, "aware", (1 - cur) * clampf2(rate, 0, 0.6))
+	for key in BUDGET_KEYS:
+		var m = float(alloc.get(key, 0))
+		if m <= 0: continue
+		var region = by_id(REGIONS, key)
+		if region:
+			var f: float = m / region.adults
+			for i in pops.size():
+				if pops[i].region == key:
+					aware_gain.call(i, CAMPAIGN.rally.aware * f)
+					add.call(i, "goodwill", CAMPAIGN.rally.goodwill * f)
+					add.call(i, "leader", CAMPAIGN.rally.leader * f)
+		elif key == "social" or key == "tv":
+			var c: Dictionary = CAMPAIGN[key]
+			for i in pops.size():
+				if c.ages.has(pops[i].age): aware_gain.call(i, c.aware * m)
+		elif key == "tour":
+			for i in pops.size():
+				aware_gain.call(i, CAMPAIGN.tour.aware * m)
+				add.call(i, "leader", CAMPAIGN.tour.leader * m * pops[i].leaderPull)
+	return impact
+
+func preview_budget(s: Dictionary, alloc: Dictionary) -> Dictionary:
+	var impact = campaign_impact(s, alloc)
+	var rows = {}
+	var groups = REGIONS.map(func(r): return {"id": r.id, "who": {"region": r.id}})
+	groups.append_array([{"id": "young", "who": {"age": ["18-29", "30-45"]}}, {"id": "old", "who": {"age": ["46-60", "61+"]}}, {"id": "all", "who": {}}])
+	for g in groups:
+		var size = 0.0
+		var before = 0.0
+		var after = 0.0
+		var lb = 0.0
+		var la = 0.0
+		for i in s.pops.size():
+			var pop: Dictionary = s.pops[i]
+			if not matches(pop, g.who): continue
+			var imp = impact.get(i)
+			size += pop.size
+			before += pop.size * pop.aware.player
+			after += pop.size * (imp.aware if imp else pop.aware.player)
+			lb += pop.size * pop.leader.player
+			la += pop.size * (pop.leader.player + (imp.leader if imp else 0.0))
+		rows[g.id] = {"before": before / size, "after": after / size, "leaderBefore": lb / size, "leaderAfter": la / size}
+	return rows
+
+func resolve_budget(s: Dictionary, alloc: Dictionary, offers_taken := []) -> Dictionary:
+	var player = player_party(s)
+	var notes = []
+	for id in offers_taken:
+		var offer = by_id(FUNDING_OFFERS, id)
+		if offer == null: continue
+		apply_effects(s, merged(offer.effects, {"awareness": 0}))
+		notes.append(offer.source)
+		s.record.money.append({"week": s.week, "source": offer.source, "amount": float(offer.effects.get("money", 0)), "dirty": offer.effects.has("scandal")})
+	var clean = {}
+	var spent = 0.0
+	for key in BUDGET_KEYS:
+		var m = clampf2(float(alloc.get(key, 0)), 0, maxf(0, s.money - spent))
+		clean[key] = m
+		spent += m
+	var preview = preview_budget(s, clean)
+	var impact = campaign_impact(s, clean)
+	var swing = (rand(s) * 2 - 0.8) * CAMPAIGN.social.swing * clean.social if clean.social > 0 else 0.0
+	for i in impact:
+		var pop: Dictionary = s.pops[i]
+		var imp: Dictionary = impact[i]
+		pop.aware.player = clampf2(imp.aware, 0.01, 1)
+		pop.goodwill.player = clampf2(pop.goodwill.player + imp.goodwill, -2, 2)
+		pop.leader.player = clampf2(pop.leader.player + imp.leader * (player.charisma / 50.0) * (1 - C.extremeLeader / 2.0 + C.extremeLeader * float(player.get("extremity", 0))), -2, 2)
+	if swing:
+		for pop in s.pops:
+			if CAMPAIGN.social.ages.has(pop.age): pop.goodwill.player = clampf2(pop.goodwill.player + swing, -2, 2)
+	s.money -= spent
+	s.lastBudget = clean.duplicate()
+	_log(s, "budget", "Spent ₱%sM on campaigning%s." % [fmt1(spent), (". Took money from " + ", ".join(notes)) if notes.size() else ""])
+	finish_front(s, "budget")
+	return {"spent": spent, "preview": preview, "socialSwing": swing}
+
+func business_mood(s: Dictionary) -> float:
+	var ctx = score_context(s)
+	var size = 0.0
+	var sup = 0.0
+	var gw = 0.0
+	for pop in s.pops:
+		if pop.class != "upper": continue
+		size += pop.size
+		sup += pop.size * pop_support(s, pop, null, ctx).player
+		gw += pop.size * pop.goodwill.player
+	return clampf2(0.25 + (sup / size) * 5 + (gw / size) * 0.8, 0, 1.6)
+
+func quarterly_income(s: Dictionary) -> Dictionary:
+	var share: float = s.lastSupport.player if s.lastSupport else 0.03
+	var grassroots: float = C.incomeBase + share * C.incomePerShare
+	var mood = business_mood(s)
+	var business: float = C.businessBase * mood
+	return {"grassroots": grassroots, "business": business, "mood": mood, "total": grassroots + business}
+
+static func business_word(mood: float) -> String:
+	if mood >= 1.1: return "generous"
+	if mood >= 0.7: return "willing"
+	if mood >= 0.4: return "cautious"
+	return "keeping their distance"
+
+func draw_offers(s: Dictionary) -> Array:
+	var mood = business_mood(s)
+	var pool = []
+	for o in FUNDING_OFFERS:
+		var chance: float = o.chance * minf(1.3, mood) if o.id == "chamber" else o.chance
+		if rand(s) < chance: pool.append(o)
+	return shuffle(s, pool).slice(0, 2).map(func(o): return o.id)
+
+# ---------- Events ----------
+func event_by_id(id) -> Variant:
+	return _events_by_id.get(id)
+
+func eligible_events(s: Dictionary) -> Array:
+	var year: int = calendar(s.week).year
+	var out = []
+	for e in EVENTS:
+		if e.get("deck", true) == false: continue
+		if e.get("minYear") and year < e.minYear: continue
+		if e.get("requires") and not s.flags.has(e.requires): continue
+		var seen = s.flags.get("seen:" + e.id)
+		if e.get("once") and seen != null: continue
+		if seen != null and s.week - seen < 18 * WEEKS_PER_MONTH: continue
+		out.append(e)
+	return out
+
+func event_weight(s: Dictionary, e: Dictionary) -> float:
+	var w = float(e.get("weight", 1))
+	if w == 0: w = 1
+	var when: Dictionary = e.get("when", {})
+	for k in when:
+		var v: float = s.world[k]
+		var cond: String = when[k]
+		var n = float(cond.substr(1))
+		if (v < n) if cond[0] == "<" else (v > n): w *= 3
+	return w
+
+func draw_event(s: Dictionary) -> Variant:
+	for i in s.scheduled.size():
+		if s.scheduled[i].week <= s.week:
+			var id = s.scheduled[i].id
+			s.scheduled.remove_at(i)
+			return id
+	for i in s.scandals.size():
+		var sc: Dictionary = s.scandals[i]
+		if rand(s) < sc.chance * C.scandalChanceScale:
+			s.scandals.remove_at(i)
+			return sc.event
+	var pool = eligible_events(s)
+	if pool.is_empty(): return null
+	var total = 0.0
+	for e in pool: total += event_weight(s, e)
+	var r = rand(s) * total
+	for e in pool:
+		r -= event_weight(s, e)
+		if r <= 0: return e.id
+	return pool[-1].id
+
+func monthly_event(s: Dictionary) -> void:
+	for q in s.queue:
+		if q.type == "event" or q.type == "debate": return
+	var forced = false
+	for x in s.scheduled:
+		if x.week <= s.week: forced = true
+	if not forced and s.quietMonths < C.maxQuietMonths and rand(s) > C.eventChance:
+		s.quietMonths += 1
+		return
+	var id = draw_event(s)
+	if id == null: return
+	s.quietMonths = 0
+	queue_event(s, id)
+
+func event_of(front: Dictionary) -> Dictionary:
+	return front.event if front.has("event") else event_by_id(front.id)
+
+func event_news(s: Dictionary, ev: Dictionary) -> void:
+	if ev.get("trust"): change_trust(s, ev.trust)
+	if ev.get("world"): apply_effects(s, {"world": ev.world, "fromNews": true, "awareness": 0})
+	if ev.get("government") and ev.government.get("world"): apply_effects(s, {"world": ev.government.world, "fromNews": true, "awareness": 0})
+	for c in ev.get("country", []): note_country(s, c)
+
+func queue_event(s: Dictionary, id) -> void:
+	var ev = event_by_id(id)
+	if ev == null: return
+	event_news(s, ev)
+	s.queue.append({"type": "event", "id": id})
+
+## choice_index: what you say. line_index: how you say it (-1 = no sound bite).
+func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictionary:
+	var front: Dictionary = s.queue[0]
+	var ev = event_of(front)
+	var choice: Dictionary = ev.choices[choice_index]
+	var before: Dictionary = player_party(s).perceived.duplicate()
+	var groups_before = snapshot_groups(s)
+	var flips_before: int = s.flips.size()
+	var fx: Dictionary = choice.effects
+	apply_effects(s, fx)
+	var extra = ""
+	if fx.get("defect"):
+		var moved = defect(s, fx.defect.from, fx.defect.share)
+		extra = " About %dk core voters came with them." % jround(moved / 1000.0)
+	var delivery = null
+	var quote = null
+	var tone = null
+	var lines: Array = choice.get("lines", [])
+	if lines.size() and line_index >= 0 and line_index < lines.size():
+		var line: Dictionary = lines[line_index]
+		delivery = deliver_line(s, line)
+		quote = line.text
+		tone = line.tone
+	var statement: bool = not fx.has("defect") and not str(ev.id).begins_with("defectors_")
+	record_statement(s, {"text": quote if quote else choice.label, "title": ev.title, "effects": fx, "tone": tone, "spoken": quote != null, "statement": statement})
+	s.flags["seen:" + str(ev.id)] = s.week
+	_log(s, "event", "%s: %s%s" % [ev.title, ("\"%s\"" % quote) if quote else (choice.label + "."), extra])
+	finish_front(s, "event")
+	return {"before": before, "after": player_party(s).perceived.duplicate(), "flips": s.flips.slice(flips_before), "extra": extra,
+		"delivery": delivery, "quote": quote, "label": choice.label, "title": ev.title, "changes": group_changes(s, groups_before)}
+
+# ---------- News ----------
+func flush_news(s: Dictionary) -> void:
+	if s.news.is_empty(): return
+	s.queue.push_front({"type": "news", "items": s.news})
+	for n in s.news: s.log.append({"week": n.week, "kind": "news", "text": n.title + "."})
+	s.news = []
+
+# ---------- Polls ----------
+func noisy(s: Dictionary, shares: Dictionary, sd: float) -> Dictionary:
+	var out = {}
+	var total = 0.0
+	for id in shares:
+		out[id] = maxf(0.001, shares[id] + rand_normal(s) * sd)
+		total += out[id]
+	for id in out: out[id] /= total
+	return out
+
+func take_poll(s: Dictionary, label: String, silent := false) -> void:
+	var ctx = score_context(s)
+	var nation = summarize(s, s.pops, ctx)
+	var poll = {"week": s.week, "label": label, "national": noisy(s, nation.support, C.pollError),
+		"turnout": nation.turnout, "trust": s.trust, "regions": {}, "groups": {}}
+	for kind in group_kinds():
+		for g in kind.groups:
+			var sm = summarize(s, pops_matching(s, g.who), ctx)
+			if not sm.size: continue
+			var entry = {"support": noisy(s, sm.support, C.pollError * 2), "core": sm.core}
+			poll.groups[kind.id + ":" + g.id] = entry
+			if kind.id == "region": poll.regions[g.id] = entry.support
+	poll.tracker = silent
+	s.polls.append(poll)
+	if silent: return
+	var prev_annual = null
+	var i: int = s.polls.size() - 2
+	while i >= 0:
+		if not s.polls[i].tracker:
+			prev_annual = s.polls[i]; break
+		i -= 1
+	if prev_annual: rivals_adapt(s, prev_annual.national, poll.national)
+	s.queue.append({"type": "poll", "index": s.polls.size() - 1})
+
+# ---------- Elections ----------
+func count_votes(s: Dictionary) -> Dictionary:
+	var by_region = {}
+	var ctx = score_context(s)
+	for r in REGIONS:
+		by_region[r.id] = {}
+		for p in s.parties: by_region[r.id][p.id] = 0.0
+	for pop in s.pops:
+		var votes = pop_votes(pop, pop_support(s, pop, null, ctx))
+		for p in s.parties: by_region[pop.region][p.id] += votes[p.id]
+	return by_region
+
+func allocate_seats(votes_by_region: Dictionary) -> Dictionary:
+	var total_adults = 0.0
+	for r in REGIONS: total_adults += r.adults
+	var quotas = REGIONS.map(func(r): return {"id": r.id, "exact": C.seats * r.adults / total_adults, "seats": 0})
+	for q in quotas: q.seats = int(floor(q.exact))
+	var assigned = 0
+	for q in quotas: assigned += q.seats
+	var left: int = int(C.seats) - assigned
+	for q in ssort(quotas, func(a, b): return fmod(b.exact, 1.0) - fmod(a.exact, 1.0)).slice(0, left): q.seats += 1
+	var seats = {"national": {}, "regions": {}}
+	for q in quotas:
+		var votes: Dictionary = votes_by_region[q.id]
+		var won = {}
+		for id in votes: won[id] = 0
+		for _i in q.seats:
+			var best = null
+			var best_val = -1.0
+			for id in votes:
+				var v: float = votes[id] / (won[id] + 1)
+				if v > best_val:
+					best_val = v; best = id
+			won[best] += 1
+		seats.regions[q.id] = won
+		for id in won: seats.national[id] = int(seats.national.get(id, 0)) + won[id]
+	return seats
+
+func run_election(s: Dictionary) -> void:
+	var votes = count_votes(s)
+	var seats = allocate_seats(votes)
+	var national = {}
+	var total = 0.0
+	for r in votes:
+		for id in votes[r]:
+			national[id] = float(national.get(id, 0)) + votes[r][id]
+			total += votes[r][id]
+	for id in national: national[id] /= total
+	var ranking = ssort(seats.national.keys(), func(a, b): return seats.national[b] - seats.national[a])
+	s.result = {"votes": national, "seats": seats, "ranking": ranking, "playerWon": ranking[0] == "player",
+		"majority": seats.national.player > C.seats / 2.0}
+	s.queue.append({"type": "election"})
+
+# ---------- The state of the nation (world.js) ----------
+func indicator_word(id: String, v: float) -> String:
+	var ind = by_id(INDICATORS, id)
+	for w in ind.words:
+		if v >= w[0]: return w[1]
+	return ind.words[-1][1]
+
+func world_monthly(s: Dictionary) -> void:
+	var w: Dictionary = s.world
+	var prev = w.duplicate()
+	var migration_target = 55.0 + (-12.0 if (s.crisis and s.crisis.id == "economy") else 0.0)
+	w.migration += (migration_target - w.migration) * 0.08 + rand_normal(s) * 2.5
+	w.jobs += (55 - w.jobs) * 0.06 + (w.migration - 55) * 0.03 - maxf(0, w.prices - 55) * 0.05 + rand_normal(s) * 1.8
+	w.prices += (45 - w.prices) * 0.06 + maxf(0, w.border - 60) * 0.03 + rand_normal(s) * 1.8
+	w.border += (40 - w.border) * 0.05 + rand_normal(s) * 2
+	var anger: float = maxf(0, 50 - w.jobs) * 0.25 + maxf(0, w.prices - 50) * 0.2 + maxf(0, w.migration - 65) * 0.12 + maxf(0, 40 - s.trust) * 0.15
+	w.unrest += (32 + anger - w.unrest) * 0.12 + rand_normal(s) * 1.5
+	for k in w: w[k] = clampf2(w[k], 0, 100)
+	if w.jobs < 42 or w.prices > 60: change_trust(s, -0.8)
+	var ruling = null
+	for p in s.parties:
+		if p.ruling: ruling = p; break
+	if ruling and (w.jobs < 42 or w.prices > 60 or w.unrest > 60): ruling.stability = clampf2(ruling.stability - 1.5, 0, 100)
+	if ruling and w.border > 65: ruling.stability = clampf2(ruling.stability + 1, 0, 100)
+	update_climate(s)
+	s.worldPrev = prev
+
+func update_climate(s: Dictionary) -> void:
+	var w: Dictionary = s.world
+	s.climate = {
+		"econ": maxf(0, 55 - w.jobs) / 40.0 + maxf(0, w.prices - 50) / 50.0,
+		"labor": maxf(0, 55 - w.jobs) / 35.0,
+		"immig": maxf(0, w.migration - 55) / 50.0,
+		"war": maxf(0, w.border - 40) / 40.0,
+		"gov": maxf(0, w.prices - 50) / 60.0,
+		"rev": maxf(0, w.unrest - 40) / 45.0,
+		"nat": maxf(0, w.border - 50) / 60.0 + maxf(0, w.unrest - 50) / 80.0,
+	}
+	s.regionClimate = {"yamlin": {"immig": maxf(0, w.migration - 50) / 30.0, "labor": maxf(0, w.migration - 55) / 50.0}}
+
+# ---------- Initiatives ----------
+func offer_initiatives(s: Dictionary) -> void:
+	var used: Array = s.agenda.used
+	var pool = INITIATIVES.filter(func(i): return not used.has(i.id) and (not i.get("minMonth") or float(s.week) / WEEKS_PER_MONTH >= i.minMonth))
+	var weighted = pool.map(func(i): return {"i": i, "w": event_weight(s, i) * (0.5 + rand(s))})
+	weighted = ssort(weighted, func(a, b): return b.w - a.w)
+	s.agenda.offered = weighted.slice(0, 3).map(func(x): return x.i.id)
+	s.agenda.done = false
+
+func take_initiative(s: Dictionary, id: String) -> Dictionary:
+	if s.agenda.done or not s.agenda.offered.has(id): return {"ok": false, "text": "You have already set this month's agenda."}
+	var ini = by_id(INITIATIVES, id)
+	var flips_before: int = s.flips.size()
+	var before = snapshot_groups(s)
+	apply_effects(s, ini.effects)
+	for sd in ini.get("seeds", []):
+		var lo = int(sd.months[0])
+		var hi = int(sd.months[1])
+		var months = lo + int(floor(rand(s) * (hi - lo + 1)))
+		s.scheduled.append({"id": sd.event, "week": s.week + months * WEEKS_PER_MONTH})
+	s.flags["initiative:" + id] = s.week
+	s.agenda.done = true
+	s.agenda.used.append(id)
+	record_statement(s, {"text": ini.get("quote", ini.title), "title": ini.title, "effects": ini.effects, "spoken": ini.has("quote")})
+	_log(s, "initiative", "Put on the agenda: %s." % ini.title)
+	return {"ok": true, "title": ini.title, "quote": ini.get("quote"), "flips": s.flips.slice(flips_before), "changes": group_changes(s, before)}
+
+# ---------- The major crisis ----------
+func crisis_odds(s: Dictionary) -> Dictionary:
+	var weights = []
+	var total = 0.0
+	for c in CRISES:
+		var b = clampf2(float(s.crisisPressure.get(c.id, 0)) / C.crisisBoostAt, 0, C.crisisBoostMax)
+		weights.append(1 + b); total += 1 + b
+	var out = {}
+	for i in CRISES.size(): out[CRISES[i].id] = weights[i] / total
+	return out
+
+func start_crisis(s: Dictionary) -> void:
+	if s.crisis: return
+	var odds = crisis_odds(s)
+	var r = rand(s)
+	var id: String = CRISES[-1].id
+	for cc in CRISES:
+		r -= odds[cc.id]
+		if r <= 0:
+			id = cc.id; break
+	var c = by_id(CRISES, id)
+	s.crisis = {"id": id, "odds": odds[id], "start": s.week, "phase": 0}
+	apply_effects(s, merged(c.onStart, {"fromNews": true, "awareness": 0}))
+	for i in c.phases.size():
+		var p: Dictionary = c.phases[i]
+		if i == 0: queue_event(s, p.event)
+		else: s.scheduled.append({"id": p.event, "week": s.week + int(p.month) * WEEKS_PER_MONTH})
+	_log(s, "crisis", "Crisis: %s." % c.name)
+
+func crisis_blames_you(s: Dictionary) -> bool:
+	return s.crisis != null and s.crisis.odds > C.crisisBlameFrom
+
+func _crisis_hook(s: Dictionary) -> void:
+	if s.crisis: return
+	if not s.has("crisisMonth"):
+		var a = int(C.crisisMonths[0])
+		var b = int(C.crisisMonths[1])
+		s.crisisMonth = a + int(floor(rand(s) * (b - a + 1)))
+	if s.week / WEEKS_PER_MONTH >= s.crisisMonth: start_crisis(s)
+
+# ---------- Voice: groups, the record, delivery (voice.js) ----------
+func snapshot_groups(s: Dictionary) -> Array:
+	var ctx = score_context(s)
+	var sup = []
+	for p in s.pops: sup.append(pop_support(s, p, null, ctx).player)
+	var out = []
+	for g in FEEDBACK_GROUPS:
+		var size = 0.0
+		var v = 0.0
+		for i in s.pops.size():
+			if matches(s.pops[i], g.who):
+				size += s.pops[i].size
+				v += s.pops[i].size * sup[i]
+		out.append(v / size if size else 0.0)
+	return out
+
+func group_changes(s: Dictionary, before: Array) -> Array:
+	var after = snapshot_groups(s)
+	var list = []
+	for i in FEEDBACK_GROUPS.size():
+		var d: float = (after[i] - before[i]) * 100
+		if absf(d) >= 0.15: list.append({"label": FEEDBACK_GROUPS[i].label, "delta": d})
+	return ssort(list, func(a, b): return absf(b.delta) - absf(a.delta))
+
+func record_statement(s: Dictionary, o: Dictionary) -> void:
+	var rec: Dictionary = s.record
+	var week: int = s.week
+	var text: String = o.text
+	var fx: Dictionary = o.get("effects", {})
+	var spoken: bool = o.get("spoken", true)
+	var statement: bool = o.get("statement", true)
+	rec.quotes.append({"week": week, "text": text, "title": o.get("title", ""), "tone": o.get("tone"), "spoken": spoken, "statement": statement, "shift": fx.get("shift", {})})
+	if fx.get("blame"): rec.blamed.append({"week": week, "group": fx.blame, "text": text})
+	for g in fx.get("goodwill", []):
+		if g.amt <= -0.8 and g.get("who", {}).get("nationality") and not fx.get("blame"):
+			rec.blamed.append({"week": week, "group": describe_who(g.who), "text": text})
+	var takes_position: bool = statement and fx.get("shift", {}).size() > 0
+	if not takes_position: return
+	for g in fx.get("goodwill", []):
+		var key = describe_who(g.get("who"))
+		if g.amt <= -0.3:
+			var found = -1
+			for i in rec.promises.size():
+				if rec.promises[i].key == key and week - rec.promises[i].week < 72:
+					found = i; break
+			if found >= 0:
+				var p: Dictionary = rec.promises[found]
+				rec.betrayed.append({"group": key, "promised": p.text, "promisedSpoken": p.spoken, "promisedWeek": p.week, "now": text, "nowSpoken": spoken, "week": week})
+				rec.promises.remove_at(found)
+				for pop in s.pops:
+					if matches(pop, g.get("who")): pop.goodwill.player = clampf2(pop.goodwill.player - 0.15, -2, 2)
+		if g.amt >= 0.35: rec.promises.append({"key": key, "week": week, "text": text, "spoken": spoken})
+
+## Pairs of statements that pulled the same issue in opposite directions.
+func contradictions(s: Dictionary) -> Array:
+	var q: Array = s.record.quotes.filter(func(x): return x.get("statement", true) != false)
+	var all = []
+	for i in q.size():
+		for j in range(i + 1, q.size()):
+			for ax in q[i].shift:
+				var a: float = q[i].shift[ax]
+				var b: float = float(q[j].shift.get(ax, 0))
+				if absf(a) >= 8 and absf(b) >= 8 and signf(a) != signf(b) and q[j].week - q[i].week >= 12:
+					var spoken = int(q[i].get("spoken", true) != false) + int(q[j].get("spoken", true) != false)
+					all.append({"axis": ax, "first": q[i], "second": q[j], "fi": i, "si": j, "size": absf(a) + absf(b) + spoken * 6})
+	all = ssort(all, func(x, y): return y.size - x.size)
+	var used = {}
+	var axes = {}
+	var out = []
+	for pass_first in [true, false]:
+		for c in all:
+			if used.has(c.fi) or used.has(c.si): continue
+			if pass_first and axes.has(c.axis): continue
+			out.append(c); used[c.fi] = true; used[c.si] = true; axes[c.axis] = true
+	return out
+
+func deliver_line(s: Dictionary, line: Dictionary) -> Dictionary:
+	var player = player_party(s)
+	var tone: String = line.tone if TONES.has(line.get("tone", "")) else "statesman"
+	var risk: float = line.risk if line.has("risk") and line.risk != null else TONE_RISK[tone]
+	var r = rand(s)
+	var charm: float = player.charisma / 100.0
+	var outcome = "normal"
+	if r < risk * (0.3 + charm * 0.6): outcome = "viral"
+	elif r > 1 - risk * (0.55 - charm * 0.35): outcome = "gaffe"
+	var pos = 1.6 if outcome == "viral" else 1.0
+	var neg = 1.8 if outcome == "gaffe" else (1.3 if outcome == "viral" else 1.0)
+	var reacts: Array = TONES[tone].react.duplicate()
+	reacts.append_array(line.get("react", []))
+	var scaled = reacts.map(func(g): return {"who": g.get("who"), "amt": g.amt * (pos if g.amt > 0 else neg)})
+	apply_effects(s, {"goodwill": scaled, "awareness": 0.06 if outcome == "viral" else (0.035 if outcome == "gaffe" else 0.01)})
+	for g in scaled:
+		for pop in s.pops:
+			if matches(pop, g.who): pop.leader.player = clampf2(pop.leader.player + g.amt * 0.35, -2, 2)
+	for k in s.style: s.style[k] *= C.styleMemory
+	s.style[tone] = float(s.style.get(tone, 0)) + 1
+	var total = dsum(s.style)
+	var entries = []
+	for k in s.style: entries.append([k, s.style[k]])
+	var top: Array = ssort(entries, func(a, b): return b[1] - a[1])[0]
+	var share: float = top[1] / total
+	var style_note = ""
+	if total > 3 and tone == top[0] and share > 0.45:
+		player.charisma = clampf2(player.charisma + 0.8, 10, 100)
+		style_note = "It sounded like you. People are starting to recognise your voice."
+	elif total > 3 and tone != top[0] and share > 0.5:
+		player.charisma = clampf2(player.charisma - 0.6, 10, 100)
+		style_note = "It didn't sound like you. Some voters wonder who the real you is."
+	if outcome == "viral":
+		s.record.memes += 1
+		player.charisma = clampf2(player.charisma + 1.5, 10, 100)
+	if outcome == "gaffe":
+		s.record.gaffes += 1
+		player.charisma = clampf2(player.charisma - 1, 10, 100)
+	return {"outcome": outcome, "press": TONES[tone].press[outcome], "styleNote": style_note}
+
+func style_profile(s: Dictionary) -> Dictionary:
+	var total = dsum(s.style)
+	if total < 2: return {"label": "Still finding a voice", "shares": {}}
+	var shares = {}
+	for k in s.style: shares[k] = s.style[k] / total
+	var sh = func(k): return float(shares.get(k, 0))
+	var label = "A bit of everything"
+	if sh.call("folksy") + sh.call("provocative") > 0.65 and sh.call("provocative") > 0.25: label = "Charismatic buffoon"
+	elif sh.call("fiery") + sh.call("provocative") > 0.65: label = "Firebrand"
+	elif sh.call("statesman") > 0.55: label = "Statesman"
+	elif sh.call("folksy") > 0.5: label = "Man of the people"
+	elif sh.call("statesman") + sh.call("fiery") > 0.7: label = "Strongman"
+	elif sh.call("statesman") + sh.call("folksy") > 0.7: label = "Reassuring uncle"
+	if label == "Man of the people" and player_party(s).leaderSex == "f": label = "Woman of the people"
+	if label == "Reassuring uncle" and player_party(s).leaderSex == "f": label = "Reassuring aunt"
+	return {"label": label, "shares": shares}
+
+# ---------- The final debate ----------
+func debate_rounds(s: Dictionary) -> Array:
+	var player = player_party(s)
+	var rival: Dictionary = ssort(rivals(s), func(a, b): return float(s.lastSupport.get(b.id, 0)) - float(s.lastSupport.get(a.id, 0)))[0]
+	var cons = contradictions(s)
+	var con = cons[0] if cons.size() else null
+	var blamed = s.record.blamed[0] if s.record.blamed.size() else null
+	var dirty = null
+	for m in s.record.money:
+		if m.dirty: dirty = m; break
+	var attack: String
+	if con: attack = "\"In %s you said: '%s' In %s you said: '%s' Which one do you actually believe?\"" % [date_label(con.first.week, false), con.first.text, date_label(con.second.week, false), con.second.text]
+	elif blamed: attack = "\"Your whole campaign has been about blaming %s. Is that all you have to offer?\"" % blamed.group
+	elif dirty: attack = "\"Where does your party's money come from? Because it isn't from ordinary Cranebonians.\""
+	else: attack = "\"You have never run anything in your life. Why should anyone trust you with a country?\""
+	var hurt = [{"who": {"class": "middle"}, "amt": -0.12}, {"who": {"age": "61+"}, "amt": -0.08}] if (con or blamed or dirty) else []
+	return [
+		{"title": "Opening statement", "prompt": "The moderator turns to %s: \"Your party didn't exist four years ago. Why should anyone vote for it?\"" % player.leader,
+			"lines": [
+				{"tone": "statesman", "text": "\"Because Cranebonistan deserves a government that keeps its word. That is all %s has ever asked for.\"" % player.name},
+				{"tone": "fiery", "text": "\"Because for thirty years the people on this stage have robbed you blind, and tonight that ends.\""},
+				{"tone": "folksy", "text": "\"I'm not a career politician. I'm someone who got tired of waiting for a bus that never comes.\""},
+				{"tone": "provocative", "text": "\"Look at the people next to me. Would you lend any of them your car?\""},
+			]},
+		{"title": "%s attacks" % rival.leader, "prompt": "%s of the %s turns to you: %s" % [rival.leader, rival.short, attack], "rival": rival.id, "hurt": hurt,
+			"lines": [
+				{"tone": "statesman", "text": "\"I have listened and I have learned. A leader who never changes their mind isn't listening.\""},
+				{"tone": "fiery", "text": "\"How dare you lecture anyone? Your party has lied to this country for a generation.\""},
+				{"tone": "folksy", "text": "\"At least I change my mind now and then. %s hasn't changed a thing since the cassette tape.\"" % rival.leader, "react": [{"who": {"loyalTo": rival.id}, "amt": -0.1}]},
+				{"tone": "provocative", "text": "\"That's invented. Everybody knows your people make things up.\"", "react": [{"who": {"class": "middle"}, "amt": -0.1}]},
+			]},
+		{"title": "Closing statement", "prompt": "\"You have thirty seconds. Speak to the voters.\"",
+			"lines": [
+				{"tone": "statesman", "text": "\"On election day, vote for the country you want your children to grow up in.\""},
+				{"tone": "fiery", "text": "\"They are afraid of you. On election day, prove them right.\""},
+				{"tone": "folksy", "text": "\"If you want more of the same, you know who to vote for. If you don't, you know where to find me.\""},
+				{"tone": "provocative", "text": "\"If they win again, don't say I didn't warn you.\""},
+			]},
+	]
+
+func start_debate(s: Dictionary) -> void:
+	s.debate = {"rounds": debate_rounds(s), "step": 0, "results": []}
+	s.queue.append({"type": "debate"})
+
+func answer_debate(s: Dictionary, line_index: int) -> Dictionary:
+	var d: Dictionary = s.debate
+	var round: Dictionary = d.rounds[d.step]
+	var line: Dictionary = round.lines[line_index]
+	var before = snapshot_groups(s)
+	if round.get("hurt", []).size(): apply_effects(s, {"goodwill": round.hurt, "awareness": 0})
+	var react: Array = line.get("react", []).duplicate()
+	react.append_array(TONES[line.tone].react)
+	var res = deliver_line(s, merged(line, {"react": react}))
+	apply_effects(s, {"awareness": 0.04})
+	var text: String = line.text
+	if text.begins_with("\""): text = text.substr(1)
+	if text.ends_with("\""): text = text.substr(0, text.length() - 1)
+	record_statement(s, {"text": text, "title": "The final debate", "tone": line.tone, "spoken": true})
+	var result = merged(res, {"quote": line.text, "changes": group_changes(s, before), "round": round.title})
+	d.results.append(result)
+	d.step += 1
+	if d.step >= d.rounds.size(): finish_front(s, "debate")
+	return result
+
+# ---------- The end-of-game profile ----------
+func build_profile(s: Dictionary) -> Dictionary:
+	var player = player_party(s)
+	var rec: Dictionary = s.record
+	var cons = contradictions(s)
+	var shares: Dictionary = style_profile(s).shares
+	var sh = func(k): return float(shares.get(k, 0))
+	var nation = summarize(s, s.pops)
+	var dirty: Array = rec.money.filter(func(m): return m.dirty)
+	var drift = inconsistency_of(s, player)
+	var ext: float = player.get("extremity", 0.0)
+	var player_flips: int = s.flips.filter(func(f): return f.party == "player").size()
+	var scores = {
+		"weathervane": mini(cons.size(), 6) * 0.8 + mini(rec.betrayed.size(), 5) * 1.2 + mini(player_flips, 10) * 0.3,
+		"believer": ext * 8 + (3.0 if drift < 1 else 0.0) - mini(cons.size(), 6),
+		"strongman": sh.call("fiery") * 8 + sh.call("statesman") * 3 + nation.devotion * 20,
+		"clown": (sh.call("folksy") + sh.call("provocative")) * 7 + rec.memes * 1.5 + rec.gaffes * 1.5,
+		"technocrat": sh.call("statesman") * 9 + (1 - ext) * 3,
+		"fixer": dirty.size() * 3 + rec.dossiers * 2,
+		"demagogue": rec.blamed.size() * 3 + rec.outrages * 1.2,
+	}
+	var entries = []
+	for k in scores: entries.append([k, scores[k]])
+	var archetype: String = ssort(entries, func(a, b): return b[1] - a[1])[0][0]
+	var r: Dictionary = s.result
+	var L: String = player.leader.to_upper()
+	var P: String = player.name.to_upper()
+	var headline: String
+	if r.majority: headline = "%s SWEEPS TO POWER" % L
+	elif r.playerWon: headline = "%s BECOMES THE LARGEST PARTY" % P
+	elif r.votes.player < 0.1: headline = "%s FADES INTO THE FOOTNOTES" % P
+	else: headline = "%s'S GAMBLE FALLS SHORT" % L
+	var quotes: Array = rec.quotes.filter(func(q): return q.title != "The final debate" and q.spoken)
+	var signature = null
+	var best = -1.0
+	for q in quotes:
+		var sz = 0.0
+		for k in q.shift: sz += absf(q.shift[k])
+		if sz > best:
+			best = sz; signature = q
+	var blamed = []
+	for b in rec.blamed:
+		if not blamed.has(b.group): blamed.append(b.group)
+	var crisis = by_id(CRISES, s.crisis.id) if s.crisis else null
+	return {
+		"archetype": ARCHETYPES[archetype], "headline": headline,
+		"contradictions": cons.slice(0, 3), "blamed": blamed, "betrayed": rec.betrayed.slice(0, 3),
+		"money": rec.money,
+		"crisis": {"name": crisis.name, "odds": s.crisis.odds, "blamed": crisis_blames_you(s)} if crisis else null,
+		"memes": rec.memes, "gaffes": rec.gaffes, "statements": rec.quotes.size(),
+		"style": style_profile(s).label, "signature": signature,
+	}
+
+# ---------- Time: weekly ticks and hooks ----------
+## The calendar, in order. The first hook to match on election week ends the run.
+func run_hooks(s: Dictionary) -> void:
+	var c = calendar(s.week)
+	if c.week == ELECTION_WEEK:
+		run_election(s); return
+	if c.week == 0: take_poll(s, "Opening poll")
+	if c.isMonthStart and c.week > 0: monthly_update(s)
+	if c.isMonthStart and c.week > 0: world_monthly(s)
+	if c.isMonthStart: offer_initiatives(s)
+	if c.isMonthStart: _crisis_hook(s)
+	if c.isQuarterStart:
+		var inc = quarterly_income(s)
+		s.lastIncome = inc
+		s.money += inc.total
+		s.queue.append({"type": "budget", "offers": draw_offers(s)})
+	if c.week == ELECTION_WEEK - WEEKS_PER_MONTH: start_debate(s)
+	if c.isMonthStart: monthly_event(s)
+	if c.weekOfMonth == 2 and not c.isYearEnd: take_poll(s, "Tracking poll", true)
+	if c.isYearEnd: take_poll(s, "Annual poll %d" % calendar(s.week).year)
+	flush_news(s)
+
+func advance_week(s: Dictionary) -> bool:
+	if s.queue.size() or s.result: return false
+	s.week += 1
+	run_hooks(s)
+	return true
+
+func advance_to_decision(s: Dictionary) -> bool:
+	var moved = false
+	while advance_week(s):
+		moved = true
+		if s.queue.size(): break
+	return moved
+
+func finish_front(s: Dictionary, type: String) -> void:
+	if s.queue.size() and s.queue[0].type == type: s.queue.pop_front()
+
+func dismiss_front(s: Dictionary) -> void:
+	s.queue.pop_front()
+	flush_news(s)
+
+# ---------- Describing effects in plain words ----------
+func describe_who(who) -> String:
+	if who == null or who.is_empty(): return "everyone"
+	var listf = func(v, f: Callable) -> String:
+		var arr: Array = v if v is Array else [v]
+		return " or ".join(arr.map(f))
+	var noun = "voters"
+	if who.has("nationality"): noun = listf.call(who.nationality, func(id): return by_id(NATIONALITIES, id).plural)
+	if who.has("lean"):
+		var parts = []
+		for ax in who.lean:
+			var a = by_id(AXES, ax)
+			parts.append(a.leftGroup if who.lean[ax][0] == "<" else a.rightGroup)
+		noun = " and ".join(parts)
+	if who.has("loyalTo"): noun = "your core supporters" if who.loyalTo == "player" else "%s core supporters" % by_id(PARTIES, who.loyalTo).short
+	var text = noun
+	if who.has("class"): text = "%s %s" % [listf.call(who["class"], func(id): return by_id(CLASSES, id).adj), text]
+	if who.has("age"): text += " aged %s" % listf.call(who.age, func(id): return by_id(AGES, id).label)
+	if who.has("region"):
+		var regions: String = listf.call(who.region, func(id): return by_id(REGIONS, id).name).replace(" or ", " and ")
+		text = regions if (noun == "voters" and not who.has("class") and not who.has("age")) else "%s in %s" % [text, regions]
+	return text
+
+func describe_choice(s: Dictionary, fx: Dictionary) -> Dictionary:
+	var groups = []
+	for g in fx.get("goodwill", []):
+		if g.get("party"): continue
+		var who: Dictionary = g.get("who", {})
+		var size = 0.0
+		if who.has("loyalTo"):
+			for p in s.pops: size += p.size * float(p.loyal.get(who.loyalTo, 0))
+		else: size = size_of(s, who)
+		groups.append({"text": describe_who(who), "amt": g.amt, "size": size, "weight": absf(g.amt) * size})
+	groups = ssort(groups, func(a, b): return b.weight - a.weight)
+	var strength = func(amt: float) -> String:
+		return "strongly" if absf(amt) >= 0.5 else ("slightly" if absf(amt) < 0.2 else "")
+	var tags = []
+	if fx.get("leader"):
+		var total = 0.0
+		for g in _leader_list(fx.leader): total += float(g) if (g is float or g is int) else g.amt
+		tags.append("Builds your leader's image" if total >= 0 else "Hurts your leader's image")
+	var aw = fx.get("awareness")
+	if (aw if aw != null else C.eventAwareness) >= 0.05: tags.append("Big media coverage")
+	if aw != null and aw == 0: tags.append("No media coverage")
+	if fx.get("money"): tags.append(("+₱%sM" % str(fx.money)) if fx.money > 0 else ("Costs ₱%sM" % str(-fx.money)))
+	if fx.get("scandal"): tags.append("Scandal risk")
+	if fx.get("trust"): tags.append("Lowers trust in politics" if fx.trust < 0 else "Raises trust in politics")
+	if fx.get("defect"): tags.append("Gains %s core voters" % party_of(s, fx.defect.from).short)
+	var fmt = func(g): return {"text": g.text, "size": g.size, "strength": strength.call(g.amt)}
+	return {
+		"appeals": groups.filter(func(g): return g.amt > 0 and g.size > 0).map(fmt),
+		"angers": groups.filter(func(g): return g.amt < 0 and g.size > 0).map(fmt),
+		"stances": preview_shift(s, fx.get("shift")),
+		"tags": tags,
+	}
