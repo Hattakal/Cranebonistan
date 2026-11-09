@@ -1,13 +1,13 @@
 {
- "_note": "Back-room dialogue scenes with Pim and Teyl, moved from the browser version. {who} is the leader first name. The intro still describes the old rules (two actions, the agenda slot) and needs rewriting for the debate system.",
+ "_note": "Back-room dialogue scenes with Carlos and Margaret, moved from the browser version. {who} is the leader first name. The intro still describes the old rules (two actions, the agenda slot) and needs rewriting for the debate system.",
  "CAST": {
   "pim": {
-   "name": "Pim Aster",
+   "name": "Carlos Aster",
    "role": "your advisor",
    "color": "#3b4a6b"
   },
   "teyl": {
-   "name": "Marta Teyl",
+   "name": "Margaret Teyl",
    "role": "party secretary",
    "color": "#7a1f1a"
   }
@@ -37,7 +37,7 @@
     ],
     [
      "teyl",
-     "His drafts are fine. Your instincts haven't been tested yet. Sit down, Pim."
+     "His drafts are fine. Your instincts haven't been tested yet. Sit down, Carlos."
     ],
     [
      "teyl",
@@ -45,7 +45,7 @@
     ],
     [
      "pim",
-     "Marta's point is fair. And I think you've already taken it on board. It's why people trust you."
+     "Margaret's point is fair. And I think you've already taken it on board. It's why people trust you."
     ],
     [
      "teyl",
@@ -56,7 +56,7 @@
     "prompt": "teyl",
     "options": [
      {
-      "label": "“You're right, Marta.”",
+      "label": "“You're right, Margaret.”",
       "story": "heard_teyl",
       "reply": [
        "teyl",

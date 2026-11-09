@@ -29,7 +29,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 |------|---------------|
 | `godot/data/content.json` | All game content: balance settings (`CONFIG`), axes, demographics, regions, neighbours, parties, events and their sound bites, initiatives, crises, the map. Edited directly |
 | `godot/data/debates.json` | Debate topics, including the ones the economy starts by itself |
-| `godot/data/scenes.json` | Back-room dialogue with Pim and Marta Teyl (not yet shown in the Godot version) |
+| `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Teyl (not yet shown in the Godot version) |
 | `godot/scripts/sim.gd` | The rules (autoload `Game`). No screen code |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |
 | `godot/scripts/board.gd` | The evidence board: what needs you now |

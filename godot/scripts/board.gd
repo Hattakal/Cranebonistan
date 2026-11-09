@@ -225,16 +225,16 @@ func render(s: Dictionary) -> void:
 		row.add_child(ll)
 		tv.add_child(row)
 	tc.pressed.connect(func(): open_file.emit("debates"))
-	# 3. Pim's note
+	# 3. Carlos's note
 	var pim = _card(Color("f8dc58"), "green", -3.0)
 	pim.custom_minimum_size.y = 150
 	var pv = _vbox(pim)
 	pv.add_child(Look.label(_pim_note(s), "type", 15, Color("3b2a12"), true))
-	var sign = Look.label("— Pim", "type", 14, Color("3b2a12"))
+	var sign = Look.label("— Carlos", "type", 14, Color("3b2a12"))
 	sign.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	pv.add_child(sign)
 	pim.pressed.connect(func(): open_file.emit("actions"))
-	# 4. Teyl's note, only when earned
+	# 4. Margaret's note, only when earned
 	var teyl = _teyl_note(s)
 	if teyl != "":
 		var c = _card(Color("fdfaf2"), "black", 1.5)
@@ -242,7 +242,7 @@ func render(s: Dictionary) -> void:
 		c.string_to = true
 		var v = _vbox(c)
 		v.add_child(Look.label(teyl, "type", 15, Color("8b1e1e"), true))
-		var sg = Look.label("— M. Teyl", "type", 14, Color("8b1e1e"))
+		var sg = Look.label("— Margaret", "type", 14, Color("8b1e1e"))
 		sg.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		v.add_child(sg)
 	# 5. this week's headlines
