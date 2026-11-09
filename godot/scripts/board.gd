@@ -14,6 +14,8 @@ var _strings: Control
 var _cards: Array = []
 var _key = ""
 var _last_front = ""
+var _poll_fracs = {}   # party id -> bar length last shown
+var _poll_seen = -1    # how many polls the board has already shown
 
 class Card extends PanelContainer:
 	signal pressed
@@ -203,6 +205,8 @@ func render(s: Dictionary) -> void:
 		v.add_child(Look.caps("%s · %s" % [poll.label, G.date_label(poll.week, false)], 11, Color("6d5d4a")))
 		var ids: Array = Game.ssort(poll.national.keys(), func(a, b): return poll.national[b] - poll.national[a])
 		var mx: float = poll.national[ids[0]]
+		var prev = s.polls[-2] if s.polls.size() > 1 else null
+		var fresh = _poll_seen != s.polls.size()
 		for id in ids:
 			var p = G.party_of(s, id)
 			var row = HBoxContainer.new()
@@ -211,6 +215,8 @@ func render(s: Dictionary) -> void:
 			nm.custom_minimum_size.x = 36
 			row.add_child(nm)
 			var bar = _Bar.new(Color(p.color), poll.national[id] / mx)
+			if fresh and _poll_fracs.has(id): bar.from = _poll_fracs[id]
+			_poll_fracs[id] = poll.national[id] / mx
 			bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			bar.custom_minimum_size.y = 10
 			row.add_child(bar)
@@ -218,7 +224,19 @@ func render(s: Dictionary) -> void:
 			pct.custom_minimum_size.x = 30
 			pct.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			row.add_child(pct)
+			var sw = ""
+			var swc = Color("6d5d4a")
+			if prev and prev.national.has(id):
+				var dd = Game.jround((poll.national[id] - prev.national[id]) * 100)
+				if dd != 0:
+					sw = ("+%d" % dd) if dd > 0 else str(dd)
+					swc = Look.GOOD if dd > 0 else Look.RED
+			var swl = Look.label(sw, "body_bold", 10, swc)
+			swl.custom_minimum_size.x = 22
+			swl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			row.add_child(swl)
 			v.add_child(row)
+		_poll_seen = s.polls.size()
 		c.pressed.connect(func(): open_file.emit("polls"))
 	# 3. Pim's note
 	var pim = _card(Color("f8dc58"), "green", -3.0)
@@ -282,9 +300,18 @@ func render(s: Dictionary) -> void:
 
 class _Bar extends Control:
 	var col: Color
-	var frac: float
+	var frac: float:
+		set(x): frac = x; queue_redraw()
+	var from = -1.0
 	func _init(c: Color, f: float) -> void:
 		col = c; frac = f
+	func _ready() -> void:
+		if from < 0: return
+		var to = frac
+		frac = from
+		var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_interval(0.35)
+		tw.tween_property(self, "frac", to, 0.9)
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.08))
 		draw_rect(Rect2(Vector2.ZERO, Vector2(size.x * frac, size.y)), col)

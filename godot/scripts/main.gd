@@ -260,12 +260,15 @@ func _render_bar() -> void:
 	names.add_child(pn)
 	names.add_child(Look.label("Leader: " + player.leader, "body", 12, Look.CREAM_DIM))
 	_party_box.add_child(names)
-	for c in _stats.get_children(): c.queue_free()
 	var mood: float = G.business_mood(S)
 	var biz = "Hostile" if mood < 0.25 else ("Distant" if mood < 0.4 else ("Cautious" if mood < 0.7 else ("Willing" if mood < 1.1 else "Generous")))
-	_chip("Funds", "₱%sM" % Game.fmt1(S.money), "Campaign money. Income arrives every quarter.")
-	_chip("Polling", _polling(), "Your national vote share in the latest poll.")
-	_chip("Known by", "%d%%" % Game.jround(G.national_awareness(S) * 100), "Share of adults who have heard of your party.")
+	_chip("Funds", "₱%sM" % Game.fmt1(S.money), "Campaign money. Income arrives every quarter.", Color.TRANSPARENT,
+		S.money, func(x): return "₱%sM" % Game.fmt1(x))
+	var arrow = _polling().substr(_polling().find("%") + 1)
+	_chip("Polling", _polling(), "Your national vote share in the latest poll.", Color.TRANSPARENT,
+		S.polls[-1].national.player * 100 if S.polls.size() else null, func(x): return "%s%%%s" % [Game.fmt1(x), arrow])
+	_chip("Known by", "%d%%" % Game.jround(G.national_awareness(S) * 100), "Share of adults who have heard of your party.", Color.TRANSPARENT,
+		G.national_awareness(S) * 100, func(x): return "%d%%" % Game.jround(x))
 	_chip("Business", biz, "Business donors are %s. Angry donors give less." % Game.business_word(mood), Look.RED.lightened(0.4) if mood < 0.4 else Color.TRANSPARENT)
 	_chip("Trust", Game.trust_label(S.trust), "Trust in the political system. Low trust helps outsiders.")
 	_date.text = G.date_label(S.week).to_upper()
@@ -275,20 +278,47 @@ func _render_bar() -> void:
 	_btn_week.disabled = blocked
 	_btn_skip.disabled = blocked
 
-func _chip(label: String, value: String, tip: String, warn := Color.TRANSPARENT) -> void:
-	var p = PanelContainer.new()
-	var sb = Look.box(Color(0, 0, 0, 0.28), 5, Color("3f3024"), 1)
-	sb.content_margin_left = 10; sb.content_margin_right = 10; sb.content_margin_top = 3; sb.content_margin_bottom = 3
-	p.add_theme_stylebox_override("panel", sb)
-	p.tooltip_text = tip
-	p.custom_minimum_size.x = 74
-	var v = VBoxContainer.new()
-	v.add_theme_constant_override("separation", -3)
-	v.add_child(Look.caps(label, 10, Color("a8957a"), 1, "body"))
-	var val = Look.label(value, "display", 17, warn if warn.a > 0 else Look.HEAD)
-	v.add_child(val)
-	p.add_child(v)
-	_stats.add_child(p)
+func _chip(label: String, value: String, tip: String, warn := Color.TRANSPARENT, num = null, fmt := Callable()) -> void:
+	# chips are built once and then updated, so a count in progress survives a refresh
+	var base: Color = warn if warn.a > 0 else Look.HEAD
+	if not _chips.has(label):
+		var p = PanelContainer.new()
+		var sb = Look.box(Color(0, 0, 0, 0.28), 5, Color("3f3024"), 1)
+		sb.content_margin_left = 10; sb.content_margin_right = 10; sb.content_margin_top = 3; sb.content_margin_bottom = 3
+		p.add_theme_stylebox_override("panel", sb)
+		p.custom_minimum_size.x = 74
+		var v = VBoxContainer.new()
+		v.add_theme_constant_override("separation", -3)
+		v.add_child(Look.caps(label, 10, Color("a8957a"), 1, "body"))
+		var l = Look.label(value, "display", 17, base)
+		l.pivot_offset = Vector2(0, 12)
+		v.add_child(l)
+		p.add_child(v)
+		_stats.add_child(p)
+		_chips[label] = {"panel": p, "val": l, "tw": null}
+	var c: Dictionary = _chips[label]
+	var val: Label = c.val
+	c.panel.tooltip_text = tip
+	var last = _chip_last.get(label, null)
+	_chip_last[label] = num
+	if num == null or last == null or absf(float(num) - float(last)) < 0.0005:
+		if c.tw == null or not c.tw.is_running():
+			val.text = value
+			val.add_theme_color_override("font_color", base)
+		return
+	# count from the old number to the new one, and flash the direction
+	if c.tw: c.tw.kill()
+	var up: bool = float(num) > float(last)
+	var flash: Color = Color("7fd18b") if up else Color("ff7a66")
+	val.add_theme_color_override("font_color", flash)
+	val.text = fmt.call(float(last))
+	val.scale = Vector2(1.15, 1.15)
+	var tw = val.create_tween().set_parallel()
+	tw.tween_method(func(x): val.text = fmt.call(x), float(last), float(num), 0.8).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_method(func(col): val.add_theme_color_override("font_color", col), flash, base, 1.4).set_delay(0.8)
+	tw.tween_property(val, "scale", Vector2.ONE, 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_callback(func(): val.text = value)
+	c.tw = tw
 
 func _polling() -> String:
 	if S.polls.is_empty(): return "?"
@@ -300,6 +330,10 @@ func _polling() -> String:
 		if absf(d) >= 0.002: txt += (" ▲" if d > 0 else " ▼")
 	return txt
 
+var _leaders = {}       # region id -> leading party, to spot a change of hands
+var _chip_last = {}     # chip label -> last number shown
+var _chips = {}         # chip label -> {panel, val, tw}
+
 func _render_map() -> void:
 	var poll = S.polls[-1] if S.polls.size() else null
 	_map.fills = {}
@@ -310,6 +344,8 @@ func _render_map() -> void:
 			var sh: Dictionary = poll.regions[r.id]
 			var ids: Array = Game.ssort(sh.keys(), func(a, b): return sh[b] - sh[a])
 			var lead: String = ids[0]
+			if _leaders.has(r.id) and _leaders[r.id] != lead: _map.flash(r.id)
+			_leaders[r.id] = lead
 			var margin: float = sh[ids[0]] - sh[ids[1]]
 			var strength = clampf(0.3 + margin * 3, 0.3, 0.75)
 			_map.fills[r.id] = Look.mix(Look.LAND, Color(G.party_of(S, lead).color), strength * 0.8)
@@ -833,6 +869,20 @@ func _shot(args: Dictionary) -> void:
 	if args.has("file"): _show_file(args.file)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
 	if args.has("country"): _country_sheet(args.country)
+	if args.has("then"):
+		# move on to the next poll and catch the motion part-way
+		var target = S.polls.size() + 1
+		var g3 = 0
+		while S.polls.size() < target and g3 < 200:
+			g3 += 1
+			if S.queue.is_empty(): G.advance_week(S); continue
+			match S.queue[0].type:
+				"event": G.resolve_event(S, 0, -1)
+				"budget": G.resolve_budget(S, {"tour": S.money * 0.5}, [])
+				"debate": G.answer_debate(S, 0)
+				_: G.dismiss_front(S)
+		render()
+		await get_tree().create_timer(float(args.then)).timeout
 	for i in 10: await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(args.shot)
 	print("shot saved ", args.shot)

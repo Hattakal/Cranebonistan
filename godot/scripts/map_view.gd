@@ -15,6 +15,8 @@ var capital = ""
 var fills = {}                # area id -> Color
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
+var _shown = {}               # colours on screen, easing towards fills
+var _flash = {}               # region id -> 1..0, after it changes hands
 var tip_provider: Callable     # (id, kind) -> Array of lines; first is the title
 
 var zoom = 1.0
@@ -43,6 +45,29 @@ func setup(game) -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
 	queue_redraw()
+
+## A region changed hands: ring it for a moment.
+func flash(id: String) -> void:
+	_flash[id] = 1.0
+
+func _process(d: float) -> void:
+	var moving = false
+	for id in fills:
+		var target: Color = fills[id]
+		var cur: Color = _shown.get(id, target)
+		if not _shown.has(id) or cur.is_equal_approx(target):
+			_shown[id] = target
+			continue
+		var k = 1.0 - exp(-d * 3.5)
+		cur = cur.lerp(target, k)
+		if absf(cur.r - target.r) + absf(cur.g - target.g) + absf(cur.b - target.b) < 0.004: cur = target
+		_shown[id] = cur
+		moving = true
+	for id in _flash.keys():
+		_flash[id] -= d / 1.6
+		if _flash[id] <= 0: _flash.erase(id)
+		moving = true
+	if moving: queue_redraw()
 
 ## "M x y x y ... Z M ..." -> list of cleaned polygons
 func _parse(d: String) -> Array:
@@ -162,7 +187,7 @@ func _draw() -> void:
 	for kind in ["foreign", "region"]:
 		for a in areas:
 			if a.kind != kind: continue
-			var col: Color = fills.get(a.id, Look.LAND if kind == "region" else Look.LAND_FOREIGN)
+			var col: Color = _shown.get(a.id, fills.get(a.id, Look.LAND if kind == "region" else Look.LAND_FOREIGN))
 			if kind == "foreign" and hot.get(a.id, false): col = Look.mix(col, Color("c0392b"), 0.35)
 			if a.id == hover: col = col.lightened(0.12)
 			for poly in a.polys:
@@ -189,6 +214,18 @@ func _draw() -> void:
 				for p in poly: sp.append(o + p * s)
 				sp.append(sp[0])
 				draw_polyline(sp, Color("ffe6a8", 0.9), maxf(2.0, 7.0 * s), true)
+	# regions that just changed hands ring outwards
+	for id in _flash:
+		var t: float = _flash[id]
+		for a in areas:
+			if a.id != id: continue
+			for poly in a.polys:
+				var sp = PackedVector2Array()
+				for p in poly: sp.append(o + p * s)
+				sp.append(sp[0])
+				var c: Color = fills.get(id, Look.RED).darkened(0.3)
+				c.a = t
+				draw_polyline(sp, c, maxf(2.0, (6.0 + (1.0 - t) * 18.0) * s), true)
 	# rivers and mountains from Krita
 	if _features: draw_texture_rect(_features, map_rect, false, Color(1, 1, 1, 0.85))
 	# cities
