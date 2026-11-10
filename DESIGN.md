@@ -10,7 +10,9 @@ Designer: Ugur Ozan Denizgünü. Built with Claude.
 
 A political simulator where the only goal is to get elected. The player founds a new party in the fictional Republic of Cranebonistan and has one electoral term to become the largest party in the National Assembly.
 
-**The point of the game** is to show how parties chase votes rather than represent anyone. The player is expected to become a populist: saying what each group wants to hear, blaming whoever is convenient, and taking money they shouldn't. Playing on principle is possible, but it should not be enough to win. The game should make the player spineless or dirty to succeed, then show them what they did.
+**The point of the game** is to show how parties chase votes rather than represent anyone. **An enjoyable game comes first; the satire is second and stays subtle.** It is better for players to miss the message and enjoy the game than the other way around: no caricature, no lecturing. The game never tells the player to be a hypocrite; it makes hypocrisy pay. Saying what each group wants to hear, blaming whoever is convenient, and taking business money while attacking the elites should be viable and tempting, and scandal risk must not make it pointless. **Playing calm and centrist is possible, just harder.** People vote for personalities first and policies second, so the leader's persona and *how they say things* matter most.
+
+*History:* the first version said playing on principle "should not be enough to win" and that the game should make the player spineless or dirty to succeed, then show them what they did. *Revised (November 2026):* the game must be fun first and the message quieter; the populist path pays best, but an honest centrist campaign can still win with good play.
 
 **Repeatability** comes from a semi-random country and from one major crisis per game, drawn from a pool and shaped by the player's campaign.
 
@@ -28,7 +30,7 @@ Five regions. The capital is Cranebo, on the northern coast in Cranbia. The nort
 | **Yamlin** | Where international trade with distant countries happens. Mixed and tense: progressives, immigrants, nationalists fed up with immigrants, economic turmoil from the new population, but also the rich who profit from trade and cheap immigrant labour. |
 | **Erland** | The nationalist heartland and breadbasket. |
 | **Alinni** | Conquered from the Southern Trueants fifty years ago. Home to the Alinnian minority, which has never fully settled in. Big tensions. |
-| **Fauran** | Nomadic, sparse, poorest and least educated. Disputed border with Dillihan. |
+| **Fauran** | Sparse, poorest and least educated. Disputed border with Dillihan. *Its history is being rewritten:* it was first written as nomads and herders, and about 20 places in the content still say so. |
 
 Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey than the map shape already suggests.
 
@@ -166,12 +168,14 @@ Choosing a position is the visible, number-based decision. **How the leader says
 
 Each month the player can open a debate: propose a referendum, launch a campaign, demand an inquiry, make a promise. Initiatives are proactive and they **seed future events**: what the player puts on the agenda comes back as consequences, and the player owns them. This answers "more proactive events, and the discussions we open affect future events".
 
-### 4.4 Monthly actions — Built
+### 4.4 Monthly actions — Built (revised)
 
-Two actions a month:
-- **Champion an issue:** only on the manifesto's side of an issue, at most two issues at a time. Ownership wins **single-issue voters**, people who care about that issue above all, a group that grows when the issue is in the news. *History:* originally any side of any issue could be championed, which let the player claim everything.
-- **Grassroots organising, opposition research, releasing dossiers, recruiting defectors, provoking outrage.**
-- **Provoking outrage** exists to get the party's name known: recognition jumps (the result shows how much), anti-system voters cheer, the middle class and older voters are appalled, and business donors back away. It wears off with repetition.
+**Three actions a month**, shared between speaking in a debate, starting a debate, changing the subject, building communities, opposition research, releasing dossiers, recruiting defectors and steering the party (see *Speaking* and *Organise, dig, steer* in section 7).
+
+- **Causes:** a side the leader has spoken for can become one of the party's **two causes**. Ownership wins **single-issue voters**, people who care about that issue above all, a group that grows when the issue is in the news.
+- **Provocation** is now a tone of voice when speaking rather than an action of its own. It still gets the party's name known: anti-system voters cheer, the middle class and older voters are appalled, and business donors back away.
+
+*History:* first there were **two actions a month**. **Champion an issue** was its own action, limited to the manifesto's side of an issue and at most two issues at a time (before that, any side of any issue could be championed, which let the player claim everything). **Provoking outrage** was its own action too: recognition jumped, and it wore off with repetition. One-off **grassroots organising** was another. *Revised (November 2026):* championing and outrage were folded into speaking, grassroots organising became communities, steering the party was added, and the number of actions went up to three.
 
 ### 4.5 Money — Built (revised)
 
@@ -268,7 +272,7 @@ The designer's aims: the game should be enjoyable first, and it should look like
 - **The board holds only what is current or urgent.** That means the decision waiting for you (red pin), the latest poll, notes from staff, this week's headlines, trouble to watch and what's coming up. Red string links the decision to related cards. *Decided:* planning (manifesto, rival files, dossiers) belongs in the files along the top, especially at the start of a month, not on the board.
 - **Planning files** slide out over the board like a folder. Clicking a region on the map opens its voters.
 - **Decisions zoom up as paper.** Events are a newspaper front page. You choose what to say on index cards, then the exact words on typed slips. The outcome is shown as the evening news. Any decision can be **put down** to look at the map or the files first, then picked up again from the board.
-- **The tutorial is a scene in the game.** *Decided:* the old "How to play" button felt fake, so the first night in the back room teaches the game instead. Pim Aster, the advisor, is a sycophant. *Revised after the mockup:* the first draft of Pim was too on the nose. He now flatters by keeping bad news away, crediting your instincts and agreeing with criticism in a way that still compliments you. Marta Teyl, the party secretary, is respected in the party and pushes back. For now she is a narrative device that remembers whether you listened. Later she could walk out and found her own party. *Renamed (November 2026):* Pim Aster became **Carlos Aster** and Marta Teyl became **Margaret Teyl**. *Decided:* Carlos is the voice of the interface, inspired by the advisor in Knights of Honor: he talks in the tutorial and at scheduled moments (polls, the budget, the election), and is meant to be voice-acted. He spins but never lies about numbers; now and then he praises a gaffe ("I think you made a great point, boss"), rarely enough not to repeat. Margaret speaks in text only, not voiced, and appears less: when you cross a line.
+- **The tutorial is a scene in the game.** *Decided:* the old "How to play" button felt fake, so the first night in the back room teaches the game instead. **Carlos Aster**, the advisor, is a sycophant. *Revised after the mockup:* his first draft was too on the nose. He now flatters by keeping bad news away, crediting your instincts and agreeing with criticism in a way that still compliments you. **Margaret Teyl**, the party secretary, is respected in the party and pushes back. For now she is a narrative device that remembers whether you listened. Later she could walk out and found her own party. *Renamed (November 2026):* they were first called Pim Aster and Marta Teyl. *Decided:* Carlos is the voice of the interface, inspired by the advisor in Knights of Honor: he talks in the tutorial and at scheduled moments (polls, the budget, the election), and is meant to be voice-acted. He spins but never lies about numbers; now and then he praises a gaffe ("I think you made a great point, boss"), rarely enough not to repeat. Margaret speaks in text only, not voiced, and appears less: when you cross a line.
 - **Sound.** New sounds were added for the pin, typing and the folder. Sound still has a long way to go.
 - **Still to come:** more cartoonish politician portraits (the designer will look for public-domain material), event pictures, the redrawn map with provinces, and election night.
 
@@ -289,6 +293,8 @@ The designer's aims: the game should be enjoyable first, and it should look like
 ---
 
 ## 8. Balance targets
+
+**Out of date:** these numbers were measured in the browser version, before the national debate, speaking, communities and the seven axes. They need measuring again in Godot. The "principled" target also predates the decision that calm, centrist play should be able to win, just with more effort (section 1).
 
 Measured with simple bots over five seeded games each, after the funding change (these bots pick sound bites at random and take all dirty money, so a thoughtful player does better). The winning party usually takes 26–35%.
 
