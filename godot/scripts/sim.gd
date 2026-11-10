@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 14
+const SAVE_VERSION := 15
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -276,7 +276,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null,
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "",
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -308,6 +308,7 @@ func new_game(opts := {}) -> Dictionary:
 			s.ownership[key][p.id] = owns[key]
 		trim_claims(s, p.id)
 	s.pops = build_pops(s)
+	_home_start(s, str(opts.get("home", "")))
 	seed_loyalty(s)
 	s.figures = new_figures(s)
 	# the country is already arguing about something
@@ -323,6 +324,25 @@ func new_game(opts := {}) -> Dictionary:
 	s.lastSupport = summarize(s, s.pops).support
 	run_hooks(s)
 	return s
+
+## The leader was mayor of a city before splitting off to found the party:
+## its region knows them and likes them, and there is already a party office there.
+## Alinni's cities can't be chosen: Alinnians elect their own minority leaders.
+func home_cities() -> Array:
+	return MAP.cities.filter(func(c): return c.area != "alinni")
+
+func _home_start(s: Dictionary, city: String) -> void:
+	var c: Dictionary = city_by_name(city)
+	if c.is_empty() or c.area == "alinni": return
+	s.home = c.name
+	s.communities[c.name] = 1
+	for pop in s.pops:
+		if pop.region != c.area: continue
+		var k: float = 1.0 if pop.nationality == "cranebonian" else 0.4
+		pop.aware.player = clampf2(pop.aware.player + 0.35 * k, 0, 1)
+		pop.goodwill.player = clampf2(pop.goodwill.player + 0.3 * k, -2, 2)
+		pop.leader.player = clampf2(pop.leader.player + 0.4 * k, -2, 2)
+	s.log.append({"week": 0, "kind": "action", "text": "%s, former mayor of %s, founds %s." % [player_party(s).leader, c.name, player_party(s).name]})
 
 func full_vector(v: Dictionary) -> Dictionary:
 	var out = {}

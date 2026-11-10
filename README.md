@@ -12,6 +12,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 
 ## How it plays
 
+- **Founding night.** Pick a party template or build your own, write the manifesto, and choose the city where your leader was mayor (not in Alinni): its region gives you a head start.
 - **Four years, monthly decisions.** A tracking poll every month, a detailed poll every December, a quarterly budget, the final debate, then the election.
 - **Pops.** About 170 population groups (region × age × class × nationality) with views on seven axes: Economy (State ↔ Market), Welfare (Welfare ↔ Austerity), Nation (Nationalist ↔ Multicultural), Society (Progressive ↔ Traditional), Order (Authority ↔ Liberty), Foreign (Hawk ↔ Dove) and System (Radical ↔ Establishment).
 - **Manifesto.** One stance per axis. Voters then judge you by what you say; drifting one stance is free, beyond that it costs you.

@@ -348,6 +348,7 @@ func _platform() -> void:
 	c1.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Your leader", c1)
 	_h(player.leader, 26, c1)
+	if S.get("home", "") != "": _p("Former mayor of %s" % S.home, c1, Look.MUTED, 13)
 	var seen = G.view_label(player.perceived)
 	var meant = G.view_label(player.manifesto)
 	_add(Look.label("Voters see you as: %s%s" % [seen, "" if seen == meant else " (your manifesto says %s)" % meant.to_lower()], "body_bold", 14, Look.RED if seen != meant else Look.INK, true), c1)

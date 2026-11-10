@@ -28,9 +28,17 @@ func _ready() -> void:
 	if args.has("shot"):
 		await _shot(args)
 		return
-	S = _load() if FileAccess.file_exists(SAVE_PATH) else G.new_game({"partyName": "People's Awakening", "leaderName": "Dorin Vask", "manifesto": {"nation": 2, "economy": 1, "society": 2, "foreign": 3, "welfare": 1, "system": 1, "order": 2}})
-	render()
-	_auto_open()
+	var saved = _load() if FileAccess.file_exists(SAVE_PATH) else null
+	if saved:
+		S = saved
+		render()
+		_auto_open()
+	else:
+		# no game yet: headquarters sits empty behind the founding sheet
+		_founding = true
+		S = G.new_game({"partyName": "People's Awakening", "leaderName": "Dorin Vask"})
+		render()
+		_founding_sheet()
 
 func _args() -> Dictionary:
 	var out = {}
@@ -242,7 +250,7 @@ func _snapshot() -> Dictionary:
 		"dirty": S.record.money.filter(func(m): return m.dirty).size()}
 
 func _react() -> void:
-	if _advisor == null: return
+	if _advisor == null or _founding: return   # Carlos waits until the party exists
 	var now = _snapshot()
 	var was = _snap
 	_snap = now
@@ -953,10 +961,131 @@ func _election_sheet() -> void:
 		p.add(Look.label("%s — %d seats" % [G.party_of(S, id).name, r.seats.national[id]], "type", 15, Look.INK))
 	p.actions([
 		p.button("Read what the papers say", func(): _profile_sheet(), false),
+		p.button("Found a new party", func():
+			p.close()
+			_founding_sheet(), false),
 		p.button("Close", func():
 			if S.queue.size() and S.queue[0].type == "election": G.dismiss_front(S)
 			_done(p)),
 	])
+
+# ---------- Founding the party (a new game) ----------
+var _found = {}
+var _founding := false   # the founding sheet is up; nothing else should talk yet
+
+func _founding_sheet() -> void:
+	_founding = true
+	var t0: Dictionary = G.PARTY_TEMPLATES[0]
+	_found = {"template": t0.id, "partyName": t0.name, "leaderName": t0.leader, "manifesto": t0.manifesto.duplicate(),
+		"color": t0.color, "emblem": t0.emblem, "portrait": int(t0.portrait), "home": ""}
+	var p = _paper(1000, false)
+	_founding_build(p)
+
+func _founding_pick(t: Dictionary) -> void:
+	_found.template = t.id
+	if t.id != "custom":
+		_found.partyName = t.name; _found.leaderName = t.leader
+		_found.manifesto = t.manifesto.duplicate()
+		_found.color = t.color; _found.emblem = t.emblem; _found.portrait = int(t.portrait)
+
+func _founding_build(p: Paper) -> void:
+	var keep_scroll: int = p._scroll.scroll_vertical
+	p.clear()
+	p.kicker("A new party")
+	p.heading("Founding night", 42)
+	p.text("Until last month you were a mayor, and a member of somebody else's party. You walked out. Tonight, in a back room above a print shop, you start your own: four years to become the largest party in the National Assembly.", 17)
+	# 1. who you are
+	p.step("One", "Who are you?")
+	var grid = GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	for t in G.PARTY_TEMPLATES:
+		var on: bool = _found.template == t.id
+		var c = p.card("index", func(box):
+			box.add_child(Look.label(("✓ " if on else "") + (t.name if t.name != "" else "Your own party"), "display", 20, Look.RED if on else Look.INK))
+			box.add_child(Look.caps(t.tagline, 11, Look.MUTED, 1))
+			if t.get("pitch", "") != "": box.add_child(Look.label(t.pitch, "body", 13, Look.INK, true)),
+			func():
+				_founding_pick(t)
+				_founding_build(p))
+		c.custom_minimum_size.x = 290
+		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		p.v.remove_child(c)
+		grid.add_child(c)
+	p.add(grid)
+	var names = HBoxContainer.new()
+	names.add_theme_constant_override("separation", 16)
+	for f in [["Party", "partyName"], ["Leader", "leaderName"]]:
+		var col = VBoxContainer.new()
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(Look.caps(f[0], 11, Look.MUTED, 2))
+		var le = LineEdit.new()
+		le.text = _found[f[1]]
+		le.max_length = 32
+		le.add_theme_font_override("font", Look.font("type"))
+		le.add_theme_font_size_override("font_size", Look.fs(18))
+		le.add_theme_color_override("font_color", Look.INK)
+		le.add_theme_stylebox_override("normal", Look.box(Color(1, 1, 1, 0.5), 0, Look.INK, 1, 0, 8))
+		le.add_theme_stylebox_override("focus", Look.box(Color(1, 1, 1, 0.8), 0, Look.RED, 1, 0, 8))
+		var key: String = f[1]
+		le.text_changed.connect(func(tx): _found[key] = tx)
+		col.add_child(le)
+		names.add_child(col)
+	p.add(names)
+	# 2. the manifesto
+	p.step("Two", "What do you stand for?")
+	p.small("One stance on each issue. Later, saying things one stance away from it costs nothing; further than that, voters start to notice.")
+	var point = {}
+	for ax in G.AXES:
+		var cur: int = int(_found.manifesto.get(ax.id, 2))
+		point[ax.id] = G.C.stanceCenters[cur]
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		var lab = Look.label(ax.issue, "body_bold", 14, Look.INK)
+		lab.custom_minimum_size.x = 210
+		row.add_child(lab)
+		for i in ax.stances.size():
+			var axid: String = ax.id
+			var b = p.button(ax.stances[i], func():
+				_found.manifesto[axid] = i
+				_founding_build(p), i == cur)
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			b.add_theme_font_size_override("font_size", Look.fs(12))
+			row.add_child(b)
+		p.add(row)
+	p.add(Look.label("Voters will see you as: %s" % G.view_label(point), "body_bold", 15, Look.RED, true))
+	# 3. home
+	p.step("Three", "Where were you mayor?")
+	p.small("Your old city is your head start: people across its region know you and like you, and the party opens with an office there. Alinni's cities are not open to you: Alinnians elect their own minority leaders.")
+	for r in G.REGIONS:
+		var cities: Array = G.home_cities().filter(func(c): return c.area == r.id)
+		if cities.is_empty(): continue
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var lab = Look.label(r.name, "body_bold", 14, Look.INK)
+		lab.custom_minimum_size.x = 210
+		row.add_child(lab)
+		for c in cities:
+			var nm: String = c.name
+			row.add_child(p.button(nm + (" ★" if nm == G.MAP.capital else ""), func():
+				_found.home = nm
+				_founding_build(p), _found.home == nm))
+		p.add(row)
+	# found it
+	var can_go: bool = _found.home != ""
+	var go = p.button("Found the party" if can_go else "Choose your city first", func():
+		var opts: Dictionary = _found.duplicate(true)
+		opts.erase("template")
+		if str(opts.partyName).strip_edges() == "": opts.partyName = "New Dawn Movement"
+		if str(opts.leaderName).strip_edges() == "": opts.leaderName = "Dorin Vask"
+		S = G.new_game(opts)
+		_founding = false
+		_snap = null   # so Carlos greets the new party
+		_done(p), true, not can_go)
+	p.actions([go])
+	await get_tree().process_frame
+	p._scroll.scroll_vertical = keep_scroll
 
 class SeatBar extends Control:
 	var parts: Array
@@ -1022,10 +1151,11 @@ func _save() -> void:
 	var f = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	f.store_string(JSON.stringify(S))
 
-func _load() -> Dictionary:
+## The saved game, or null when there is none the current rules can read (then a new party is founded).
+func _load() -> Variant:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
 	if typeof(d) != TYPE_DICTIONARY or int(d.get("version", 0)) != G.SAVE_VERSION:
-		return G.new_game({})
+		return null
 	# JSON turns whole numbers into floats; the rules expect ints in a few places
 	d.week = int(d.week); d.rng = int(d.rng); d.actionsLeft = int(d.actionsLeft); d.quietMonths = int(d.quietMonths)
 	return d
@@ -1064,6 +1194,12 @@ func _shot(args: Dictionary) -> void:
 	for i in 20: await get_tree().process_frame
 	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
 	if args.has("open"): _open_front()
+	if args.has("found"):
+		_founding_sheet()
+		if args.has("home"): _found.home = args.home; _founding_build(_sheet_layer.get_child(-1))
+		if args.has("scroll"):
+			for i in 3: await get_tree().process_frame
+			(_sheet_layer.get_child(-1) as Paper)._scroll.scroll_vertical = int(args.scroll)
 	await get_tree().process_frame
 	if args.has("step2"):
 		var ev: Dictionary = G.event_of(S.queue[0])

@@ -51,7 +51,7 @@ Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey 
 
 ### The map
 
-The designer is reworking the map with cities, provinces and mountain ranges. Everything that depends on it waits: provinces as voting districts, the election-night broadcast, the leader's background (a city they were mayor of), and map-centred play. **Planned, waiting for the map.**
+The designer is reworking the map with cities, provinces and mountain ranges. Everything that depends on it waits: provinces as voting districts, the election-night broadcast and map-centred play. **Planned, waiting for the map.** (The leader's home city is built: see *Founding night* in section 7.)
 
 ---
 
@@ -255,8 +255,8 @@ Not a list of events, but **a profile of the leader written by a hostile newspap
 
 | Element | Status | Notes |
 |---|---|---|
-| Title screen with the map | Built | |
-| Party templates | Built | Left populist, right populist, centrist, agrarian, anti-system, custom |
+| Title screen with the map | Built in the browser version | Not in Godot yet; the game opens on the founding sheet |
+| Party templates | Built | Left populist, right populist, centrist, agrarian, anti-system, custom; chosen on the founding sheet |
 | Sound effects | Built | Synthesised in code; the designer is happy with them |
 | Leader portraits | Built | Drawn in code. *History:* the first set (CC0 "Notionists" avatars) didn't look like politicians; replaced with drawn older men and women in suits. The designer finds them endearing but different from what they imagined and will look for public-domain portraits. |
 | Flags | Built | Original designs. *History:* first shown on the map, where some didn't line up. Moved into country profiles: clicking a neighbour shows its flag, leader and summary. |
@@ -288,6 +288,10 @@ The designer's aims: the game should be enjoyable first, and it should look like
 - **An event's answer is your statement.** When an answered event goes on as a national debate, your answer already counts as speaking in it, so the same story can't be answered twice.
 - **Debates turn over like headlines.** A debate runs at most four months (six for crises and other major ones), however hot it still is; the news starts new ones more often, and a rival can't restart one it just lost for six months. *History:* rivals kept favourite arguments alive for a year or more.
 - The Country file's button is called **Raise issue**. Carlos's note on the board opens the Debates file when the party has under ₱1.5M (speaking is free), the Actions file otherwise.
+
+### Founding night (November 2026)
+
+*Decided:* a new game opens on a founding sheet. The player picks a party template (or builds their own), names the party and the leader, sets the manifesto (one stance per issue) and chooses **the city where the leader was mayor** before walking out of their old party. That city is the head start: its region's voters know and like the leader (Cranebonians there much more than the minority), and the party starts with a level-1 office in the city. A bigger region is a bigger head start: about 4.8% opening poll from Bayernal, 6.5% from Cranebo, against 2.5% with no home. **Alinni's cities can't be chosen**: Alinnians elect their own minority leaders, and the player's leader is from the majority. The end-of-election sheet offers "Found a new party". Carlos's welcome waits until the party exists.
 
 ### Organise, dig, steer (November 2026)
 
@@ -337,7 +341,7 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 - Personalities who can pull off otherwise bad sound bites.
 - Sound bites for the remaining events (about 10 of 40 have them so far; written in small batches and playtested before scaling up).
 - More initiatives, and second-stage follow-ups so debates can run for longer chains.
-- The leader's background (former mayor, defector from another party, etc.), after the map.
+- More of the leader's background (defector from another party, etc.). The home city is built.
 - A full economy.
 - Governing after winning, and the next election.
 - Pops changing their views after events; demographic change.
