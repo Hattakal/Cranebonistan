@@ -145,15 +145,22 @@ func _build_bar() -> Control:
 	dates.add_child(_date); dates.add_child(_countdown)
 	time.add_child(dates)
 	_btn_week = _speed_button("play", "Next week")
-	_btn_week.pressed.connect(func(): if G.advance_week(S): _after_change())
+	_btn_week.pressed.connect(func(): _time_pressed(false))
 	time.add_child(_btn_week)
 	_btn_skip = _speed_button("fast-forward", "Next decision", true)
-	_btn_skip.pressed.connect(func(): if G.advance_to_decision(S): _after_change())
+	_btn_skip.pressed.connect(func(): _time_pressed(true))
 	time.add_child(_btn_skip)
 	var tsec = _section(time, 14)
 	(tsec.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = Color(0, 0, 0, 0.22)
 	h.add_child(tsec)
 	return _bar
+
+func _time_pressed(to_decision: bool) -> void:
+	if _sheet_open(): return
+	if S.queue.size():
+		_open_front()
+		return
+	if (G.advance_to_decision(S) if to_decision else G.advance_week(S)): _after_change()
 
 func _section(inner: Control, pad: int) -> PanelContainer:
 	var p = PanelContainer.new()
@@ -173,7 +180,7 @@ func _menu_button(icon_name: String, text: String) -> Button:
 	b.expand_icon = true
 	b.add_theme_constant_override("icon_max_width", 20)
 	b.add_theme_font_override("font", Look.spaced("display", 1))
-	b.add_theme_font_size_override("font_size", 11)
+	b.add_theme_font_size_override("font_size", Look.fs(11))
 	b.tooltip_text = text
 	for st in ["normal", "focus", "disabled"]: b.add_theme_stylebox_override(st, Look.box(Color(0, 0, 0, 0), 0, Color("33271d"), 0, 0, 6))
 	var hov = Look.box(Color("3a2c20"), 0, Color.TRANSPARENT, 0, 0, 6)
@@ -197,7 +204,7 @@ func _speed_button(icon_name: String, tip: String, primary := false) -> Button:
 	if primary:
 		b.text = tip.to_upper()
 		b.add_theme_font_override("font", Look.spaced("display", 1))
-		b.add_theme_font_size_override("font_size", 13)
+		b.add_theme_font_size_override("font_size", Look.fs(13))
 	var base = Color("6b1f14") if primary else Color(0, 0, 0, 0.2)
 	b.add_theme_stylebox_override("normal", Look.box(base, 5, Look.BRASS if primary else Color("5a4632"), 1, 0, 8))
 	b.add_theme_stylebox_override("hover", Look.box(base.lightened(0.15), 5, Look.BRASS, 1, 0, 8))
@@ -347,9 +354,13 @@ func _render_bar() -> void:
 	_date.text = G.date_label(S.week).to_upper()
 	var months_left = int(ceil(float(G.ELECTION_WEEK - S.week) / G.WEEKS_PER_MONTH))
 	_countdown.text = "Election held" if S.result else "Election in %d month%s" % [months_left, "" if months_left == 1 else "s"]
-	var blocked: bool = S.queue.size() > 0 or S.result != null
-	_btn_week.disabled = blocked
-	_btn_skip.disabled = blocked
+	# a decision that was put down waits on the board; the time buttons take you back to it
+	var waiting: bool = S.queue.size() > 0
+	_btn_week.disabled = S.result != null and not waiting
+	_btn_skip.disabled = S.result != null and not waiting
+	_btn_skip.text = "OPEN DECISION" if waiting else "NEXT DECISION"
+	_btn_week.tooltip_text = "A decision is waiting for you" if waiting else "Next week"
+	_btn_skip.tooltip_text = "A decision is waiting for you" if waiting else "Next decision"
 
 func _chip(label: String, value: String, tip: String, warn := Color.TRANSPARENT, num = null, fmt := Callable()) -> void:
 	# chips are built once and then updated, so a count in progress survives a refresh
@@ -586,6 +597,7 @@ func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
 
 func _event_result(p: Paper, res: Dictionary) -> void:
 	p.clear()
+	p.decided()
 	_result_body(p, res.get("title", ""), res)
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
@@ -648,7 +660,7 @@ func _speak_sheet(id: String, side: String) -> void:
 				else:
 					_toast(res.text + (" " + res.delivery.styleNote if res.delivery.styleNote != "" else ""))
 					_done(p))
-	p.actions([p.button("Stay out of it", func(): p.close())])
+	p.actions([p.button("Back", func(): p.close())])
 
 func _after_speaking(res: Dictionary, line: Dictionary, axis: String, side: String) -> void:
 	var outcome: String = res.delivery.outcome
@@ -911,6 +923,7 @@ func _debate_round(p: Paper) -> void:
 		p.card("slip", func(box): box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
 			var res: Dictionary = G.answer_debate(S, j)
 			p.clear()
+			p.decided()
 			p.tv_strap("CBC · Live", "The final debate · " + res.round)
 			p.add(Look.label(res.quote, "news_bold", 24, Look.INK, true))
 			p.text(res.press, 17, "news_italic")
@@ -1054,10 +1067,10 @@ func _shot(args: Dictionary) -> void:
 	await get_tree().process_frame
 	if args.has("step2"):
 		var ev: Dictionary = G.event_of(S.queue[0])
-		var ci = 0
+		var ci = -1
 		for i in ev.choices.size():
 			if ev.choices[i].get("lines", []).size(): ci = i
-		_event_step2(_sheet_layer.get_child(-1), ev, ci)
+		if ci >= 0: _event_step2(_sheet_layer.get_child(-1), ev, ci)
 	if args.has("result"):
 		var ev2: Dictionary = G.event_of(S.queue[0])
 		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1))

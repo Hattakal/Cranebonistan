@@ -68,11 +68,17 @@ static func spaced(name: String, px: int) -> Font:
 	return v
 
 # ---------- Builders ----------
+## Small text reads better a little larger: every font size in the code goes through this.
+static func fs(size: int) -> int:
+	if size <= 13: return size + 2
+	if size <= 16: return size + 1
+	return size
+
 static func label(text: String, font_name := "body", size := 15, color := INK, wrap := false) -> Label:
 	var l = Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font(font_name))
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", fs(size))
 	l.add_theme_color_override("font_color", color)
 	if wrap:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

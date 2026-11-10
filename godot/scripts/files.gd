@@ -63,7 +63,7 @@ func _ready() -> void:
 	var close = Button.new()
 	close.text = "×"
 	close.flat = true
-	close.add_theme_font_size_override("font_size", 30)
+	close.add_theme_font_size_override("font_size", Look.fs(30))
 	close.add_theme_color_override("font_color", Color("3b2a12"))
 	close.add_theme_color_override("font_hover_color", Look.RED)
 	close.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
@@ -136,7 +136,7 @@ func _btn(text: String, cb: Callable, disabled := false, primary := false, toggl
 	b.text = text
 	b.disabled = disabled
 	b.add_theme_font_override("font", Look.spaced("display", 1))
-	b.add_theme_font_size_override("font_size", 13)
+	b.add_theme_font_size_override("font_size", Look.fs(13))
 	var bg = Look.OXBLOOD if primary else (Look.INK if toggled else Color(1, 1, 1, 0.35))
 	var fg = Look.HEAD if (primary or toggled) else Look.INK
 	b.add_theme_stylebox_override("normal", Look.box(bg, 2, Look.INK if not primary else Look.OXBLOOD, 1, 0, 7))
@@ -298,7 +298,7 @@ func _electorate() -> void:
 		var b = _btn("%s   %sM" % [x.label, Game.fmt1(size / 1e6)], func(): group = x.id; render(), false, false, x.id == g.id)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.add_theme_font_override("font", Look.font("body"))
-		b.add_theme_font_size_override("font_size", 13)
+		b.add_theme_font_size_override("font_size", Look.fs(13))
 		list.add_child(b)
 	var d = VBoxContainer.new()
 	d.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -401,7 +401,7 @@ func _platform() -> void:
 			if rx.angry.size(): tip += "\nAngers: " + ", ".join(rx.angry.map(func(f): return f.name))
 			if rx.pleased.size(): tip += "\nPleases: " + ", ".join(rx.pleased.map(func(f): return f.name))
 			b.tooltip_text = tip
-			b.add_theme_font_size_override("font_size", 11)
+			b.add_theme_font_size_override("font_size", Look.fs(11))
 			sr.add_child(b)
 	# the people in the party
 	_rule()
@@ -574,7 +574,7 @@ func _debates() -> void:
 	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hl)
 	_eyebrow("What Cranebonistan is arguing about", hl)
-	_p("Join a debate by speaking for one side. In a major debate the whole country is watching: your exact words get quoted, and can go viral or become a gaffe. In smaller ones a line mostly shapes how you come across. Or stay out of it: silence keeps your record clean, but nobody notices you either.", hl, Look.INK, 14)
+	_p("Join a debate by speaking for one side. In a major debate the whole country is watching: your exact words get quoted, and can go viral or become a gaffe. In smaller ones a line mostly shapes how you come across.", hl, Look.INK, 14)
 	var cs = _row(hl, 6)
 	cs.add_child(Look.caps("Your causes (%d of %d)" % [S.signature.size(), int(G.C.maxSignatureIssues)], 11, Look.MUTED, 1))
 	if S.signature.is_empty(): cs.add_child(Look.label("None yet. Speak for a side, then make it yours.", "body", 12, Look.MUTED))

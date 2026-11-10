@@ -11,6 +11,7 @@ var _dim: ColorRect
 var _scroll: ScrollContainer
 var _paper: PanelContainer
 var v: VBoxContainer          # the sheet's content; add to it freely
+var _down_btn: Button = null  # "Put it down"; survives clear() so every step of a decision has it
 
 func _init(width := 820, can_put_down := false) -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -48,7 +49,7 @@ func _init(width := 820, can_put_down := false) -> void:
 		b.add_theme_constant_override("icon_max_width", 14)
 		b.flat = true
 		b.add_theme_font_override("font", Look.spaced("display", 2))
-		b.add_theme_font_size_override("font_size", 12)
+		b.add_theme_font_size_override("font_size", Look.fs(12))
 		b.add_theme_color_override("font_color", Look.MUTED)
 		b.add_theme_color_override("font_hover_color", Look.RED)
 		b.add_theme_color_override("icon_normal_color", Look.MUTED)
@@ -57,6 +58,7 @@ func _init(width := 820, can_put_down := false) -> void:
 		b.pressed.connect(func(): put_down.emit(); close())
 		b.size_flags_horizontal = Control.SIZE_SHRINK_END
 		v.add_child(b)
+		_down_btn = b
 
 func _ready() -> void:
 	_paper.resized.connect(func(): _paper.pivot_offset = Vector2(_paper.size.x / 2, 120))
@@ -77,7 +79,12 @@ func close() -> void:
 	tw.tween_callback(func(): closed.emit(); queue_free())
 
 func clear() -> void:
-	for c in v.get_children(): c.queue_free()
+	for c in v.get_children():
+		if c != _down_btn: c.queue_free()
+
+## Once the decision is made (the result is showing) there is nothing left to put down.
+func decided() -> void:
+	if _down_btn: _down_btn.visible = false
 
 func top() -> void:
 	_scroll.scroll_vertical = 0
@@ -243,7 +250,7 @@ func button(t: String, cb: Callable, primary := true, disabled := false) -> Butt
 	b.text = t.to_upper()
 	b.disabled = disabled
 	b.add_theme_font_override("font", Look.spaced("display", 2))
-	b.add_theme_font_size_override("font_size", 15)
+	b.add_theme_font_size_override("font_size", Look.fs(15))
 	var bg = Look.OXBLOOD if primary else Color(1, 1, 1, 0.3)
 	var fg = Look.HEAD if primary else Look.INK
 	b.add_theme_stylebox_override("normal", Look.box(bg, 2, Look.OXBLOOD if primary else Look.INK, 1, 0, 10))

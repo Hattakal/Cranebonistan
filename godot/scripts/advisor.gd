@@ -155,7 +155,7 @@ func margaret(trigger: String) -> void:
 		var b = Button.new()
 		b.text = pr[0]
 		b.add_theme_font_override("font", Look.font("body_bold"))
-		b.add_theme_font_size_override("font_size", 13)
+		b.add_theme_font_size_override("font_size", Look.fs(13))
 		b.add_theme_color_override("font_color", Look.INK)
 		b.add_theme_stylebox_override("normal", Look.box(Color(0, 0, 0, 0.06), 3, Color("8b1e1e") if pr[1] else Look.MUTED, 1, 8, 4))
 		b.add_theme_stylebox_override("hover", Look.box(Color(0, 0, 0, 0.12), 3, Color("8b1e1e") if pr[1] else Look.MUTED, 1, 8, 4))
