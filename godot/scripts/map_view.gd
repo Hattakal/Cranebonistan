@@ -338,10 +338,10 @@ func _plate(a: Dictionary, s: float) -> void:
 	var c = to_screen(Vector2(a.label[0], a.label[1]))
 	var p = to_screen(Vector2(a.label[0] + 190, a.label[1] + 85))
 	var text: String = " ".join(a.name).to_upper()
-	var fs = int(maxf(11, 30 * s))
+	var fs = int(maxf(15, 40 * s))
 	var font = Look.spaced("display", int(fs * 0.16))
 	var tw = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var rect = Rect2(p - Vector2(tw / 2 + 12, fs * 0.9), Vector2(tw + 24, fs * 1.6))
+	var rect = Rect2(p - Vector2(tw / 2 + 18, fs * 0.95), Vector2(tw + 36, fs * 1.8))
 	var hot_now: bool = hot.get(a.id, false)
 	draw_line(c, rect.position + Vector2(0, rect.size.y / 2), Look.BORDER, maxf(1.0, 3 * s), true)
 	draw_circle(c, maxf(2.5, 7 * s), Look.BORDER)
@@ -349,7 +349,7 @@ func _plate(a: Dictionary, s: float) -> void:
 	var bg = Look.mix(Look.PAPER, Color("c0392b"), 0.3) if hot_now else (Color("fff8e6") if hover == a.id else Look.PAPER)
 	draw_rect(rect, bg)
 	draw_rect(rect, Look.RED if hover == a.id else Look.BORDER, false, maxf(1.0, 2.5 * s))
-	draw_string(font, Vector2(rect.position.x + 12, rect.position.y + rect.size.y * 0.5 + fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Look.BORDER)
+	draw_string(font, Vector2(rect.position.x + 18, rect.position.y + rect.size.y * 0.5 + fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Look.BORDER)
 	_plates[a.id] = rect
 
 func _tooltip() -> void:

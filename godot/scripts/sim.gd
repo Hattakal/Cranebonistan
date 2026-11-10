@@ -834,6 +834,40 @@ func rivals_adapt(s: Dictionary, before: Dictionary, now: Dictionary) -> void:
 		push_news(s, {"party": p.id, "kind": "threat", "title": "%s copies your line on %s" % [p.short, ax.issue.to_lower()],
 			"text": "Worried about losing voters to you, %s has moved %s toward %s. They will compete for the same voters." % [p.leader, p.short, (ax.left if d < 0 else ax.right).to_lower()]})
 
+## Rivals don't only copy you: now and then one moves into an empty niche,
+## a side of an issue many voters care about that no party speaks for.
+const NICHE_CHANCE := 0.12
+func rivals_fill_niche(s: Dictionary) -> void:
+	var best = null
+	var best_score = 0.0
+	for ax in AXES:
+		for side in ["L", "R"]:
+			var key = side_key(ax.id, side)
+			var held = 0.0
+			for pid in s.ownership.get(key, {}): held += float(s.ownership[key][pid])
+			if held >= 0.05: continue
+			var sg = -1.0 if side == "L" else 1.0
+			var demand = 0.0
+			for pop in s.pops: demand += pop.size * maxf(0, sg * pop.pos[ax.id] / 100.0) * pop.sal[ax.id]
+			# the party that can most credibly take it: already on that side, or near the middle
+			for p in rivals(s):
+				var lean: float = sg * p.perceived[ax.id]
+				if lean < -25: continue
+				var sc: float = demand * (1.0 + maxf(0, lean) / 100.0) * (0.6 + rand(s) * 0.8)
+				if sc > best_score:
+					best_score = sc; best = {"party": p, "ax": ax, "side": side, "key": key}
+	if best == null: return
+	var p: Dictionary = best.party
+	var ax: Dictionary = best.ax
+	var sg = -1.0 if best.side == "L" else 1.0
+	p.perceived[ax.id] = clampf2(p.perceived[ax.id] + sg * 12, -100, 100)
+	p.manifesto[ax.id] = p.perceived[ax.id]
+	add_ownership(s, p.id, best.key, 0.12)
+	trim_claims(s, p.id, best.key)
+	var name = (ax.left if best.side == "L" else ax.right).to_lower()
+	push_news(s, {"party": p.id, "kind": "threat", "title": "%s takes up %s" % [p.short, name],
+		"text": "Nobody was speaking for %s voters on %s, so %s has started to. Expect to hear a lot more about it from them." % [name, ax.issue.to_lower(), p.leader]})
+
 func rivals_monthly(s: Dictionary, now_support: Dictionary) -> void:
 	for p in rivals(s):
 		var trend: float = now_support[p.id] - s.lastSupport[p.id] if s.lastSupport else 0.0
@@ -841,6 +875,7 @@ func rivals_monthly(s: Dictionary, now_support: Dictionary) -> void:
 		if p.ruling: d -= 0.8 + maxf(0, 35 - s.trust) * 0.05
 		p.stability = clampf2(p.stability + d, 0, 100)
 	if rand(s) < C.rivalEventChance: rival_happening(s)
+	if rand(s) < NICHE_CHANCE: rivals_fill_niche(s)
 	var falling = null
 	for p in rivals(s):
 		if p.stability < C.collapseAt and s.week - int(p.get("lastCollapse", -999)) > C.collapseCooldownMonths * WEEKS_PER_MONTH:
@@ -1117,6 +1152,8 @@ func act_release(s: Dictionary, index: int) -> Dictionary:
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
+const POACH_FIGURE_CHANCE := 0.2
+
 func can_poach(s: Dictionary, party_id: String) -> bool:
 	var p = party_of(s, party_id)
 	return p.stability < 40 and s.week - int(p.get("lastPoached", -999)) >= C.poachCooldownMonths * WEEKS_PER_MONTH
@@ -1135,7 +1172,8 @@ func act_poach(s: Dictionary, party_id: String) -> Dictionary:
 	var text = "Local %s organisers crossed over to you, bringing about %dk core voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
 	var claims = ownership_table(s).filter(func(r): return r.owners.any(func(o): return o.party == party_id))
 	var pool = LEADER_POOL.filter(func(x): return not s.figures.any(func(f): return f.name == x.name) and not s.parties.any(func(q): return q.leader == x.name))
-	if claims.size() and pool.size():
+	# organisers cross over easily; one of their politicians only rarely comes with them
+	if claims.size() and pool.size() and rand(s) < POACH_FIGURE_CHANCE:
 		var who: Dictionary = pick(s, pool)
 		var key: String = claims[0].key
 		s.figures.append({"id": "poach_%d" % s.week, "name": who.name, "sex": who.sex, "role": "Former %s politician" % p.short, "region": pick(s, REGIONS).id,
@@ -1391,6 +1429,8 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 		var sh = float(fx.get("shift", {}).get(eax, 0))
 		var ed = open_debate(s, "ev:" + str(ev.id), eax, ev.title, ev.text, "news", 28, signf(sh) * 20)
 		if ev.get("kind", "") == "crisis" or str(ev.id).begins_with("crisis_"): ed.major = true
+		# your answer to the event is already your statement in the debate it starts
+		ed.you = {"side": ("L" if sh < 0 else "R") if sh != 0 else "", "week": s.week, "quote": quote if quote else choice.label}
 	_log(s, "event", "%s: %s%s" % [ev.title, ("\"%s\"" % quote) if quote else (choice.label + "."), extra])
 	finish_front(s, "event")
 	return {"before": before, "after": player_party(s).perceived.duplicate(), "flips": s.flips.slice(flips_before), "extra": extra,
@@ -1557,6 +1597,8 @@ const DEBATE_MAX := 6
 const DEBATE_FAN_HEAT := 14.0
 const DEBATE_FAN_LEAN := 15.0
 const DEBATE_COOL := 18.0
+const DEBATE_LIFE := 4.0         # months a debate runs before the country moves on
+const DEBATE_LIFE_MAJOR := 6.0   # crises and other major debates last a little longer
 
 func debate_by_id(s: Dictionary, id: String) -> Variant:
 	for d in s.debates:
@@ -1622,7 +1664,9 @@ func debates_monthly(s: Dictionary) -> void:
 		var age: float = float(s.week - int(d.started)) / WEEKS_PER_MONTH
 		d.heat = d.heat * maxf(0.6, 0.86 - 0.012 * age) - 2.0
 		d.lean *= 0.92
-		if d.heat < 8:
+		# like the headlines, the argument moves on after a few months, however hot it still is
+		var life: float = DEBATE_LIFE_MAJOR if d.get("major", false) else DEBATE_LIFE
+		if d.heat < 8 or age >= life:
 			end_debate(s, d)
 			continue
 		d.history.append(d.heat)
@@ -1634,8 +1678,8 @@ func debates_monthly(s: Dictionary) -> void:
 			for pop in s.pops:
 				pop.pos[d.axis] = clampf2(pop.pos[d.axis] + push * minf(1.5, pop.sal[d.axis]), -100, 100)
 	rivals_debate(s)
-	# the news starts something new now and then
-	if rand(s) < 0.3:
+	# the news starts something new now and then, and always when the country has little to argue about
+	if rand(s) < 0.55 or s.debates.size() < 3:
 		var pool = TOPICS.filter(func(t): return not t.has("trigger") and debate_by_id(s, t.id) == null \
 			and s.week - int(s.debateCooldown.get(t.id, -9999)) > 8 * WEEKS_PER_MONTH)
 		if pool.size():
@@ -1689,7 +1733,8 @@ func rivals_debate(s: Dictionary) -> void:
 			var claims = ownership_table(s).filter(func(r): return r.owners.any(func(o): return o.party == p.id))
 			if claims.is_empty(): continue
 			var row: Dictionary = claims[0]
-			var pool = TOPICS.filter(func(t): return t.axis == row.axis and not t.has("trigger") and debate_by_id(s, t.id) == null)
+			var pool = TOPICS.filter(func(t): return t.axis == row.axis and not t.has("trigger") and debate_by_id(s, t.id) == null \
+				and s.week - int(s.debateCooldown.get(t.id, -9999)) > 6 * WEEKS_PER_MONTH)
 			if pool.is_empty(): continue
 			var t: Dictionary = pick(s, pool)
 			var side: String = row.key.split(":")[1]
@@ -1732,9 +1777,11 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 	if err: return {"ok": false, "text": err}
 	var d = debate_by_id(s, id)
 	if d == null: return {"ok": false, "text": "That debate is over."}
+	if d.has("you"): return {"ok": false, "text": "You've already had your say on this one."}
 	var major = is_major(d)
 	var line: Dictionary = debate_lines(d, side)[line_index]
 	spend_action(s, 0)
+	d.you = {"side": side, "week": s.week, "quote": line.text}
 	var pv = fan_preview(s, d, side)
 	var sign = -1.0 if side == "L" else 1.0
 	var before = snapshot_groups(s)

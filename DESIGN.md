@@ -193,7 +193,9 @@ Money offers: corporate and union donations (public, shift the party's image) an
 
 National Unity Party (ruling, nationalist), Cranebonian Labour Front, Open Cranebonistan (liberal, pro-business), Alinni People's Voice (minority party).
 
-Rivals have leaders, charisma and stability. They suffer scandals and infighting, change leaders (who take them in new directions), recover, and **split** when stability collapses, freeing their core voters: a **power vacuum** the closest party can fill, and a chance to take in defectors. Rivals losing voters to the player copy the player's most popular position. Rivals sit in their niches otherwise.
+Rivals have leaders, charisma and stability. They suffer scandals and infighting, change leaders (who take them in new directions), recover, and **split** when stability collapses, freeing their core voters: a **power vacuum** the closest party can fill, and a chance to take in defectors. Rivals losing voters to the player copy the player's most popular position. **Rivals also fill empty niches** (*decided November 2026*): now and then the rival best placed to do it takes up a side of an issue that many voters care about and no party speaks for, and moves toward it. *History:* rivals used to sit in their niches unless copying the player.
+
+**Recruiting defectors** wins a rival's organisers and some core voters; one of their politicians only rarely comes along (one time in five). *History:* a politician used to come every time, which made poaching feel routine.
 
 *Origin:* real politicians rise out of nowhere when other parties falter. The designer asked for power vacuums that can be exploited, or that cost the player their own base.
 
@@ -280,6 +282,12 @@ The designer's aims: the game should be enjoyable first, and it should look like
 ### Speaking (November 2026)
 
 *Decided:* almost every action is about how you say things. Joining a debate means picking a line. In **major debates** (hot ones, or ones the economy or a crisis started) the exact words matter: they are quoted and can go viral or become a gaffe, and a gaffe pushes the argument the other way. In **smaller debates** a line mostly shapes your speaking style. Starting a debate also asks for your exact words, and it can **fizzle**. Not speaking in a debate is simply not doing it: the speaking sheet only has a "Back" button. *History:* it first had a "Stay out of it" button, which read as a separate decision made at the same moment as choosing to speak; dropped after the first Godot playtest. Championing and "provoke outrage" were folded into speaking: a side you have spoken for can become one of your two causes, and provocation is a tone. Some lines are simply the wrong way to say something (marked risky).
+
+*Decided after the second playtest (November 2026):*
+- **One statement per debate.** Once you have spoken in a debate, that is your position on it; the debate shows what you said instead of the speak buttons. *History:* at first you could speak in the same debate every month, even for both sides.
+- **An event's answer is your statement.** When an answered event goes on as a national debate, your answer already counts as speaking in it, so the same story can't be answered twice.
+- **Debates turn over like headlines.** A debate runs at most four months (six for crises and other major ones), however hot it still is; the news starts new ones more often, and a rival can't restart one it just lost for six months. *History:* rivals kept favourite arguments alive for a year or more.
+- The Country file's button is called **Raise issue**. Carlos's note on the board opens the Debates file when the party has under ₱1.5M (speaking is free), the Actions file otherwise.
 
 ### Organise, dig, steer (November 2026)
 

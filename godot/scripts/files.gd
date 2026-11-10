@@ -704,7 +704,11 @@ func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 	var row = HFlowContainer.new()
 	row.add_theme_constant_override("h_separation", 8)
 	row.add_theme_constant_override("v_separation", 6)
-	for side in ["L", "R"]:
+	# one statement per debate: once you've spoken (or answered the event behind it), that's your position
+	if d.has("you"):
+		var said: String = "You spoke for %s." % (ax.left if d.you.side == "L" else ax.right).to_lower() if d.you.side != "" else "You've had your say."
+		v.add_child(Look.label("%s “%s”" % [said, d.you.quote], "body_italic", 13, Look.INK, true))
+	for side in ([] if d.has("you") else ["L", "R"]):
 		var pv: Dictionary = G.fan_preview(S, d, side)
 		var tip = "Heat +%d, pushes the argument toward %s." % [Game.jround(pv.heat), pv.side.to_lower()]
 		if pv.shift.from != pv.shift.to: tip += "\nVoters will see you move from %s to %s on %s." % [G.stance_name(d.axis, pv.shift.from), G.stance_name(d.axis, pv.shift.to), ax.issue.to_lower()]
@@ -825,7 +829,7 @@ func _country_issues() -> void:
 		row.add_child(tv)
 		if m[2] != null:
 			var opt: Dictionary = m[2]
-			var b = _btn("Raise it", func(): raise.emit(opt), blocked)
+			var b = _btn("Raise issue", func(): raise.emit(opt), blocked)
 			b.tooltip_text = "Start a national debate about it. About %d%% chance it catches on." % Game.jround(opt.chance * 100)
 			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			row.add_child(b)
@@ -851,7 +855,7 @@ func _country_issues() -> void:
 		var tx = Look.label(opt.text, "body", 12, Look.MUTED, true)
 		tv.add_child(tx)
 		row.add_child(tv)
-		var b = _btn("Raise it", func(): raise.emit(opt), blocked)
+		var b = _btn("Raise issue", func(): raise.emit(opt), blocked)
 		b.tooltip_text = "Make it a national debate. About %d%% chance it catches on." % Game.jround(opt.chance * 100)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(b)

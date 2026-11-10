@@ -233,7 +233,8 @@ func render(s: Dictionary) -> void:
 	var sign = Look.label("— Carlos", "type", 14, Color("3b2a12"))
 	sign.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	pv.add_child(sign)
-	pim.pressed.connect(func(): open_file.emit("actions"))
+	# speaking is free; the other actions cost money, so a poor party is sent to the debates
+	pim.pressed.connect(func(): open_file.emit("debates" if s.money < 1.5 else "actions"))
 	# 4. Margaret's note, only when earned
 	var teyl = _teyl_note(s)
 	if teyl != "":

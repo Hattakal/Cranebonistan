@@ -21,7 +21,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 - **Three actions a month**, shared between speaking, starting a debate, changing the subject, building communities, opposition research, dossiers, recruiting defectors and steering the party.
 - **Communities.** Open a party office in a city and grow it. It works every month in its region: core voters, turnout, members' dues. Shown as rings on the map.
 - **Issues.** The Country file lists the major issues (the economy, the crisis) and smaller local stories in the news. Any of them, or the government's own record, can be raised as a debate.
-- **The party's politicians and steering.** Seven named politicians, each caring about one side of one issue. Steering the manifesto one stance takes three months; the ones who disagree lose loyalty and may quit, taking reach and regional goodwill with them. Recruiting defectors can bring a rival's politician over.
+- **The party's politicians and steering.** Seven named politicians, each caring about one side of one issue. Steering the manifesto one stance takes three months; the ones who disagree lose loyalty and may quit, taking reach and regional goodwill with them. Recruiting defectors now and then brings a rival's politician over.
 - **Events** every two to three months. Choose what to say, then the exact words; the wording shapes your leader's style and can go viral or become a gaffe.
 - **The state of the nation.** Jobs, prices, migration, border tension and the public mood drift and push each other.
 - **One major crisis** in the second year, from five. Your campaign can make one up to twice as likely.
