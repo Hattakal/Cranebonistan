@@ -5,11 +5,11 @@ build_map.py: turn the designer's Krita map (.kra) into the game's map.
     python3 tools/build_map.py path/to/map.kra
 
 Reads these Krita layers (by name):
-  Background            sea (blue) and land (white); coastlines in black
-  States and Countries  border lines (any colour) between regions and countries
-  Rivers and Mountains  decoration only; never used as borders
+  Background            land (white or light grey); sea may be blue, or found from WATER_SEEDS
+  States and Countries  border and coast lines (any colour); may also be called "Map"
+  Rivers and Mountains  decoration only; never used as borders (optional)
   Cities                one dot per city
-  (a vector/text layer) names typed next to each city
+  (a vector/text layer) names typed next to each city; big text (area names) is skipped
 
 Writes:
   godot/data/content.json   its MAP entry: shapes, label spots and cities (game coordinates)
@@ -37,17 +37,22 @@ WORK = 2           # work at half resolution
 
 # A point inside each area, in Krita pixels. kind: region or foreign.
 AREA_SEEDS = {
-    "yamlin":    ("region",  (2379, 3890)),
-    "cranbia":   ("region",  (4518, 2547)),
-    "alinni":    ("region",  (7025, 1967)),
-    "erland":    ("region",  (5282, 3941)),
-    "fauraifai": ("region",  (7785, 3944)),   # shown as "Fauran"
-    "trueants":  ("foreign", (9300, 500)),
-    "dillihan":  ("foreign", (9600, 3500)),
-    "bourdeaux": ("foreign", (5600, 6400)),   # shown as "Bordon Federation"
-    "james":     ("foreign", (7286, 5464)),
+    "yamlin":    ("region",  (2552, 2011)),
+    "cranbia":   ("region",  (3680, 600)),
+    "alinni":    ("region",  (5934, 726)),
+    "erland":    ("region",  (5334, 2628)),
+    "fauraifai": ("region",  (3088, 4169)),   # shown as "Fauran"
+    "trueants":  ("foreign", (7600, 1485)),
+    "dillihan":  ("foreign", (7424, 4757)),
+    "bourdeaux": ("foreign", (1180, 6313)),   # shown as "Bordon Federation"
+    "james":     ("foreign", (2753, 5494)),
 }
+# Points in water, for maps whose sea isn't painted blue: the sea, the south-east sea, the lake.
+WATER_SEEDS = [(500, 500), (8000, 6950), (4989, 681)]
 CAPITAL = "Cranebo"
+# Names on the map that the game spells differently.
+NAME_FIX = {"Cranbero": "Cranebo"}
+CITY_TEXT_MAX = 20   # text bigger than this (font size) is an area name, not a city
 # Label text, used only to find room for it (the game has the real names).
 LABELS = {"yamlin": ["Yamlin"], "cranbia": ["Cranbia"], "alinni": ["Alinni"], "erland": ["Erland"],
           "fauraifai": ["Fauran"], "trueants": ["Southern", "Trueants"], "dillihan": ["Dillihan", "Republic"],
@@ -110,9 +115,9 @@ def load_kra(path):
             for t in re.finditer(r'<text[^>]*transform="translate\(([-\d.]+),\s*([-\d.]+)\)"[^>]*?font-size:\s*([\d.]+)[^>]*>(.*?)</text>', svg, re.S):
                 x, y, fs = float(t.group(1)), float(t.group(2)), float(t.group(3))
                 txt = re.sub(r"<[^>]+>", "", html.unescape(t.group(4))).strip()
-                if txt:
+                if txt and fs <= CITY_TEXT_MAX and x >= 0 and y >= 0:
                     w = len(txt) * 0.55 * fs
-                    texts.append((txt, (x + w / 2) * s, (y - fs * 0.35) * s))
+                    texts.append((NAME_FIX.get(txt, txt), (x + w / 2) * s, (y - fs * 0.35) * s))
     return W, H, layers, texts
 
 
@@ -137,6 +142,13 @@ def build_areas(bg, borders):
         band = line[sl]; rows = band.any(1); band[rows, :] = True; line[sl] = band
     white = (b[..., 0] > 200) & (b[..., 1] > 200) & (b[..., 2] > 200) & ~line
     lab, n = ndimage.label(white)
+    if not water.any():
+        # sea not painted: the areas around the water seeds are water
+        for sx, sy in WATER_SEEDS:
+            L = lab[sy // WORK, sx // WORK]
+            if L: water |= lab == L
+        white &= ~water
+        lab, n = ndimage.label(white)
     ids = {}
     seeds = np.zeros((h, w), np.int32)
     for k, (area_id, (_kind, (sx, sy))) in enumerate(AREA_SEEDS.items(), start=1):
@@ -194,8 +206,11 @@ def label_spot(mask, lines, obstacles):
 def main(path):
     W, H, layers, texts = load_kra(path)
     bg = find_layer(layers, "Background")
-    borders = find_layer(layers, "States and Countries")
-    feats = find_layer(layers, "Rivers and Mountains")
+    borders = find_layer(layers, "States and Countries", "Map")
+    try:
+        feats = find_layer(layers, "Rivers and Mountains")
+    except SystemExit:
+        feats = np.zeros((H, W, 4), np.uint8)   # none drawn yet
     cities_l = find_layer(layers, "Cities")
 
     full, order = build_areas(bg, borders)
@@ -220,11 +235,13 @@ def main(path):
         spot, room = label_spot(mask, LABELS.get(area_id), obstacles)
         out["regions" if kind == "region" else "foreign"][area_id] = {"d": mask_to_path(mask), "label": spot, "room": room}
 
+    med = float(np.median([d[2] for d in dots]))
+    print("city dots (px):", sorted(int(d[2]) for d in dots), "median", int(med))
     for name, tx, ty in texts:
         x, y, s = min(dots, key=lambda d: (d[0] - tx) ** 2 + (d[1] - ty) ** 2)
         k = full[int(y) // WORK, int(x) // WORK]
         out["cities"].append({"name": name, "x": round(x / SCALE), "y": round(y / SCALE),
-                              "size": 3 if s > 5000 else 2 if s > 3000 else 1,
+                              "size": 3 if s > 1.5 * med else 2 if s > 0.75 * med else 1,   # dot size, relative to a typical dot
                               "area": order[k - 1] if k else None,
                               "lx": round(tx / SCALE), "ly": round(ty / SCALE)})
 

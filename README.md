@@ -19,7 +19,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 - **The national debate** is the main activity. Live debates have heat (how much the country talks about it) and a tug of war (which side is winning). The economy, the news, events and rival parties start them. A hot debate helps whoever owns that side; one that stays hot and one-sided slowly changes what people believe.
 - **Speaking.** Join a debate by speaking for one side, in your own words. In a major debate the country is watching: your exact line is quoted and can go viral or become a gaffe. In smaller ones a line mostly shapes your speaking style. Sides you speak for can become one of your two causes.
 - **Starting a debate.** Once a month, put a topic or a proposal in front of the country. Whether it catches on depends on your reach and your words; it can fizzle.
-- **Three actions a month**, shared between speaking, starting a debate, changing the subject, building communities, opposition research, dossiers, recruiting defectors and steering the party.
+- **Three actions a month**, shared between speaking, starting a debate, building communities, opposition research, dossiers, recruiting defectors and steering the party.
 - **Communities.** Open a party office in a city and grow it. It works every month in its region: core voters, turnout, members' dues. Shown as rings on the map.
 - **Issues.** The Country file lists the major issues (the economy, the crisis) and smaller local stories in the news. Any of them, or the government's own record, can be raised as a debate.
 - **The party's politicians and steering.** Seven named politicians, each caring about one side of one issue. Steering the manifesto one stance takes three months; the ones who disagree lose loyalty and may quit, taking reach and regional goodwill with them. Recruiting defectors now and then brings a rival's politician over.
@@ -65,7 +65,7 @@ godot --headless --path godot -s tests/debates.gd -- 7
 
 ## Setting
 
-Cranebonistan has five regions: Cranbia (capital Cranebo, industrial and educated), Yamlin (trade gateway, mixed and tense), Erland (nationalist breadbasket), Alinni (conquered from the Southern Trueants fifty years ago, minority-heavy) and Fauran (the poorest). Its neighbours are the Southern Trueants, the Dillihan Republic, the Bordon Federation and James. Further away are Golba, Norbanistan and Potania. The map is being redrawn.
+Cranebonistan has five regions: Cranbia (capital Cranebo, industrial and educated), Yamlin (trade gateway, mixed and tense), Erland (nationalist breadbasket), Alinni (conquered from the Southern Trueants fifty years ago, minority-heavy) and Fauran (the poorest). Its neighbours are the Southern Trueants, the Dillihan Republic, the Bordon Federation and James. Further away are Golba, Norbanistan and Potania. Rivers and mountains are still to be drawn on the new map.
 
 ## Updating the map
 

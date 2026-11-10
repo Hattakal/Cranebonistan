@@ -1,0 +1,101 @@
+{
+ "_note": "One entry per Cranebonian city. size: 1-3 (overrides the dot size on the map; bigger cities count for more). population: millions of people (first numbers are estimates from the region's size; edit freely). lean: optional shift per axis on top of the region's average, e.g. {\"society\": -15} for a more progressive city. fact: one line about the place, shown in the region file.",
+ "CITIES": {
+  "Kravk": {
+   "size": 1,
+   "population": 0.14,
+   "lean": {},
+   "fact": ""
+  },
+  "Arthemta": {
+   "size": 2,
+   "population": 0.95,
+   "lean": {},
+   "fact": ""
+  },
+  "Nikecisa": {
+   "size": 3,
+   "population": 2.22,
+   "lean": {},
+   "fact": ""
+  },
+  "Athenilo": {
+   "size": 1,
+   "population": 0.4,
+   "lean": {},
+   "fact": ""
+  },
+  "Grenhera": {
+   "size": 2,
+   "population": 0.95,
+   "lean": {},
+   "fact": ""
+  },
+  "Tarropolis": {
+   "size": 1,
+   "population": 0.61,
+   "lean": {},
+   "fact": ""
+  },
+  "Cranebo": {
+   "size": 3,
+   "population": 3.42,
+   "lean": {},
+   "fact": ""
+  },
+  "Gilopolis": {
+   "size": 2,
+   "population": 1.47,
+   "lean": {},
+   "fact": ""
+  },
+  "Lilapolis": {
+   "size": 2,
+   "population": 1.47,
+   "lean": {},
+   "fact": ""
+  },
+  "Harapolis": {
+   "size": 2,
+   "population": 1.47,
+   "lean": {},
+   "fact": ""
+  },
+  "Büllünt": {
+   "size": 1,
+   "population": 0.26,
+   "lean": {},
+   "fact": ""
+  },
+  "Törün": {
+   "size": 1,
+   "population": 0.26,
+   "lean": {},
+   "fact": ""
+  },
+  "Aikütest": {
+   "size": 2,
+   "population": 0.62,
+   "lean": {},
+   "fact": ""
+  },
+  "Bayernal": {
+   "size": 2,
+   "population": 1.01,
+   "lean": {},
+   "fact": ""
+  },
+  "Kansilia": {
+   "size": 1,
+   "population": 0.42,
+   "lean": {},
+   "fact": ""
+  },
+  "Teksmisa": {
+   "size": 2,
+   "population": 1.01,
+   "lean": {},
+   "fact": ""
+  }
+ }
+}

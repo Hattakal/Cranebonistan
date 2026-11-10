@@ -311,6 +311,7 @@ func _electorate() -> void:
 	if k.id == "region":
 		var r = Game.by_id(G.REGIONS, g.id)
 		_p(r.blurb, d, Look.INK, 14)
+		_region_cities(g.id, d)
 	var poll = S.polls[-1] if S.polls.size() else null
 	var entry = poll.groups.get("%s:%s" % [k.id, g.id]) if poll else null
 	var prev = S.polls[-2].groups.get("%s:%s" % [k.id, g.id]) if S.polls.size() > 1 else null
@@ -335,6 +336,45 @@ func _electorate() -> void:
 	for a in leans: _add(Look.label(_lean_label(sum.pos[a.id], a), "type", 15, Look.INK), d)
 	_eyebrow("Vote intention · " + (poll.label if poll else "no poll yet"), d)
 	if entry: _bars(entry.support, prev.support if prev else null, d)
+
+
+## The region's cities: who lives there, how they lean, and your office (open or grow it here).
+func _region_cities(region: String, to: Control) -> void:
+	var cities: Array = G.country_cities().filter(func(c): return c.area == region)
+	if cities.is_empty(): return
+	_eyebrow("Cities", to)
+	var grid = GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	_add(grid, to)
+	var left: int = S.actionsLeft
+	for c in Game.ssort(cities, func(a, b): return int(b.get("size", 1)) - int(a.get("size", 1))):
+		var card = _card(grid)
+		card.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var marks = (" ★" if c.name == G.MAP.capital else "") + ("  ⌂ your home" if S.get("home", "") == c.name else "")
+		card.add_child(Look.label(c.name + marks, "display", 20, Look.INK))
+		card.add_child(Look.label("About %s people" % _people(G.city_population(c)), "body", 13, Look.MUTED))
+		var pos: Dictionary = G.city_leanings(S, c)
+		var leans: Array = G.AXES.filter(func(a): return absf(pos[a.id]) > 12)
+		leans = Game.ssort(leans, func(a, b): return absf(pos[b.id]) - absf(pos[a.id])).slice(0, 3)
+		card.add_child(Look.label(", ".join(leans.map(func(a): return _lean_label(pos[a.id], a))) if leans.size() else "No strong leanings", "type", 14, Look.INK, true))
+		var fact: String = G.city_fact(c)
+		if fact != "": card.add_child(Look.label(fact, "body_italic", 13, Look.INK, true))
+		var lvl: int = G.community_level(S, c.name)
+		var pips = "●".repeat(lvl) + "○".repeat(G.COMMUNITY_MAX - lvl)
+		var row = _row(card, 8)
+		row.add_child(Look.label("Party office " + pips, "body", 13, Look.INK))
+		if lvl < G.COMMUNITY_MAX:
+			var cost: float = G.COMMUNITY_COST[lvl]
+			var b = _btn(("Open an office" if lvl == 0 else "Grow it") + " · ₱%sM" % Game.fmt1(cost), func(): _did(G.act_community(S, c.name)),
+				S.result != null or left <= 0 or S.money < cost, lvl == 0)
+			b.tooltip_text = "Uses one of this month's actions. A community works every month: it turns your supporters in %s into core voters and gets them to the polls." % Game.by_id(G.REGIONS, region).name
+			row.add_child(b)
+
+func _people(n: float) -> String:
+	if n >= 1e6: return "%s million" % Game.fmt1(n / 1e6)
+	return "%dk" % (Game.jround(n / 10000.0) * 10)
 
 # ---------- Platform and leader ----------
 func _platform() -> void:
@@ -696,7 +736,7 @@ func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 		var words = []
 		for m in movers:
 			var who = _who(m.party)
-			var w = "%s %s" % [who.substr(0, 1).to_upper() + who.substr(1), {"fan": "fanned it", "cool": "tried to change the subject", "start": "started it"}[m.kind]]
+			var w = "%s %s" % [who.substr(0, 1).to_upper() + who.substr(1), {"fan": "fanned it", "cool": "played it down", "start": "started it"}[m.kind]]
 			if m.side != "" and m.kind != "cool": w += " (%s)" % (ax.left if m.side == "L" else ax.right).to_lower()
 			if not words.has(w): words.append(w)
 		v.add_child(Look.label(" · ".join(words.slice(-3)), "body_italic", 12, Look.INK, true))
@@ -719,12 +759,6 @@ func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 		var b = _btn("Speak for " + pv.side.to_lower(), func(): speak.emit(d.id, side), blocked, mine == side)
 		b.tooltip_text = tip
 		row.add_child(b)
-	var cb = _btn("Change the subject", func():
-		var res: Dictionary = G.act_cool(S, d.id)
-		toast.emit(res.text)
-		changed.emit(), blocked)
-	cb.tooltip_text = "Heat −%d. Use it when an argument is helping someone else." % Game.jround(G.DEBATE_COOL * G.debate_reach(S))
-	row.add_child(cb)
 	for side in ["L", "R"]:
 		var key = Game.side_key(d.axis, side)
 		if S.spoke.has(key) and not S.signature.has(key):

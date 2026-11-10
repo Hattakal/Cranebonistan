@@ -55,7 +55,7 @@ godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=de
 
 ## Content and writing
 
-- About 300 written lines live in `debate_lines.json`, `issues.json`, `carlos.json`, `margaret.json`; events and sound bites in `content.json`. Keep Ozan's voice: dry, grounded, specific to the world (Cranebo, Bayernal, Tarrpolis, the pezo), never cartoonish.
+- About 300 written lines live in `debate_lines.json`, `issues.json`, `carlos.json`, `margaret.json`; events and sound bites in `content.json`. Keep Ozan's voice: dry, grounded, specific to the world (Cranebo, Bayernal, Tarropolis, the pezo), never cartoonish.
 - After changing Carlos's lines, run `python3 tools/voice_script.py` to regenerate VOICE.md (the recording script; recordings go in `godot/assets/voice/carlos/<id>.ogg`).
 - The map is built from Ozan's Krita file: `python3 tools/build_map.py path/to/map.kra` (writes the MAP entry in content.json and the map features image).
 

@@ -610,9 +610,9 @@ func _event_result(p: Paper, res: Dictionary) -> void:
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 
-func _result_body(p: Paper, title: String, res: Dictionary) -> void:
+func _result_body(p: Paper, title: String, res: Dictionary, strap := "CBC · Evening news") -> void:
 	var player: Dictionary = G.player_party(S)
-	p.tv_strap("CBC · Evening news", "How it played · " + title)
+	p.tv_strap(strap, "How it played · " + title)
 	if res.get("quote"):
 		p.add(Look.label("%s: “%s”" % [player.leader, res.quote], "news_bold", 26, Look.INK, true))
 	else:
@@ -660,14 +660,11 @@ func _speak_sheet(id: String, side: String) -> void:
 				if not res.ok:
 					_toast(res.text); return
 				_after_speaking(res, line, d.axis, side)
-				if res.major:
-					p.clear()
-					_result_body(p, res.title, res)
-					p.actions([p.button("Back to work", func(): _done(p))])
-					p.top()
-				else:
-					_toast(res.text + (" " + res.delivery.styleNote if res.delivery.styleNote != "" else ""))
-					_done(p))
+				# every speech shows how it played; a smaller debate just doesn't make the evening news
+				p.clear()
+				_result_body(p, res.title, res, "CBC · Evening news" if res.major else "On the record")
+				p.actions([p.button("Back to work", func(): _done(p))])
+				p.top())
 	p.actions([p.button("Back", func(): p.close())])
 
 func _after_speaking(res: Dictionary, line: Dictionary, axis: String, side: String) -> void:
@@ -1224,7 +1221,7 @@ func _shot(args: Dictionary) -> void:
 	if args.has("carlos"):
 		_advisor.say(args.carlos, true)
 	if args.has("build"):
-		for name in ["Cranebo", "Tarrpolis", "Bayernal"]:
+		for name in ["Cranebo", "Tarropolis", "Bayernal"]:
 			S.actionsLeft = 3; S.money = 9.0
 			G.act_community(S, name)
 			if name == "Cranebo": G.act_community(S, name)

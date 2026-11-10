@@ -4,7 +4,7 @@ Carlos is the voice of headquarters: the advisor who hypes you up, spins every n
 
 **How to save recordings:** one file per line, named by its id, in `godot/assets/voice/carlos/` (for example `pollup_3.ogg`). `.ogg` is best; `.wav` and `.mp3` also work. The game plays a recording automatically when the line comes up; lines without one just show as text. Keep each line short and natural; it doesn't need to match the text word for word, but close is better because the subtitle shows the written line.
 
-83 lines in total.
+82 lines in total.
 
 ## Tutorial
 *First day at headquarters. Warm, eager, a little too pleased to see the boss.*
@@ -221,7 +221,6 @@ Carlos is the voice of headquarters: the advisor who hypes you up, spins every n
 | `tip_3` | Offices take a while to pay off, but they never stop working. Like me. |
 | `tip_4` | Provocative lines catch fire. Sometimes the fire is on us. Mostly it's on them. |
 | `tip_5` | Say the same kind of thing often enough and people start to recognise your voice. That's charisma, boss. |
-| `tip_6` | If an argument is helping the competition, change the subject. Nobody notices. Nobody important. |
 | `tip_7` | Staying out of a fight is allowed. Nobody can quote what you didn't say. |
 | `tip_8` | Business money is easy money. Just don't let anyone see the receipt. |
 | `tip_9` | The Country file lists every problem we could talk about. Problems are opportunities, boss. |

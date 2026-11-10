@@ -43,17 +43,24 @@ func _init(width := 820, can_put_down := false) -> void:
 	_paper.add_child(v)
 	if can_put_down:
 		var b = Button.new()
-		b.text = "PUT IT DOWN"
+		# a real button: it says what it does and looks pressable
+		b.text = "PIN IT TO THE BOARD · LOOK AROUND FIRST"
 		b.icon = Look.icon("pin")
 		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width", 14)
-		b.flat = true
-		b.add_theme_font_override("font", Look.spaced("display", 2))
-		b.add_theme_font_size_override("font_size", Look.fs(12))
-		b.add_theme_color_override("font_color", Look.MUTED)
-		b.add_theme_color_override("font_hover_color", Look.RED)
-		b.add_theme_color_override("icon_normal_color", Look.MUTED)
-		b.tooltip_text = "Pin it back on the board and look around first"
+		b.add_theme_constant_override("icon_max_width", 16)
+		b.add_theme_constant_override("h_separation", 8)
+		b.add_theme_font_override("font", Look.spaced("display", 1))
+		b.add_theme_font_size_override("font_size", Look.fs(13))
+		b.add_theme_color_override("font_color", Look.INK)
+		b.add_theme_color_override("font_hover_color", Look.HEAD)
+		b.add_theme_color_override("font_pressed_color", Look.HEAD)
+		b.add_theme_color_override("icon_normal_color", Look.RED)
+		b.add_theme_color_override("icon_hover_color", Look.HEAD)
+		b.add_theme_stylebox_override("normal", Look.box(Color("efe3c6"), 3, Look.INK, 1, 0, 8))
+		b.add_theme_stylebox_override("hover", Look.box(Look.RED, 3, Look.RED, 1, 0, 8))
+		b.add_theme_stylebox_override("pressed", Look.box(Look.OXBLOOD, 3, Look.OXBLOOD, 1, 0, 8))
+		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		b.tooltip_text = "The decision waits on the board. Check the map and the files, then pick it up again (or press Open decision, top right)."
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		b.pressed.connect(func(): put_down.emit(); close())
 		b.size_flags_horizontal = Control.SIZE_SHRINK_END
@@ -198,10 +205,10 @@ func card(kind: String, build: Callable, cb: Callable, disabled := false) -> Pan
 		p.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		p.mouse_entered.connect(func():
 			p.add_theme_stylebox_override("panel", hv)
-			p.create_tween().tween_property(p, "position:x", 6.0, 0.12))
+			if p.get_parent() == v: p.create_tween().tween_property(p, "position:x", 6.0, 0.12))   # only slide in a plain column; in a grid it would jump
 		p.mouse_exited.connect(func():
 			p.add_theme_stylebox_override("panel", sb)
-			p.create_tween().tween_property(p, "position:x", 0.0, 0.12))
+			if p.get_parent() == v: p.create_tween().tween_property(p, "position:x", 0.0, 0.12))
 		p.gui_input.connect(func(e):
 			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 				cb.call())

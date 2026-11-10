@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 15
+const SAVE_VERSION := 16
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -55,6 +55,7 @@ var TOPICS: Array = []        # debate topics (data/debates.json)
 var LINES: Dictionary = {}    # what the leader can say in them (data/debate_lines.json)
 var ISSUES: Array = []        # minor issues: local stories (data/issues.json)
 var FIGURES: Array = []       # your party's politicians (data/party.json)
+var CITY_INFO: Dictionary = {} # population, lean and a line per city (data/cities.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -83,6 +84,9 @@ func load_content(path: String) -> void:
 	LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/debate_lines.json"))
 	ISSUES = JSON.parse_string(FileAccess.get_file_as_string("res://data/issues.json")).ISSUES
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
+	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
+	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
+		if CITY_INFO.get(c.name, {}).has("size"): c.size = int(CITY_INFO[c.name].size)
 	_event_axis = {}
 	# Godot rules: the national debate is the main game, events are rarer
 	C.actionsPerMonth = 3
@@ -329,7 +333,31 @@ func new_game(opts := {}) -> Dictionary:
 ## its region knows them and likes them, and there is already a party office there.
 ## Alinni's cities can't be chosen: Alinnians elect their own minority leaders.
 func home_cities() -> Array:
-	return MAP.cities.filter(func(c): return c.area != "alinni")
+	return country_cities().filter(func(c): return c.area != "alinni")
+
+## Cranebonistan's own cities (the map also has the neighbours' capitals).
+func country_cities() -> Array:
+	return MAP.cities.filter(func(c): return REGIONS.any(func(r): return r.id == c.area))
+
+## City facts from data/cities.json (population in millions, a lean per axis
+## on top of its region's, and a line about the place). Missing values fall back
+## to an estimate from the region's size and the dot size on the map.
+func city_population(c: Dictionary) -> float:
+	var info: Dictionary = CITY_INFO.get(c.name, {})
+	if info.has("population"): return float(info.population) * 1e6
+	var r = by_id(REGIONS, c.area)
+	var share: float = {3: 0.28, 2: 0.12, 1: 0.05}.get(int(c.get("size", 1)), 0.05)
+	return float(r.adults) * 1e6 * 1.3 * share if r else 0.0
+
+func city_fact(c: Dictionary) -> String:
+	return str(CITY_INFO.get(c.name, {}).get("fact", ""))
+
+## Where the city's people stand: its region's average, moved by the city's own lean.
+func city_leanings(s: Dictionary, c: Dictionary) -> Dictionary:
+	var pos: Dictionary = summarize(s, pops_matching(s, {"region": c.area})).pos.duplicate()
+	var lean: Dictionary = CITY_INFO.get(c.name, {}).get("lean", {})
+	for ax in lean: pos[ax] = clampf2(float(pos.get(ax, 0)) + float(lean[ax]), -100, 100)
+	return pos
 
 func _home_start(s: Dictionary, city: String) -> void:
 	var c: Dictionary = city_by_name(city)
@@ -1472,7 +1500,9 @@ func noisy(s: Dictionary, shares: Dictionary, sd: float) -> Dictionary:
 	var out = {}
 	var total = 0.0
 	for id in shares:
-		out[id] = maxf(0.001, shares[id] + rand_normal(s) * sd)
+		# like a real poll, the error shrinks for small parties (sd is the error at 25%)
+		var p: float = clampf2(float(shares[id]), 0, 1)
+		out[id] = maxf(0.001, shares[id] + rand_normal(s) * sd * sqrt(p * (1 - p)) / 0.433)
 		total += out[id]
 	for id in out: out[id] /= total
 	return out
@@ -1616,7 +1646,6 @@ func offer_initiatives(s: Dictionary) -> void:
 const DEBATE_MAX := 6
 const DEBATE_FAN_HEAT := 14.0
 const DEBATE_FAN_LEAN := 15.0
-const DEBATE_COOL := 18.0
 const DEBATE_LIFE := 4.0         # months a debate runs before the country moves on
 const DEBATE_LIFE_MAJOR := 6.0   # crises and other major debates last a little longer
 
@@ -1969,6 +1998,7 @@ func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) ->
 		d.topic = opt.ref if opt.kind in ["topic", "metric"] else id
 		if opt.kind == "issue": s.issues = s.issues.filter(func(x): return x.id != opt.ref)
 		_note_move(d, "player", "start", side, s.week)
+		d.you = {"side": side, "week": s.week, "quote": line.text}   # starting it was your statement
 		if opt.kind == "proposal": _launch_proposal(s, opt.ref)
 		text = "It caught on. Everyone is arguing about %s, and you started it." % opt.title.to_lower()
 	else:
@@ -1992,17 +2022,6 @@ func _launch_proposal(s: Dictionary, id: String) -> void:
 	s.flags["initiative:" + id] = s.week
 	s.agenda.used.append(id)
 
-func act_cool(s: Dictionary, id: String) -> Dictionary:
-	var err = can_act(s, 0)
-	if err: return {"ok": false, "text": err}
-	var d = debate_by_id(s, id)
-	if d == null: return {"ok": false, "text": "That debate is over."}
-	spend_action(s, 0)
-	d.heat = clampf2(d.heat - DEBATE_COOL * debate_reach(s), 0, 100)
-	_note_move(d, "player", "cool", "", s.week)
-	var text = "You changed the subject whenever %s came up. The argument is losing steam." % d.title.to_lower()
-	_log(s, "action", text)
-	return {"ok": true, "text": text}
 
 # ---------- The major crisis ----------
 func crisis_odds(s: Dictionary) -> Dictionary:
