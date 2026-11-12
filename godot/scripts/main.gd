@@ -456,7 +456,8 @@ func _render_map() -> void:
 func _tip(id: String, kind: String) -> Array:
 	if kind == "district":
 		var d = G.district_by_id(id)
-		var lines = ["%s · %d seat%s" % [d.name, d.seats, "" if d.seats == 1 else "s"], Game.by_id(G.REGIONS, d.region).name]
+		var w: int = G.winner_seats(int(d.seats))
+		var lines = ["%s · %d seat%s" % [d.name, d.seats, "" if d.seats == 1 else "s"], Game.by_id(G.REGIONS, d.region).name + (" · the winner takes all" if w == int(d.seats) else " · the winner takes %d, %d shared by national vote" % [w, int(d.seats) - w])]
 		var x: Dictionary = S.get("projection", {}).get(id, {})
 		if x.size():
 			var who: String = "You" if x.winner == "player" else G.party_of(S, x.winner).short
@@ -997,7 +998,8 @@ func _district_sheet(id: String) -> void:
 		for k in x.votes: tot += x.votes[k]
 		var shares = {}
 		for k in ids: shares[k] = x.votes[k] / tot if tot else 0.0
-		p.add(Look.caps("If the election were today · winner takes all %d seats" % d.seats, 11, Look.MUTED, 2))
+		var w: int = G.winner_seats(int(d.seats))
+		p.add(Look.caps("If the election were today · " + ("the winner takes all %d seats" % d.seats if w == int(d.seats) else "the winner takes %d of %d seats" % [w, d.seats]), 11, Look.MUTED, 2))
 		var shown: Array = ids.slice(0, 3)
 		if not shown.has("player"): shown.append("player")
 		for k in shown:
@@ -1007,6 +1009,7 @@ func _district_sheet(id: String) -> void:
 			p.small("Yours today, by %d points. Votes beyond what wins it are wasted: if it's safe, campaign elsewhere." % maxi(1, Game.jround(float(x.margin) * 100)), Look.INK)
 		else:
 			p.small("You'd need about %d more points to take it." % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)), Look.INK)
+		if w < int(d.seats): p.small("The other %d seat%s go to parties by their vote across the whole country, so every vote here still counts toward them." % [int(d.seats) - w, "" if int(d.seats) - w == 1 else "s"])
 	var st: Dictionary = S.districts.get(id, {})
 	if int(st.get("visits", 0)) > 0: p.small("%s has toured here %d time%s." % [G.player_party(S).leader, int(st.visits), "" if int(st.visits) == 1 else "s"])
 	var block: String = G.visit_block(S)

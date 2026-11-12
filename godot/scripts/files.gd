@@ -1027,7 +1027,8 @@ func _country() -> void:
 		_p("Campaigns on: " + (", ".join(claims.map(func(r): return r.label.to_lower())) if claims.size() else "nothing in particular"), pc)
 		if not p.isPlayer:
 			var rel: float = G.relation(S, p.id)
-			_add(Look.label("Relations with you: %s (%+d)" % [G.relation_word(rel), Game.jround(rel)], "body_bold", 13, Look.GOOD if rel >= 15 else (Look.RED if rel <= -15 else Look.INK)), pc)
+			var scar: float = G.relation_scar(S, p.id)
+			_add(Look.label("Relations with you: %s (%+d)%s" % [G.relation_word(rel), Game.jround(rel), (" · old wounds %d" % Game.jround(scar)) if scar <= -1 else ""], "body_bold", 13, Look.GOOD if rel >= 15 else (Look.RED if rel <= -15 else Look.INK)), pc)
 			var notes: Array = S.get("relationNotes", {}).get(p.id, [])
 			if notes.size(): _p(" · ".join(notes.slice(-3).map(func(n): return "%s (%+d)" % [n.text, Game.jround(n.delta)])), pc, Look.MUTED, 12)
 	# neighbours

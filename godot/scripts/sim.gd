@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 19
+const SAVE_VERSION := 20
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -281,7 +281,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {},
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -1176,8 +1176,17 @@ func relation_base(s: Dictionary, pid: String) -> float:
 	for ax in AXES: dist += absf(float(me[ax.id]) - float(them[ax.id]))
 	return clampf2(40.0 - dist / AXES.size() * 1.1, -40, 40)
 
+## The everyday relationship (it fades back toward the base) plus scars (they don't).
 func relation(s: Dictionary, pid: String) -> float:
+	return clampf2(_rel_fading(s, pid) + relation_scar(s, pid), -100, 100)
+
+func _rel_fading(s: Dictionary, pid: String) -> float:
 	return float(s.get("relations", {}).get(pid, relation_base(s, pid)))
+
+func relation_scar(s: Dictionary, pid: String) -> float:
+	return float(s.get("relScars", {}).get(pid, 0.0))
+
+const SCAR_SHARE := 0.4   # of every hostile act, the part that never fades
 
 static func relation_word(v: float) -> String:
 	if v >= 45: return "Friendly"
@@ -1186,9 +1195,21 @@ static func relation_word(v: float) -> String:
 	if v > -45: return "Hostile"
 	return "Bitter"
 
+## Hostile acts leave a scar; favours heal scars first, then warm things up.
 func change_relation(s: Dictionary, pid: String, delta: float, why: String) -> void:
 	if not s.has("relations"): s.relations = {}
-	s.relations[pid] = clampf2(relation(s, pid) + delta, -100, 100)
+	if not s.has("relScars"): s.relScars = {}
+	var fading: float = _rel_fading(s, pid)
+	var scar: float = relation_scar(s, pid)
+	if delta < 0:
+		scar += delta * SCAR_SHARE
+		fading += delta * (1 - SCAR_SHARE)
+	else:
+		var heal: float = minf(delta, -scar)
+		scar += heal
+		fading += delta - heal
+	s.relations[pid] = clampf2(fading, -100, 100)
+	s.relScars[pid] = clampf2(scar, -100, 0)
 	if not s.has("relationNotes"): s.relationNotes = {}
 	var notes: Array = s.relationNotes.get(pid, [])
 	notes.append({"week": s.week, "text": why, "delta": delta})
@@ -1199,10 +1220,11 @@ func new_relations(s: Dictionary) -> Dictionary:
 	for p in rivals(s): out[p.id] = relation_base(s, p.id)
 	return out
 
-## Monthly: a tenth of the way back toward what your policies alone would earn.
+## Monthly: the everyday part moves a tenth of the way back toward what your
+## policies alone would earn. Scars stay until favours heal them.
 func relations_monthly(s: Dictionary) -> void:
 	for p in rivals(s):
-		var v = relation(s, p.id)
+		var v = _rel_fading(s, p.id)
 		s.relations[p.id] = v + (relation_base(s, p.id) - v) * 0.1
 
 func act_research(s: Dictionary, party_id: String) -> Dictionary:
@@ -1721,32 +1743,86 @@ func districts_monthly(s: Dictionary) -> void:
 		if d: district_boost(s, d.id, 0.006 * int(s.communities[name]), 0.018 * int(s.communities[name]))
 
 ## Seats each party would win if the election were today.
-func projected_seats(proj: Dictionary) -> Dictionary:
-	var out = {}
-	for d in DISTRICTS:
-		var w: String = proj[d.id].winner
-		out[w] = int(out.get(w, 0)) + int(d.seats)
-	return out
+## The district's winner takes two-thirds of its seats (rounded up); the rest
+## are shared out by national vote. Those shared seats are counted across the
+## whole country (largest remainder), then placed in the districts where each
+## party did best, so a small party's votes everywhere add up to something.
+const WINNER_SHARE := 2.0 / 3.0
 
-# ---------- Elections ----------
-## Winner takes all: in each district the party with the most votes wins all its seats.
-func run_election(s: Dictionary) -> void:
-	var res: Dictionary = district_results(s)
-	var seats = {"national": {}, "regions": {}, "districts": res}
-	var national = {}
-	var total = 0.0
-	for p in s.parties: seats.national[p.id] = 0
+static func winner_seats(n: int) -> int:
+	return mini(n, int(ceil(n * WINNER_SHARE - 0.0001)))
+
+func seat_allocation(res: Dictionary) -> Dictionary:
+	var out = {"national": {}, "regions": {}, "districts": {}, "votes": {}}
+	var party_ids: Array = []
+	for d in DISTRICTS:
+		for id in res[d.id].votes:
+			if not party_ids.has(id): party_ids.append(id)
+	for id in party_ids:
+		out.national[id] = 0
+		out.votes[id] = 0.0
 	for r in REGIONS:
-		seats.regions[r.id] = {}
-		for p in s.parties: seats.regions[r.id][p.id] = 0
+		out.regions[r.id] = {}
+		for id in party_ids: out.regions[r.id][id] = 0
+	var pool = 0
+	var total = 0.0
 	for d in DISTRICTS:
 		var x: Dictionary = res[d.id]
-		seats.national[x.winner] += int(d.seats)
-		seats.regions[d.region][x.winner] += int(d.seats)
+		var w: int = winner_seats(int(d.seats))
+		out.districts[d.id] = {"winner": x.winner, "won": w, "shared": {}}
+		out.national[x.winner] += w
+		out.regions[d.region][x.winner] += w
+		pool += int(d.seats) - w
 		for id in x.votes:
-			national[id] = float(national.get(id, 0)) + x.votes[id]
+			out.votes[id] += x.votes[id]
 			total += x.votes[id]
-	for id in national: national[id] /= total
+	# the shared seats, by national vote
+	var share = {}
+	var rows = []
+	var given = 0
+	for id in party_ids:
+		share[id] = out.votes[id] / total if total else 0.0
+		var exact: float = pool * share[id]
+		share[id + ":n"] = int(floor(exact))
+		given += int(floor(exact))
+		rows.append({"id": id, "rest": exact - floor(exact)})
+	for r in ssort(rows, func(a, b): return b.rest - a.rest).slice(0, pool - given): share[r.id + ":n"] += 1
+	# place each party's shared seats where it did best
+	var slots = {}
+	for d in DISTRICTS: slots[d.id] = int(d.seats) - winner_seats(int(d.seats))
+	var cand = []
+	for d in DISTRICTS:
+		if slots[d.id] <= 0: continue
+		var tot = dsum(res[d.id].votes)
+		for id in party_ids: cand.append({"d": d, "id": id, "v": res[d.id].votes[id] / tot if tot else 0.0})
+	cand = ssort(cand, func(a, b): return b.v - a.v)
+	var left = {}
+	for id in party_ids: left[id] = share[id + ":n"]
+	var placed = true
+	while placed:
+		placed = false
+		for c in cand:
+			if left[c.id] <= 0 or slots[c.d.id] <= 0: continue
+			var sh: Dictionary = out.districts[c.d.id].shared
+			sh[c.id] = int(sh.get(c.id, 0)) + 1
+			out.national[c.id] += 1
+			out.regions[c.d.region][c.id] += 1
+			left[c.id] -= 1
+			slots[c.d.id] -= 1
+			placed = true
+	for id in party_ids: out.votes[id] = share[id]
+	return out
+
+## Seats each party would win if the election were today.
+func projected_seats(proj: Dictionary) -> Dictionary:
+	return seat_allocation(proj).national
+
+# ---------- Elections ----------
+func run_election(s: Dictionary) -> void:
+	var res: Dictionary = district_results(s)
+	var alloc: Dictionary = seat_allocation(res)
+	var seats = {"national": alloc.national, "regions": alloc.regions, "districts": res, "split": alloc.districts}
+	var national: Dictionary = alloc.votes
 	var ranking = ssort(seats.national.keys(), func(a, b): return seats.national[b] - seats.national[a])
 	s.result = {"votes": national, "seats": seats, "ranking": ranking, "playerWon": ranking[0] == "player",
 		"majority": seats.national.player > C.seats / 2.0}
