@@ -59,6 +59,7 @@ func _init() -> void:
 			G.dismiss_front(s)
 	var r: Dictionary = s.result
 	print("RESULT you=%.6f seats=%d won=%s crisis=%s" % [r.votes.player, r.seats.national.player, str(r.playerWon), s.crisis.id if s.crisis else "none"])
+	print("FLAGSHIP %s: %s" % [s.flagship.get("issue", "none"), s.flagship.get("quote", "")])
 	var pr: Dictionary = G.build_profile(s)
 	print("PROFILE %s | contra %d | betrayed %d | style %s" % [pr.archetype.title, pr.contradictions.size(), pr.betrayed.size(), pr.style])
 	quit()

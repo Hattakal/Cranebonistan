@@ -550,7 +550,7 @@ func _effects_lines(box: VBoxContainer, fx: Dictionary) -> void:
 	if tags.size(): box.add_child(Look.label(" · ".join(tags), "body_italic", 12, Look.MUTED, true))
 
 # ----- Events: the front page, what you say, how you say it, how it played -----
-const KINDS := {"crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences"}
+const KINDS := {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences"}
 
 func _event_header(p: Paper, ev: Dictionary) -> void:
 	var crisis = ""
@@ -594,7 +594,7 @@ func _event_step1(p: Paper, ev: Dictionary) -> void:
 	var any_lines = false
 	for ch in ev.choices:
 		if ch.get("lines", []).size(): any_lines = true
-	p.step("Step 1 of 2" if any_lines else "Your decision", "What do you say?")
+	p.step("Step 1 of 2" if any_lines else "Your decision", "What do you promise?" if ev.get("kind", "") == "flagship" else "What do you say?")
 	for i in ev.choices.size():
 		var ch: Dictionary = ev.choices[i]
 		p.card("index", func(box):
@@ -610,7 +610,8 @@ func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
 	p.clear()
 	_event_header(p, ev)
 	p.step("Step 2 of 2", "How do you say it?")
-	p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 15, "type")
+	if ev.get("kind", "") == "flagship": p.text("Your promise: %s. This goes on every poster for a year." % ch.label, 15, "type")
+	else: p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 15, "type")
 	p.small("The wording matters. The same position can win people over or blow up in your face.")
 	for j in ch.lines.size():
 		var line: Dictionary = ch.lines[j]
@@ -1246,6 +1247,8 @@ func _shot(args: Dictionary) -> void:
 	render()
 	for i in 20: await get_tree().process_frame
 	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
+	if args.has("flagship"):
+		S.queue.push_front({"type": "event", "event": G.flagship_event(S)})
 	if args.has("open"): _open_front()
 	if args.has("found"):
 		_founding_sheet()

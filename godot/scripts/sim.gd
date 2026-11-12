@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 20
+const SAVE_VERSION := 21
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -56,6 +56,7 @@ var LINES: Dictionary = {}    # what the leader can say in them (data/debate_lin
 var ISSUES: Array = []        # minor issues: local stories (data/issues.json)
 var FIGURES: Array = []       # your party's politicians (data/party.json)
 var CITY_INFO: Dictionary = {} # population, lean and a line per city (data/cities.json)
+var FLAGSHIP: Array = []       # the year-three flagship promise (data/flagship.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -85,6 +86,7 @@ func load_content(path: String) -> void:
 	ISSUES = JSON.parse_string(FileAccess.get_file_as_string("res://data/issues.json")).ISSUES
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
+	FLAGSHIP = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagship.json")).ISSUES if FileAccess.file_exists("res://data/flagship.json") else []
 	_load_districts()
 	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
 		if CITY_INFO.get(c.name, {}).has("size"): c.size = int(CITY_INFO[c.name].size)
@@ -281,7 +283,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {}, "flagship": {},
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -948,6 +950,7 @@ func monthly_update(s: Dictionary) -> void:
 	issues_monthly(s)
 	communities_monthly(s)
 	relations_monthly(s)
+	flagship_monthly(s)
 	steer_monthly(s)
 	figures_monthly(s)
 	if rand(s) < C.newsWaveChance:
@@ -1547,6 +1550,7 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 	var statement: bool = not fx.has("defect") and not str(ev.id).begins_with("defectors_")
 	record_statement(s, {"text": quote if quote else choice.label, "title": ev.title, "effects": fx, "tone": tone, "spoken": quote != null, "statement": statement})
 	s.flags["seen:" + str(ev.id)] = s.week
+	if ev.get("kind", "") == "flagship": _flagship_made(s, ev, choice, quote)
 	var eax = event_axis(ev)
 	if eax != "" and ev.get("kind", "") != "trap":
 		var sh = float(fx.get("shift", {}).get(eax, 0))
@@ -1816,6 +1820,53 @@ func seat_allocation(res: Dictionary) -> Dictionary:
 ## Seats each party would win if the election were today.
 func projected_seats(proj: Dictionary) -> Dictionary:
 	return seat_allocation(proj).national
+
+# ---------- The flagship promise (year three) ----------
+## A year before the election the party commits to one tangible answer for the
+## country's biggest issue: which promise, then the exact words. Afterwards the
+## party owns that side of the issue, the issue stays in the news, and the
+## promise keeps rallying the voters who like it, month after month.
+func flagship_week() -> int:
+	return 3 * WEEKS_PER_YEAR
+
+## The issue the country cares most about now: how much voters care about it
+## (a crisis raises that on its issues), plus how bad its numbers are.
+func flagship_issue(s: Dictionary) -> Dictionary:
+	var nation: Dictionary = summarize(s, s.pops)
+	var best: Dictionary = FLAGSHIP[0]
+	var best_score = -INF
+	for it in FLAGSHIP:
+		var sc: float = float(nation.sal[it.axis])
+		for m in it.metrics: sc += metric_badness(s, m) * 0.8
+		if sc > best_score:
+			best_score = sc; best = it
+	return best
+
+func flagship_event(s: Dictionary) -> Dictionary:
+	var it: Dictionary = flagship_issue(s)
+	var choices: Array = it.promises.duplicate(true)
+	for ch in choices: ch.lines = shuffle(s, ch.lines)   # so the plain bad one isn't always last
+	return {"id": "flagship_" + it.id, "kind": "flagship", "flagship": it.id, "title": it.title, "text": it.text, "choices": choices}
+
+func _flagship_made(s: Dictionary, ev: Dictionary, choice: Dictionary, quote) -> void:
+	var it: Dictionary = by_id(FLAGSHIP, ev.flagship)
+	var sh: float = float(choice.effects.shift.get(it.axis, 0))
+	var axis: String = it.axis
+	if sh == 0:
+		for ax in choice.effects.shift:
+			axis = ax; sh = float(choice.effects.shift[ax]); break
+	var side = "L" if sh < 0 else "R"
+	s.flagship = {"issue": it.id, "axis": axis, "side": side, "label": choice.label, "quote": quote if quote else choice.label, "week": s.week}
+	add_ownership(s, "player", side_key(axis, side), 0.25)
+	s.salMod[axis] = clampf2(float(s.salMod.get(axis, 0)) + 0.3, -0.5, 1.5)
+
+## Every month until the election, the promise keeps its voters warm.
+func flagship_monthly(s: Dictionary) -> void:
+	var f = s.get("flagship")
+	if f == null or typeof(f) != TYPE_DICTIONARY or f.is_empty(): return
+	var sg = -1.0 if f.side == "L" else 1.0
+	for pop in s.pops:
+		if sg * float(pop.pos[f.axis]) > 20: pop.goodwill.player = clampf2(pop.goodwill.player + 0.01 * minf(1.5, pop.sal[f.axis]), -2, 2)
 
 # ---------- Elections ----------
 func run_election(s: Dictionary) -> void:
@@ -2583,6 +2634,7 @@ func run_hooks(s: Dictionary) -> void:
 		s.money += inc.total
 		s.queue.append({"type": "budget", "offers": draw_offers(s)})
 	if c.week == ELECTION_WEEK - WEEKS_PER_MONTH: start_debate(s)
+	if c.week == flagship_week() and FLAGSHIP.size(): s.queue.append({"type": "event", "event": flagship_event(s)})
 	if c.isMonthStart: monthly_event(s)
 	if c.weekOfMonth == 2 and not c.isYearEnd: take_poll(s, "Tracking poll", true)
 	if c.isYearEnd: take_poll(s, "Annual poll %d" % calendar(s.week).year)

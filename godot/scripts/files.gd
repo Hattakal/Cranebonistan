@@ -389,6 +389,10 @@ func _platform() -> void:
 	_eyebrow("Your leader", c1)
 	_h(player.leader, 26, c1)
 	if S.get("home", "") != "": _p("Former mayor of %s" % S.home, c1, Look.MUTED, 13)
+	var fl = S.get("flagship", {})
+	if typeof(fl) == TYPE_DICTIONARY and not fl.is_empty():
+		_add(Look.label("Flagship promise: %s" % fl.label, "body_bold", 14, Look.RED, true), c1)
+		_add(Look.label("“%s”" % fl.quote, "news_italic", 15, Look.INK, true), c1)
 	var seen = G.view_label(player.perceived)
 	var meant = G.view_label(player.manifesto)
 	_add(Look.label("Voters see you as: %s%s" % [seen, "" if seen == meant else " (your manifesto says %s)" % meant.to_lower()], "body_bold", 14, Look.RED if seen != meant else Look.INK, true), c1)

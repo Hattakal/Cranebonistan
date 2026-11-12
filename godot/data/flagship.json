@@ -1,0 +1,1921 @@
+{
+ "_note": "The flagship promise: a year before the election (month 36) the party commits to one tangible answer for the country's biggest issue. The game picks the issue (how much voters care about its axis, plus how bad its metrics are), then the player picks a promise and the exact words. A promise works like an event choice (shift, salience, goodwill); a line like a sound bite (tone, react, risk). Lines with risk 0.1 and a small minus for everyone are the plain bad ones: dull and evasive. These are drafts; rewrite freely.",
+ "ISSUES": [
+  {
+   "id": "economy",
+   "axis": "economy",
+   "metrics": [
+    "jobs",
+    "prices"
+   ],
+   "title": "It's the pezo, again",
+   "text": "A year before the election, every poll asks the same question first: why does everything cost more, and where did the jobs go? Whoever has one clear answer will own the next twelve months. The party needs its flagship promise, the one that goes on every poster.",
+   "promises": [
+    {
+     "label": "Tariffs on Golban goods",
+     "effects": {
+      "shift": {
+       "economy": -6,
+       "nation": -4
+      },
+      "salience": {
+       "economy": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-25"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.35
+       },
+       {
+        "who": {
+         "region": "yamlin",
+         "class": "middle"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A ten-percent tariff on Golban goods, and every pezo of it spent on Cranebonian factories."
+      },
+      {
+       "tone": "fiery",
+       "text": "Golba sells, we pay, Golba laughs. From our first day, Golba pays at the border.",
+       "react": [
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "folksy",
+       "text": "If it's made in Bayernal, it should cost less than if it's made in Golba. That's all this is.",
+       "react": [
+        {
+         "who": {
+          "region": "erland"
+         },
+         "amt": 0.12
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "Let the Golban ambassador write us a letter. We'll read it after lunch.",
+       "react": [
+        {
+         "who": {
+          "class": "upper"
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.7
+      },
+      {
+       "tone": "statesman",
+       "text": "We will review the tariff schedule with a view to selective, targeted adjustments.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "Freeze the price of bread, fuel and rent",
+     "effects": {
+      "shift": {
+       "economy": -8,
+       "welfare": -6
+      },
+      "salience": {
+       "economy": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": "<-25"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.35
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">25"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "A loaf of bread will cost what it cost on the day you voted for us. That's the promise.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "The landlords and the fuel companies have had their turn. Now prices stop.",
+       "react": [
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": 0.1
+        },
+        {
+         "who": {
+          "class": "upper"
+         },
+         "amt": -0.1
+        }
+       ]
+      },
+      {
+       "tone": "statesman",
+       "text": "A two-year freeze on bread, fuel and rent, while wages catch up."
+      },
+      {
+       "tone": "provocative",
+       "text": "If a shopkeeper doesn't like the price, he can sell something else.",
+       "react": [
+        {
+         "who": {
+          "class": "middle"
+         },
+         "amt": -0.25
+        },
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": 0.05
+        }
+       ],
+       "risk": 0.7
+      },
+      {
+       "tone": "statesman",
+       "text": "Essential prices will be managed within a framework of agreed corridors.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "No income tax rise for anyone below the average wage",
+     "effects": {
+      "shift": {
+       "economy": 5,
+       "welfare": 5
+      },
+      "salience": {
+       "economy": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">25"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": "<-25"
+         }
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Nobody earning less than the average wage will pay a pezo more in income tax, and most will pay less."
+      },
+      {
+       "tone": "folksy",
+       "text": "You earned it, you keep it. We'll find the money where the money is.",
+       "react": [
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "The state takes a week of your wages every month. We're giving it back.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "Tax cuts for everyone except the people who write the tax code.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "system": ">25"
+          }
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": 0.15
+        }
+       ],
+       "risk": 0.6
+      },
+      {
+       "tone": "statesman",
+       "text": "A revenue-neutral restructuring of the lower income bands.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "class": "middle"
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "immigration",
+   "axis": "nation",
+   "metrics": [
+    "migration"
+   ],
+   "title": "Who gets to come in",
+   "text": "Arrivals from Norbanistan keep coming, Yamlin's towns say they are full, and Erland's farms say they can't bring in a harvest without them. A year before the election, immigration is the question. The party needs one answer to put on every poster.",
+   "promises": [
+    {
+     "label": "A hard cap on arrivals",
+     "effects": {
+      "shift": {
+       "nation": -8
+      },
+      "salience": {
+       "nation": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "yamlin",
+         "class": "working"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": ">25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "nationality": "alinnian"
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A fixed number every year, agreed in the Assembly and kept. No more, and no exceptions."
+      },
+      {
+       "tone": "fiery",
+       "text": "The door isn't closed. It just has a lock again.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "nation": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "folksy",
+       "text": "My street can take a few new neighbours. Not a new street every month.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "If Norbanistan wants its people looked after, it can look after them.",
+       "react": [
+        {
+         "who": {
+          "nationality": "alinnian"
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "lean": {
+           "nation": ">25"
+          }
+         },
+         "amt": -0.25
+        },
+        {
+         "who": {
+          "lean": {
+           "nation": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.75
+      },
+      {
+       "tone": "statesman",
+       "text": "An annual cap, the level of which will be determined in due course.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "nation": "<-25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "Work permits, not walls",
+     "effects": {
+      "shift": {
+       "nation": 5,
+       "economy": 3
+      },
+      "salience": {
+       "nation": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": ">25"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "region": "yamlin",
+         "class": "working"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Anyone who comes gets a job, pays tax from the first day and learns the language. Anyone who won't, goes home."
+      },
+      {
+       "tone": "folksy",
+       "text": "The orchards in Erland can't find pickers. Let's stop pretending they can.",
+       "react": [
+        {
+         "who": {
+          "region": "erland"
+         },
+         "amt": 0.08
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "The loudest people shouting about immigrants are the ones paying them cash in hand.",
+       "react": [
+        {
+         "who": {
+          "class": "upper"
+         },
+         "amt": -0.15
+        },
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": 0.05
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "Half the people complaining about foreigners have never met one.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "nation": "<-25"
+          }
+         },
+         "amt": -0.3
+        },
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.7
+      },
+      {
+       "tone": "statesman",
+       "text": "A points-based approach, calibrated to the needs of the labour market.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "class": "upper"
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "The money follows the people",
+     "effects": {
+      "shift": {
+       "welfare": -6,
+       "nation": -2
+      },
+      "salience": {
+       "welfare": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "yamlin"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": "<-25"
+         }
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">25"
+         }
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "region": "cranbia"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every town that takes in new arrivals gets the money for its schools and clinics before they arrive, not years after."
+      },
+      {
+       "tone": "folksy",
+       "text": "If Grenhera takes in five hundred families, Grenhera gets five hundred families' worth of doctors.",
+       "react": [
+        {
+         "who": {
+          "region": "yamlin"
+         },
+         "amt": 0.12
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "Cranebo decided and the towns paid. That ends.",
+       "react": [
+        {
+         "who": {
+          "region": "cranbia"
+         },
+         "amt": -0.1
+        },
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "The capital can have the arrivals or the money. Not just the speeches.",
+       "react": [
+        {
+         "who": {
+          "region": "cranbia"
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "region": "yamlin"
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.6
+      },
+      {
+       "tone": "statesman",
+       "text": "A needs-weighted municipal allocation mechanism.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "region": "yamlin"
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "security",
+   "axis": "foreign",
+   "metrics": [
+    "border"
+   ],
+   "title": "Who keeps us safe",
+   "text": "Trueant patrols on the Alinni border, Dillihan's spring exercises, Bordon's generalissimo making speeches about James. A year before the election, the country wants to know who will keep it safe. The party needs one answer to put on every poster.",
+   "promises": [
+    {
+     "label": "Double the army in four years",
+     "effects": {
+      "shift": {
+       "foreign": -8,
+       "order": -3
+      },
+      "salience": {
+       "foreign": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "foreign": "<-25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "foreign": ">25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">25"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Twice the soldiers and twice the equipment within four years, paid for in the open."
+      },
+      {
+       "tone": "fiery",
+       "text": "Ostrun respects one thing. We are going to have a lot of it.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "foreign": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "folksy",
+       "text": "My father did his service in Kravk. He came home a man, and the border stayed where it was.",
+       "react": [
+        {
+         "who": {
+          "region": "fauraifai"
+         },
+         "amt": 0.12
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "If the Trueants want Alinni back, they can come and ask the army.",
+       "react": [
+        {
+         "who": {
+          "region": "alinni"
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "lean": {
+           "foreign": ">25"
+          }
+         },
+         "amt": -0.3
+        },
+        {
+         "who": {
+          "lean": {
+           "foreign": "<-25"
+          }
+         },
+         "amt": 0.15
+        }
+       ],
+       "risk": 0.8
+      },
+      {
+       "tone": "statesman",
+       "text": "A capability-led review of our defence posture.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "foreign": "<-25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "A defence pact with James and Golba",
+     "effects": {
+      "shift": {
+       "foreign": -3,
+       "nation": 3
+      },
+      "salience": {
+       "foreign": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "system": ">25"
+         }
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-25"
+         }
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-25"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A pact with James and Golba: an attack on one of us is an attack on all three."
+      },
+      {
+       "tone": "folksy",
+       "text": "You don't walk home alone at night. Neither should a country.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.08
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "Let them try us with Golba standing next to us.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "foreign": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "Our army could hold the line for a week. Golba's can hold it for ever.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "foreign": "<-25"
+          }
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "lean": {
+           "nation": "<-25"
+          }
+         },
+         "amt": -0.25
+        }
+       ],
+       "risk": 0.6
+      },
+      {
+       "tone": "statesman",
+       "text": "Enhanced cooperation within a multilateral framework.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "class": "middle"
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "Talks first: a peace conference in Cranebo",
+     "effects": {
+      "shift": {
+       "foreign": 8
+      },
+      "salience": {
+       "foreign": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "foreign": ">25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "nationality": "alinnian"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "foreign": "<-25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Before a single soldier moves, every neighbour sits at one table in Cranebo, with the cameras on."
+      },
+      {
+       "tone": "folksy",
+       "text": "Every war ends with people sitting round a table. Let's skip the bit in the middle.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.05
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "The generals have had thirty years of their ideas. We're trying ours.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": 0.1
+        },
+        {
+         "who": {
+          "lean": {
+           "foreign": "<-25"
+          }
+         },
+         "amt": -0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "Anyone who wants a war is welcome to go first.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "foreign": "<-25"
+          }
+         },
+         "amt": -0.3
+        },
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": 0.15
+        }
+       ],
+       "risk": 0.7
+      },
+      {
+       "tone": "statesman",
+       "text": "A structured dialogue process with regional stakeholders.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "foreign": ">25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "order",
+   "axis": "order",
+   "metrics": [
+    "unrest"
+   ],
+   "title": "Safe streets",
+   "text": "Burned cars in Arthemta, a march in Cranebo that ended in tear gas, shopkeepers in Nikecisa pulling the shutters down at six. A year before the election, people want to feel safe at home. The party needs one answer to put on every poster.",
+   "promises": [
+    {
+     "label": "An officer on every street",
+     "effects": {
+      "shift": {
+       "order": -8
+      },
+      "salience": {
+       "order": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Three thousand new officers, every one of them on foot, on a street you know."
+      },
+      {
+       "tone": "folksy",
+       "text": "You should know your local officer's name. So should your children.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "The streets belong to the people who live on them, not the people who smash them.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "order": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "If you've done nothing wrong, you'll love the new cameras.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "order": ">25"
+          }
+         },
+         "amt": -0.3
+        },
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": -0.15
+        }
+       ],
+       "risk": 0.75
+      },
+      {
+       "tone": "statesman",
+       "text": "An intelligence-led, outcomes-focused policing strategy.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "order": "<-25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "Jobs and clubs, not curfews",
+     "effects": {
+      "shift": {
+       "order": 6,
+       "welfare": -4
+      },
+      "salience": {
+       "order": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">25"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A youth centre and an apprenticeship scheme in every town. Idle hands, honest answer."
+      },
+      {
+       "tone": "folksy",
+       "text": "I never threw a stone at sixteen because I was too tired from work. Let's give them work.",
+       "react": [
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "You can't arrest your way out of a town with no jobs.",
+       "react": [
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "The rioters are the only people in Arthemta the government has noticed in years.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "order": "<-25"
+          }
+         },
+         "amt": -0.3
+        },
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": -0.15
+        }
+       ],
+       "risk": 0.7
+      },
+      {
+       "tone": "statesman",
+       "text": "A multi-agency early-intervention partnership.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "Clean out the police",
+     "effects": {
+      "shift": {
+       "system": -6,
+       "order": 3
+      },
+      "salience": {
+       "system": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "nationality": "alinnian"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "system": ">25"
+         }
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "An independent inspector in every police force, with every officer's record open to them."
+      },
+      {
+       "tone": "fiery",
+       "text": "Half the trouble on our streets wears a uniform.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "order": "<-25"
+          }
+         },
+         "amt": -0.3
+        },
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.7
+      },
+      {
+       "tone": "folksy",
+       "text": "Most officers are decent people. They'd like the bad ones gone too.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.08
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "First we arrest the police. Then we'll see about crime.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.1
+        },
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.85
+      },
+      {
+       "tone": "statesman",
+       "text": "A comprehensive review of standards and accountability mechanisms.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "culture",
+   "axis": "society",
+   "metrics": [],
+   "title": "The way we live",
+   "text": "Schoolbooks, the flag, what a family is, what can be said on television: a year before the election, the loudest argument in the country isn't about money at all. The party needs one answer to put on every poster.",
+   "promises": [
+    {
+     "label": "Put the family first in the law",
+     "effects": {
+      "shift": {
+       "society": 8
+      },
+      "salience": {
+       "society": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "society": ">25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A family allowance for every child, and a tax system that stops punishing couples for marrying."
+      },
+      {
+       "tone": "folksy",
+       "text": "Sunday lunch is the best institution this country has. We're going to protect it.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "Cranebo's activists have had their say about your family. Now you get yours.",
+       "react": [
+        {
+         "who": {
+          "region": "cranbia"
+         },
+         "amt": -0.1
+        },
+        {
+         "who": {
+          "lean": {
+           "society": ">25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "This country was doing fine when people knew what a family was.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "society": "<-25"
+          }
+         },
+         "amt": -0.35
+        },
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "lean": {
+           "society": ">25"
+          }
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.75
+      },
+      {
+       "tone": "statesman",
+       "text": "A family-centred policy orientation across government.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "society": ">25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "Equal rights, written into the constitution",
+     "effects": {
+      "shift": {
+       "society": -8
+      },
+      "salience": {
+       "society": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "society": "<-25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "region": "cranbia"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "society": ">25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Whoever you are and whoever you love, the constitution will say the same thing about you."
+      },
+      {
+       "tone": "folksy",
+       "text": "My neighbours have been together thirty years. The law can catch up.",
+       "react": [
+        {
+         "who": {
+          "age": "46-60"
+         },
+         "amt": 0.08
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "No more second-class citizens. Not one.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "society": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "If equal rights frighten you, ask yourself what you were planning.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "society": ">25"
+          }
+         },
+         "amt": -0.35
+        },
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": -0.2
+        }
+       ],
+       "risk": 0.7
+      },
+      {
+       "tone": "statesman",
+       "text": "A rights-based framework for inclusion and belonging.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "society": "<-25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    },
+    {
+     "label": "Leave people alone",
+     "effects": {
+      "shift": {
+       "order": 6
+      },
+      "salience": {
+       "order": 0.4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": ">25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "30-45"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": -0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "society": ">25"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The state has no business in your kitchen or your bedroom, and we'll write that down."
+      },
+      {
+       "tone": "folksy",
+       "text": "Live and let live worked for my grandparents. It'll work for us.",
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": 0.05
+        }
+       ]
+      },
+      {
+       "tone": "fiery",
+       "text": "Every other party wants to tell you how to live. We don't.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "system": "<-25"
+          }
+         },
+         "amt": 0.1
+        }
+       ]
+      },
+      {
+       "tone": "provocative",
+       "text": "Both sides of this argument should find a hobby.",
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "society": ">25"
+          }
+         },
+         "amt": -0.15
+        },
+        {
+         "who": {
+          "lean": {
+           "society": "<-25"
+          }
+         },
+         "amt": -0.15
+        },
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": 0.1
+        }
+       ],
+       "risk": 0.6
+      },
+      {
+       "tone": "statesman",
+       "text": "A principled neutrality on contested questions of values.",
+       "react": [
+        {
+         "who": {},
+         "amt": -0.08
+        },
+        {
+         "who": {
+          "lean": {
+           "order": ">25"
+          }
+         },
+         "amt": -0.12
+        }
+       ],
+       "risk": 0.1
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

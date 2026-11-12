@@ -356,7 +356,7 @@ func _front_summary(s: Dictionary, front) -> Dictionary:
 	match front.type:
 		"event":
 			var ev: Dictionary = game.event_of(front)
-			var kinds = {"crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences"}
+			var kinds = {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences"}
 			return {"kicker": kinds.get(ev.get("kind", ""), "Event"), "title": ev.title, "text": ev.text, "stamp": "Decision needed"}
 		"budget":
 			return {"kicker": "Quarterly budget", "title": "Where does the money go?", "text": "₱%sM in the account. Rallies, social media, TV and the national tour are waiting for a decision." % Game.fmt1(s.money), "stamp": "Sign off"}
