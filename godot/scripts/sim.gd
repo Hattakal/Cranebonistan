@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 16
+const SAVE_VERSION := 17
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -85,6 +85,7 @@ func load_content(path: String) -> void:
 	ISSUES = JSON.parse_string(FileAccess.get_file_as_string("res://data/issues.json")).ISSUES
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
+	_load_districts()
 	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
 		if CITY_INFO.get(c.name, {}).has("size"): c.size = int(CITY_INFO[c.name].size)
 	_event_axis = {}
@@ -280,7 +281,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "",
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {},
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -311,6 +312,7 @@ func new_game(opts := {}) -> Dictionary:
 			if not s.ownership.has(key): s.ownership[key] = {}
 			s.ownership[key][p.id] = owns[key]
 		trim_claims(s, p.id)
+	s.districts = new_districts(s)
 	s.pops = build_pops(s)
 	_home_start(s, str(opts.get("home", "")))
 	seed_loyalty(s)
@@ -364,6 +366,8 @@ func _home_start(s: Dictionary, city: String) -> void:
 	if c.is_empty() or c.area == "alinni": return
 	s.home = c.name
 	s.communities[c.name] = 1
+	var hd = district_of_city(c.name)
+	if hd: district_boost(s, hd.id, 0.3, 0.35)   # the old constituency knows you best
 	for pop in s.pops:
 		if pop.region != c.area: continue
 		var k: float = 1.0 if pop.nationality == "cranebonian" else 0.4
@@ -1521,6 +1525,7 @@ func take_poll(s: Dictionary, label: String, silent := false) -> void:
 			if kind.id == "region": poll.regions[g.id] = entry.support
 	poll.tracker = silent
 	s.polls.append(poll)
+	s.projection = district_results(s)   # who would win each district today
 	if silent: return
 	var prev_annual = null
 	var i: int = s.polls.size() - 2
@@ -1531,53 +1536,128 @@ func take_poll(s: Dictionary, label: String, silent := false) -> void:
 	if prev_annual: rivals_adapt(s, prev_annual.national, poll.national)
 	s.queue.append({"type": "poll", "index": s.polls.size() - 1})
 
-# ---------- Elections ----------
-func count_votes(s: Dictionary) -> Dictionary:
-	var by_region = {}
-	var ctx = score_context(s)
-	for r in REGIONS:
-		by_region[r.id] = {}
-		for p in s.parties: by_region[r.id][p.id] = 0.0
+# ---------- Districts ----------
+## Each region is split into districts (MAP.districts, drawn by tools/build_districts.py;
+## names, seats and leans can be changed in data/districts.json). A district has its
+## region's voters, plus a little of its own: a local lean, rival strongholds, and
+## whatever you have done there (home city, offices, the leader's visits).
+var DISTRICTS: Array = []
+
+func _load_districts() -> void:
+	DISTRICTS = MAP.get("districts", [])
+	var over: Dictionary = {}
+	if FileAccess.file_exists("res://data/districts.json"):
+		over = JSON.parse_string(FileAccess.get_file_as_string("res://data/districts.json")).get("DISTRICTS", {})
+	# seats by population (largest remainder), at least one each
+	var total = 0.0
+	for d in DISTRICTS:
+		d.people = float(by_id(REGIONS, d.region).adults) * float(d.share)
+		total += d.people
+	var seats_left: int = maxi(0, int(C.seats) - DISTRICTS.size())
+	var rows = []
+	for d in DISTRICTS:
+		var exact: float = seats_left * d.people / total
+		d.seats = 1 + int(floor(exact))
+		rows.append({"d": d, "rest": exact - floor(exact)})
+	var given = 0
+	for d in DISTRICTS: given += int(d.seats)
+	for r in ssort(rows, func(a, b): return b.rest - a.rest).slice(0, maxi(0, int(C.seats) - given)): r.d.seats += 1
+	for d in DISTRICTS:
+		var o: Dictionary = over.get(d.id, {})
+		if o.has("name"): d.name = o.name
+		if o.has("seats"): d.seats = int(o.seats)
+		d.fixedLean = o.get("lean", {})
+
+func district_by_id(id: String) -> Variant:
+	for d in DISTRICTS:
+		if d.id == id: return d
+	return null
+
+## Fresh local differences for a new game: districts of a region are much alike.
+func new_districts(s: Dictionary) -> Dictionary:
+	var out = {}
+	for d in DISTRICTS:
+		var lean = {}
+		for ax in AXES: lean[ax.id] = float(jround(rand_normal(s) * 4 + float(d.fixedLean.get(ax.id, 0))))
+		var rivals = {}
+		for p in s.parties:
+			if not p.isPlayer: rivals[p.id] = fixed(rand_normal(s) * 0.12, 3)
+		out[d.id] = {"lean": lean, "aware": 0.0, "goodwill": 0.0, "rivals": rivals, "visits": 0}
+	return out
+
+func district_of_city(city: String) -> Variant:
+	for d in DISTRICTS:
+		if d.cities.has(city): return d
+	return null
+
+## Your standing in one district grows (home city, offices, the leader's visits).
+func district_boost(s: Dictionary, id: String, aware: float, goodwill: float) -> void:
+	var st: Dictionary = s.districts[id]
+	st.aware = clampf2(st.aware + aware, 0, 0.6)
+	st.goodwill = clampf2(st.goodwill + goodwill, -1, 1.2)
+
+## Votes in one district: its region's voters with the district's own differences.
+func district_votes(s: Dictionary, d: Dictionary, ctx) -> Dictionary:
+	var st: Dictionary = s.districts[d.id]
+	var out = {}
+	for p in s.parties: out[p.id] = 0.0
 	for pop in s.pops:
+		if pop.region != d.region: continue
+		var pos0: Dictionary = pop.pos
+		var aw0: float = pop.aware.player
+		var gw0: Dictionary = pop.goodwill.duplicate()
+		var pos1 = pos0.duplicate()
+		for ax in st.lean: pos1[ax] = clampf2(pos1[ax] + st.lean[ax], -100, 100)
+		pop.pos = pos1
+		pop.aware.player = clampf2(aw0 + st.aware * (1 - aw0), 0, 1)
+		pop.goodwill.player = clampf2(gw0.player + st.goodwill, -2, 2)
+		for id in st.rivals: pop.goodwill[id] = clampf2(gw0[id] + st.rivals[id], -2, 2)
 		var votes = pop_votes(pop, pop_support(s, pop, null, ctx))
-		for p in s.parties: by_region[pop.region][p.id] += votes[p.id]
-	return by_region
+		pop.pos = pos0
+		pop.aware.player = aw0
+		pop.goodwill = gw0
+		for id in votes: out[id] += votes[id] * float(d.share)
+	return out
 
-func allocate_seats(votes_by_region: Dictionary) -> Dictionary:
-	var total_adults = 0.0
-	for r in REGIONS: total_adults += r.adults
-	var quotas = REGIONS.map(func(r): return {"id": r.id, "exact": C.seats * r.adults / total_adults, "seats": 0})
-	for q in quotas: q.seats = int(floor(q.exact))
-	var assigned = 0
-	for q in quotas: assigned += q.seats
-	var left: int = int(C.seats) - assigned
-	for q in ssort(quotas, func(a, b): return fmod(b.exact, 1.0) - fmod(a.exact, 1.0)).slice(0, left): q.seats += 1
-	var seats = {"national": {}, "regions": {}}
-	for q in quotas:
-		var votes: Dictionary = votes_by_region[q.id]
-		var won = {}
-		for id in votes: won[id] = 0
-		for _i in q.seats:
-			var best = null
-			var best_val = -1.0
-			for id in votes:
-				var v: float = votes[id] / (won[id] + 1)
-				if v > best_val:
-					best_val = v; best = id
-			won[best] += 1
-		seats.regions[q.id] = won
-		for id in won: seats.national[id] = int(seats.national.get(id, 0)) + won[id]
-	return seats
+## Every district: votes, the winner, the runner-up and the winning margin (share points).
+func district_results(s: Dictionary) -> Dictionary:
+	var ctx = score_context(s)
+	var out = {}
+	for d in DISTRICTS:
+		var v: Dictionary = district_votes(s, d, ctx)
+		var tot = dsum(v)
+		var ids: Array = ssort(v.keys(), func(a, b): return v[b] - v[a])
+		out[d.id] = {"votes": v, "winner": ids[0], "second": ids[1], "seats": int(d.seats),
+			"share": v[ids[0]] / tot if tot else 0.0, "margin": (v[ids[0]] - v[ids[1]]) / tot if tot else 0.0,
+			"you": v.player / tot if tot else 0.0}
+	return out
 
+## Seats each party would win if the election were today.
+func projected_seats(proj: Dictionary) -> Dictionary:
+	var out = {}
+	for d in DISTRICTS:
+		var w: String = proj[d.id].winner
+		out[w] = int(out.get(w, 0)) + int(d.seats)
+	return out
+
+# ---------- Elections ----------
+## Winner takes all: in each district the party with the most votes wins all its seats.
 func run_election(s: Dictionary) -> void:
-	var votes = count_votes(s)
-	var seats = allocate_seats(votes)
+	var res: Dictionary = district_results(s)
+	var seats = {"national": {}, "regions": {}, "districts": res}
 	var national = {}
 	var total = 0.0
-	for r in votes:
-		for id in votes[r]:
-			national[id] = float(national.get(id, 0)) + votes[r][id]
-			total += votes[r][id]
+	for p in s.parties: seats.national[p.id] = 0
+	for r in REGIONS:
+		seats.regions[r.id] = {}
+		for p in s.parties: seats.regions[r.id][p.id] = 0
+	for d in DISTRICTS:
+		var x: Dictionary = res[d.id]
+		seats.national[x.winner] += int(d.seats)
+		seats.regions[d.region][x.winner] += int(d.seats)
+		for id in x.votes:
+			national[id] = float(national.get(id, 0)) + x.votes[id]
+			total += x.votes[id]
 	for id in national: national[id] /= total
 	var ranking = ssort(seats.national.keys(), func(a, b): return seats.national[b] - seats.national[a])
 	s.result = {"votes": national, "seats": seats, "ranking": ranking, "playerWon": ranking[0] == "player",

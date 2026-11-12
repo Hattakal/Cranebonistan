@@ -91,6 +91,7 @@ func _build() -> void:
 	_map.tip_provider = _tip
 	_map.region_clicked.connect(func(id): _files.S = S; _files.open_region(id); _sync_menu())
 	_map.foreign_clicked.connect(func(id): _country_sheet(id))
+	_map.district_clicked.connect(func(id): _files.S = S; _files.open_region(G.district_by_id(id).region); _sync_menu())
 	right.add_child(_map)
 	_ticker = Ticker.new()
 	_ticker.custom_minimum_size.y = 34
@@ -435,22 +436,37 @@ func _render_map() -> void:
 	_map.party_color = Color(G.player_party(S).color)
 	if poll:
 		for r in G.REGIONS:
-			var sh: Dictionary = poll.regions[r.id]
-			var ids: Array = Game.ssort(sh.keys(), func(a, b): return sh[b] - sh[a])
-			var lead: String = ids[0]
-			if _leaders.has(r.id) and _leaders[r.id] != lead: _map.flash(r.id)
-			_leaders[r.id] = lead
-			var margin: float = sh[ids[0]] - sh[ids[1]]
-			var strength = clampf(0.3 + margin * 3, 0.3, 0.75)
-			_map.fills[r.id] = Look.mix(Look.LAND, Color(G.party_of(S, lead).color), strength * 0.8)
-			_map.shares[r.id] = "You %d%%" % Game.jround(sh.player * 100)
+			_map.shares[r.id] = "You %d%%" % Game.jround(poll.regions[r.id].player * 100)
+	# each district in the colour of whoever would win it today: deep when safe, pale when close
+	var proj: Dictionary = S.get("projection", {})
+	for d in G.DISTRICTS:
+		if not proj.has(d.id): continue
+		var x: Dictionary = proj[d.id]
+		if _leaders.has(d.id) and _leaders[d.id] != x.winner: _map.flash(d.id)
+		_leaders[d.id] = x.winner
+		var strength = clampf(0.28 + float(x.margin) * 2.6, 0.28, 0.85)
+		_map.fills[d.id] = Look.mix(Look.LAND, Color(G.party_of(S, x.winner).color), strength * 0.85)
 	for f in G.FOREIGN:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
-	_map.legend = S.parties.map(func(p): return [p.short, Color(p.color)])
-	_map.legend_note = ("%s, %s. Scroll to zoom, drag to move." % [poll.label, G.date_label(poll.week, false)]) if poll else "No poll yet."
+	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
+	_map.legend = Game.ssort(S.parties.duplicate(), func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Color(p.color)])
+	_map.legend_note = ("Seats if the election were today · %s. %d to win." % [poll.label, int(G.C.seats / 2 + 1)]) if poll else "No poll yet."
 	_map.queue_redraw()
 
 func _tip(id: String, kind: String) -> Array:
+	if kind == "district":
+		var d = G.district_by_id(id)
+		var lines = ["%s · %d seat%s" % [d.name, d.seats, "" if d.seats == 1 else "s"], Game.by_id(G.REGIONS, d.region).name]
+		var x: Dictionary = S.get("projection", {}).get(id, {})
+		if x.size():
+			var who: String = "You" if x.winner == "player" else G.party_of(S, x.winner).short
+			var lead: float = float(x.margin) * 100
+			lines.append("%s would win it today, %s" % [who, "safely" if lead >= 12 else ("comfortably" if lead >= 5 else "narrowly")])
+			lines.append("Your vote here: %d%%" % Game.jround(float(x.you) * 100))
+			if x.winner != "player":
+				lines.append("You'd need about %d more points" % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)))
+		lines.append("Click for the region's voters")
+		return lines
 	if kind == "region":
 		var r = Game.by_id(G.REGIONS, id)
 		var lines = [r.name, r.blurb if r.has("blurb") else ""]

@@ -6,10 +6,12 @@ extends Control
 
 signal region_clicked(id: String)
 signal foreign_clicked(id: String)
+signal district_clicked(id: String)
 
 var W = 2480.0
 var H = 1754.0
 var areas: Array = []          # {id, kind, name, polys, label, small}
+var districts: Array = []      # {id, region, name, polys, label, seats}
 var cities: Array = []
 var capital = ""
 var fills = {}                # area id -> Color
@@ -42,6 +44,9 @@ func setup(game) -> void:
 		areas.append({"id": r.id, "kind": "region", "name": r.name, "polys": _parse(m.regions[r.id].d), "label": m.regions[r.id].label, "small": false})
 	for f in game.FOREIGN:
 		areas.append({"id": f.id, "kind": "foreign", "name": f.name, "polys": _parse(m.foreign[f.id].d), "label": m.foreign[f.id].label, "small": f.get("small", false)})
+	districts.clear()
+	for d in game.DISTRICTS:
+		districts.append({"id": d.id, "region": d.region, "name": d.name, "polys": _parse(d.d), "label": d.label, "seats": int(d.seats)})
 	_features = load("res://assets/map-features.png")
 	_grain = Look.noise_texture(512, 512, Color(0.35, 0.25, 0.12, 0.0), Color(0.35, 0.25, 0.12, 0.22), 0.02, 4)
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -144,6 +149,9 @@ func _hit(screen: Vector2) -> Dictionary:
 	for id in _plates:
 		if _plates[id].has_point(screen): return {"id": id, "kind": "foreign"}
 	var p = to_map(screen)
+	for d in districts:
+		for poly in d.polys:
+			if Geometry2D.is_point_in_polygon(p, poly): return {"id": d.id, "kind": "district"}
 	for kind in ["region", "foreign"]:
 		for a in areas:
 			if a.kind != kind: continue
@@ -160,7 +168,8 @@ func _update_hover(pos: Vector2) -> void:
 func _click(pos: Vector2) -> void:
 	var h = _hit(pos)
 	if h.is_empty(): return
-	if h.kind == "region": region_clicked.emit(h.id)
+	if h.kind == "district": district_clicked.emit(h.id)
+	elif h.kind == "region": region_clicked.emit(h.id)
 	else: foreign_clicked.emit(h.id)
 
 # ---------- Drawing ----------
@@ -197,6 +206,20 @@ func _draw() -> void:
 				for p in poly: sp.append(o + p * s)
 				draw_colored_polygon(sp, col)
 				if kind == "foreign": _hatch(sp)
+	# districts: each painted in the colour of the party that would win it
+	for d in districts:
+		var col: Color = _shown.get(d.id, fills.get(d.id, Look.LAND))
+		if d.id == hover: col = col.lightened(0.14)
+		for poly in d.polys:
+			var sp = PackedVector2Array()
+			for p in poly: sp.append(o + p * s)
+			draw_colored_polygon(sp, col)
+	for d in districts:
+		for poly in d.polys:
+			var sp = PackedVector2Array()
+			for p in poly: sp.append(o + p * s)
+			sp.append(sp[0])
+			draw_polyline(sp, Color(Look.BORDER, 0.45), maxf(1.0, 1.8 * s), true)
 	# borders in ink
 	for kind in ["foreign", "region"]:
 		for a in areas:
@@ -209,7 +232,7 @@ func _draw() -> void:
 				draw_polyline(sp, Look.BORDER, w, true)
 	# the hovered region gets a warm outline
 	if hover != "":
-		for a in areas:
+		for a in areas + districts:
 			if a.id != hover: continue
 			for poly in a.polys:
 				var sp = PackedVector2Array()
@@ -219,7 +242,7 @@ func _draw() -> void:
 	# regions that just changed hands ring outwards
 	for id in _flash:
 		var t: float = _flash[id]
-		for a in areas:
+		for a in areas + districts:
 			if a.id != id: continue
 			for poly in a.polys:
 				var sp = PackedVector2Array()
@@ -245,6 +268,7 @@ func _draw() -> void:
 			var rr = maxf(8.0, (20 + lvl * 6) * s)
 			draw_arc(p, rr, 0, TAU, 32, party_color, maxf(1.5, (2 + lvl) * s), true)
 	_plates.clear()
+	_seat_badges(s)
 	_labels(s)
 	# paper grain over everything
 	if _grain: draw_texture_rect(_grain, map_rect, true)
@@ -253,6 +277,7 @@ func _draw() -> void:
 
 var legend: Array = []   # [[short name, Color], ...]
 var legend_note := ""
+var legend_title := "WHO WOULD WIN EACH DISTRICT"
 
 func _legend() -> void:
 	if legend.is_empty(): return
@@ -265,7 +290,7 @@ func _legend() -> void:
 	var rect := Rect2(Vector2(14, 14), Vector2(w, 78))
 	draw_rect(rect, Color(0.08, 0.06, 0.04, 0.88))
 	draw_rect(rect, Look.BRASS, false, 1.0)
-	draw_string(head, rect.position + Vector2(14, 24), "WHO LEADS WHERE", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Look.HEAD)
+	draw_string(head, rect.position + Vector2(14, 24), legend_title, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Look.HEAD)
 	var cx := rect.position.x + 14
 	for item in legend:
 		draw_circle(Vector2(cx + 5, rect.position.y + 42), 5, item[1])
@@ -333,6 +358,17 @@ func _labels(s: float) -> void:
 		var sh: String = shares.get(a.id, "")
 		if sh != "":
 			_text(to_screen(Vector2(a.label[0], a.label[1] + 44 * k)), sh, type_font, int(maxf(10, 32 * maxf(k, 0.75) * s)), Color("3b2a1a"), halo)
+
+## Each district's number of seats, small, on its quietest spot.
+func _seat_badges(s: float) -> void:
+	var f = Look.font("display_bold")
+	var fs = int(maxf(10, 26 * s))
+	for d in districts:
+		var p = to_screen(Vector2(d.label[0], d.label[1] + 40))
+		var r = fs * 0.75
+		draw_circle(p, r, Color(Look.PAPER, 0.85))
+		draw_arc(p, r, 0, TAU, 24, Color(Look.BORDER, 0.6), 1.0, true)
+		_text(p + Vector2(0, fs * 0.36), str(d.seats), f, fs, Look.BORDER)
 
 func _plate(a: Dictionary, s: float) -> void:
 	var c = to_screen(Vector2(a.label[0], a.label[1]))

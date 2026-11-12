@@ -239,11 +239,19 @@ Each crisis plays out over several months and permanently changes what the count
 
 A month before the election, a televised debate is its own large event: an opening statement, an attack from the leader of the largest rival party (built from the player's own contradictions, the groups they blamed, or their dirty money), and a closing statement. Every answer is a sound bite, and every word counts twice.
 
-### 6.2 Election — Built (regions), Planned (provinces)
+### 6.2 Election — Districts, winner takes all (decided November 2026; being built)
 
-Votes are counted in three separate stages: opinion, turnout, seats. Seats are split by region, then shared proportionally inside each. Elections should resemble real ones, with results coming in province by province on election night. **Waiting for the map.**
+*Decided:* **the map is the game's centre.** The campaign is about turning districts your colour, Paradox-style; the debates and events stay (choosing the exact words is still the core skill), but they become the weapons you use on the map rather than the whole game.
 
-Win condition: the largest party in the Assembly. Governing and staying in power for the next election is the long-term goal and comes later.
+- **Districts.** Each region is split into about **6–7 districts** (subject to change). Districts within a region are much alike for clarity (same kinds of voters); local differences come mostly from campaigning. *Maybe later:* districts with their own character, like Erland's big cities leaning left.
+- **Winner takes all.** In each district, the party with the most votes wins **all** of its seats. Districts send different numbers of seats by population: a big Cranbia district might send six, a corner of Fauran just one (a joke district). The total is 120 seats for now.
+- **Clear over clever.** No thresholds, no national top-up seats, no complicated vote transfers. *Considered and dropped:* proportional seats with a threshold, a mixed system with national list seats, and the Turkish system (hard to explain, and a Turkey parallel).
+- **Min-maxing is the fun.** Votes beyond what wins a district are wasted. Once Erland's nationalists are safely yours, you can drift toward Cranbia's moderates, as long as Erland doesn't slip.
+- **The leader on the road.** Each month the leader can visit a district; people there (and a little next door) hear of you and warm to you. Less realistic than a national campaign, but more fun. Party offices work mostly in their own district.
+- **Party relations (skeleton now).** Each rival party has a relationship with yours, moved by what you do to it (dossiers, poaching its politicians, attacking its causes) and by how close your policies are. *Later:* parties standing aside in each other's districts so they don't split the vote, and forming a government after the election (the largest party is asked first and needs partners; a party everyone hates can be frozen out).
+- *History:* seats were split by region and shared proportionally inside each (largest-remainder by region, then D'Hondt), 300 seats in all.
+
+Win condition, for now: the largest party in the Assembly. Forming a government becomes the win condition in a later update.
 
 ### 6.3 The end screen — Built
 
@@ -347,4 +355,4 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 - A full economy.
 - Governing after winning, and the next election.
 - Pops changing their views after events; demographic change.
-- Provinces, election night, map-centred play (after the map).
+- Election night district by district; standing aside in districts; forming a government.

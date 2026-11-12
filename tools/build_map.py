@@ -14,6 +14,7 @@ Reads these Krita layers (by name):
 Writes:
   godot/data/content.json   its MAP entry: shapes, label spots and cities (game coordinates)
   godot/assets/map-features.png   rivers and mountains, recoloured as ink
+and then runs build_districts.py to split the regions into electoral districts.
 
 Areas are named by AREA_SEEDS below: a point (in Krita pixels) inside each area.
 If a border is redrawn, those points usually still work; if an area gets
@@ -262,6 +263,10 @@ def main(path):
     content["MAP"] = out
     json.dump(content, open(path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print(f"map: {len(out['regions'])} regions, {len(out['foreign'])} neighbours, {len(out['cities'])} cities")
+    # and split the regions into electoral districts again
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("build_districts", os.path.join(ROOT, "tools", "build_districts.py"))
+    bd = importlib.util.module_from_spec(spec); spec.loader.exec_module(bd); bd.main()
 
 
 if __name__ == "__main__":
