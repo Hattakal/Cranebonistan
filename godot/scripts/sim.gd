@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 18
+const SAVE_VERSION := 19
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -281,7 +281,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99,
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {},
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -313,6 +313,7 @@ func new_game(opts := {}) -> Dictionary:
 			s.ownership[key][p.id] = owns[key]
 		trim_claims(s, p.id)
 	s.districts = new_districts(s)
+	s.relations = new_relations(s)
 	s.pops = build_pops(s)
 	_home_start(s, str(opts.get("home", "")))
 	seed_loyalty(s)
@@ -946,6 +947,7 @@ func monthly_update(s: Dictionary) -> void:
 	debates_monthly(s)
 	issues_monthly(s)
 	communities_monthly(s)
+	relations_monthly(s)
 	steer_monthly(s)
 	figures_monthly(s)
 	if rand(s) < C.newsWaveChance:
@@ -1162,6 +1164,47 @@ func steer_monthly(s: Dictionary) -> void:
 func teyl(s: Dictionary) -> Variant:
 	return figure_by_id(s, "teyl")
 
+# ---------- Relations with the other parties (skeleton) ----------
+## How each rival party feels about yours, -100 (bitter) to +100 (friendly).
+## It starts from how close your policies are, drifts back there slowly, and is
+## moved by what you do to them. Nothing uses it yet: later, parties standing
+## aside in each other's districts, and forming a government.
+func relation_base(s: Dictionary, pid: String) -> float:
+	var me: Dictionary = player_party(s).perceived
+	var them: Dictionary = party_of(s, pid).perceived
+	var dist = 0.0
+	for ax in AXES: dist += absf(float(me[ax.id]) - float(them[ax.id]))
+	return clampf2(40.0 - dist / AXES.size() * 1.1, -40, 40)
+
+func relation(s: Dictionary, pid: String) -> float:
+	return float(s.get("relations", {}).get(pid, relation_base(s, pid)))
+
+static func relation_word(v: float) -> String:
+	if v >= 45: return "Friendly"
+	if v >= 15: return "Cordial"
+	if v > -15: return "Wary"
+	if v > -45: return "Hostile"
+	return "Bitter"
+
+func change_relation(s: Dictionary, pid: String, delta: float, why: String) -> void:
+	if not s.has("relations"): s.relations = {}
+	s.relations[pid] = clampf2(relation(s, pid) + delta, -100, 100)
+	if not s.has("relationNotes"): s.relationNotes = {}
+	var notes: Array = s.relationNotes.get(pid, [])
+	notes.append({"week": s.week, "text": why, "delta": delta})
+	s.relationNotes[pid] = notes.slice(-6)
+
+func new_relations(s: Dictionary) -> Dictionary:
+	var out = {}
+	for p in rivals(s): out[p.id] = relation_base(s, p.id)
+	return out
+
+## Monthly: a tenth of the way back toward what your policies alone would earn.
+func relations_monthly(s: Dictionary) -> void:
+	for p in rivals(s):
+		var v = relation(s, p.id)
+		s.relations[p.id] = v + (relation_base(s, p.id) - v) * 0.1
+
 func act_research(s: Dictionary, party_id: String) -> Dictionary:
 	var cost: float = ACTIONS.research.cost
 	var err = can_act(s, cost)
@@ -1174,6 +1217,7 @@ func act_research(s: Dictionary, party_id: String) -> Dictionary:
 		apply_effects(s, {"awareness": 0.03, "leader": -0.08,
 			"goodwill": [{"who": {"class": ["middle", "upper"]}, "amt": -0.25}, {"who": {}, "amt": -0.05}]})
 		text = "Your investigators were caught going through %s's bins. The press is calling it a dirty trick." % p.short
+		change_relation(s, party_id, -15, "caught spying on them")
 	elif r < 0.65:
 		var severity = 3 if rand(s) < 0.3 else (2 if rand(s) < 0.6 else 1)
 		var what: String = ["an unpaid tax bill", "an expenses fiddle", "secret payments from a tycoon"][severity - 1]
@@ -1202,6 +1246,7 @@ func act_release(s: Dictionary, index: int) -> Dictionary:
 	change_trust(s, -2 * sev)
 	apply_effects(s, {"awareness": 0.03})
 	var text = "The story broke: %s involving %s. %s is reeling." % [dos.what, p.leader, p.short]
+	change_relation(s, p.id, -8.0 * sev, "you leaked a dossier on %s" % p.leader)
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
@@ -1223,6 +1268,7 @@ func act_poach(s: Dictionary, party_id: String) -> Dictionary:
 	var diffs = biggest_differences(s, player_party(s), p, 1)
 	shift_perceived(s, {diffs[0].ax: signf(diffs[0].d) * 5})
 	var text = "Local %s organisers crossed over to you, bringing about %dk core voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
+	change_relation(s, party_id, -10, "you poached their organisers")
 	var claims = ownership_table(s).filter(func(r): return r.owners.any(func(o): return o.party == party_id))
 	var pool = LEADER_POOL.filter(func(x): return not s.figures.any(func(f): return f.name == x.name) and not s.parties.any(func(q): return q.leader == x.name))
 	# organisers cross over easily; one of their politicians only rarely comes with them
@@ -1232,6 +1278,7 @@ func act_poach(s: Dictionary, party_id: String) -> Dictionary:
 		s.figures.append({"id": "poach_%d" % s.week, "name": who.name, "sex": who.sex, "role": "Former %s politician" % p.short, "region": pick(s, REGIONS).id,
 			"axis": key.split(":")[0], "side": key.split(":")[1], "loyalty": 45.0, "note": "Came over from %s. Still thinks like them on %s." % [p.short, side_label(key).to_lower()]})
 		text += " %s, one of their politicians, came with them." % who.name
+		change_relation(s, party_id, -8, "%s defected to you" % who.name)
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
@@ -1464,6 +1511,7 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 	var extra = ""
 	if fx.get("defect"):
 		var moved = defect(s, fx.defect.from, fx.defect.share)
+		change_relation(s, fx.defect.from, -10, "you took in their rebels")
 		extra = " About %dk core voters came with them." % jround(moved / 1000.0)
 	var delivery = null
 	var quote = null
@@ -1970,6 +2018,11 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 	shift_perceived(s, {d.axis: sign * 4})
 	var key = side_key(d.axis, side)
 	if pv.mine: add_ownership(s, "player", key, 0.05 if major else 0.03)
+	# parties notice when you take up their cause, or attack it
+	var other_key = side_key(d.axis, "R" if side == "L" else "L")
+	for rp in rivals(s):
+		if ownership_of(s, rp.id, other_key) > 0.05: change_relation(s, rp.id, -3 if major else -1.5, "you attacked their line on %s" % by_id(AXES, d.axis).issue.to_lower())
+		elif ownership_of(s, rp.id, key) > 0.05: change_relation(s, rp.id, 1.5 if major else 0.75, "you backed their line on %s" % by_id(AXES, d.axis).issue.to_lower())
 	s.spoke[key] = s.week
 	var k = 1.0 if major else 0.6
 	for pop in s.pops:
