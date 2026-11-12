@@ -356,3 +356,14 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 - Governing after winning, and the next election.
 - Pops changing their views after events; demographic change.
 - Election night district by district; standing aside in districts; forming a government.
+
+## 11. Directions decided (November 2026), not built yet
+
+Agreed after the realism review: the vote itself first, then the people around it.
+
+- **Rivals play the same game as you.** They target districts, tour, open offices and pick their fights, using the same actions as the player. This is also what a far-future **multiplayer** version (a friend's suggestion, possibly with different parties) would need.
+- **Tactical voting waits** until the basic vote works. Voters should keep a reason to vote for their own party; a Netherlands-style element (seats shared out by national vote) is an idea for later. *Open question:* this pulls against the pure winner-takes-all decision in 6.2, so it needs deciding when we get there.
+- **Local candidates.** Every district has a candidate per party, a character with a reputation. Poaching a good local candidate is **extremely rare but can change a district**; the chance depends on how close their views are to yours and how unstable their party is.
+- **Media and characters.** A basic character system, much simpler than Crusader Kings: newspapers and TV channels with owners, big media personalities, social media figures, streamers moving into politics, celebrities who sell their endorsement to the highest bidder. Media are central to the satire.
+- **The economy and the ruling party.** How the economy feels should drive how the government is judged, and both should feed **trust in the system**.
+- **A tangible answer for the biggest issue.** Voters reward a simple, concrete-sounding solution (tariffs being the real-world example) over "the economy is actually fine", whether or not it makes economic sense. *To work out:* whether this is a new "flagship promise" (one concrete pledge, judged by voters on how simple and satisfying it sounds while experts say it won't work) or part of the existing causes, which are sides of an issue rather than pledges.
