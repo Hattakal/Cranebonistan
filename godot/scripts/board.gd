@@ -378,6 +378,7 @@ func _pim_note(s: Dictionary) -> String:
 	var hottest = null
 	for d in s.debates:
 		if hottest == null or d.heat > hottest.heat: hottest = d
+	if game.visit_block(s) == "" and s.week < 8: return "First things first, boss: pick a district on the map and go and shake some hands. Once a month, and it costs us nothing."
 	if n > 0 and hottest and hottest.heat >= 50: return "Everyone's talking about %s. %d action%s left. Whatever you say about it, I'm sure it'll be the right thing." % [hottest.title.to_lower(), n, "" if n == 1 else "s"]
 	if n > 0 and agenda: return "%d action%s left this month, and nobody has started this month's argument yet. Could be you, boss." % [n, "" if n == 1 else "s"]
 	if n > 0: return "%d action%s left this month. Whenever you're ready." % [n, "" if n == 1 else "s"]

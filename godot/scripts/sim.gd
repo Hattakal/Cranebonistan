@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 17
+const SAVE_VERSION := 18
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -281,7 +281,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99,
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -1058,6 +1058,7 @@ func _community_tick(s: Dictionary, c: Dictionary, k := 1.0) -> void:
 func communities_monthly(s: Dictionary) -> void:
 	for name in s.communities:
 		_community_tick(s, city_by_name(name))
+	districts_monthly(s)
 
 # ---------- The party's politicians ----------
 ## Named people in your party. Each cares most about one side of one issue.
@@ -1631,6 +1632,45 @@ func district_results(s: Dictionary) -> Dictionary:
 			"share": v[ids[0]] / tot if tot else 0.0, "margin": (v[ids[0]] - v[ids[1]]) / tot if tot else 0.0,
 			"you": v.player / tot if tot else 0.0}
 	return out
+
+## The leader on the road: once a month, free, one district. People there hear
+## of you and warm to you; the rest of the region a little. Going back to the same
+## place keeps helping, but less each time. Local goodwill fades slowly.
+const VISIT_AWARE := 0.12
+const VISIT_GOODWILL := 0.16
+
+func visit_block(s: Dictionary) -> String:
+	if s.result: return "The election is over."
+	if int(s.get("lastVisit", -99)) / WEEKS_PER_MONTH == s.week / WEEKS_PER_MONTH: return "%s has already been on the road this month." % player_party(s).leader
+	return ""
+
+func act_visit(s: Dictionary, id: String) -> Dictionary:
+	var block = visit_block(s)
+	if block: return {"ok": false, "text": block}
+	var d = district_by_id(id)
+	var st: Dictionary = s.districts[id]
+	var before: float = float(s.projection.get(id, {}).get("you", 0))
+	st.visits = int(st.visits) + 1
+	var k: float = 1.0 / (1.0 + 0.3 * (st.visits - 1))
+	district_boost(s, id, VISIT_AWARE * k, VISIT_GOODWILL * k)
+	for o in DISTRICTS:
+		if o.region == d.region and o.id != id: district_boost(s, o.id, VISIT_AWARE * k * 0.2, VISIT_GOODWILL * k * 0.15)
+	s.lastVisit = s.week
+	s.projection = district_results(s)
+	var after: float = float(s.projection[id].you)
+	var text = "%s spent the month in %s: town halls, a market walkabout, a local radio phone-in. Your vote there: %d%% → %d%%." % [player_party(s).leader, d.name, jround(before * 100), jround(after * 100)]
+	_log(s, "action", "Toured %s." % d.name)
+	return {"ok": true, "text": text}
+
+## Local standing fades a little every month; offices keep their own district warm.
+func districts_monthly(s: Dictionary) -> void:
+	for id in s.districts:
+		var st: Dictionary = s.districts[id]
+		st.aware = float(st.aware) * 0.985
+		st.goodwill = float(st.goodwill) * 0.95
+	for name in s.communities:
+		var d = district_of_city(name)
+		if d: district_boost(s, d.id, 0.006 * int(s.communities[name]), 0.018 * int(s.communities[name]))
 
 ## Seats each party would win if the election were today.
 func projected_seats(proj: Dictionary) -> Dictionary:

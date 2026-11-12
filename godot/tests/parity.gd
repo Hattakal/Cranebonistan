@@ -10,6 +10,7 @@ func _init() -> void:
 	var M = {"nation": 2, "economy": 1, "society": 2, "foreign": 2, "welfare": 1, "system": 1, "order": 2}
 	var s: Dictionary = G.new_game({"seed": seed, "partyName": "Test", "manifesto": M})
 	var last = -1
+	var target = ""
 	var guard = 0
 	while not s.result and guard < 20000:
 		guard += 1
@@ -20,6 +21,19 @@ func _init() -> void:
 				var opts = G.raise_options(s)
 				if opts.size() and not s.agenda.done and m % 2 == 0: G.act_raise(s, opts[0], opts[0].side if opts[0].side != "" else "L", 0)
 				if s.actionsLeft > 0 and m % 5 == 1 and s.money > 2: G.act_community(s, G.MAP.cities[m % 16].name)
+				# tour one target until it is won, then the next closest one
+				if s.projection.size() and target != "" and not (s.projection[target].winner == "player" and s.projection[target].margin > 0.08):
+					G.act_visit(s, target)
+				elif s.projection.size():
+					var best = ""
+					var gap = INF
+					for d in G.DISTRICTS:
+						var x: Dictionary = s.projection[d.id]
+						var need: float = float(x.share) - float(x.you)
+						if x.winner == "player" and x.margin > 0.08: continue
+						if need < gap: gap = need; best = d.id
+					target = best
+					if best != "": G.act_visit(s, best)
 			G.advance_week(s)
 			continue
 		var f: Dictionary = s.queue[0]

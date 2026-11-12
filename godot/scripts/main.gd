@@ -91,7 +91,7 @@ func _build() -> void:
 	_map.tip_provider = _tip
 	_map.region_clicked.connect(func(id): _files.S = S; _files.open_region(id); _sync_menu())
 	_map.foreign_clicked.connect(func(id): _country_sheet(id))
-	_map.district_clicked.connect(func(id): _files.S = S; _files.open_region(G.district_by_id(id).region); _sync_menu())
+	_map.district_clicked.connect(func(id): _district_sheet(id))
 	right.add_child(_map)
 	_ticker = Ticker.new()
 	_ticker.custom_minimum_size.y = 34
@@ -465,7 +465,7 @@ func _tip(id: String, kind: String) -> Array:
 			lines.append("Your vote here: %d%%" % Game.jround(float(x.you) * 100))
 			if x.winner != "player":
 				lines.append("You'd need about %d more points" % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)))
-		lines.append("Click for the region's voters")
+		lines.append("Click to campaign here")
 		return lines
 	if kind == "region":
 		var r = Game.by_id(G.REGIONS, id)
@@ -982,6 +982,43 @@ func _election_sheet() -> void:
 			_done(p)),
 	])
 
+# ---------- A district: who would win it, and the leader's visit ----------
+func _district_sheet(id: String) -> void:
+	var d = G.district_by_id(id)
+	var r = Game.by_id(G.REGIONS, d.region)
+	var x: Dictionary = S.get("projection", {}).get(id, {})
+	var p = _paper(640, false)
+	p.kicker("District · %s · %d seat%s" % [r.name, d.seats, "" if d.seats == 1 else "s"])
+	p.heading(d.name, 36)
+	if d.cities.size(): p.small("Includes " + ", ".join(d.cities) + ".")
+	if x.size():
+		var ids: Array = Game.ssort(x.votes.keys(), func(a, b): return x.votes[b] - x.votes[a])
+		var tot: float = 0.0
+		for k in x.votes: tot += x.votes[k]
+		var shares = {}
+		for k in ids: shares[k] = x.votes[k] / tot if tot else 0.0
+		p.add(Look.caps("If the election were today · winner takes all %d seats" % d.seats, 11, Look.MUTED, 2))
+		var shown: Array = ids.slice(0, 3)
+		if not shown.has("player"): shown.append("player")
+		for k in shown:
+			var name: String = "You" if k == "player" else G.party_of(S, k).short
+			p.add(Look.label("%s%s  %d%%" % ["★ " if k == x.winner else "", name, Game.jround(shares[k] * 100)], "type", 17, Color(G.party_of(S, k).color).darkened(0.25) if k != "player" else Look.RED))
+		if x.winner == "player":
+			p.small("Yours today, by %d points. Votes beyond what wins it are wasted: if it's safe, campaign elsewhere." % maxi(1, Game.jround(float(x.margin) * 100)), Look.INK)
+		else:
+			p.small("You'd need about %d more points to take it." % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)), Look.INK)
+	var st: Dictionary = S.districts.get(id, {})
+	if int(st.get("visits", 0)) > 0: p.small("%s has toured here %d time%s." % [G.player_party(S).leader, int(st.visits), "" if int(st.visits) == 1 else "s"])
+	var block: String = G.visit_block(S)
+	var go = p.button("Tour %s this month" % d.name, func():
+		var res: Dictionary = G.act_visit(S, id)
+		_toast(res.text)
+		_done(p), true, block != "")
+	go.tooltip_text = block if block != "" else "Free, once a month. People here hear of you and warm to you, and the rest of %s a little. Going back keeps helping, but less each time." % r.name
+	p.actions([p.button("Region's voters", func():
+		p.close()
+		_files.S = S; _files.open_region(d.region); _sync_menu(), false), p.button("Close", func(): p.close(), false), go])
+
 # ---------- Founding the party (a new game) ----------
 var _found = {}
 var _founding := false   # the founding sheet is up; nothing else should talk yet
@@ -1231,6 +1268,7 @@ func _shot(args: Dictionary) -> void:
 			await get_tree().process_frame
 			_files._scroll.scroll_vertical = int(args.scroll)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
+	if args.has("district"): _district_sheet(args.district)
 	if args.has("country"): _country_sheet(args.country)
 	if args.has("margaret"):
 		_advisor.margaret(args.margaret)
