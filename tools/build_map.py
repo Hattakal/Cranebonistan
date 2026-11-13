@@ -244,6 +244,19 @@ def build_provinces(full, order, prov_layer, borders, prov_texts, cities, adults
         for j, L in enumerate(ids, start=1): seeds[(lab == L) & rmask] = j
         _, (iy, ix) = ndimage.distance_transform_edt(seeds == 0, return_indices=True)
         prov = seeds[iy, ix]; prov[~rmask] = 0
+        # an island is one province: land with no province drawn on it goes whole to the province
+        # holding most of it, and land with only one province drawn on it goes whole to that one
+        # (an island split by a drawn line between two provinces stays split, as drawn)
+        comp, _nc = ndimage.label(rmask)
+        for ci, sl in enumerate(ndimage.find_objects(comp), start=1):
+            if sl is None: continue
+            cm = comp[sl] == ci
+            sub = prov[sl]
+            drawn = [v for v in np.unique(seeds[sl][cm]) if v]
+            if len(drawn) == 1: sub[cm] = int(drawn[0])
+            elif not drawn:
+                votes = np.bincount(sub[cm], minlength=2); votes[0] = 0
+                sub[cm] = int(votes.argmax())
         area_total = float(rmask.sum())
         rc = [c for c in cities if c["area"] == region]
         city_adults = {c["name"]: city_pop.get(c["name"], 0.1) * 0.75 for c in rc}
