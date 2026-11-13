@@ -11,7 +11,7 @@ signal speak(id: String, side: String)   # open the sheet to pick your words
 signal raise(opt: Dictionary)             # open the sheet to start a debate
 
 const TITLES := {"debates": "The national debate", "electorate": "The electorate", "platform": "Platform and leader", "actions": "This month's moves",
-	"parties": "The country", "polls": "Polls", "diary": "Campaign diary"}
+	"parties": "The country", "media": "The media", "polls": "Polls", "diary": "Campaign diary"}
 
 var G
 var S: Dictionary
@@ -106,6 +106,7 @@ func render() -> void:
 		"platform": _platform()
 		"actions": _actions()
 		"parties": _country()
+		"media": _media()
 		"polls": _polls()
 		"diary": _diary()
 	await get_tree().process_frame
@@ -328,6 +329,16 @@ func _electorate() -> void:
 		var fitd: Dictionary = G.leader_fit(S, G.player_party(S))
 		var you = func(t): return "you fit well" if float(fitd.get(t.id, 0)) >= 0.55 else ("you fit somewhat" if float(fitd.get(t.id, 0)) >= 0.35 else "not you, yet")
 		_p("Wants %s (%s), or %s (%s)." % [wants[0].type.want, you.call(wants[0].type), wants[1].type.want, you.call(wants[1].type)], d, Look.INK, 14)
+	var gpops: Array = G.pops_matching(S, g.who)
+	var follows: Array = G.group_media(S, gpops).filter(func(x): return x.reach >= 0.06).slice(0, 3)
+	if follows.size():
+		var bits = follows.map(func(x): return "%s (%s)" % [x.outlet.name, favour_word(float(S.media[x.outlet.id].get("favour", {}).get("player", 0))).to_lower()])
+		_p("Follows: %s." % ", ".join(bits), d, Look.INK, 14)
+	var shield: float = G.group_shield(gpops, "player")
+	if shield >= 0.2: _p("Their media is on your side: they'll forgive you a lot.", d, Look.GOOD, 14)
+	elif shield >= 0.08: _p("Their media gives you some cover: they'll forgive you a little.", d, Look.INK, 14)
+	var rival_cover = G.rivals(S).filter(func(p): return G.group_shield(gpops, p.id) >= 0.2)
+	if rival_cover.size(): _p("Their media protects %s: hard to win over." % " and ".join(rival_cover.map(func(p): return p.short)), d, Look.RED, 14)
 	if sum.leaderPull > 1.12: _p("Votes on personality more than most.", d, Look.RED)
 	elif sum.leaderPull < 0.88: _p("Hard to win over with personality alone.", d, Look.RED)
 	_eyebrow("Cares most about", d)
@@ -1074,6 +1085,63 @@ class Spark extends Control:
 		draw_dashed_line(Vector2(0, mid), Vector2(size.x, mid), Look.LINE, 1.0, 4.0)
 		draw_polyline(pts, col, 2.0, true)
 		draw_circle(pts[-1], 3, col)
+
+# ---------- Media ----------
+const KIND_NAMES := {"public": "Public broadcaster", "paper": "Broadsheet", "tabloid": "Tabloid", "business": "Business paper",
+	"network": "TV network", "online": "Online", "regional": "Local papers", "platform": "Social media", "foreign": "Foreign channel"}
+const TONE_WORDS := {"statesman": "measured", "folksy": "folksy", "fiery": "fiery", "provocative": "provocative"}
+
+static func favour_word(f: float) -> String:
+	if f >= 0.45: return "Backs you"
+	if f >= 0.15: return "Friendly"
+	if f > -0.15: return "Neutral"
+	if f > -0.45: return "Critical"
+	return "Hostile"
+
+func _media() -> void:
+	_p("Every outlet works on its audience month after month: it pulls their views toward its own line, warms them to the party it favours, and makes them forgive that party. Honest outlets reach many people and report what you actually say; partisan ones reach fewer, but move and protect their audience much more. Measured and folksy lines play best on television and in the papers, fiery and provocative ones on social media.", null, Look.MUTED, 13)
+	var nation: Array = G.group_media(S, S.pops)
+	var g = GridContainer.new()
+	g.columns = 3 if size.x > 1100 else 1
+	g.add_theme_constant_override("h_separation", 12)
+	g.add_theme_constant_override("v_separation", 12)
+	_add(g)
+	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
+	for row in nation:
+		var o: Dictionary = row.outlet
+		var st: Dictionary = S.media[o.id]
+		var c = _card(g)
+		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_add(Look.caps(KIND_NAMES.get(o.kind, o.kind), 10, Look.MUTED, 1), c)
+		_h(o.name, 20, c)
+		_add(Look.label(o.blurb, "body_italic", 12, Look.MUTED, true), c)
+		var fav: Dictionary = st.get("favour", {})
+		var mine: float = float(fav.get("player", 0))
+		var best = ""
+		var best_f = 0.15
+		for pid in fav:
+			if pid != "player" and float(fav[pid]) > best_f: best_f = float(fav[pid]); best = pid
+		var h: float = G.outlet_honesty(S, o)
+		var reach_word = "Huge" if row.reach >= 0.25 else ("Large" if row.reach >= 0.12 else ("Medium" if row.reach >= 0.05 else "Small"))
+		var plays = []
+		for t in o.get("tones", {}):
+			if float(o.tones[t]) >= 1.15: plays.append(TONE_WORDS.get(t, t))
+		_facts([
+			["On you", favour_word(mine)],
+			["Reach", reach_word],
+			["Style", "Honest" if h >= 0.65 else ("Slanted" if h >= 0.35 else "Partisan")],
+		], c)
+		if best != "": _add(Look.label("Favours %s." % G.party_of(S, best).short, "body_bold", 12, Look.INK, true), c)
+		if plays.size(): _add(Look.label("Plays well: %s." % ", ".join(plays), "body", 12, Look.INK, true), c)
+		_add(Look.label("Owner: %s." % ("friends of your party" if st.owner == "player" else o.owner), "body", 12, Look.MUTED, true), c)
+		var price: float = float(o.get("price", 0))
+		if st.owner == "" and price > 0:
+			var b = _btn("Buy it · ₱%sM" % Game.fmt1(price), func():
+				var res: Dictionary = G.act_buy_outlet(S, o.id)
+				toast.emit(res.text)
+				changed.emit(), blocked or S.money < price)
+			b.tooltip_text = "Uses one of this month's actions. A bought outlet turns your way and shields your voters, but it is believed less and loses readers to the others."
+			c.add_child(b)
 
 # ---------- Polls ----------
 func _polls() -> void:

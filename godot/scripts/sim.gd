@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 26
+const SAVE_VERSION := 27
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -59,6 +59,7 @@ var CITY_INFO: Dictionary = {} # population, lean and a line per city (data/citi
 var FLAGSHIP: Array = []       # the year-three flagship promise (data/flagship.json)
 var TOURS: Dictionary = {}     # short stories from the leader's trips (data/tours.json)
 var LEADER_TYPES: Array = []   # the kinds of leader voters want (data/leader_types.json)
+var OUTLETS: Array = []        # newspapers, channels and platforms (data/media.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -89,6 +90,7 @@ func load_content(path: String) -> void:
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
 	FLAGSHIP = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagship.json")).ISSUES if FileAccess.file_exists("res://data/flagship.json") else []
+	OUTLETS = JSON.parse_string(FileAccess.get_file_as_string("res://data/media.json")).OUTLETS if FileAccess.file_exists("res://data/media.json") else []
 	LEADER_TYPES = JSON.parse_string(FileAccess.get_file_as_string("res://data/leader_types.json")).TYPES if FileAccess.file_exists("res://data/leader_types.json") else []
 	if not C.has("typeWeight"): C.typeWeight = 0.8
 	TOURS = JSON.parse_string(FileAccess.get_file_as_string("res://data/tours.json")) if FileAccess.file_exists("res://data/tours.json") else {}
@@ -325,6 +327,7 @@ func new_game(opts := {}) -> Dictionary:
 	_home_start(s, str(opts.get("home", "")))
 	seed_loyalty(s)
 	s.figures = new_figures(s)
+	s.media = new_media(s)
 	# the country is already arguing about something
 	var general = TOPICS.filter(func(t): return not t.has("trigger"))
 	for i in 2:
@@ -465,7 +468,7 @@ func build_pops(s: Dictionary) -> Array:
 					var pop = {
 						"id": "%s/%s/%s/%s" % [d.id, a.id, c.id, nid],
 						"region": r.id, "district": d.id, "age": a.id, "class": c.id, "nationality": nid,
-						"size": float(jround(size)), "pos": pos, "sal": sal,
+						"size": float(jround(size)), "pos": pos, "base": pos.duplicate(), "sal": sal, "shield": {},
 						"turnout": clampf2(a.turnout + c.turnout + n.turnout + float(r.get("turnout", 0)), 0.25, 0.95),
 						"engagement": a.engagement * c.engagement,
 						"leaderPull": fixed(_or1(a.get("leaderAppeal")) * _or1(c.get("leaderAppeal")) * _or1(n.get("leaderAppeal")) * _or1(r.get("leaderAppeal")), 2),
@@ -836,7 +839,9 @@ func apply_effects(s: Dictionary, fx: Dictionary) -> void:
 		var amt: float = g.amt
 		if amt < 0 and party == player.id: amt = amt * (1 - C.extremeAnger / 2.0 + C.extremeAnger * ext)
 		for pop in s.pops:
-			if matches(pop, g.get("who")): pop.goodwill[party] = clampf2(pop.goodwill[party] + amt * C.goodwillScale, -2, 2)
+			if matches(pop, g.get("who")):
+				var a2: float = amt * (1 - shield_of(pop, party)) if amt < 0 else amt   # friendly media explain it away
+				pop.goodwill[party] = clampf2(pop.goodwill[party] + a2 * C.goodwillScale, -2, 2)
 	for id in fx.get("crisis", {}):
 		if s.crisis: break
 		s.crisisPressure[id] = maxf(-3, float(s.crisisPressure.get(id, 0)) + fx.crisis[id] * inf)
@@ -1137,6 +1142,7 @@ func monthly_update(s: Dictionary) -> void:
 	flagship_monthly(s)
 	steer_monthly(s)
 	figures_monthly(s)
+	media_monthly(s)
 	if rand(s) < C.newsWaveChance:
 		var ax: Dictionary = pick(s, AXES)
 		s.salMod[ax.id] = clampf2(float(s.salMod.get(ax.id, 0)) + C.newsWaveSize, -0.5, 1.5)
@@ -1168,7 +1174,7 @@ func monthly_update(s: Dictionary) -> void:
 			var floating: float = sup[p.id] - pop.loyal[p.id]
 			var core: float = pop.loyal[p.id] * (1 - C.loyaltyChurn) + floating * C.loyaltyGain
 			var erosion: float = C.coreErosion * maxf(0, ctx.inc[p.id] - C.inconsistencyTolerance)
-			core *= 1 - erosion * (1 - devotion_of(pop, p))
+			core *= 1 - erosion * (1 - devotion_of(pop, p)) * (1 - shield_of(pop, p.id))
 			pop.loyal[p.id] = clampf2(core, 0, 0.9)
 			loyal_total += pop.loyal[p.id]
 		if loyal_total > 0.85:
@@ -1178,6 +1184,140 @@ func monthly_update(s: Dictionary) -> void:
 	frontrunner_scrutiny(s, now)
 	s.trustHistory.append({"week": s.week, "trust": s.trust})
 	s.lastSupport = now
+
+# ---------- Media ----------
+## Each outlet works on its audience every month (data/media.json): it pulls their
+## views toward its slant, warms them to the party it favours, and shields that
+## party. Views are pulled back toward where they started, so nobody runs away.
+const VIEW_HOME := 0.04       # monthly pull of every group's views back to where it started
+const MEDIA_VIEW := 0.03      # how far a full-time viewer moves toward an outlet's slant each month
+const MEDIA_WARM := 0.05      # goodwill a full-time viewer gains for the favoured party each month
+const SHIELD_MAX := 0.6
+
+func new_media(s: Dictionary) -> Dictionary:
+	var out = {}
+	for o in OUTLETS:
+		out[o.id] = {"pos": o.get("pos", {}).duplicate(), "owner": "", "audience": 1.0, "buzz": 0.0, "favour": {}}
+	return out
+
+func outlet_by_id(id: String) -> Variant:
+	return by_id(OUTLETS, id)
+
+## The share of a group that follows an outlet.
+func outlet_reach(s: Dictionary, o: Dictionary, pop: Dictionary) -> float:
+	var st: Dictionary = s.media.get(o.id, {})
+	var r: float = float(o.get("reach", {}).get("base", 0.1)) * float(st.get("audience", 1.0))
+	var by: Dictionary = o.get("reach", {}).get("by", {})
+	for key in ["age", "class", "region", "nationality"]:
+		r *= float(by.get(key, {}).get(pop[key], 1.0))
+	return clampf2(r, 0, 0.9)
+
+## How honest an outlet is now: a party-owned one is less believed.
+func outlet_honesty(s: Dictionary, o: Dictionary) -> float:
+	var h: float = float(o.get("honesty", 0.5))
+	return h * 0.5 if s.media[o.id].owner != "" else h
+
+## How an outlet treats a party, -1..1. Partisan outlets back whoever is closest to
+## their slant; honest ones follow what you actually say and how it goes ("buzz").
+func outlet_favour(s: Dictionary, o: Dictionary, p: Dictionary) -> float:
+	var st: Dictionary = s.media[o.id]
+	if st.owner != "": return 1.0 if st.owner == p.id else -0.3
+	var h: float = float(o.get("honesty", 0.5))
+	var diff = 0.0
+	var n = 0
+	for ax in st.pos:
+		diff += absf(float(p.perceived[ax]) - float(st.pos[ax]))
+		n += 1
+	var slant: float = clampf2(1.0 - (diff / n) / 60.0, -1, 1) if n else 0.0
+	var f: float = slant * (1 - h)
+	if p.isPlayer: f += h * float(st.buzz)
+	return clampf2(f, -1, 1)
+
+static func shield_of(pop: Dictionary, pid: String) -> float:
+	return float(pop.get("shield", {}).get(pid, 0.0))
+
+## A line you said, as each outlet plays it: tone, a viral clip, a gaffe.
+func media_hear(s: Dictionary, tone: String, outcome: String, k := 1.0) -> void:
+	if not s.has("media"): return
+	for o in OUTLETS:
+		var st: Dictionary = s.media[o.id]
+		var d: float = (float(o.get("tones", {}).get(tone, 1.0)) - 1.0) * 0.4
+		if outcome == "viral": d += 0.35 if o.kind == "platform" else 0.15
+		elif outcome == "gaffe": d -= 0.4 * float(o.get("honesty", 0.5))   # partisan friends look away
+		st.buzz = clampf2(float(st.buzz) + d * k, -1, 1)
+
+func media_monthly(s: Dictionary) -> void:
+	if not s.has("media"): return
+	for pop in s.pops:
+		if pop.has("base"):
+			for ax in pop.base: pop.pos[ax] += (float(pop.base[ax]) - float(pop.pos[ax])) * VIEW_HOME
+		var shd: Dictionary = pop.get("shield", {})
+		for pid in shd: shd[pid] = float(shd[pid]) * 0.7
+		pop.shield = shd
+	for o in OUTLETS:
+		var st: Dictionary = s.media[o.id]
+		# a bought outlet turns toward its owner, and loses viewers to the others
+		if st.owner != "":
+			var owner = party_of(s, st.owner)
+			if owner:
+				for ax in st.pos: st.pos[ax] = float(st.pos[ax]) + (float(owner.perceived[ax]) - float(st.pos[ax])) * 0.08
+			var lost: float = float(st.audience) * 0.04
+			st.audience = float(st.audience) - lost
+			var others = OUTLETS.filter(func(x): return x.id != o.id and x.kind != "platform")
+			for x in others: s.media[x.id].audience = minf(1.6, float(s.media[x.id].audience) + lost / others.size())
+		var fav = {}
+		for p in s.parties: fav[p.id] = outlet_favour(s, o, p)
+		st.favour = fav
+		var h: float = outlet_honesty(s, o)
+		var k: float = 0.15 + 0.6 * (1 - h)     # how hard it moves a viewer
+		var sk: float = 0.1 + 0.8 * (1 - h)     # how much it shields its favourite
+		for pop in s.pops:
+			var r: float = outlet_reach(s, o, pop)
+			if r < 0.01: continue
+			for ax in st.pos: pop.pos[ax] = clampf2(float(pop.pos[ax]) + (float(st.pos[ax]) - float(pop.pos[ax])) * r * k * MEDIA_VIEW, -100, 100)
+			for pid in fav:
+				var f: float = fav[pid]
+				if absf(f) < 0.05: continue
+				pop.goodwill[pid] = clampf2(pop.goodwill[pid] + r * k * f * MEDIA_WARM, -2, 2)
+				if f > 0: pop.shield[pid] = minf(SHIELD_MAX, shield_of(pop, pid) + r * sk * f)
+		st.buzz = float(st.buzz) * 0.5
+
+## Buy an outlet outright. It turns your way and is believed less; viewers drift off.
+func act_buy_outlet(s: Dictionary, id: String) -> Dictionary:
+	var o = outlet_by_id(id)
+	if o == null: return {"ok": false, "text": "No such outlet."}
+	var price: float = float(o.get("price", 0))
+	if price <= 0: return {"ok": false, "text": "%s is not for sale." % o.name}
+	if s.media[id].owner != "": return {"ok": false, "text": "%s already has an owner." % o.name}
+	var err = can_act(s, price)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, price)
+	s.media[id].owner = "player"
+	var text = "%s now belongs to friends of the party. Its line will move your way; some of its readers will notice and leave." % o.name
+	push_news(s, {"kind": "issue", "title": "%s changes hands" % o.name, "text": "Buyers close to %s have taken over %s. Its journalists say nothing will change." % [player_party(s).short, o.name]})
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+## What a group follows, biggest first: [{outlet, reach}] (share of the group).
+func group_media(s: Dictionary, pops: Array) -> Array:
+	var out = []
+	var tot = 0.0
+	for pop in pops: tot += float(pop.size)
+	if tot <= 0 or not s.has("media"): return out
+	for o in OUTLETS:
+		var r = 0.0
+		for pop in pops: r += float(pop.size) * outlet_reach(s, o, pop)
+		out.append({"outlet": o, "reach": r / tot})
+	return ssort(out, func(a, b): return b.reach - a.reach)
+
+## How much a group's media shields a party (0..SHIELD_MAX), size-weighted.
+func group_shield(pops: Array, pid: String) -> float:
+	var tot = 0.0
+	var v = 0.0
+	for pop in pops:
+		tot += float(pop.size)
+		v += float(pop.size) * shield_of(pop, pid)
+	return v / tot if tot else 0.0
 
 # ---------- Actions ----------
 func can_act(s: Dictionary, cost := 0.0) -> String:
@@ -2451,7 +2591,7 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 		if on_side:
 			pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.025 * k, 0, 1)
 			pop.goodwill.player = clampf2(pop.goodwill.player + 0.05 * k * pop.sal[d.axis], -2, 2)
-		elif against: pop.goodwill.player = clampf2(pop.goodwill.player - 0.04 * k * pop.sal[d.axis], -2, 2)
+		elif against: pop.goodwill.player = clampf2(pop.goodwill.player - 0.04 * k * pop.sal[d.axis] * (1 - shield_of(pop, "player")), -2, 2)
 	record_statement(s, {"text": line.text, "title": d.title, "effects": {"shift": {d.axis: sign * 4}}, "tone": line.tone, "spoken": true})
 	var helps = ""
 	if not pv.mine and pv.owner != "" and pv.owner != "player": helps = " %s owns that side, so the attention helps them too." % party_of(s, pv.owner).short
@@ -2768,6 +2908,7 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	elif total > 3 and tone != top[0] and share > 0.5:
 		player.charisma = clampf2(player.charisma - 0.6, 10, 100)
 		style_note = "It didn't sound like you. Some voters wonder who the real you is."
+	media_hear(s, tone, outcome, 0.5 if quick else 1.0)
 	if outcome == "viral":
 		s.record.memes += 1
 		player.charisma = clampf2(player.charisma + 1.5, 10, 100)

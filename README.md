@@ -38,6 +38,10 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/debates.json` | Debate topics, including the ones the economy starts by itself |
 | `godot/data/issues.json` | Minor issues: local stories, each with its own lines |
 | `godot/data/party.json` | Your party's politicians |
+| `godot/data/media.json` | Newspapers, channels and platforms: audience, slant, honesty, what tone plays well |
+| `godot/data/leader_types.json` | The kinds of leader voters want, and who wants which |
+| `godot/data/tours.json` | Short stories from the leader's trips |
+| `godot/data/districts.json` | Province overrides: names, seats, local leans |
 | `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
 | `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |
 | `godot/data/margaret.json` | Margaret's notes and the two ways to answer her |
