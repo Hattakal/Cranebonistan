@@ -325,6 +325,18 @@ The designer's aims: the game should be enjoyable first, and it should look like
 - **Voters live in provinces.** The voter groups (pops) are now one per province × age × class × nationality (where that nationality lives), about 710 instead of 136 per region. A province takes its region's people and views, then its own character: towns are more middle- and upper-class, more mixed and more progressive than the countryside; a city's lean (cities.json) counts for its share of the province; and each game adds a local lean. Trips, offices and the home town still act on one province (and a little on its neighbours, less than before), but now on its own voters, so they show in the polls too, not only in the seat projection. This is the fix for whole regions flipping together after one trip. (Before: pops by region only; a province was its region's voters with a small overlay, so the provinces of a region moved in lockstep.) SAVE_VERSION 26.
 - **Carlos never blocks a button:** his remarks let clicks through and fade while the mouse is over them; only tutorial lines wait for a click.
 
+### Media (decided November 2026; first slice being built)
+
+- **Every outlet has an audience and works on it every month.** Its reach is which voter groups read or watch it (by age, class, region, nationality). Each month it does three things to its audience: pulls their **views** toward its own slant (a few issues of its own), warms them to the party it **favours**, and builds a **shield** for that party: its audience forgives that party's unpopular statements and drifts away more slowly (the "voting resilience" idea).
+- **Honest and partisan media.** An honest outlet reaches many people and moves each one a little; it reports what you actually do (good lines get credit, gaffes get covered). A partisan outlet (the Cranebonian Fox News, or its leftist equivalent) reaches fewer but moves them more and shields more, and spins whatever its party does. Its favour follows how close a party is to its own slant, so a working-class hero with the "wrong" economics is not its man.
+- **No runaway radicalisation.** Voters' views are pulled back toward where they started (who they are) every month; media moves opinion slowly and it eases back when coverage stops. Outlets shield only on their own terms.
+- **Tone by medium.** Measured and folksy lines play well in traditional media; fiery and provocative ones on social media.
+- **Buying an outlet.** A bought outlet's slant moves slowly toward your party, and it bleeds viewers, who go to other outlets of the same kind.
+- **Rivals play too.** Outlets favour rival parties by the same rules, so some groups are shielded for a rival.
+- **The player sees it in words.** The Electorate file says what a group reads and who that outlet backs ("They'll forgive you a lot"); no exact numbers.
+- *Second slice:* social media personalities (independent ones act like small partisan outlets; bought ones are weaker and a scandal if exposed); foreign money (money, friendly foreign coverage and free bot farms, at the price of exposure risk and demands); the media setting the agenda; friendly journalists who investigate rivals for you (opposition research becomes paying investigative journalists).
+- **Rival parties' turn (direction, after the media).** Rivals get a budget and spend it as the player does, a little less freely (the game is asymmetric): rallies and trips, media, investigating other parties. The Polls file becomes a general page about the parties: their monthly moves and spending, streamlined so it reads fast.
+
 ### Technology
 
 **Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.
