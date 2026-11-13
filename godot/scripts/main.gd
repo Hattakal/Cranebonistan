@@ -108,6 +108,10 @@ func _build() -> void:
 	_advisor = Advisor.new()
 	_advisor.z_index = 25
 	add_child(_advisor)
+	# the designer's cheat panel: ` or F12
+	_cheats = preload("res://scripts/cheats.gd").new()
+	_cheats.main = self
+	add_child(_cheats)
 	_advisor.margaret_answered.connect(func(agreed):
 		var t = G.teyl(S)
 		if t: t.loyalty = clampf(t.loyalty + (6.0 if agreed else -8.0), 0, 100)
@@ -165,6 +169,7 @@ func _build_bar() -> Control:
 	h.add_child(tsec)
 	return _bar
 
+var _cheats   # the cheat panel (cheats.gd)
 var _warned_month := -1   # the month we last reminded you about an unused trip or actions
 
 func _time_pressed(to_decision: bool) -> void:
@@ -1417,6 +1422,12 @@ func _shot(args: Dictionary) -> void:
 	if args.has("country"): _country_sheet(args.country)
 	if args.has("margaret"):
 		_advisor.margaret(args.margaret)
+	if args.has("cheats"):
+		_cheats.visible = true
+		_cheats._build()
+		if args.cheats != "1": _cheats._play_months(int(args.cheats))
+		_cheats._show_status("test")
+		render()
 	if args.has("carlos"):
 		_advisor.say(args.carlos, true)
 	if args.has("build"):

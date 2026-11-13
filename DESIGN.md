@@ -344,6 +344,10 @@ The designer's aims: the game should be enjoyable first, and it should look like
   - *Friendly journalists:* opposition research goes through the honest outlet that likes you most: better odds, less chance of being caught, and a leaked dossier they run hits harder and is traced to you less.
 - **Rival parties' turn — built (November 2026).** Every rival has money: an income every quarter from its support, its members and business (more for establishment parties). Each month it may tour the province where a trip matters most (one it could take or could lose, only in regions where it organises), spend on adverts that warm the voters closest to it, sign a personality close to its line, very rarely buy an outlet that likes it, and pay investigators to dig into whoever is closest in the polls, the new party most of all (a leak about you hits harder if you have taken dirty money; a caught investigator hurts them). Their moves have about 0.7 of the player's effect. The Polls file is now "Parties and polls": each party's polling, projected seats, funds and its moves of the last two months, above the poll tables. Leaks aimed at you stop the clock; everything else goes to the ticker.
 
+### Cheats (November 2026)
+
+For testing: ` (backtick) or F12 opens a cheat panel. Skip a month, three, six, a year, to the last month or to the election (decisions on the way take the first answer and last quarter's budget); settle or clear the decision waiting; money, actions, another trip; everyone's goodwill up or down, awareness, charisma; trust and each world number; start the crisis, a budget now, a foreign money offer, a random event, or any event by name; each rival's stability and money.
+
 ### Technology
 
 **Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.
