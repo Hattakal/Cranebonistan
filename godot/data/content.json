@@ -10629,7 +10629,7 @@
   "research": {
    "label": "Opposition research",
    "cost": 2,
-   "help": "Pay investigators to dig into a rival. You may find something you can release later. You may also get caught."
+   "help": "Pay investigators to dig into a rival. You may find something you can release later. You may also get caught. Friendly journalists at an honest outlet dig better and are caught less, and a story they run hits harder."
   },
   "release": {
    "label": "Release a dossier",

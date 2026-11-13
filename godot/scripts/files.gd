@@ -628,6 +628,9 @@ func _who(id: String) -> String:
 	if id == "player": return "you"
 	if id == "news": return "the news"
 	if id == "economy": return "the economy"
+	if id.begins_with("media:"):
+		var o = G.outlet_by_id(id.trim_prefix("media:"))
+		return o.name if o else "the media"
 	var p = G.party_of(S, id)
 	return p.short if p else id
 
@@ -1091,7 +1094,7 @@ class Spark extends Control:
 
 # ---------- Media ----------
 const KIND_NAMES := {"public": "Public broadcaster", "paper": "Broadsheet", "tabloid": "Tabloid", "business": "Business paper",
-	"network": "TV network", "online": "Online", "regional": "Local papers", "platform": "Social media", "foreign": "Foreign channel"}
+	"network": "TV network", "online": "Online", "regional": "Local papers", "platform": "Social media", "foreign": "Foreign channel", "influencer": "Personality"}
 const TONE_WORDS := {"statesman": "measured", "folksy": "folksy", "fiery": "fiery", "provocative": "provocative"}
 
 static func favour_word(f: float) -> String:
@@ -1103,14 +1106,25 @@ static func favour_word(f: float) -> String:
 
 func _media() -> void:
 	_p("Every outlet works on its audience month after month: it pulls their views toward its own line, warms them to the party it favours, and makes them forgive that party. Honest outlets reach many people and report what you actually say; partisan ones reach fewer, but move and protect their audience much more. Measured and folksy lines play best on television and in the papers, fiery and provocative ones on social media.", null, Look.MUTED, 13)
+	var pat = S.get("patron")
+	if pat:
+		var since: int = int((S.week - int(pat.since)) / G.WEEKS_PER_MONTH)
+		_p("Your friends abroad (%s) have been paying for %d month%s: money every quarter, their channel on your side and help on social media. Every month it runs, someone else might find out." % [str(pat.country).capitalize(), since, "" if since == 1 else "s"], null, Look.RED, 14)
 	var nation: Array = G.group_media(S, S.pops)
-	var g = GridContainer.new()
-	g.columns = 3 if size.x > 1100 else 1
-	g.add_theme_constant_override("h_separation", 12)
-	g.add_theme_constant_override("v_separation", 12)
-	_add(g)
 	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
-	for row in nation:
+	for part in [["Newspapers, channels and platforms", false], ["Personalities", true]]:
+		_eyebrow(part[0])
+		if part[1]: _p("Commentators, streamers and gossip channels. An independent one works like a small partisan outlet. You can sponsor one: they back you, but a paid voice counts for less, the fee comes every quarter, and if the contract leaks their followers feel used.", null, Look.MUTED, 13)
+		var g = GridContainer.new()
+		g.columns = 3 if size.x > 1100 else 1
+		g.add_theme_constant_override("h_separation", 12)
+		g.add_theme_constant_override("v_separation", 12)
+		_add(g)
+		for row in nation:
+			if (row.outlet.kind == "influencer") != part[1]: continue
+			_media_card(g, row, blocked)
+
+func _media_card(g: Control, row: Dictionary, blocked: bool) -> void:
 		var o: Dictionary = row.outlet
 		var st: Dictionary = S.media[o.id]
 		var c = _card(g)
@@ -1145,6 +1159,24 @@ func _media() -> void:
 				changed.emit(), blocked or S.money < price)
 			b.tooltip_text = "Uses one of this month's actions. A bought outlet turns your way and shields your voters, but it is believed less and loses readers to the others."
 			c.add_child(b)
+		if o.kind == "influencer":
+			var spon: String = st.get("sponsor", "")
+			var fee: float = float(o.get("sponsor", 2))
+			if spon == "player":
+				_add(Look.label("Sponsored by friends of the party: ₱%sM a quarter." % Game.fmt1(fee), "body_bold", 12, Look.RED, true), c)
+				c.add_child(_btn("End the deal", func():
+					var res: Dictionary = G.act_end_sponsor(S, o.id)
+					toast.emit(res.text)
+					changed.emit(), S.result != null))
+			elif spon != "":
+				_add(Look.label("Has a deal with someone.", "body", 12, Look.MUTED, true), c)
+			else:
+				var sb = _btn("Sponsor · ₱%sM a quarter" % Game.fmt1(fee), func():
+					var res: Dictionary = G.act_sponsor(S, o.id)
+					toast.emit(res.text)
+					changed.emit(), blocked or S.money < fee or S.week - int(st.get("grudge", -9999)) < 6 * G.WEEKS_PER_MONTH)
+				sb.tooltip_text = "Uses one of this month's actions; the fee is paid now and every quarter. A paid voice counts for half, and about one deal in thirty leaks each month."
+				c.add_child(sb)
 
 # ---------- Polls ----------
 func _polls() -> void:

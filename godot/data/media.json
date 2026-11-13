@@ -1,60 +1,737 @@
 {
- "_note": "The media. Every outlet works on its audience every month: it pulls their views toward its slant ('pos', only the issues it cares about, -100..100 like the axes), warms them to the party it favours, and shields that party (its audience forgives its unpopular statements). 'honesty' 0..1: honest outlets reach widely, move each viewer a little and report what you actually do; partisan ones move and shield their own audience much more and favour whoever is closest to their slant. 'reach': base share of a group that follows it, times 'by' (age, class, region, nationality multipliers). 'tones': how each way of speaking plays there (1 = neutral). 'kind': public, paper, tabloid, business, network, online, regional, platform, foreign. 'price': millions of pezo to buy it (0 = not for sale). Drafts: rename and retune freely.",
+ "_note": "The media. Every outlet works on its audience every month: it pulls their views toward its slant ('pos', only the issues it cares about, -100..100 like the axes), warms them to the party it favours, and shields that party (its audience forgives its unpopular statements). 'honesty' 0..1: honest outlets reach widely, move each viewer a little and report what you actually do; partisan ones move and shield their own audience much more and favour whoever is closest to their slant. 'reach': base share of a group that follows it, times 'by' (age, class, region, nationality multipliers). 'tones': how each way of speaking plays there (1 = neutral). 'kind': public, paper, tabloid, business, network, online, regional, platform, foreign. 'price': millions of pezo to buy it (0 = not for sale). Drafts: rename and retune freely. Foreign outlets name their 'country'. Personalities (kind 'influencer') can be sponsored: 'sponsor' is the price per quarter in millions; a sponsored personality backs the party paying, but is believed less, and the deal can come out. FOREIGN_MONEY: what comes with the secret foreign offers in content.json (FUNDING_OFFERS, by 'offer' id) once you take one: 'quarterly' millions more every quarter, the country's channel ('country', if it has one) on your side, free bot farms on social media, and favours asked now and then ('demands', each with a 'comply' answer and its effects; refusing ends the money). It ends when the offer's leak event comes out.",
  "OUTLETS": [
-  {"id": "cbc", "name": "CBC", "kind": "public", "owner": "the state broadcaster",
+  {
+   "id": "cbc",
+   "name": "CBC",
+   "kind": "public",
+   "owner": "the state broadcaster",
    "blurb": "The national broadcaster. Bound to be balanced, and mostly is.",
-   "honesty": 0.9, "pos": {}, "price": 0,
-   "reach": {"base": 0.35, "by": {"age": {"18-29": 0.4, "30-45": 0.8, "46-60": 1.2, "61+": 1.6}}},
-   "tones": {"statesman": 1.3, "folksy": 1.1, "fiery": 0.8, "provocative": 0.5}},
-  {"id": "herald", "name": "The Cranebo Herald", "kind": "paper", "owner": "the Vandel family, publishers for four generations",
+   "honesty": 0.9,
+   "pos": {},
+   "price": 0,
+   "reach": {
+    "base": 0.35,
+    "by": {
+     "age": {
+      "18-29": 0.4,
+      "30-45": 0.8,
+      "46-60": 1.2,
+      "61+": 1.6
+     }
+    }
+   },
+   "tones": {
+    "statesman": 1.3,
+    "folksy": 1.1,
+    "fiery": 0.8,
+    "provocative": 0.5
+   }
+  },
+  {
+   "id": "herald",
+   "name": "The Cranebo Herald",
+   "kind": "paper",
+   "owner": "the Vandel family, publishers for four generations",
    "blurb": "The broadsheet of the capital. Reads like a university, prices like a bank.",
-   "honesty": 0.75, "pos": {"society": -25, "nation": 25, "economy": 20}, "price": 14,
-   "reach": {"base": 0.16, "by": {"class": {"working": 0.3, "middle": 1.4, "upper": 2.2}, "region": {"cranbia": 1.4, "fauraifai": 0.5}}},
-   "tones": {"statesman": 1.4, "folksy": 0.9, "fiery": 0.7, "provocative": 0.4}},
-  {"id": "post", "name": "The Morning Post", "kind": "tabloid", "owner": "Henrik Strell, who also owns half the country's billboards",
+   "honesty": 0.75,
+   "pos": {
+    "society": -25,
+    "nation": 25,
+    "economy": 20
+   },
+   "price": 14,
+   "reach": {
+    "base": 0.16,
+    "by": {
+     "class": {
+      "working": 0.3,
+      "middle": 1.4,
+      "upper": 2.2
+     },
+     "region": {
+      "cranbia": 1.4,
+      "fauraifai": 0.5
+     }
+    }
+   },
+   "tones": {
+    "statesman": 1.4,
+    "folksy": 0.9,
+    "fiery": 0.7,
+    "provocative": 0.4
+   }
+  },
+  {
+   "id": "post",
+   "name": "The Morning Post",
+   "kind": "tabloid",
+   "owner": "Henrik Strell, who also owns half the country's billboards",
    "blurb": "The biggest-selling paper in the country. Three words to a headline.",
-   "honesty": 0.35, "pos": {"nation": -35, "society": 25, "economy": 30, "order": -20}, "price": 18,
-   "reach": {"base": 0.22, "by": {"class": {"working": 1.5, "middle": 0.9, "upper": 0.3}, "age": {"18-29": 0.5, "61+": 1.3}}},
-   "tones": {"statesman": 0.8, "folksy": 1.3, "fiery": 1.2, "provocative": 1.1}},
-  {"id": "ledger", "name": "The Pezo Ledger", "kind": "business", "owner": "a consortium of the country's banks",
+   "honesty": 0.35,
+   "pos": {
+    "nation": -35,
+    "society": 25,
+    "economy": 30,
+    "order": -20
+   },
+   "price": 18,
+   "reach": {
+    "base": 0.22,
+    "by": {
+     "class": {
+      "working": 1.5,
+      "middle": 0.9,
+      "upper": 0.3
+     },
+     "age": {
+      "18-29": 0.5,
+      "61+": 1.3
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.8,
+    "folksy": 1.3,
+    "fiery": 1.2,
+    "provocative": 1.1
+   }
+  },
+  {
+   "id": "ledger",
+   "name": "The Pezo Ledger",
+   "kind": "business",
+   "owner": "a consortium of the country's banks",
    "blurb": "Read on every trading floor. Thinks every problem is a tax.",
-   "honesty": 0.7, "pos": {"economy": 60, "welfare": 50, "system": 40}, "price": 0,
-   "reach": {"base": 0.05, "by": {"class": {"working": 0.1, "middle": 1.2, "upper": 6.0}}},
-   "tones": {"statesman": 1.5, "folksy": 0.8, "fiery": 0.5, "provocative": 0.3}},
-  {"id": "eagle", "name": "Eagle TV", "kind": "network", "owner": "Henrik Strell again, through a company in James",
+   "honesty": 0.7,
+   "pos": {
+    "economy": 60,
+    "welfare": 50,
+    "system": 40
+   },
+   "price": 0,
+   "reach": {
+    "base": 0.05,
+    "by": {
+     "class": {
+      "working": 0.1,
+      "middle": 1.2,
+      "upper": 6.0
+     }
+    }
+   },
+   "tones": {
+    "statesman": 1.5,
+    "folksy": 0.8,
+    "fiery": 0.5,
+    "provocative": 0.3
+   }
+  },
+  {
+   "id": "eagle",
+   "name": "Eagle TV",
+   "kind": "network",
+   "owner": "Henrik Strell again, through a company in James",
    "blurb": "Twenty-four hours of outrage, mostly about Cranebo.",
-   "honesty": 0.15, "pos": {"nation": -60, "society": 50, "order": -40, "economy": 40, "foreign": -30}, "price": 0,
-   "reach": {"base": 0.14, "by": {"age": {"18-29": 0.4, "30-45": 0.8, "46-60": 1.3, "61+": 1.6}, "class": {"upper": 0.6}, "nationality": {"alinnian": 0.1, "norbanian": 0.2}, "region": {"cranbia": 0.8, "erland": 1.4, "fauraifai": 1.3}}},
-   "tones": {"statesman": 0.7, "folksy": 1.2, "fiery": 1.4, "provocative": 1.2}},
-  {"id": "kettle", "name": "The Kettle", "kind": "online", "owner": "its readers, and a retired union boss who pays the deficit",
+   "honesty": 0.15,
+   "pos": {
+    "nation": -60,
+    "society": 50,
+    "order": -40,
+    "economy": 40,
+    "foreign": -30
+   },
+   "price": 0,
+   "reach": {
+    "base": 0.14,
+    "by": {
+     "age": {
+      "18-29": 0.4,
+      "30-45": 0.8,
+      "46-60": 1.3,
+      "61+": 1.6
+     },
+     "class": {
+      "upper": 0.6
+     },
+     "nationality": {
+      "alinnian": 0.1,
+      "norbanian": 0.2
+     },
+     "region": {
+      "cranbia": 0.8,
+      "erland": 1.4,
+      "fauraifai": 1.3
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.7,
+    "folksy": 1.2,
+    "fiery": 1.4,
+    "provocative": 1.2
+   }
+  },
+  {
+   "id": "kettle",
+   "name": "The Kettle",
+   "kind": "online",
+   "owner": "its readers, and a retired union boss who pays the deficit",
    "blurb": "Started as a union newsletter. Now the left's loudest channel.",
-   "honesty": 0.25, "pos": {"economy": -60, "welfare": -60, "system": -40, "society": -20}, "price": 6,
-   "reach": {"base": 0.09, "by": {"age": {"18-29": 1.6, "30-45": 1.2, "61+": 0.5}, "class": {"working": 1.4, "middle": 0.9, "upper": 0.2}}},
-   "tones": {"statesman": 0.6, "folksy": 1.1, "fiery": 1.5, "provocative": 1.2}},
-  {"id": "courier", "name": "The regional Couriers", "kind": "regional", "owner": "a chain of local papers bought up one at a time",
+   "honesty": 0.25,
+   "pos": {
+    "economy": -60,
+    "welfare": -60,
+    "system": -40,
+    "society": -20
+   },
+   "price": 6,
+   "reach": {
+    "base": 0.09,
+    "by": {
+     "age": {
+      "18-29": 1.6,
+      "30-45": 1.2,
+      "61+": 0.5
+     },
+     "class": {
+      "working": 1.4,
+      "middle": 0.9,
+      "upper": 0.2
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.6,
+    "folksy": 1.1,
+    "fiery": 1.5,
+    "provocative": 1.2
+   }
+  },
+  {
+   "id": "courier",
+   "name": "The regional Couriers",
+   "kind": "regional",
+   "owner": "a chain of local papers bought up one at a time",
    "blurb": "One in every province. They cover the council, the harvest and whoever came to town.",
-   "honesty": 0.7, "pos": {"system": 15}, "price": 0,
-   "reach": {"base": 0.2, "by": {"region": {"cranbia": 0.6, "erland": 1.4, "fauraifai": 1.5, "yamlin": 1.0, "alinni": 0.8}, "age": {"18-29": 0.4, "61+": 1.5}}},
-   "tones": {"statesman": 1.0, "folksy": 1.5, "fiery": 0.9, "provocative": 0.6}},
-  {"id": "clipr", "name": "Clipr", "kind": "platform", "owner": "a tech company nobody can find an address for",
+   "honesty": 0.7,
+   "pos": {
+    "system": 15
+   },
+   "price": 0,
+   "reach": {
+    "base": 0.2,
+    "by": {
+     "region": {
+      "cranbia": 0.6,
+      "erland": 1.4,
+      "fauraifai": 1.5,
+      "yamlin": 1.0,
+      "alinni": 0.8
+     },
+     "age": {
+      "18-29": 0.4,
+      "61+": 1.5
+     }
+    }
+   },
+   "tones": {
+    "statesman": 1.0,
+    "folksy": 1.5,
+    "fiery": 0.9,
+    "provocative": 0.6
+   }
+  },
+  {
+   "id": "clipr",
+   "name": "Clipr",
+   "kind": "platform",
+   "owner": "a tech company nobody can find an address for",
    "blurb": "Thirty-second videos. The algorithm loves a fight.",
-   "honesty": 0.4, "pos": {}, "price": 0,
-   "reach": {"base": 0.3, "by": {"age": {"18-29": 2.2, "30-45": 1.1, "46-60": 0.4, "61+": 0.15}}},
-   "tones": {"statesman": 0.5, "folksy": 1.0, "fiery": 1.4, "provocative": 1.7}},
-  {"id": "chatter", "name": "Chatter", "kind": "platform", "owner": "a billionaire who posts on it at three in the morning",
+   "honesty": 0.4,
+   "pos": {},
+   "price": 0,
+   "reach": {
+    "base": 0.3,
+    "by": {
+     "age": {
+      "18-29": 2.2,
+      "30-45": 1.1,
+      "46-60": 0.4,
+      "61+": 0.15
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.5,
+    "folksy": 1.0,
+    "fiery": 1.4,
+    "provocative": 1.7
+   }
+  },
+  {
+   "id": "chatter",
+   "name": "Chatter",
+   "kind": "platform",
+   "owner": "a billionaire who posts on it at three in the morning",
    "blurb": "Where journalists and politicians shout at each other in public.",
-   "honesty": 0.4, "pos": {}, "price": 0,
-   "reach": {"base": 0.15, "by": {"age": {"18-29": 1.2, "30-45": 1.5, "46-60": 0.9, "61+": 0.4}, "class": {"working": 0.7, "upper": 1.3}}},
-   "tones": {"statesman": 0.7, "folksy": 0.9, "fiery": 1.4, "provocative": 1.5}},
-  {"id": "trueants_tv", "name": "Trueants International", "kind": "foreign", "owner": "the government of Southern Trueants",
+   "honesty": 0.4,
+   "pos": {},
+   "price": 0,
+   "reach": {
+    "base": 0.15,
+    "by": {
+     "age": {
+      "18-29": 1.2,
+      "30-45": 1.5,
+      "46-60": 0.9,
+      "61+": 0.4
+     },
+     "class": {
+      "working": 0.7,
+      "upper": 1.3
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.7,
+    "folksy": 0.9,
+    "fiery": 1.4,
+    "provocative": 1.5
+   }
+  },
+  {
+   "id": "trueants_tv",
+   "name": "Trueants International",
+   "kind": "foreign",
+   "owner": "the government of Southern Trueants",
    "blurb": "Broadcast across the border in Alinni. Says the Alinni are mistreated, which is sometimes true.",
-   "honesty": 0.2, "pos": {"nation": 50, "foreign": 40, "system": -40}, "price": 0,
-   "reach": {"base": 0.04, "by": {"nationality": {"alinnian": 9.0}, "region": {"alinni": 2.0}}},
-   "tones": {"statesman": 0.9, "folksy": 1.0, "fiery": 1.2, "provocative": 1.0}},
-  {"id": "dillihan_world", "name": "Dillihan World", "kind": "foreign", "owner": "the Dillihan state, at arm's length",
+   "honesty": 0.2,
+   "pos": {
+    "nation": 50,
+    "foreign": 40,
+    "system": -40
+   },
+   "price": 0,
+   "reach": {
+    "base": 0.04,
+    "by": {
+     "nationality": {
+      "alinnian": 9.0
+     },
+     "region": {
+      "alinni": 2.0
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.9,
+    "folksy": 1.0,
+    "fiery": 1.2,
+    "provocative": 1.0
+   },
+   "country": "trueants"
+  },
+  {
+   "id": "dillihan_world",
+   "name": "Dillihan World",
+   "kind": "foreign",
+   "owner": "the Dillihan state, at arm's length",
    "blurb": "Polished, well funded and quietly on Dillihan's side.",
-   "honesty": 0.55, "pos": {"foreign": 40, "economy": 30}, "price": 0,
-   "reach": {"base": 0.04, "by": {"class": {"middle": 1.5, "upper": 2.0}, "region": {"fauraifai": 2.5, "cranbia": 1.2}}},
-   "tones": {"statesman": 1.3, "folksy": 0.9, "fiery": 0.7, "provocative": 0.5}}
+   "honesty": 0.55,
+   "pos": {
+    "foreign": 40,
+    "economy": 30
+   },
+   "price": 0,
+   "reach": {
+    "base": 0.04,
+    "by": {
+     "class": {
+      "middle": 1.5,
+      "upper": 2.0
+     },
+     "region": {
+      "fauraifai": 2.5,
+      "cranbia": 1.2
+     }
+    }
+   },
+   "tones": {
+    "statesman": 1.3,
+    "folksy": 0.9,
+    "fiery": 0.7,
+    "provocative": 0.5
+   },
+   "country": "dillihan"
+  },
+  {
+   "id": "vos",
+   "name": "Lena Vos",
+   "kind": "influencer",
+   "owner": "herself, and a few thousand monthly supporters",
+   "blurb": "Explains the economy in ten minutes with a whiteboard. Her viewers think the rest of the media is lying.",
+   "honesty": 0.35,
+   "pos": {
+    "economy": -50,
+    "welfare": -45,
+    "society": -35
+   },
+   "price": 0,
+   "sponsor": 2.0,
+   "reach": {
+    "base": 0.05,
+    "by": {
+     "age": {
+      "18-29": 2.4,
+      "30-45": 1.3,
+      "46-60": 0.4,
+      "61+": 0.1
+     },
+     "class": {
+      "working": 1.1,
+      "middle": 1.2,
+      "upper": 0.5
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.8,
+    "folksy": 1.0,
+    "fiery": 1.4,
+    "provocative": 1.2
+   }
+  },
+  {
+   "id": "bakk",
+   "name": "Jory Bakk",
+   "kind": "influencer",
+   "owner": "himself, from a farm outside Kansilia",
+   "blurb": "Films himself on a tractor, talking about Cranebo. Two million views a week.",
+   "honesty": 0.3,
+   "pos": {
+    "nation": -40,
+    "society": 40,
+    "system": -25
+   },
+   "price": 0,
+   "sponsor": 1.5,
+   "reach": {
+    "base": 0.05,
+    "by": {
+     "age": {
+      "18-29": 0.8,
+      "30-45": 1.4,
+      "46-60": 1.3,
+      "61+": 0.6
+     },
+     "region": {
+      "erland": 2.2,
+      "fauraifai": 2.0,
+      "cranbia": 0.5
+     },
+     "class": {
+      "upper": 0.3
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.7,
+    "folksy": 1.6,
+    "fiery": 1.2,
+    "provocative": 1.0
+   }
+  },
+  {
+   "id": "dunn",
+   "name": "Marek Dunn",
+   "kind": "influencer",
+   "owner": "himself, and his supplement sponsors",
+   "blurb": "A four-hour podcast about how everything is rigged. Sells vitamins in the breaks.",
+   "honesty": 0.15,
+   "pos": {
+    "system": -60,
+    "order": -25,
+    "foreign": -20
+   },
+   "price": 0,
+   "sponsor": 2.5,
+   "reach": {
+    "base": 0.06,
+    "by": {
+     "age": {
+      "18-29": 2.0,
+      "30-45": 1.5,
+      "46-60": 0.5,
+      "61+": 0.1
+     },
+     "class": {
+      "working": 1.3,
+      "middle": 0.9,
+      "upper": 0.4
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.5,
+    "folksy": 1.1,
+    "fiery": 1.5,
+    "provocative": 1.6
+   }
+  },
+  {
+   "id": "pim",
+   "name": "Pim",
+   "kind": "influencer",
+   "owner": "himself, and a sponsor who makes energy drinks",
+   "blurb": "Streams games eight hours a day to a quarter of the country's teenagers. Has never mentioned politics.",
+   "honesty": 0.4,
+   "pos": {},
+   "price": 0,
+   "sponsor": 3.0,
+   "reach": {
+    "base": 0.1,
+    "by": {
+     "age": {
+      "18-29": 3.2,
+      "30-45": 0.6,
+      "46-60": 0.1,
+      "61+": 0.02
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.5,
+    "folksy": 1.3,
+    "fiery": 1.0,
+    "provocative": 1.5
+   }
+  },
+  {
+   "id": "ross",
+   "name": "Dalia Ross",
+   "kind": "influencer",
+   "owner": "herself; her lawyers are kept busy",
+   "blurb": "Celebrity gossip and online feuds. If two famous people fall out, she had it first.",
+   "honesty": 0.25,
+   "pos": {},
+   "price": 0,
+   "sponsor": 2.0,
+   "reach": {
+    "base": 0.07,
+    "by": {
+     "age": {
+      "18-29": 2.0,
+      "30-45": 1.6,
+      "46-60": 0.6,
+      "61+": 0.2
+     },
+     "class": {
+      "middle": 1.3
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.6,
+    "folksy": 1.2,
+    "fiery": 1.1,
+    "provocative": 1.5
+   }
+  },
+  {
+   "id": "teller",
+   "name": "Kova Teller",
+   "kind": "influencer",
+   "owner": "himself; formerly of the Pezo Ledger",
+   "blurb": "An economist with charts on Chatter. Bankers read him; so do people who want to sound like bankers.",
+   "honesty": 0.6,
+   "pos": {
+    "economy": 40,
+    "welfare": 30,
+    "system": 30
+   },
+   "price": 0,
+   "sponsor": 1.5,
+   "reach": {
+    "base": 0.04,
+    "by": {
+     "class": {
+      "working": 0.3,
+      "middle": 1.4,
+      "upper": 3.0
+     },
+     "age": {
+      "18-29": 1.2,
+      "30-45": 1.5,
+      "61+": 0.4
+     }
+    }
+   },
+   "tones": {
+    "statesman": 1.4,
+    "folksy": 0.8,
+    "fiery": 0.6,
+    "provocative": 0.5
+   }
+  },
+  {
+   "id": "nina",
+   "name": "Nina from Nikecisa",
+   "kind": "influencer",
+   "owner": "herself, and the brands she wears",
+   "blurb": "Cafés, harbour sunsets and opinions about the trams. Everyone in Yamlin under forty follows her.",
+   "honesty": 0.45,
+   "pos": {
+    "nation": 20
+   },
+   "price": 0,
+   "sponsor": 1.0,
+   "reach": {
+    "base": 0.06,
+    "by": {
+     "region": {
+      "yamlin": 4.0,
+      "cranbia": 0.6,
+      "erland": 0.2,
+      "alinni": 0.3,
+      "fauraifai": 0.2
+     },
+     "age": {
+      "18-29": 2.0,
+      "30-45": 1.6,
+      "46-60": 0.5,
+      "61+": 0.2
+     }
+    }
+   },
+   "tones": {
+    "statesman": 0.8,
+    "folksy": 1.4,
+    "fiery": 0.8,
+    "provocative": 1.0
+   }
+  }
+ ],
+ "FOREIGN_MONEY": [
+  {
+   "offer": "dillihan",
+   "country": "dillihan",
+   "quarterly": 2,
+   "demands": [
+    {
+     "title": "A quiet word from Dillihan",
+     "text": "Your friends at the Dillihan energy company would like the party to say less about the Fauran border for a while. Nothing public; just less.",
+     "comply": {
+      "label": "Say less about the border",
+      "effects": {
+       "shift": {
+        "foreign": 8
+       }
+      }
+     },
+     "refuse": {
+      "label": "Say whatever you like"
+     }
+    },
+    {
+     "title": "A ports bill they care about",
+     "text": "Dillihan wants Cranebonistan's ports opened to its shipping firms. Your friends ask the party to back the bill.",
+     "comply": {
+      "label": "Back the ports bill",
+      "effects": {
+       "shift": {
+        "economy": 8,
+        "foreign": 5
+       }
+      }
+     },
+     "refuse": {
+      "label": "Stay out of it"
+     }
+    }
+   ]
+  },
+  {
+   "offer": "trueants",
+   "country": "trueants",
+   "quarterly": 2,
+   "demands": [
+    {
+     "title": "The intermediaries ask about Alinni",
+     "text": "The Trueant intermediaries would like the party to call for Alinni-language schools. Good for the Alinni, they say, and good for the friendship.",
+     "comply": {
+      "label": "Call for the schools",
+      "effects": {
+       "shift": {
+        "nation": 10
+       }
+      }
+     },
+     "refuse": {
+      "label": "Not now"
+     }
+    },
+    {
+     "title": "A softer word on the border",
+     "text": "There are troops on both sides of the Trueant border. The intermediaries hope the party will call for calm rather than for more troops.",
+     "comply": {
+      "label": "Call for calm",
+      "effects": {
+       "shift": {
+        "foreign": 10
+       }
+      }
+     },
+     "refuse": {
+      "label": "Say what you think"
+     }
+    }
+   ]
+  },
+  {
+   "offer": "potania",
+   "country": "potania",
+   "quarterly": 1.5,
+   "demands": [
+    {
+     "title": "About the James mines",
+     "text": "The Potanian mining company thinks Cranebonian firms have had the James concessions too long, and would like the party to call for an open tender.",
+     "comply": {
+      "label": "Call for an open tender",
+      "effects": {
+       "shift": {
+        "economy": 6,
+        "foreign": 6
+       }
+      }
+     },
+     "refuse": {
+      "label": "Leave the mines alone"
+     }
+    }
+   ]
+  },
+  {
+   "offer": "golba",
+   "country": "golba",
+   "quarterly": 1.5,
+   "demands": [
+    {
+     "title": "The Golban lobby has a tariff in mind",
+     "text": "The Golban trade lobby would like the party to oppose any tariff on Golban goods, whatever happens to the pezo.",
+     "comply": {
+      "label": "Oppose the tariffs",
+      "effects": {
+       "shift": {
+        "economy": 8
+       }
+      }
+     },
+     "refuse": {
+      "label": "Keep your options open"
+     }
+    }
+   ]
+  }
  ]
 }

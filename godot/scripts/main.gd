@@ -580,7 +580,7 @@ func _effects_lines(box: VBoxContainer, fx: Dictionary) -> void:
 	if tags.size(): box.add_child(Look.label(" · ".join(tags), "body_italic", 12, Look.MUTED, true))
 
 # ----- Events: the front page, what you say, how you say it, how it played -----
-const KINDS := {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences"}
+const KINDS := {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences", "secret": "In confidence"}
 
 func _event_header(p: Paper, ev: Dictionary) -> void:
 	var crisis = ""
