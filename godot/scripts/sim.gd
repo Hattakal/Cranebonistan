@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 23
+const SAVE_VERSION := 24
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -1071,17 +1071,40 @@ func communities_monthly(s: Dictionary) -> void:
 ## Named people in your party. Each cares most about one side of one issue.
 ## Steering the manifesto away from it costs their loyalty; below 25 they quit,
 ## and take a little of the party's reach and their region's goodwill with them.
+## The founders joined for the manifesto, so they share it: each one's cause is the
+## manifesto's side of their issue (the other side's note is in "noteOther"). One of
+## them, picked at random, is the exception: in the party for other reasons, against
+## the manifesto on their issue, and slowly losing patience unless you speak up for it.
 func new_figures(s: Dictionary) -> Array:
 	var out = []
-	var man: Dictionary = player_party(s).manifesto
+	var others = FIGURES.filter(func(f): return f.id != "teyl")
+	var odd: String = pick(s, others).id if others.size() else ""
 	for f in FIGURES:
-		var mine = manifesto_side(s, f.axis)
-		var loyal = 70.0 if mine == f.side else (45.0 if mine == "" else 35.0)
-		if f.id == "teyl": loyal = 65.0
 		var x = f.duplicate()
-		x.loyalty = loyal
+		x.skill = float(f.get("skill", 70))
+		var mine = manifesto_side(s, f.axis)
+		if f.id == "teyl":
+			x.loyalty = 65.0
+		elif f.id == odd:
+			# the bad apple: on the other side from the manifesto (or their own, if the manifesto sits in the middle)
+			if mine != "" and mine == f.side: _flip_figure(x)
+			x.loyalty = 40.0
+			x.doubter = true
+		else:
+			if mine != "" and mine != f.side: _flip_figure(x)
+			x.loyalty = 72.0 if mine != "" else 60.0
 		out.append(x)
 	return out
+
+func _flip_figure(x: Dictionary) -> void:
+	x.side = "R" if x.side == "L" else "L"
+	if x.has("noteOther"): x.note = x.noteOther
+
+## Your words on an issue reach the politicians who care about it.
+func figures_heard(s: Dictionary, axis: String, side: String) -> void:
+	for f in s.figures:
+		if f.axis != axis: continue
+		f.loyalty = clampf2(f.loyalty + (3.0 if f.side == side else -5.0), 0, 100)
 
 func figure_by_id(s: Dictionary, id: String) -> Variant:
 	for f in s.figures:
@@ -1090,7 +1113,15 @@ func figure_by_id(s: Dictionary, id: String) -> Variant:
 
 ## How strong the party's bench is: 1.0 with everyone you started with.
 func party_bench(s: Dictionary) -> float:
-	return clampf2(float(s.figures.size()) / maxf(1, FIGURES.size()), 0.3, 1.3)
+	var have = 0.0
+	for f in s.figures: have += float(f.get("skill", 70)) / 70.0
+	return clampf2(have / maxf(1, FIGURES.size()), 0.3, 1.3)
+
+static func skill_word(k: float) -> String:
+	if k >= 75: return "Gifted"
+	if k >= 60: return "Able"
+	if k >= 45: return "Ordinary"
+	return "Green"
 
 static func loyalty_word(l: float) -> String:
 	if l >= 75: return "Devoted"
@@ -1101,6 +1132,9 @@ static func loyalty_word(l: float) -> String:
 
 func figures_monthly(s: Dictionary) -> void:
 	for f in s.figures.duplicate():
+		# someone whose cause the manifesto is against loses patience a little every month
+		var mine = manifesto_side(s, f.axis)
+		if f.id != "teyl" and mine != "" and mine != f.side: f.loyalty = clampf2(f.loyalty - 1.5, 0, 100)
 		if f.loyalty >= 25: continue
 		s.figures.erase(f)
 		s.figuresLost.append({"name": f.name, "role": f.role, "week": s.week})
@@ -1108,6 +1142,21 @@ func figures_monthly(s: Dictionary) -> void:
 			if pop.region == f.region: pop.goodwill.player = clampf2(pop.goodwill.player - 0.06, -2, 2)
 		push_news(s, {"kind": "threat", "title": "%s quits %s" % [f.name, player_party(s).short],
 			"text": "%s, %s, says the party is no longer the one %s joined. %s local supporters are not happy either." % [f.name, f.role.to_lower(), "she" if f.get("sex", "m") == "f" else "he", "Her" if f.get("sex", "m") == "f" else "His"]})
+		if f.id != "teyl": _replace_figure(s, f)
+
+## Someone who agrees with the manifesto takes the empty chair: loyal, because they
+## owe the job to you, and usually less able than the person who left.
+func _replace_figure(s: Dictionary, gone: Dictionary) -> void:
+	var pool = LEADER_POOL.filter(func(x): return not s.figures.any(func(f): return f.name == x.name) and not s.parties.any(func(q): return q.leader == x.name) and not s.figuresLost.any(func(l): return l.name == x.name))
+	if pool.is_empty(): return
+	var who: Dictionary = pick(s, pool)
+	var mine = manifesto_side(s, gone.axis)
+	var side: String = mine if mine != "" else gone.side
+	var lean_word: String = side_label(side_key(gone.axis, side)).to_lower()
+	s.figures.append({"id": "new_%d_%s" % [s.week, gone.id], "name": who.name, "sex": who.get("sex", "m"), "role": gone.role, "region": gone.region,
+		"axis": gone.axis, "side": side, "loyalty": 78.0, "skill": 30.0 + rand(s) * 20.0, "yes": true,
+		"note": "Took over from %s. Agrees with the manifesto on %s, and on most things you say." % [gone.name, lean_word]})
+	_log(s, "action", "%s replaces %s as %s." % [who.name, gone.name, String(gone.role).to_lower()])
 
 # ---------- Steering the party ----------
 ## Moving the manifesto one stance takes three months. The politicians who
@@ -2224,6 +2273,7 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 		if ownership_of(s, rp.id, other_key) > 0.05: change_relation(s, rp.id, -3 if major else -1.5, "you attacked their line on %s" % by_id(AXES, d.axis).issue.to_lower())
 		elif ownership_of(s, rp.id, key) > 0.05: change_relation(s, rp.id, 1.5 if major else 0.75, "you backed their line on %s" % by_id(AXES, d.axis).issue.to_lower())
 	s.spoke[key] = s.week
+	figures_heard(s, d.axis, side)
 	var k = 1.0 if major else 0.6
 	for pop in s.pops:
 		var p: float = pop.pos[d.axis]
@@ -2361,6 +2411,7 @@ func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) ->
 	var sign = -1.0 if side == "L" else 1.0
 	shift_perceived(s, {opt.axis: sign * 4})
 	s.spoke[side_key(opt.axis, side)] = s.week
+	figures_heard(s, opt.axis, side)
 	record_statement(s, {"text": line.text, "title": opt.title, "effects": {"shift": {opt.axis: sign * 4}}, "tone": line.tone, "spoken": true})
 	var text = ""
 	if caught:

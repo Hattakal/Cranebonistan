@@ -1,5 +1,5 @@
 {
- "_note": "The people in your party. Each cares most about one side of one issue; steering the manifesto away from it costs their loyalty, and below 25 they quit. Margaret Teyl is the party secretary and always starts in the party. 'side' is L or R of the axis; a figure whose side matches your manifesto starts more loyal.",
+ "_note": "The people in your party. Each cares most about one side of one issue. At the start they share the manifesto: a figure whose side differs from the manifesto's is turned around, and 'noteOther' replaces their note. One of them (never Teyl), picked at random each game, is the exception and starts against the manifesto. Steering the manifesto, or speaking, against their side costs loyalty; below 25 they quit and a less able yes-man takes the chair. 'skill' 0-100 (the bench's strength). Margaret Teyl is the party secretary and always starts in the party.",
  "FIGURES": [
   {
    "id": "teyl",
@@ -9,7 +9,8 @@
    "axis": "system",
    "side": "R",
    "note": "Respected by everyone in the party. Hates cutting corners.",
-   "sex": "f"
+   "sex": "f",
+   "skill": 80
   },
   {
    "id": "orlik",
@@ -19,7 +20,9 @@
    "axis": "economy",
    "side": "L",
    "note": "Brought half the steelworkers with him.",
-   "sex": "m"
+   "sex": "m",
+   "skill": 70,
+   "noteOther": "Ran the steelworkers' pension fund for ten years. Thinks the state makes a poor shareholder."
   },
   {
    "id": "vanna",
@@ -29,7 +32,9 @@
    "axis": "society",
    "side": "L",
    "note": "Young, sharp, good on television.",
-   "sex": "f"
+   "sex": "f",
+   "skill": 75,
+   "noteOther": "Young, sharp, good on television. Thinks the old ways got the country this far."
   },
   {
    "id": "brandt",
@@ -39,7 +44,9 @@
    "axis": "nation",
    "side": "L",
    "note": "Speaks for the villages. Distrusts Cranebo.",
-   "sex": "m"
+   "sex": "m",
+   "skill": 65,
+   "noteOther": "Speaks for the villages, where the harvest is picked by people from three countries. Distrusts Cranebo."
   },
   {
    "id": "kaya",
@@ -49,7 +56,9 @@
    "axis": "welfare",
    "side": "R",
    "note": "Knows where every pezo goes. Hates promises nobody can pay for.",
-   "sex": "f"
+   "sex": "f",
+   "skill": 72,
+   "noteOther": "Knows where every pezo goes, and thinks most of them should go to pensions."
   },
   {
    "id": "aikut",
@@ -59,7 +68,9 @@
    "axis": "order",
    "side": "R",
    "note": "Grew up with checkpoints. Will not defend them.",
-   "sex": "f"
+   "sex": "f",
+   "skill": 68,
+   "noteOther": "Grew up with checkpoints, and with what they kept out. Will not apologise for them."
   },
   {
    "id": "sarn",
@@ -69,7 +80,9 @@
    "axis": "welfare",
    "side": "L",
    "note": "Fauran's only well-known politician in the party.",
-   "sex": "m"
+   "sex": "m",
+   "skill": 60,
+   "noteOther": "Fauran's only well-known politician in the party. Balanced Kravk's books three years running."
   }
  ]
 }

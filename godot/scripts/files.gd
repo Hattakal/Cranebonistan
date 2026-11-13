@@ -451,7 +451,7 @@ func _platform() -> void:
 	# the people in the party
 	_rule()
 	_eyebrow("Your party's politicians")
-	_p("They are the party's faces in the regions. Each cares most about one issue; steer the manifesto away from it and their loyalty drops. Below 25 they quit, and the party's reach shrinks.", null, Look.MUTED, 13)
+	_p("They are the party's faces in the regions, and they joined for the manifesto. Each cares most about one issue: keep to it and they stay; steer the manifesto or speak against their side and their loyalty drops. Below 25 they quit, and someone who agrees with you takes the chair: loyal, but usually less able.", null, Look.MUTED, 13)
 	var pg = GridContainer.new()
 	pg.columns = 3 if size.x > 1100 else 1
 	pg.add_theme_constant_override("h_separation", 12)
@@ -466,13 +466,15 @@ func _platform() -> void:
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		top2.add_child(nm)
 		top2.add_child(Look.label(G.loyalty_word(f.loyalty), "body_bold", 13, Look.RED if f.loyalty < 40 else (Look.GOOD if f.loyalty >= 55 else Look.INK)))
-		c.add_child(Look.label("%s · %s" % [f.role, Game.by_id(G.REGIONS, f.region).name], "body", 12, Look.MUTED, true))
+		c.add_child(Look.label("%s · %s · %s" % [f.role, Game.by_id(G.REGIONS, f.region).name, G.skill_word(float(f.get("skill", 70)))], "body", 12, Look.MUTED, true))
 		var lb = Bar.new(Look.RED if f.loyalty < 40 else Color("8a6d4a"), f.loyalty / 100.0)
 		lb.custom_minimum_size.y = 6
 		c.add_child(lb)
 		var fax = Game.by_id(G.AXES, f.axis)
 		c.add_child(Look.label("Cares about: %s" % (fax.left if f.side == "L" else fax.right).to_lower() + (" ★" if G.manifesto_side(S, f.axis) == f.side else (" (against your manifesto)" if G.manifesto_side(S, f.axis) != "" else "")), "body_bold", 12, Look.INK, true))
 		c.add_child(Look.label(f.note, "body_italic", 12, Look.MUTED, true))
+		if f.get("doubter", false) and G.manifesto_side(S, f.axis) != "" and G.manifesto_side(S, f.axis) != f.side:
+			c.add_child(Look.label("Joined for you, not the manifesto. Losing patience every month; speaking up for their side buys time.", "body", 12, Look.RED, true))
 	if S.figuresLost.size():
 		_p("Gone: " + ", ".join(S.figuresLost.map(func(x): return "%s (%s)" % [x.name, x.role.to_lower()])), null, Look.RED, 13)
 
