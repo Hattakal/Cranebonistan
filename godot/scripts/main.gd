@@ -1284,7 +1284,8 @@ func _profile_sheet() -> void:
 	var dirty: Array = pr.money.filter(func(m): return m.dirty)
 	if dirty.size(): p.text("You took money from %s." % ", ".join(dirty.map(func(m): return m.source)), 15)
 	if pr.crisis: p.text("The crisis: %s.%s" % [pr.crisis.name, " Your own campaign helped bring it about." if pr.crisis.blamed else ""], 15)
-	p.small("Speaking style: %s · %d statements · %d viral moments · %d gaffes" % [pr.style, pr.statements, pr.memes, pr.gaffes], Look.INK)
+	var pl = func(n: int, w: String) -> String: return "%d %s%s" % [n, w, "" if n == 1 else "s"]
+	p.small("Speaking style: %s · %s · %s · %s" % [pr.style, pl.call(pr.statements, "statement"), pl.call(pr.memes, "viral moment"), pl.call(pr.gaffes, "gaffe")], Look.INK)
 	p.actions([p.button("Close", func(): p.close())])
 
 ## Two things the leader said, side by side: what came first and what came later.
@@ -1304,7 +1305,10 @@ func _said_pair(first: Dictionary, second: Dictionary, side_of) -> Control:
 		var head: String = "%s · %s" % [cols[i][1], G.date_label(int(q.week), false)]
 		if side_of is Callable and q.has("shift"): head += " · for " + side_of.call(q)
 		v.add_child(Look.caps(head, 11, Look.RED if i == 1 else Look.MUTED, 1))
-		var told: String = ("“%s”" % q.text) if q.get("spoken", true) else ("Chose to " + String(q.text).substr(0, 1).to_lower() + String(q.text).substr(1))
+		var t: String = String(q.text).strip_edges()
+		var quoted: bool = q.get("spoken", true) or t.begins_with("\"") or t.begins_with("“")
+		var told: String = ("“%s”" % t.trim_prefix("\"").trim_suffix("\"").trim_prefix("“").trim_suffix("”")) if quoted else ("Chose to " + t.substr(0, 1).to_lower() + t.substr(1).trim_suffix("."))
+		if String(q.get("title", "")) != "": v.add_child(Look.label("On “%s”:" % q.title, "body", 13, Look.MUTED, true))
 		v.add_child(Look.label(told, "news_italic", 16, Look.INK, true))
 		box.add_child(v)
 		h.add_child(box)
