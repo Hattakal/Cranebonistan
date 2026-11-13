@@ -1266,22 +1266,48 @@ func _profile_sheet() -> void:
 	if pr.signature: p.quote(pr.signature.text, "%s, %s" % [you.leader, G.date_label(pr.signature.week, false)])
 	if pr.contradictions.size():
 		p.rule(1)
-		p.add(Look.caps("Said and unsaid", 12, Look.RED, 2))
+		p.add(Look.caps("Where you said one thing, then the opposite", 12, Look.RED, 2))
 		for c in pr.contradictions:
-			p.add(Look.caps("On " + Game.by_id(G.AXES, c.axis).issue.to_lower(), 11, Look.MUTED, 2))
-			for q in [c.first, c.second]:
-				var told: String = ("“%s”" % q.text) if q.get("spoken", true) else ("Chose to " + q.text.substr(0, 1).to_lower() + q.text.substr(1))
-				p.add(Look.label("%s — %s" % [G.date_label(q.week, false), told], "news", 16, Look.INK, true))
+			var ax = Game.by_id(G.AXES, c.axis)
+			var side_of = func(q) -> String: return (ax.left if float(q.shift[c.axis]) < 0 else ax.right).to_lower()
+			p.add(Look.label("On %s: first %s, then %s." % [ax.issue.to_lower(), side_of.call(c.first), side_of.call(c.second)], "news_bold", 19, Look.INK, true))
+			p.add(_said_pair(c.first, c.second, side_of))
 	if pr.betrayed.size():
 		p.rule(1)
 		p.add(Look.caps("Promises broken", 12, Look.RED, 2))
-		for b in pr.betrayed: p.text("To %s: first “%s”, then “%s”." % [b.group, b.promised, b.now], 15)
-	if pr.blamed.size(): p.text("Blamed along the way: %s." % ", ".join(pr.blamed), 15)
+		for b in pr.betrayed:
+			p.add(Look.label("To %s:" % b.group, "news_bold", 17, Look.INK, true))
+			p.add(_said_pair({"text": b.promised, "week": b.promisedWeek, "spoken": b.get("promisedSpoken", true)}, {"text": b.now, "week": b.week, "spoken": b.get("nowSpoken", true)}, null))
+	if pr.blamed.size(): p.text("Groups you blamed along the way: %s." % ", ".join(pr.blamed), 15)
 	var dirty: Array = pr.money.filter(func(m): return m.dirty)
-	if dirty.size(): p.text("Took money from %s." % ", ".join(dirty.map(func(m): return m.source)), 15)
-	if pr.crisis: p.text("The crisis: %s.%s" % [pr.crisis.name, " Its campaign helped bring it about." if pr.crisis.blamed else ""], 15)
+	if dirty.size(): p.text("You took money from %s." % ", ".join(dirty.map(func(m): return m.source)), 15)
+	if pr.crisis: p.text("The crisis: %s.%s" % [pr.crisis.name, " Your own campaign helped bring it about." if pr.crisis.blamed else ""], 15)
 	p.small("Speaking style: %s · %d statements · %d viral moments · %d gaffes" % [pr.style, pr.statements, pr.memes, pr.gaffes], Look.INK)
 	p.actions([p.button("Close", func(): p.close())])
+
+## Two things the leader said, side by side: what came first and what came later.
+func _said_pair(first: Dictionary, second: Dictionary, side_of) -> Control:
+	var h = HBoxContainer.new()
+	h.add_theme_constant_override("separation", 14)
+	var cols = [[first, "Then"], [second, "Later"]]
+	for i in 2:
+		var q: Dictionary = cols[i][0]
+		var box = PanelContainer.new()
+		var sb = Look.box(Color(0.7, 0.15, 0.12, 0.06) if i == 1 else Color(0, 0, 0, 0.04), 0, Look.RED if i == 1 else Look.MUTED, 0, 0, 12)
+		sb.border_width_left = 4
+		box.add_theme_stylebox_override("panel", sb)
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		box.custom_minimum_size.x = 340
+		var v = VBoxContainer.new()
+		var head: String = "%s · %s" % [cols[i][1], G.date_label(int(q.week), false)]
+		if side_of is Callable and q.has("shift"): head += " · for " + side_of.call(q)
+		v.add_child(Look.caps(head, 11, Look.RED if i == 1 else Look.MUTED, 1))
+		var told: String = ("“%s”" % q.text) if q.get("spoken", true) else ("Chose to " + String(q.text).substr(0, 1).to_lower() + String(q.text).substr(1))
+		v.add_child(Look.label(told, "news_italic", 16, Look.INK, true))
+		box.add_child(v)
+		h.add_child(box)
+		if i == 0: h.add_child(Look.label("→", "display", 22, Look.RED))
+	return h
 
 func _toast(text: String) -> void:
 	var t = Look.label(text, "type", 15, Look.INK, true)
