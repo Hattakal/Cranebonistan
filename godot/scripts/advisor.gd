@@ -21,6 +21,14 @@ var _text: Label
 var _hint: Label
 var _audio: AudioStreamPlayer
 var _note: PanelContainer = null
+var _hold := false
+
+func _process(d: float) -> void:
+	if _bubble == null or not _bubble.visible or _hold or not _busy: return
+	var over: bool = _bubble.get_global_rect().has_point(get_global_mouse_position())
+	var want: float = 0.12 if over else 1.0
+	if absf(_bubble.modulate.a - want) > 0.01:
+		_bubble.modulate.a = move_toward(_bubble.modulate.a, want, d * 6.0)
 
 func _ready() -> void:
 	LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/carlos.json")).LINES
@@ -112,6 +120,10 @@ func _next() -> void:
 	_hint.text = ("Click to continue · %d more" % _queue.size()) if item.hold and _queue.size() else ("Click to continue" if item.hold else "")
 	_bubble.visible = true
 	_bubble.modulate.a = 1.0
+	# an ordinary remark never blocks the buttons under it: clicks pass through, and it
+	# fades while the mouse is over it (see _process). Tutorial lines wait for a click.
+	_bubble.mouse_filter = Control.MOUSE_FILTER_STOP if item.hold else Control.MOUSE_FILTER_IGNORE
+	_hold = item.hold
 	_layout()
 	await get_tree().process_frame
 	_layout()

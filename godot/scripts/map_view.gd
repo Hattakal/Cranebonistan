@@ -33,6 +33,8 @@ var _dragged = false
 var _features: Texture2D
 var _grain: Texture2D
 var _plates = {}              # foreign id -> Rect2 (screen) for tiny countries
+var capital_district = ""     # the capital's own small district: its star is a click target too
+var _cap_spot = Rect2()       # screen area of the capital's star and name
 
 func setup(game) -> void:
 	var m: Dictionary = game.MAP
@@ -48,6 +50,7 @@ func setup(game) -> void:
 	districts.clear()
 	for d in game.DISTRICTS:
 		districts.append({"id": d.id, "region": d.region, "name": d.name, "polys": _parse(d.d), "label": d.label, "seats": int(d.seats)})
+		if d.cities.has(capital): capital_district = d.id
 	_features = load("res://assets/map-features.png")
 	_grain = Look.noise_texture(512, 512, Color(0.35, 0.25, 0.12, 0.0), Color(0.35, 0.25, 0.12, 0.22), 0.02, 4)
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -149,6 +152,7 @@ func _notification(what: int) -> void:
 func _hit(screen: Vector2) -> Dictionary:
 	for id in _plates:
 		if _plates[id].has_point(screen): return {"id": id, "kind": "foreign"}
+	if capital_district != "" and _cap_spot.has_point(screen): return {"id": capital_district, "kind": "district"}
 	var p = to_map(screen)
 	for d in districts:
 		for poly in d.polys:
@@ -197,6 +201,16 @@ func _draw() -> void:
 		y += step
 	# land: neighbours, then regions
 	for kind in ["foreign", "region"]:
+		if kind == "region":
+			# the national border: a wide line round every region, half of it then hidden
+			# under the regions' own fill, so only the outer edge of the country shows thick
+			for a in areas:
+				if a.kind != "region": continue
+				for poly in a.polys:
+					var sp = PackedVector2Array()
+					for p in poly: sp.append(o + p * s)
+					sp.append(sp[0])
+					draw_polyline(sp, Look.BORDER, maxf(5.0, 16.0 * s), true)
 		for a in areas:
 			if a.kind != kind: continue
 			var col: Color = _shown.get(a.id, fills.get(a.id, Look.LAND if kind == "region" else a.get("color", Look.LAND_FOREIGN)))
@@ -258,7 +272,10 @@ func _draw() -> void:
 	for c in cities:
 		var p = to_screen(Vector2(c.x, c.y))
 		if c.name == capital:
-			_star(p, maxf(7.0, 22 * s), Look.RED)
+			var r = maxf(11.0, 28 * s)
+			if hover == capital_district and capital_district != "": draw_circle(p, r * 1.15, Color("ffe6a8", 0.85))
+			_star(p, r, Look.RED)
+			_cap_spot = Rect2(p - Vector2(r, r) * 1.4, Vector2(r, r) * 2.8)
 		else:
 			var r = maxf(2.5, (5 + c.size * 2.5) * s)
 			draw_circle(p, r + maxf(1.0, 2.5 * s), Color("f1e4c4"))
@@ -334,8 +351,12 @@ func _labels(s: float) -> void:
 	var type_font = Look.font("type")
 	for c in cities:
 		var is_cap: bool = c.name == capital
-		var fs = int(maxf(10, (32 if is_cap else 25) * s))
-		_text(to_screen(Vector2(c.lx, c.ly + 9)), c.name, type_font, fs, Look.BORDER, halo)
+		var fs = int(maxf(13 if is_cap else 10, (36 if is_cap else 25) * s))
+		var lp = to_screen(Vector2(c.lx, c.ly + 9))
+		_text(lp, c.name, type_font, fs, Look.BORDER, halo)
+		if is_cap:
+			var tw = type_font.get_string_size(c.name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			_cap_spot = _cap_spot.merge(Rect2(lp - Vector2(tw / 2.0, fs), Vector2(tw, fs * 1.3)))
 	# neighbours
 	for a in areas:
 		if a.kind != "foreign": continue
@@ -373,12 +394,12 @@ func _seat_badges(s: float) -> void:
 
 func _plate(a: Dictionary, s: float) -> void:
 	var c = to_screen(Vector2(a.label[0], a.label[1]))
-	var p = to_screen(Vector2(a.label[0] + 190, a.label[1] + 85))
+	var p = to_screen(Vector2(a.label[0] + 200, a.label[1] + 95))
 	var text: String = " ".join(a.name).to_upper()
-	var fs = int(maxf(15, 40 * s))
+	var fs = int(maxf(19, 50 * s))
 	var font = Look.spaced("display", int(fs * 0.16))
 	var tw = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var rect = Rect2(p - Vector2(tw / 2 + 18, fs * 0.95), Vector2(tw + 36, fs * 1.8))
+	var rect = Rect2(p - Vector2(tw / 2 + 24, fs * 1.05), Vector2(tw + 48, fs * 2.0))
 	var hot_now: bool = hot.get(a.id, false)
 	draw_line(c, rect.position + Vector2(0, rect.size.y / 2), Look.BORDER, maxf(1.0, 3 * s), true)
 	draw_circle(c, maxf(2.5, 7 * s), Look.BORDER)
@@ -386,7 +407,7 @@ func _plate(a: Dictionary, s: float) -> void:
 	var bg = Look.mix(Look.PAPER, Color("c0392b"), 0.3) if hot_now else (Color("fff8e6") if hover == a.id else Look.PAPER)
 	draw_rect(rect, bg)
 	draw_rect(rect, Look.RED if hover == a.id else Look.BORDER, false, maxf(1.0, 2.5 * s))
-	draw_string(font, Vector2(rect.position.x + 18, rect.position.y + rect.size.y * 0.5 + fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Look.BORDER)
+	draw_string(font, Vector2(rect.position.x + 24, rect.position.y + rect.size.y * 0.5 + fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Look.BORDER)
 	_plates[a.id] = rect
 
 func _tooltip() -> void:

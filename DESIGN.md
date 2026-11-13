@@ -310,6 +310,15 @@ The designer's aims: the game should be enjoyable first, and it should look like
 
 *Decided:* besides speaking, the player can **build communities** in cities (evergreen, slow, lasting; replaces one-off grassroots organising), **dig** into rivals' dirty laundry (opposition research and dossiers), and **steer the party**: moving the manifesto one stance takes three months and costs the loyalty of the party's politicians who care about the other side. "Members" means the party's **politicians**, a named roster, not registered members. When they quit, the party loses reach and goodwill in their region. **Issues:** the country tab lists major issues (from the economy and the crisis) and smaller local stories; any of them, a bad economic number, or the ruling party's own positions can be raised as a debate. A story still in the headlines catches on most easily.
 
+### Fourth playtest (November 2026)
+
+- **Polls are news, not decisions.** The yearly poll no longer stops the clock with a "Read it" card; it goes in the diary and ticker, and the Polls file has the detail. (Before: every non-tracking poll was a decision.)
+- **No weeks in the interface.** The Next week button is hidden and dates show the month only; weeks still tick in the rules.
+- **The month-end reminder.** Next decision first reminds you, once a month, if the leader hasn't toured yet or actions are left (opening Debates when it's actions); press again to move on.
+- **Trip money is per quarter.** Unspent "On the road" money goes back into the account at the next budget instead of boosting next quarter's trips.
+- **Map:** the country's outer border is drawn thick; the capital's star and name are a click target for its province; small neighbours' name plates are larger; North-East Cranbia is renamed Middle Cranbia (in districts.json).
+- **Carlos never blocks a button:** his remarks let clicks through and fade while the mouse is over them; only tutorial lines wait for a click.
+
 ### Technology
 
 **Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.

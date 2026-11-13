@@ -203,7 +203,7 @@ func calendar(week: int) -> Dictionary:
 		"isYearEnd": week % WEEKS_PER_YEAR == WEEKS_PER_YEAR - 1,
 	}
 
-func date_label(week: int, with_week := true) -> String:
+func date_label(week: int, with_week := false) -> String:
 	var c = calendar(week)
 	var base = "%s %d" % [MONTH_NAMES[c.monthIndex], c.year]
 	return ("Week %d · %s" % [c.weekOfMonth + 1, base]) if with_week else base
@@ -1611,7 +1611,8 @@ func take_poll(s: Dictionary, label: String, silent := false) -> void:
 			prev_annual = s.polls[i]; break
 		i -= 1
 	if prev_annual: rivals_adapt(s, prev_annual.national, poll.national)
-	s.queue.append({"type": "poll", "index": s.polls.size() - 1})
+	# a poll is news, not a decision: it goes in the diary and the ticker, and the Polls file has the detail
+	s.log.append({"week": s.week, "kind": "poll", "text": "%s: %s on %s%%." % [label, player_party(s).short, fmt1(poll.national.player * 100)]})
 
 # ---------- Districts ----------
 ## Each region is split into districts (MAP.districts, drawn by tools/build_districts.py;
@@ -2689,6 +2690,9 @@ func run_hooks(s: Dictionary) -> void:
 		var inc = quarterly_income(s)
 		s.lastIncome = inc
 		s.money += inc.total
+		# trip money not spent last quarter goes back into the pot, not into this quarter's trips
+		s.money += float(s.get("roadFund", 0))
+		s.roadFund = 0.0
 		s.queue.append({"type": "budget", "offers": draw_offers(s)})
 	if c.week == ELECTION_WEEK - WEEKS_PER_MONTH: start_debate(s)
 	if c.week == flagship_week() and FLAGSHIP.size(): s.queue.append({"type": "event", "event": flagship_event(s)})

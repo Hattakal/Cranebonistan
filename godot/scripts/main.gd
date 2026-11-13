@@ -155,6 +155,7 @@ func _build_bar() -> Control:
 	time.add_child(dates)
 	_btn_week = _speed_button("play", "Next week")
 	_btn_week.pressed.connect(func(): _time_pressed(false))
+	_btn_week.visible = false   # weeks still tick underneath; the player moves decision to decision
 	time.add_child(_btn_week)
 	_btn_skip = _speed_button("fast-forward", "Next decision", true)
 	_btn_skip.pressed.connect(func(): _time_pressed(true))
@@ -164,12 +165,34 @@ func _build_bar() -> Control:
 	h.add_child(tsec)
 	return _bar
 
+var _warned_month := -1   # the month we last reminded you about an unused trip or actions
+
 func _time_pressed(to_decision: bool) -> void:
 	if _sheet_open(): return
 	if S.queue.size():
 		_open_front()
 		return
+	if to_decision and _month_unused(): return
 	if (G.advance_to_decision(S) if to_decision else G.advance_week(S)): _after_change()
+
+## Before the clock runs past the end of the month: a reminder, once a month, if the
+## leader hasn't been on the road yet or there are actions left. Press again to move on.
+func _month_unused() -> bool:
+	if S.result: return false
+	var c: Dictionary = G.calendar(S.week)
+	var month: int = c.year * 12 + c.monthIndex
+	if month == _warned_month: return false
+	var trip: bool = G.visit_block(S) == ""
+	var left: int = S.actionsLeft
+	if not trip and left <= 0: return false
+	_warned_month = month
+	var parts = []
+	if trip: parts.append("%s hasn't been on the road this month: pick a province on the map" % G.player_party(S).leader)
+	if left > 0:
+		parts.append("%d action%s left" % [left, "" if left == 1 else "s"])
+		if not trip: _show_file("debates")   # the trip is picked on the map, so keep it in view
+	_toast("%s. Press Next decision again to move on." % "; ".join(parts))
+	return true
 
 func _section(inner: Control, pad: int) -> PanelContainer:
 	var p = PanelContainer.new()
@@ -360,7 +383,7 @@ func _render_bar() -> void:
 		G.national_awareness(S) * 100, func(x): return "%d%%" % Game.jround(x))
 	_chip("Business", biz, "Business donors are %s. Angry donors give less." % Game.business_word(mood), Look.RED.lightened(0.4) if mood < 0.4 else Color.TRANSPARENT)
 	_chip("Trust in politics", Game.trust_label(S.trust), "How much people trust politicians and the system in general (not your party). Low trust helps outsiders.")
-	_date.text = G.date_label(S.week).to_upper()
+	_date.text = G.date_label(S.week, false).to_upper()
 	var months_left = int(ceil(float(G.ELECTION_WEEK - S.week) / G.WEEKS_PER_MONTH))
 	_countdown.text = "Election held" if S.result else "Election in %d month%s" % [months_left, "" if months_left == 1 else "s"]
 	# a decision that was put down waits on the board; the time buttons take you back to it

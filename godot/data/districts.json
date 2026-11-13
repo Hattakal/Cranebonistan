@@ -3,5 +3,7 @@
  "REGION_WEIGHT": {
   "alinni": 0.75
  },
- "DISTRICTS": {}
+ "DISTRICTS": {
+  "cranbia_4": {"name": "Middle Cranbia"}
+ }
 }
