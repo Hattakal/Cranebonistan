@@ -318,6 +318,7 @@ The designer's aims: the game should be enjoyable first, and it should look like
 - **Trip money is per quarter.** Unspent "On the road" money goes back into the account at the next budget instead of boosting next quarter's trips.
 - **Map:** the country's outer border is drawn thick; the capital's star and name are a click target for its province; small neighbours' name plates are larger; North-East Cranbia is renamed Middle Cranbia (in districts.json).
 - **Your colour creeps in.** A province someone else leads shows your colour as diagonal stripes over theirs, thicker as your vote nears the leader's; once you lead, it is wholly yours. (Before: only the leader's colour, deep or pale by margin.) Small provinces inside big ones (the capital) are now drawn on top; before, the province around Cranebo painted over it.
+- **The trip as a local paper.** A tour opens a full page: a headline, a photo (drawn placeholder until art exists in `godot/assets/tours/great|good|flat.png`), a short story picked by how well it went (`godot/data/tours.json`, drafts to rewrite), the vote before and after, and why. (Before: a one-line toast.)
 - **Carlos never blocks a button:** his remarks let clicks through and fade while the mouse is over them; only tutorial lines wait for a click.
 
 ### Technology

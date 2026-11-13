@@ -1047,12 +1047,82 @@ func _district_sheet(id: String) -> void:
 	var block: String = G.visit_block(S)
 	var go = p.button("Tour %s this month" % d.name, func():
 		var res: Dictionary = G.act_visit(S, id)
-		_toast(res.text)
-		_done(p), true, block != "")
+		if not res.ok:
+			_toast(res.text); return
+		_tour_result(p, res)
+		_after_change(), true, block != "")
 	go.tooltip_text = block if block != "" else "Free, once a month. People here hear of you and warm to you, and the rest of %s a little. Going back keeps helping, but less each time." % r.name
 	p.actions([p.button("Region's voters", func():
 		p.close()
 		_files.S = S; _files.open_region(d.region); _sync_menu(), false), p.button("Close", func(): p.close(), false), go])
+
+## The trip, as the local paper ran it: a photo, a short story, and what it did to the vote.
+func _tour_result(p: Paper, res: Dictionary) -> void:
+	p.clear()
+	p._paper.custom_minimum_size.x = 860   # the district sheet is narrow; the story gets a full page
+	var r = Game.by_id(G.REGIONS, res.region)
+	p.masthead(G.date_label(S.week), "The %s Courier" % r.name, "On the road")
+	p.kicker("%s in %s" % [G.player_party(S).leader, res.place])
+	var heads = {"great": "%s packs the halls in %s", "good": "%s makes the rounds in %s", "flat": "A quiet visit to %s for %s"}
+	var head: String = heads.get(res.kind, "%s in %s")
+	p.heading(head % ([G.player_party(S).leader, res.place] if res.kind != "flat" else [res.place, G.player_party(S).leader]), 34)
+	var photo = TourPhoto.new()
+	photo.kind = res.kind
+	photo.party_color = Color(G.player_party(S).color)
+	photo.custom_minimum_size = Vector2(0, 260)
+	p.add(photo)
+	if res.caption != "": p.small(res.caption)
+	if res.story != "": p.text(res.story, 18, "news")
+	var b: int = Game.jround(float(res.before) * 100)
+	var a: int = Game.jround(float(res.after) * 100)
+	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.RED if a > b else Look.INK))
+	if res.why.size():
+		var w: String = ", ".join(res.why)
+		p.small(w.substr(0, 1).to_upper() + w.substr(1) + ".", Look.INK)
+	p.small("The rest of %s heard about it too, a little." % r.name)
+	p.actions([p.button("Back to work", func(): _done(p))])
+	p.top()
+
+## A placeholder photo until the real pictures exist (godot/assets/tours/<kind>.png):
+## a hall, a stage, and a crowd as big as the trip went well.
+class TourPhoto extends Control:
+	var kind := "good"
+	var party_color := Color("b03a2e")
+	var _tex: Texture2D = null
+	func _ready() -> void:
+		var path = "res://assets/tours/%s.png" % kind
+		if ResourceLoader.exists(path): _tex = load(path)
+	func _draw() -> void:
+		var r = Rect2(Vector2.ZERO, size)
+		if _tex:
+			draw_texture_rect(_tex, r, false)
+			return
+		draw_rect(r, Color("2b2621"))
+		var inner = r.grow(-8)
+		draw_rect(inner, Color("6f675c"))
+		# back wall, banner and stage
+		draw_rect(Rect2(inner.position, Vector2(inner.size.x, inner.size.y * 0.55)), Color("8a8174"))
+		var bw = inner.size.x * 0.42
+		draw_rect(Rect2(inner.position + Vector2((inner.size.x - bw) / 2, inner.size.y * 0.1), Vector2(bw, inner.size.y * 0.16)), Look.mix(Color("8a8174"), party_color, 0.65))
+		draw_rect(Rect2(inner.position + Vector2(inner.size.x * 0.3, inner.size.y * 0.45), Vector2(inner.size.x * 0.4, inner.size.y * 0.08)), Color("4a443c"))
+		draw_circle(inner.position + Vector2(inner.size.x * 0.5, inner.size.y * 0.33), inner.size.y * 0.05, Color("3a352f"))
+		draw_rect(Rect2(inner.position + Vector2(inner.size.x * 0.5 - inner.size.y * 0.04, inner.size.y * 0.37), Vector2(inner.size.y * 0.08, inner.size.y * 0.09)), Color("3a352f"))
+		# the crowd: heads in rows, more of them the better it went
+		var row_n = {"great": 5, "good": 3, "flat": 1}
+		var fill_n = {"great": 1.0, "good": 0.75, "flat": 0.3}
+		var rows: int = int(row_n.get(kind, 3))
+		var fill: float = float(fill_n.get(kind, 0.7))
+		var rng = RandomNumberGenerator.new()
+		rng.seed = 7
+		for row in rows:
+			var y = inner.position.y + inner.size.y * (0.98 - row * 0.085)
+			var rad = inner.size.y * (0.075 - row * 0.008)
+			var x = inner.position.x + rad
+			while x < inner.end.x - rad:
+				if rng.randf() < fill: draw_circle(Vector2(x + rng.randf() * 4, y), rad, Color(0.16 + rng.randf() * 0.08, 0.15, 0.14))
+				x += rad * 1.7
+		# old newsprint: soften it
+		draw_rect(inner, Color(0.85, 0.8, 0.7, 0.18))
 
 # ---------- Founding the party (a new game) ----------
 var _found = {}

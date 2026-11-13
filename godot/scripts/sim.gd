@@ -57,6 +57,7 @@ var ISSUES: Array = []        # minor issues: local stories (data/issues.json)
 var FIGURES: Array = []       # your party's politicians (data/party.json)
 var CITY_INFO: Dictionary = {} # population, lean and a line per city (data/cities.json)
 var FLAGSHIP: Array = []       # the year-three flagship promise (data/flagship.json)
+var TOURS: Dictionary = {}     # short stories from the leader's trips (data/tours.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -87,6 +88,7 @@ func load_content(path: String) -> void:
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
 	FLAGSHIP = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagship.json")).ISSUES if FileAccess.file_exists("res://data/flagship.json") else []
+	TOURS = JSON.parse_string(FileAccess.get_file_as_string("res://data/tours.json")) if FileAccess.file_exists("res://data/tours.json") else {}
 	_load_districts()
 	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
 		if CITY_INFO.get(c.name, {}).has("size"): c.size = int(CITY_INFO[c.name].size)
@@ -1792,7 +1794,20 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 		var w: String = ", ".join(pw.why)
 		text += " " + w.substr(0, 1).to_upper() + w.substr(1) + "."
 	_log(s, "action", "Toured %s." % d.name)
-	return {"ok": true, "text": text}
+	# a short story from the trip, by how well it went
+	var gain: float = (after - before) * 100
+	var kind = "great" if gain >= 4 else ("good" if gain >= 1.5 else "flat")
+	var town: String = d.name
+	var best = -1.0
+	for c in d.cities:
+		var pop: float = float(CITY_INFO.get(c, {}).get("population", 0))
+		if pop > best: best = pop; town = c
+	var story = {"text": "", "caption": ""}
+	var pool: Array = TOURS.get(kind, [])
+	if pool.size(): story = pick(s, pool)
+	var fill = {"leader": player_party(s).leader, "place": d.name, "town": town}
+	return {"ok": true, "text": text, "kind": kind, "place": d.name, "region": d.region, "before": before, "after": after,
+		"why": pw.why, "story": String(story.text).format(fill), "caption": String(story.caption).format(fill)}
 
 ## Local standing fades a little every month; offices keep their own district warm.
 func districts_monthly(s: Dictionary) -> void:

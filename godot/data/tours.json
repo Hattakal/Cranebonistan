@@ -1,0 +1,24 @@
+{
+ "_note": "Short stories from the leader's monthly trip, picked by how well it went. {leader} is the leader, {place} the province, {town} its biggest town (or the province again). 'caption' goes under the photo. Pictures, when they exist: godot/assets/tours/<kind>.png (great, good, flat). Drafts: rewrite freely.",
+ "great": [
+  {"text": "The hall in {town} held four hundred. Six hundred came. {leader} gave the second speech from the car park, standing on a bread crate the bakery next door lent for the evening, and the bakery has since put it in the window.", "caption": "The overflow crowd outside the hall in {town}."},
+  {"text": "A local radio phone-in was meant to last twenty minutes. It ran for two hours, and by the end callers were answering each other. The station manager asked if {leader} could come back in spring.", "caption": "{leader} in the studio in {town}, past the scheduled hour."},
+  {"text": "At the {town} market a fishmonger told {leader} that no politician had stopped at her stall in thirty years. {leader} bought two kilos of something nobody could identify and carried it for the rest of the walkabout. The photo was on every front page in {place}.", "caption": "Market day in {town}."},
+  {"text": "The mayor of {town}, who belongs to no party and says so often, introduced {leader} as 'the first one who asked us before telling us'. Nobody had briefed her to say it.", "caption": "On the town hall steps, {town}."},
+  {"text": "Schoolchildren in {town} had painted a banner with the party's name spelled wrong. {leader} insisted it stay up, and the misspelling is now on t-shirts across {place}.", "caption": "The banner, as painted."}
+ ],
+ "good": [
+  {"text": "Three town halls, a factory gate at six in the morning and a long lunch with the {town} chamber of commerce, who were polite and asked about rates. A solid week; the local paper called it 'businesslike'.", "caption": "The factory gate, {town}, before the shift."},
+  {"text": "{leader} walked the length of the high street in {town} and was stopped every few metres, mostly about the buses. The buses are not a national matter, but people noticed someone had listened.", "caption": "The high street in {town}."},
+  {"text": "A question from the floor in {town} about the price of bread went on longer than the answer. {leader} let it, which the room liked better than any answer.", "caption": "Questions from the floor, {town}."},
+  {"text": "The {place} farmers' union gave {leader} a tour of a dairy and a lecture on milk quotas. The quotas were not changed, but the union's newsletter was warm about the visit.", "caption": "At a dairy outside {town}."},
+  {"text": "A small crowd, a borrowed microphone and a dog that walked onto the stage in the middle of the speech. The dog got the bigger applause. Locals say it was the best evening the square had had in years.", "caption": "The square in {town}, and the dog."}
+ ],
+ "flat": [
+  {"text": "Half the chairs in the {town} community hall were empty, and the other half had come for the bingo that was meant to start afterwards. {leader} kept it short. The bingo ran late.", "caption": "The community hall, {town}."},
+  {"text": "It rained for the whole visit. The walkabout became a walk, and then a wait in a café where the owner had not heard of the party but was happy to sell coffee to it.", "caption": "Rain in {town}."},
+  {"text": "The local paper sent a trainee, who spelled {leader}'s name two different ways in the same article. The article was on page nine, under the tide tables.", "caption": "Page nine of the {place} paper."},
+  {"text": "{leader} arrived in {town} on the same day as a cattle auction. The auction won. A handful of people came by afterwards, mostly to ask whether the party had a position on cattle.", "caption": "Auction day in {town}."},
+  {"text": "A polite reception, a polite speech, polite applause. {place} has seen a lot of politicians. It will need to see this one again before it decides anything.", "caption": "A polite evening in {town}."}
+ ]
+}
