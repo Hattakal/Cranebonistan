@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 25
+const SAVE_VERSION := 26
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -364,7 +364,8 @@ func city_fact(c: Dictionary) -> String:
 
 ## Where the city's people stand: its region's average, moved by the city's own lean.
 func city_leanings(s: Dictionary, c: Dictionary) -> Dictionary:
-	var pos: Dictionary = summarize(s, pops_matching(s, {"region": c.area})).pos.duplicate()
+	var hd = district_of_city(c.name)
+	var pos: Dictionary = summarize(s, pops_matching(s, {"district": hd.id} if hd else {"region": c.area})).pos.duplicate()
 	var lean: Dictionary = CITY_INFO.get(c.name, {}).get("lean", {})
 	for ax in lean: pos[ax] = clampf2(float(pos.get(ax, 0)) + float(lean[ax]), -100, 100)
 	return pos
@@ -399,26 +400,71 @@ func initials(name: String) -> String:
 	out = out.to_upper().substr(0, 4)
 	return out if out != "" else "YOU"
 
+## Voters: one group for every province, age, class and nationality that lives
+## there. A province takes its region's people and views, then its own character:
+## towns are more middle-class, more mixed and more progressive than the
+## countryside, a city's own lean (cities.json) counts for its share of the
+## province, and every game adds a little local difference (s.districts[id].lean).
+const POP_MIN := 3000.0
+
 func build_pops(s: Dictionary) -> Array:
 	var pops = []
-	for r in REGIONS:
+	for d in DISTRICTS:
+		var r = by_id(REGIONS, d.region)
+		var people: float = float(r.adults) * 1e6 * float(d.share)
+		var st: Dictionary = s.districts.get(d.id, {})
+		# how urban: the share of the province living in its cities
+		var city_people = 0.0
+		var city_lean = {}
+		for name in d.cities:
+			var c: Dictionary = city_by_name(name)
+			if c.is_empty(): continue
+			var cp: float = city_population(c) * 0.75
+			city_people += cp
+			var cl: Dictionary = CITY_INFO.get(name, {}).get("lean", {})
+			for ax in cl: city_lean[ax] = float(city_lean.get(ax, 0)) + float(cl[ax]) * cp
+		var urban: float = clampf2(city_people / people, 0, 1) if people > 0 else 0.0
+		var cls = {}
+		var ctot = 0.0
+		for c in CLASSES:
+			var k: float = {"working": 1 - 0.35 * urban, "middle": 1 + 0.3 * urban, "upper": 1 + 0.6 * urban}.get(c.id, 1.0)
+			cls[c.id] = float(r.classes.get(c.id, 0)) * k
+			ctot += cls[c.id]
+		var nats = {}
+		var ntot = 0.0
+		for n in NATIONALITIES:
+			var share: float = float(r.nationalities.get(n.id, 0))
+			if share <= 0: continue
+			# minorities gather in towns
+			var big = 0.0
+			for m in NATIONALITIES: big = maxf(big, float(r.nationalities.get(m.id, 0)))
+			nats[n.id] = share * (1.0 if share >= big else 1 + 0.5 * urban)
+			ntot += nats[n.id]
+		var local_lean = {}
+		for ax in AXES:
+			var v: float = float(st.get("lean", {}).get(ax.id, 0))
+			if city_people > 0: v += float(city_lean.get(ax.id, 0)) / people
+			local_lean[ax.id] = v
+		local_lean.society = float(local_lean.get("society", 0)) + (0.4 - urban) * 20   # countryside more traditional
+		local_lean.nation = float(local_lean.get("nation", 0)) + (urban - 0.4) * 15     # towns more mixed
 		for a in AGES:
 			for c in CLASSES:
-				for n in NATIONALITIES:
-					var size: float = r.adults * 1e6 * a.share * float(r.classes.get(c.id, 0)) * float(r.nationalities.get(n.id, 0))
-					if size < 15000: continue
-					var local: Dictionary = r.get("local", {}).get(n.id, {})
+				for nid in nats:
+					var n = by_id(NATIONALITIES, nid)
+					var size: float = people * float(a.share) * cls[c.id] / ctot * nats[nid] / ntot
+					if size < POP_MIN: continue
+					var local: Dictionary = r.get("local", {}).get(nid, {})
 					var pos = {}
 					var sal = {}
 					for ax in AXES:
 						var lean: float = float(r.lean.get(ax.id, 0)) + float(a.lean.get(ax.id, 0)) + float(c.lean.get(ax.id, 0)) \
-							+ float(n.lean.get(ax.id, 0)) + float(local.get("lean", {}).get(ax.id, 0))
+							+ float(n.lean.get(ax.id, 0)) + float(local.get("lean", {}).get(ax.id, 0)) + float(local_lean.get(ax.id, 0))
 						pos[ax.id] = float(jround(clampf2(lean + rand_normal(s) * 7, -100, 100)))
 						sal[ax.id] = fixed(_or1(r.sal.get(ax.id)) * _or1(a.sal.get(ax.id)) * _or1(c.sal.get(ax.id)) \
 							* _or1(n.sal.get(ax.id)) * _or1(local.get("sal", {}).get(ax.id)), 2)
 					var pop = {
-						"id": "%s/%s/%s/%s" % [r.id, a.id, c.id, n.id],
-						"region": r.id, "age": a.id, "class": c.id, "nationality": n.id,
+						"id": "%s/%s/%s/%s" % [d.id, a.id, c.id, nid],
+						"region": r.id, "district": d.id, "age": a.id, "class": c.id, "nationality": nid,
 						"size": float(jround(size)), "pos": pos, "sal": sal,
 						"turnout": clampf2(a.turnout + c.turnout + n.turnout + float(r.get("turnout", 0)), 0.25, 0.95),
 						"engagement": a.engagement * c.engagement,
@@ -608,8 +654,16 @@ func leader_match(pop: Dictionary, fit: Dictionary, clim: Dictionary) -> float:
 func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Dictionary) -> float:
 	var dev = devotion_of(pop, party)
 	var sc = -distance(s, pop, party.perceived) / C.distanceScale * (1 - C.devotionBlind * dev)
-	sc += pop.goodwill[party.id]
-	sc += log(pop.aware[party.id])
+	var gw: float = pop.goodwill[party.id]
+	var aw: float = pop.aware[party.id]
+	var st = s.districts.get(pop.get("district", ""), null)
+	if st:
+		if party.isPlayer:
+			gw += float(st.goodwill)
+			aw = aw + float(st.aware) * (1 - aw)
+		else: gw += float(st.rivals.get(party.id, 0))
+	sc += gw
+	sc += log(maxf(aw, 0.001))
 	if party.isPlayer: sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
 	else: sc += C.rivalLeaderWeight * ((party.charisma - 50) / 50.0) * pop.leaderPull
 	# the kind of leader they want, against the kind this one is
@@ -1796,8 +1850,8 @@ func take_poll(s: Dictionary, label: String, silent := false) -> void:
 # ---------- Districts ----------
 ## Each region is split into districts (MAP.districts, drawn by tools/build_districts.py;
 ## names, seats and leans can be changed in data/districts.json). A district has its
-## region's voters, plus a little of its own: a local lean, rival strongholds, and
-## whatever you have done there (home city, offices, the leader's visits).
+## own voters (built from its region's people, see build_pops), rival strongholds,
+## and whatever you have done there (home city, offices, the leader's visits).
 var DISTRICTS: Array = []
 
 func _load_districts() -> void:
@@ -1838,12 +1892,12 @@ func district_by_id(id: String) -> Variant:
 		if d.id == id: return d
 	return null
 
-## Fresh local differences for a new game: districts of a region are much alike.
+## Fresh local differences for a new game: a lean of its own (built into its voters) and rival strongholds.
 func new_districts(s: Dictionary) -> Dictionary:
 	var out = {}
 	for d in DISTRICTS:
 		var lean = {}
-		for ax in AXES: lean[ax.id] = float(jround(rand_normal(s) * 4 + float(d.fixedLean.get(ax.id, 0))))
+		for ax in AXES: lean[ax.id] = float(jround(rand_normal(s) * 6 + float(d.fixedLean.get(ax.id, 0))))
 		var rivals = {}
 		for p in s.parties:
 			if not p.isPlayer: rivals[p.id] = fixed(rand_normal(s) * 0.12, 3)
@@ -1861,27 +1915,14 @@ func district_boost(s: Dictionary, id: String, aware: float, goodwill: float) ->
 	st.aware = clampf2(st.aware + aware, 0, 0.6)
 	st.goodwill = clampf2(st.goodwill + goodwill, -1, 1.2)
 
-## Votes in one district: its region's voters with the district's own differences.
+## Votes in one district: its own voters (build_pops), with its local standing (party_score).
 func district_votes(s: Dictionary, d: Dictionary, ctx) -> Dictionary:
-	var st: Dictionary = s.districts[d.id]
 	var out = {}
 	for p in s.parties: out[p.id] = 0.0
 	for pop in s.pops:
-		if pop.region != d.region: continue
-		var pos0: Dictionary = pop.pos
-		var aw0: float = pop.aware.player
-		var gw0: Dictionary = pop.goodwill.duplicate()
-		var pos1 = pos0.duplicate()
-		for ax in st.lean: pos1[ax] = clampf2(pos1[ax] + st.lean[ax], -100, 100)
-		pop.pos = pos1
-		pop.aware.player = clampf2(aw0 + st.aware * (1 - aw0), 0, 1)
-		pop.goodwill.player = clampf2(gw0.player + st.goodwill, -2, 2)
-		for id in st.rivals: pop.goodwill[id] = clampf2(gw0[id] + st.rivals[id], -2, 2)
+		if pop.get("district", "") != d.id: continue
 		var votes = pop_votes(pop, pop_support(s, pop, null, ctx))
-		pop.pos = pos0
-		pop.aware.player = aw0
-		pop.goodwill = gw0
-		for id in votes: out[id] += votes[id] * float(d.share)
+		for id in votes: out[id] += votes[id]
 	return out
 
 ## Every district: votes, the winner, the runner-up and the winning margin (share points).
@@ -1934,14 +1975,14 @@ func visit_power(s: Dictionary, id: String) -> Dictionary:
 	k *= base_k
 	if office > 0: why.append("your office there filled the hall")
 	# you spoke up recently for something these voters lean toward and care about
-	var nation_pos: Dictionary = summarize(s, pops_matching(s, {"region": d.region})).pos
+	var local_pos: Dictionary = summarize(s, pops_matching(s, {"district": id})).pos
 	var bonus = 0.0
 	var topic = ""
 	for key in s.spoke:
 		if s.week - int(s.spoke[key]) > 2 * WEEKS_PER_MONTH: continue
 		var ax: String = key.split(":")[0]
 		var sg = -1.0 if key.ends_with(":L") else 1.0
-		var lean: float = float(nation_pos[ax]) + float(st.lean.get(ax, 0))
+		var lean: float = float(local_pos[ax])
 		if sg * lean > 10:
 			var b: float = clampf2(sg * lean / 60.0, 0, 0.5)
 			if b > bonus: bonus = b; topic = side_label(key).to_lower()
@@ -1962,7 +2003,7 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	s.roadFund = maxf(0, float(s.get("roadFund", 0)) - pw.money)
 	district_boost(s, id, VISIT_AWARE * k, VISIT_GOODWILL * k)
 	for o in DISTRICTS:
-		if o.region == d.region and o.id != id: district_boost(s, o.id, VISIT_AWARE * k * 0.2, VISIT_GOODWILL * k * 0.15)
+		if o.region == d.region and o.id != id: district_boost(s, o.id, VISIT_AWARE * k * 0.1, VISIT_GOODWILL * k * 0.06)
 	s.lastVisit = s.week
 	s.projection = district_results(s)
 	var after: float = float(s.projection[id].you)
