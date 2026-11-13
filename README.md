@@ -79,4 +79,6 @@ The map is drawn in Krita (layers: Background, States and Countries, Rivers and 
 python3 tools/build_map.py path/to/map.kra
 ```
 
+The current source is `art/map3.kra` (`python3 tools/build_map.py art/map3.kra`).
+
 This rewrites the `MAP` entry in `godot/data/content.json` and `godot/assets/map-features.png`. It needs Python with numpy, scipy, opencv-python and Pillow. If a border is moved so much that an area no longer contains its seed point, adjust `AREA_SEEDS` at the top of the script.
