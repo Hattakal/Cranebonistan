@@ -47,7 +47,7 @@ func _init() -> void:
 			var tot = 0.0
 			for r in G.REGIONS: tot += r.adults
 			var alloc = {}
-			for r in G.REGIONS: alloc[r.id] = money * 0.55 * r.adults / tot
+			alloc.road = money * 0.55   # the trip fund (it used to be rallies by region)
 			alloc.social = money * 0.15; alloc.tv = money * 0.15; alloc.tour = money * 0.15
 			G.resolve_budget(s, alloc, [])
 		elif f.type == "debate":

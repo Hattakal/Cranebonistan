@@ -9,6 +9,8 @@ Reads these Krita layers (by name):
   States and Countries  border and coast lines (any colour); may also be called "Map"
   Rivers and Mountains  decoration only; never used as borders (optional)
   Cities                one dot per city
+  Provinces             (optional) lines splitting the regions into provinces (electoral districts)
+  Province names        (optional, text layer) a name inside each province; unnamed ones take their city's name
   (a vector/text layer) names typed next to each city; big text (area names) is skipped
 
 Writes:
@@ -103,7 +105,7 @@ def load_kra(path):
     doc = z.read("maindoc.xml").decode()
     W, H = int(re.search(r'<IMAGE[^>]*\swidth="(\d+)"', doc).group(1)), int(re.search(r'<IMAGE[^>]*\sheight="(\d+)"', doc).group(1))
     imgname = re.search(r'<IMAGE[^>]*\sname="([^"]*)"', doc).group(1)
-    layers, texts = {}, []
+    layers, texts, prov_texts = {}, [], []
     for tag in re.findall(r"<layer [^>]*>", doc):
         attr = dict(re.findall(r'(\w[\w-]*)="([^"]*)"', tag))
         base = f"{imgname}/layers/{attr['filename']}"
@@ -113,13 +115,17 @@ def load_kra(path):
             svg = z.read(base + ".shapelayer/content.svg").decode()
             vb = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg)
             s = W / float(vb.group(1))
+            is_prov = "province" in attr["name"].lower()
             for t in re.finditer(r'<text[^>]*transform="translate\(([-\d.]+),\s*([-\d.]+)\)"[^>]*?font-size:\s*([\d.]+)[^>]*>(.*?)</text>', svg, re.S):
                 x, y, fs = float(t.group(1)), float(t.group(2)), float(t.group(3))
                 txt = re.sub(r"<[^>]+>", "", html.unescape(t.group(4))).strip()
+                if is_prov:
+                    if txt: prov_texts.append((txt, x * s, y * s))
+                    continue
                 if txt and fs <= CITY_TEXT_MAX and x >= 0 and y >= 0:
                     w = len(txt) * 0.55 * fs
                     texts.append((NAME_FIX.get(txt, txt), (x + w / 2) * s, (y - fs * 0.35) * s))
-    return W, H, layers, texts
+    return W, H, layers, texts, prov_texts
 
 
 def find_layer(layers, *names):
@@ -204,8 +210,73 @@ def label_spot(mask, lines, obstacles):
     return [round(x * k), round(y * k)], room
 
 
+# ---------- provinces (the designer's electoral districts) ----------
+REGION_NAMES = {"cranbia": "Cranbia", "yamlin": "Yamlin", "erland": "Erland", "alinni": "Alinni", "fauraifai": "Fauran"}
+
+
+def direction(dx, dy):
+    a = (np.degrees(np.arctan2(-dy, dx)) + 360) % 360
+    return ["East", "North-East", "North", "North-West", "West", "South-West", "South", "South-East"][int((a + 22.5) // 45) % 8]
+
+
+def build_provinces(full, order, prov_layer, borders, prov_texts, cities, adults, city_pop):
+    """Provinces from the drawn lines: every closed area inside a region is one province."""
+    lines = (prov_layer[::WORK, ::WORK, 3] >= 60) | (borders[::WORK, ::WORK, 3] >= 60)
+    lines = cv2.dilate(lines.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0   # close tiny gaps in the strokes
+    land = full > 0
+    lab, n = ndimage.label(~lines & land)
+    sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+    out = []
+    k = WORK / SCALE
+    for ri, region in enumerate(order, start=1):
+        if AREA_SEEDS[region][0] != "region": continue
+        rmask = full == ri
+        # a province is a big enough closed area, or a small one with a name or a city in it (Cranebo city);
+        # small islands without either join the nearest province
+        marks = set()
+        for t, tx, ty in prov_texts:
+            if 0 <= int(ty / WORK) < lab.shape[0] and 0 <= int(tx / WORK) < lab.shape[1]: marks.add(int(lab[int(ty / WORK), int(tx / WORK)]))
+        for c in cities:
+            if c['area'] == region: marks.add(int(lab[min(lab.shape[0] - 1, int(c['y'] / k)), min(lab.shape[1] - 1, int(c['x'] / k))]))
+        ids = [L for L in np.unique(lab[rmask]) if L and (sizes[L - 1] >= 20000 or (L in marks and sizes[L - 1] >= 1500)) and (lab[rmask] == L).sum() > 0.5 * sizes[L - 1]]
+        # every bit of the region (islands, the lines themselves) joins its nearest province
+        seeds = np.zeros(lab.shape, np.int32)
+        for j, L in enumerate(ids, start=1): seeds[(lab == L) & rmask] = j
+        _, (iy, ix) = ndimage.distance_transform_edt(seeds == 0, return_indices=True)
+        prov = seeds[iy, ix]; prov[~rmask] = 0
+        area_total = float(rmask.sum())
+        rc = [c for c in cities if c["area"] == region]
+        city_adults = {c["name"]: city_pop.get(c["name"], 0.1) * 0.75 for c in rc}
+        rural = max(0.2 * adults[region], adults[region] - sum(city_adults.values()))
+        ys, xs = np.nonzero(rmask); cy0, cx0 = ys.mean(), xs.mean()
+        used = set()
+        rows = []
+        for j in range(1, len(ids) + 1):
+            m = prov == j
+            inside = [c["name"] for c in rc if prov[min(prov.shape[0] - 1, int(c["y"] / k)), min(prov.shape[1] - 1, int(c["x"] / k))] == j]
+            named = [t for t, tx, ty in prov_texts if 0 <= int(ty / WORK) < m.shape[0] and 0 <= int(tx / WORK) < m.shape[1] and m[int(ty / WORK), int(tx / WORK)]]
+            dy, dx = np.nonzero(m)
+            if named: name = max(named, key=len)
+            elif inside: name = max(inside, key=lambda c: city_pop.get(c, 0))
+            else:
+                name = f"{direction(dx.mean() - cx0, dy.mean() - cy0)} {REGION_NAMES[region]}"
+                if name in used: name = ("Upper " if dy.mean() < cy0 else "Lower ") + name
+            used.add(name)
+            dt = ndimage.distance_transform_edt(np.pad(m, 1))[1:-1, 1:-1]
+            ly, lx = np.unravel_index(np.argmax(dt), dt.shape)
+            area = float(m.sum()) / area_total
+            people = sum(city_adults[c] for c in inside) + rural * area
+            rows.append({"region": region, "name": name, "d": mask_to_path(m), "label": [round(lx * k), round(ly * k)],
+                         "area": round(area, 4), "cities": inside, "share": people / adults[region], "named": bool(named)})
+        tot = sum(r["share"] for r in rows) or 1.0
+        for r in rows: r["share"] = round(r["share"] / tot, 4)
+        for i, r in enumerate(sorted(rows, key=lambda r: (r["label"][1] // 120, r["label"][0])), start=1): r["id"] = f"{region}_{i}"
+        out.extend(sorted(rows, key=lambda r: r["id"]))
+    return [{"id": r["id"], **{x: v for x, v in r.items() if x != "id"}} for r in out]
+
+
 def main(path):
-    W, H, layers, texts = load_kra(path)
+    W, H, layers, texts, prov_texts = load_kra(path)
     bg = find_layer(layers, "Background")
     borders = find_layer(layers, "States and Countries", "Map")
     try:
@@ -263,10 +334,20 @@ def main(path):
     content["MAP"] = out
     json.dump(content, open(path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print(f"map: {len(out['regions'])} regions, {len(out['foreign'])} neighbours, {len(out['cities'])} cities")
-    # and split the regions into electoral districts again
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("build_districts", os.path.join(ROOT, "tools", "build_districts.py"))
-    bd = importlib.util.module_from_spec(spec); spec.loader.exec_module(bd); bd.main()
+    # electoral districts: the designer's provinces if drawn, otherwise an automatic split
+    if any(k.strip().lower() == "provinces" for k in layers):
+        cpath = os.path.join(godot, "data", "cities.json")
+        city_pop = {n: float(v.get("population", 0.1)) for n, v in json.load(open(cpath, encoding="utf-8"))["CITIES"].items()} if os.path.exists(cpath) else {}
+        adults = {r["id"]: float(r["adults"]) for r in content["REGIONS"]}
+        content["MAP"]["districts"] = build_provinces(full, order, find_layer(layers, "Provinces"), borders, prov_texts, out["cities"], adults, city_pop)
+        json.dump(content, open(path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+        print(f"provinces: {len(content['MAP']['districts'])}")
+        for d in content["MAP"]["districts"]:
+            print(f"  {d['id']:12} {d['name']:22} {'' if d['named'] else '(unnamed) '}share {d['share']:.3f} cities {d['cities']}")
+    else:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("build_districts", os.path.join(ROOT, "tools", "build_districts.py"))
+        bd = importlib.util.module_from_spec(spec); spec.loader.exec_module(bd); bd.main()
 
 
 if __name__ == "__main__":

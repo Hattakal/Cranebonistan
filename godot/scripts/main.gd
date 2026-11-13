@@ -813,7 +813,7 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 	p.rule(2)
 	var player: Dictionary = G.player_party(S)
 	var rows = []
-	for r in G.REGIONS: rows.append([r.id, "Rallies in " + r.name, "%sM adults. Awareness and goodwill there, a little leader image." % str(r.adults), pv[r.id]])
+	rows.append(["road", "On the road", "Money for %s's trips this quarter: bigger halls, buses, posters. Each month's trip uses a third of it." % player.leader, pv.all])
 	rows.append(["social", "Social media", "Cheap reach to voters under 46. The reaction is unpredictable.", pv.young])
 	rows.append(["tv", "TV and newspapers", "Reaches voters over 45 across the country.", pv.old])
 	rows.append(["tour", player.leader + "'s national tour", "Builds the leader as a person. Strongest with the young, the working class and Fauran.", pv.all])
@@ -827,7 +827,10 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 		info.add_child(Look.label(row[2], "body", 12, Look.MUTED, true))
 		var pr: Dictionary = row[3]
 		var known: String
-		if row[0] == "tour":
+		if row[0] == "road":
+			var per: float = (float(S.get("roadFund", 0)) + _budget.road) / 3.0
+			known = "Each trip this quarter: %s" % ("×%s as strong" % Game.fmt1(1.0 + 0.6 * sqrt(per)) if per > 0 else "on foot, with a megaphone")
+		elif row[0] == "tour":
 			known = "Leader image: %s%s (%s)" % [Files.leader_score(pr.leaderBefore), (" → " + Files.leader_score(pr.leaderAfter)) if pr.leaderAfter - pr.leaderBefore > 0.005 else "", Files.leader_words(pr.leaderAfter)]
 		else:
 			known = "Know you: %s%%%s" % [Game.fmt1(pr.before * 100), (" → %s%%" % Game.fmt1(pr.after * 100)) if pr.after - pr.before > 0.0005 else ""]
@@ -1227,7 +1230,7 @@ func _shot(args: Dictionary) -> void:
 		var f: Dictionary = S.queue[0]
 		match f.type:
 			"event": G.resolve_event(S, 0, 0 if G.event_of(f).choices[0].get("lines", []).size() else -1)
-			"budget": G.resolve_budget(S, {"tour": S.money * 0.5, "cranbia": S.money * 0.3}, [])
+			"budget": G.resolve_budget(S, {"tour": S.money * 0.5, "road": S.money * 0.3}, [])
 			"debate": G.answer_debate(S, 0)
 			_: G.dismiss_front(S)
 	# stop on the next decision so the board shows one (or on a given kind)

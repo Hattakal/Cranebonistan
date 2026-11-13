@@ -1,0 +1,7 @@
+{
+ "_note": "Electoral districts (provinces). REGION_WEIGHT scales a region's seats against its population: Alinni gets fewer seats than its people would earn, part of the minority's disenfranchisement. DISTRICTS: overrides by province name or id: seats (fixed), name (rename), lean (a local lean per axis, e.g. {\"society\": -15}).",
+ "REGION_WEIGHT": {
+  "alinni": 0.75
+ },
+ "DISTRICTS": {}
+}

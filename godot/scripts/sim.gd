@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 21
+const SAVE_VERSION := 23
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -77,8 +77,8 @@ func load_content(path: String) -> void:
 	WEEKS_PER_YEAR = int(C.weeksPerMonth) * int(C.monthsPerYear)
 	ELECTION_WEEK = int(C.electionYears) * WEEKS_PER_YEAR
 	BUDGET_KEYS = []
-	for r in REGIONS: BUDGET_KEYS.append(r.id)
-	BUDGET_KEYS.append_array(["social", "tv", "tour"])
+	# "road": money for the leader's trips this quarter (it used to be rallies by region)
+	BUDGET_KEYS.append_array(["road", "social", "tv", "tour"])
 	_events_by_id = {}
 	for e in EVENTS: _events_by_id[e.id] = e
 	TOPICS = JSON.parse_string(FileAccess.get_file_as_string("res://data/debates.json")).TOPICS
@@ -283,7 +283,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {}, "flagship": {},
+		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {}, "flagship": {}, "roadFund": 0.0, "roadPerTrip": 0.0,
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -1398,6 +1398,8 @@ func resolve_budget(s: Dictionary, alloc: Dictionary, offers_taken := []) -> Dic
 		for pop in s.pops:
 			if CAMPAIGN.social.ages.has(pop.age): pop.goodwill.player = clampf2(pop.goodwill.player + swing, -2, 2)
 	s.money -= spent
+	s.roadFund = float(s.get("roadFund", 0)) + float(clean.get("road", 0))
+	s.roadPerTrip = s.roadFund / 3.0   # a quarter has three trips
 	s.lastBudget = clean.duplicate()
 	_log(s, "budget", "Spent ₱%sM on campaigning%s." % [fmt1(spent), (". Took money from " + ", ".join(notes)) if notes.size() else ""])
 	finish_front(s, "budget")
@@ -1620,28 +1622,36 @@ var DISTRICTS: Array = []
 
 func _load_districts() -> void:
 	DISTRICTS = MAP.get("districts", [])
-	var over: Dictionary = {}
+	var data: Dictionary = {}
 	if FileAccess.file_exists("res://data/districts.json"):
-		over = JSON.parse_string(FileAccess.get_file_as_string("res://data/districts.json")).get("DISTRICTS", {})
-	# seats by population (largest remainder), at least one each
+		data = JSON.parse_string(FileAccess.get_file_as_string("res://data/districts.json"))
+	var over: Dictionary = data.get("DISTRICTS", {})
+	var weight: Dictionary = data.get("REGION_WEIGHT", {})
+	# overrides by id or by name: a new name, fixed seats, a lean of its own
+	for d in DISTRICTS:
+		var o: Dictionary = over.get(d.id, over.get(d.name, {}))
+		if o.has("name"): d.name = o.name
+		d.fixedSeats = int(o.get("seats", 0))
+		d.fixedLean = o.get("lean", {})
+	# seats by population, weighted by region (largest remainder), at least one each
 	var total = 0.0
+	var fixed_total = 0
 	for d in DISTRICTS:
 		d.people = float(by_id(REGIONS, d.region).adults) * float(d.share)
-		total += d.people
-	var seats_left: int = maxi(0, int(C.seats) - DISTRICTS.size())
+		if d.fixedSeats > 0: fixed_total += d.fixedSeats
+		else: total += d.people * float(weight.get(d.region, 1.0))
+	var seats_left: int = maxi(0, int(C.seats) - fixed_total)
 	var rows = []
 	for d in DISTRICTS:
-		var exact: float = seats_left * d.people / total
-		d.seats = 1 + int(floor(exact))
+		if d.fixedSeats > 0:
+			d.seats = d.fixedSeats
+			continue
+		var exact: float = seats_left * d.people * float(weight.get(d.region, 1.0)) / total
+		d.seats = maxi(1, int(floor(exact)))
 		rows.append({"d": d, "rest": exact - floor(exact)})
 	var given = 0
 	for d in DISTRICTS: given += int(d.seats)
 	for r in ssort(rows, func(a, b): return b.rest - a.rest).slice(0, maxi(0, int(C.seats) - given)): r.d.seats += 1
-	for d in DISTRICTS:
-		var o: Dictionary = over.get(d.id, {})
-		if o.has("name"): d.name = o.name
-		if o.has("seats"): d.seats = int(o.seats)
-		d.fixedLean = o.get("lean", {})
 
 func district_by_id(id: String) -> Variant:
 	for d in DISTRICTS:
@@ -1718,14 +1728,58 @@ func visit_block(s: Dictionary) -> String:
 	if int(s.get("lastVisit", -99)) / WEEKS_PER_MONTH == s.week / WEEKS_PER_MONTH: return "%s has already been on the road this month." % player_party(s).leader
 	return ""
 
+## What makes this trip bigger or smaller. Returns the multiplier and the reasons, in words.
+func visit_power(s: Dictionary, id: String) -> Dictionary:
+	var d = district_by_id(id)
+	var st: Dictionary = s.districts[id]
+	var why: Array = []
+	var k: float = 1.0 / (1.0 + 0.3 * int(st.visits))          # going back helps less each time
+	if int(st.visits) > 0: why.append("they've seen you before")
+	# the money set aside for trips this quarter
+	var m: float = minf(float(s.get("roadFund", 0)), float(s.get("roadPerTrip", 0)))
+	if m > 0:
+		k *= 1.0 + 0.6 * sqrt(m)
+		why.append("bigger halls and buses (₱%sM)" % fmt1(m))
+	# popularity: a party people have heard good things about draws crowds
+	var sup: float = float(s.lastSupport.player) if s.lastSupport else 0.0
+	var pop_k: float = clampf2(0.7 + sup * 3.0, 0.7, 1.6) * sqrt(player_party(s).charisma / 50.0)
+	k *= pop_k
+	if pop_k >= 1.1: why.append("people want to see you")
+	elif pop_k <= 0.8: why.append("few people know who you are yet")
+	# a base there: an office, and voters who already back you
+	var office = 0
+	for c in d.cities: office = maxi(office, community_level(s, c))
+	var you: float = float(s.projection.get(id, {}).get("you", 0))
+	var base_k: float = 1.0 + 0.15 * office + you
+	k *= base_k
+	if office > 0: why.append("your office there filled the hall")
+	# you spoke up recently for something these voters lean toward and care about
+	var nation_pos: Dictionary = summarize(s, pops_matching(s, {"region": d.region})).pos
+	var bonus = 0.0
+	var topic = ""
+	for key in s.spoke:
+		if s.week - int(s.spoke[key]) > 2 * WEEKS_PER_MONTH: continue
+		var ax: String = key.split(":")[0]
+		var sg = -1.0 if key.ends_with(":L") else 1.0
+		var lean: float = float(nation_pos[ax]) + float(st.lean.get(ax, 0))
+		if sg * lean > 10:
+			var b: float = clampf2(sg * lean / 60.0, 0, 0.5)
+			if b > bonus: bonus = b; topic = side_label(key).to_lower()
+	if bonus > 0:
+		k *= 1.0 + bonus
+		why.append("you spoke up for %s, and they noticed" % topic)
+	return {"k": k, "money": m, "why": why}
+
 func act_visit(s: Dictionary, id: String) -> Dictionary:
 	var block = visit_block(s)
 	if block: return {"ok": false, "text": block}
 	var d = district_by_id(id)
 	var st: Dictionary = s.districts[id]
 	var before: float = float(s.projection.get(id, {}).get("you", 0))
+	var pw: Dictionary = visit_power(s, id)
+	var k: float = pw.k
 	st.visits = int(st.visits) + 1
-	var k: float = 1.0 / (1.0 + 0.3 * (st.visits - 1))
+	s.roadFund = maxf(0, float(s.get("roadFund", 0)) - pw.money)
 	district_boost(s, id, VISIT_AWARE * k, VISIT_GOODWILL * k)
 	for o in DISTRICTS:
 		if o.region == d.region and o.id != id: district_boost(s, o.id, VISIT_AWARE * k * 0.2, VISIT_GOODWILL * k * 0.15)
@@ -1733,6 +1787,9 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	s.projection = district_results(s)
 	var after: float = float(s.projection[id].you)
 	var text = "%s spent the month in %s: town halls, a market walkabout, a local radio phone-in. Your vote there: %d%% → %d%%." % [player_party(s).leader, d.name, jround(before * 100), jround(after * 100)]
+	if pw.why.size():
+		var w: String = ", ".join(pw.why)
+		text += " " + w.substr(0, 1).to_upper() + w.substr(1) + "."
 	_log(s, "action", "Toured %s." % d.name)
 	return {"ok": true, "text": text}
 

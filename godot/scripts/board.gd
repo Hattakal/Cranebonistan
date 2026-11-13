@@ -359,7 +359,7 @@ func _front_summary(s: Dictionary, front) -> Dictionary:
 			var kinds = {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences"}
 			return {"kicker": kinds.get(ev.get("kind", ""), "Event"), "title": ev.title, "text": ev.text, "stamp": "Decision needed"}
 		"budget":
-			return {"kicker": "Quarterly budget", "title": "Where does the money go?", "text": "₱%sM in the account. Rallies, social media, TV and the national tour are waiting for a decision." % Game.fmt1(s.money), "stamp": "Sign off"}
+			return {"kicker": "Quarterly budget", "title": "Where does the money go?", "text": "₱%sM in the account. Trips, social media, TV and the national tour are waiting for a decision." % Game.fmt1(s.money), "stamp": "Sign off"}
 		"poll":
 			return {"kicker": s.polls[front.index].label, "title": "The poll is in", "text": "The numbers for every party, and the map, are updated.", "stamp": "Read it"}
 		"news":

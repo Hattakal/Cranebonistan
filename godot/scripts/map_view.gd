@@ -43,7 +43,8 @@ func setup(game) -> void:
 	for r in game.REGIONS:
 		areas.append({"id": r.id, "kind": "region", "name": r.name, "polys": _parse(m.regions[r.id].d), "label": m.regions[r.id].label, "small": false})
 	for f in game.FOREIGN:
-		areas.append({"id": f.id, "kind": "foreign", "name": f.name, "polys": _parse(m.foreign[f.id].d), "label": m.foreign[f.id].label, "small": f.get("small", false)})
+		areas.append({"id": f.id, "kind": "foreign", "name": f.name, "polys": _parse(m.foreign[f.id].d), "label": m.foreign[f.id].label, "small": f.get("small", false),
+			"color": Color(f.get("mapColor", "#cdbe9c"))})
 	districts.clear()
 	for d in game.DISTRICTS:
 		districts.append({"id": d.id, "region": d.region, "name": d.name, "polys": _parse(d.d), "label": d.label, "seats": int(d.seats)})
@@ -183,7 +184,7 @@ func _draw() -> void:
 	draw_rect(map_rect.grow(4), Color(0, 0, 0, 0.5))
 	# sea and its waves
 	draw_rect(map_rect, Look.SEA)
-	var wave = Color("40606a", 0.28)
+	var wave = Color("5e8fab", 0.32)
 	var step = 46.0
 	var y = 20.0
 	while y < H:
@@ -198,7 +199,7 @@ func _draw() -> void:
 	for kind in ["foreign", "region"]:
 		for a in areas:
 			if a.kind != kind: continue
-			var col: Color = _shown.get(a.id, fills.get(a.id, Look.LAND if kind == "region" else Look.LAND_FOREIGN))
+			var col: Color = _shown.get(a.id, fills.get(a.id, Look.LAND if kind == "region" else a.get("color", Look.LAND_FOREIGN)))
 			if kind == "foreign" and hot.get(a.id, false): col = Look.mix(col, Color("c0392b"), 0.35)
 			if a.id == hover: col = col.lightened(0.12)
 			for poly in a.polys:
