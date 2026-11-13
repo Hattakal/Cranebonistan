@@ -38,7 +38,7 @@ godot --headless --path godot --import                     # needed after adding
 Screenshots of the real game (use these to check any visual change; look at the image before claiming it works):
 
 ```
-godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|actions|parties|polls|diary] [--clear=1] [--scroll=700]
+godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|actions|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--clear=1] [--scroll=700]
     [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5]
 ```
 

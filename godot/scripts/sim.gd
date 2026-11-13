@@ -654,9 +654,34 @@ func leader_match(pop: Dictionary, fit: Dictionary, clim: Dictionary) -> float:
 		den += w
 	return num / den if den > 0 else 0.4
 
-func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Dictionary) -> float:
+## What doesn't depend on the party, worked out once per group (pop_support).
+func pop_prep(s: Dictionary, pop: Dictionary, ctx: Dictionary) -> Dictionary:
+	var sal = {}
+	var sw = 0.0
+	for ax in AXES:
+		var v: float = salience_of(s, pop, ax.id)
+		sal[ax.id] = v
+		sw += v
+	var lw = {}
+	if LEADER_TYPES.size() and ctx.has("clim"):
+		if not pop.has("wants"): pop.wants = pop_wants(pop)
+		var den = 0.0
+		for k in pop.wants:
+			lw[k] = float(pop.wants[k]) * float(ctx.clim.get(k, 1.0))
+			den += lw[k]
+		for k in lw: lw[k] = lw[k] / den if den > 0 else 0.0
+	return {"sal": sal, "sw": sw, "lw": lw}
+
+func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Dictionary, pre = null) -> float:
+	if pre == null: pre = pop_prep(s, pop, ctx)
 	var dev = devotion_of(pop, party)
-	var sc = -distance(s, pop, party.perceived) / C.distanceScale * (1 - C.devotionBlind * dev)
+	var d = 0.0
+	var sal: Dictionary = pre.sal
+	var perc: Dictionary = party.perceived
+	var pp: Dictionary = pop.pos
+	for ax in sal: d += sal[ax] * absf(pp[ax] - perc[ax])
+	d = d / pre.sw if pre.sw > 0 else 0.0
+	var sc = -d / C.distanceScale * (1 - C.devotionBlind * dev)
 	var gw: float = pop.goodwill[party.id]
 	var aw: float = pop.aware[party.id]
 	var st = s.districts.get(pop.get("district", ""), null)
@@ -670,14 +695,18 @@ func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Diction
 	if party.isPlayer: sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
 	else: sc += C.rivalLeaderWeight * ((party.charisma - 50) / 50.0) * pop.leaderPull
 	# the kind of leader they want, against the kind this one is
-	if LEADER_TYPES.size() and ctx.has("fit"): sc += C.typeWeight * (leader_match(pop, ctx.fit[party.id], ctx.clim) - 0.4) * pop.leaderPull
+	if not pre.lw.is_empty():
+		var fit: Dictionary = ctx.fit[party.id]
+		var m = 0.0
+		for k in pre.lw: m += pre.lw[k] * float(fit.get(k, 0.4))
+		sc += C.typeWeight * (m - 0.4) * pop.leaderPull
 	var penalty = maxf(0, ctx.inc[party.id] - C.inconsistencyTolerance) / 4.0
 	sc -= penalty * pop.engagement * (1 - C.devotionBlind * dev)
 	sc += C.trustWeight * ctx.distrust * (0.5 - party.establishment) * pop.disaffection
 	for o in ctx.own[party.id]:
 		var p: float = pop.pos[o.axis]
 		if (o.side == "L" and p < -15) or (o.side == "R" and p > 15):
-			var care = salience_of(s, pop, o.axis) - C.singleIssueFrom
+			var care = sal[o.axis] - C.singleIssueFrom
 			if care > 0: sc += C.ownWeight * o.value * care
 	return sc
 
@@ -686,8 +715,9 @@ func pop_support(s: Dictionary, pop: Dictionary, exclude, ctx = null) -> Diction
 	var parties: Array = s.parties.filter(func(p): return p.id != exclude)
 	var scores = []
 	var top = -INF
+	var pre = pop_prep(s, pop, ctx)
 	for p in parties:
-		var v = party_score(s, pop, p, ctx)
+		var v = party_score(s, pop, p, ctx, pre)
 		scores.append(v)
 		top = maxf(top, v)
 	var weights = []
@@ -749,7 +779,8 @@ func size_of(s: Dictionary, who) -> float:
 	for p in pops_matching(s, who): t += p.size
 	return t
 
-func summarize(s: Dictionary, pops: Array, ctx = null) -> Dictionary:
+## cache: optional {pop id: support}, shared by several summaries of the same moment (a poll).
+func summarize(s: Dictionary, pops: Array, ctx = null, cache = null) -> Dictionary:
 	if ctx == null: ctx = score_context(s)
 	var res = {"size": 0.0, "voters": 0.0, "turnout": 0.0, "support": {}, "core": {}, "pos": {}, "sal": {},
 		"aware": 0.0, "leader": 0.0, "leaderPull": 0.0, "backers": 0.0, "devotion": 0.0, "followers": 0.0,
@@ -762,7 +793,11 @@ func summarize(s: Dictionary, pops: Array, ctx = null) -> Dictionary:
 		res.pos[ax.id] = 0.0
 		res.sal[ax.id] = 0.0
 	for pop in pops:
-		var sup = pop_support(s, pop, null, ctx)
+		var sup
+		if cache != null and cache.has(pop.id): sup = cache[pop.id]
+		else:
+			sup = pop_support(s, pop, null, ctx)
+			if cache != null: cache[pop.id] = sup
 		var votes = pop_votes(pop, sup)
 		res.size += pop.size
 		for p in s.parties:
@@ -1963,19 +1998,20 @@ func noisy(s: Dictionary, shares: Dictionary, sd: float) -> Dictionary:
 
 func take_poll(s: Dictionary, label: String, silent := false) -> void:
 	var ctx = score_context(s)
-	var nation = summarize(s, s.pops, ctx)
+	var cache = {}
+	var nation = summarize(s, s.pops, ctx, cache)
 	var poll = {"week": s.week, "label": label, "national": noisy(s, nation.support, C.pollError),
 		"turnout": nation.turnout, "trust": s.trust, "regions": {}, "groups": {}}
 	for kind in group_kinds():
 		for g in kind.groups:
-			var sm = summarize(s, pops_matching(s, g.who), ctx)
+			var sm = summarize(s, pops_matching(s, g.who), ctx, cache)
 			if not sm.size: continue
 			var entry = {"support": noisy(s, sm.support, C.pollError * 2), "core": sm.core}
 			poll.groups[kind.id + ":" + g.id] = entry
 			if kind.id == "region": poll.regions[g.id] = entry.support
 	poll.tracker = silent
 	s.polls.append(poll)
-	s.projection = district_results(s)   # who would win each district today
+	s.projection = district_results(s, cache, ctx)   # who would win each district today
 	if silent: return
 	var prev_annual = null
 	var i: int = s.polls.size() - 2
@@ -2056,21 +2092,22 @@ func district_boost(s: Dictionary, id: String, aware: float, goodwill: float) ->
 	st.goodwill = clampf2(st.goodwill + goodwill, -1, 1.2)
 
 ## Votes in one district: its own voters (build_pops), with its local standing (party_score).
-func district_votes(s: Dictionary, d: Dictionary, ctx) -> Dictionary:
+func district_votes(s: Dictionary, d: Dictionary, ctx, cache = null) -> Dictionary:
 	var out = {}
 	for p in s.parties: out[p.id] = 0.0
 	for pop in s.pops:
 		if pop.get("district", "") != d.id: continue
-		var votes = pop_votes(pop, pop_support(s, pop, null, ctx))
+		var sup = cache[pop.id] if cache != null and cache.has(pop.id) else pop_support(s, pop, null, ctx)
+		var votes = pop_votes(pop, sup)
 		for id in votes: out[id] += votes[id]
 	return out
 
 ## Every district: votes, the winner, the runner-up and the winning margin (share points).
-func district_results(s: Dictionary) -> Dictionary:
-	var ctx = score_context(s)
+func district_results(s: Dictionary, cache = null, ctx = null) -> Dictionary:
+	if ctx == null: ctx = score_context(s)
 	var out = {}
 	for d in DISTRICTS:
-		var v: Dictionary = district_votes(s, d, ctx)
+		var v: Dictionary = district_votes(s, d, ctx, cache)
 		var tot = dsum(v)
 		var ids: Array = ssort(v.keys(), func(a, b): return v[b] - v[a])
 		out[d.id] = {"votes": v, "winner": ids[0], "second": ids[1], "seats": int(d.seats),

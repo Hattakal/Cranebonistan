@@ -471,9 +471,11 @@ func _render_map() -> void:
 		var strength = clampf(0.28 + float(x.margin) * 2.6, 0.28, 0.85)
 		_map.fills[d.id] = Look.mix(Look.LAND, Color(G.party_of(S, x.winner).color), strength * 0.85)
 		# not yours yet: your colour in stripes, thicker the closer your vote is to the leader's
-		if x.winner != "player" and float(x.you) > 0.02:
-			var k: float = clampf(float(x.you) / maxf(0.01, float(x.share)), 0.0, 1.0)
-			_map.stripes[d.id] = [Color(G.player_party(S).color), 0.08 + 0.72 * k * k]
+		# (only once you are a real contender there: at least a quarter of the leader's vote)
+		var k: float = clampf(float(x.you) / maxf(0.01, float(x.share)), 0.0, 1.0)
+		if x.winner != "player" and k >= 0.25:
+			var t: float = (k - 0.25) / 0.75
+			_map.stripes[d.id] = [Look.mix(Look.LAND, Color(G.player_party(S).color), 0.85), 0.12 + 0.68 * t]
 	for f in G.FOREIGN:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
 	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
@@ -1115,8 +1117,8 @@ class TourPhoto extends Control:
 		var rng = RandomNumberGenerator.new()
 		rng.seed = 7
 		for row in rows:
-			var y = inner.position.y + inner.size.y * (0.98 - row * 0.085)
 			var rad = inner.size.y * (0.075 - row * 0.008)
+			var y = inner.end.y - rad * 0.6 - row * inner.size.y * 0.085
 			var x = inner.position.x + rad
 			while x < inner.end.x - rad:
 				if rng.randf() < fill: draw_circle(Vector2(x + rng.randf() * 4, y), rad, Color(0.16 + rng.randf() * 0.08, 0.15, 0.14))
@@ -1402,6 +1404,12 @@ func _shot(args: Dictionary) -> void:
 			_files._scroll.scroll_vertical = int(args.scroll)
 	if args.has("region"): _files.S = S; _files.open_region(args.region)
 	if args.has("district"): _district_sheet(args.district)
+	if args.has("tour"):
+		S.queue.clear()
+		S.lastVisit = -99
+		_district_sheet(args.tour)
+		_tour_result(_sheet_layer.get_child(-1), G.act_visit(S, args.tour))
+	if args.has("profile"): _profile_sheet()
 	if args.has("country"): _country_sheet(args.country)
 	if args.has("margaret"):
 		_advisor.margaret(args.margaret)

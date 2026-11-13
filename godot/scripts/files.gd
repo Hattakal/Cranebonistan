@@ -109,6 +109,9 @@ func render() -> void:
 		"media": _media()
 		"polls": _polls()
 		"diary": _diary()
+	# room at the bottom, so the last cards can be scrolled clear of Carlos in the corner
+	var pad = Control.new(); pad.custom_minimum_size.y = 120
+	_body.add_child(pad)
 	await get_tree().process_frame
 	_scroll.scroll_vertical = keep
 
