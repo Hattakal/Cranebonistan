@@ -453,6 +453,7 @@ var _chips = {}         # chip label -> {panel, val, tw}
 func _render_map() -> void:
 	var poll = S.polls[-1] if S.polls.size() else null
 	_map.fills = {}
+	_map.stripes = {}
 	_map.shares = {}
 	_map.hot = {}
 	_map.communities = S.communities
@@ -469,6 +470,10 @@ func _render_map() -> void:
 		_leaders[d.id] = x.winner
 		var strength = clampf(0.28 + float(x.margin) * 2.6, 0.28, 0.85)
 		_map.fills[d.id] = Look.mix(Look.LAND, Color(G.party_of(S, x.winner).color), strength * 0.85)
+		# not yours yet: your colour in stripes, thicker the closer your vote is to the leader's
+		if x.winner != "player" and float(x.you) > 0.02:
+			var k: float = clampf(float(x.you) / maxf(0.01, float(x.share)), 0.0, 1.0)
+			_map.stripes[d.id] = [Color(G.player_party(S).color), 0.08 + 0.72 * k * k]
 	for f in G.FOREIGN:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
 	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}

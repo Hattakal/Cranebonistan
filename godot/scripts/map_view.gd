@@ -15,6 +15,7 @@ var districts: Array = []      # {id, region, name, polys, label, seats}
 var cities: Array = []
 var capital = ""
 var fills = {}                # area id -> Color
+var stripes = {}              # district id -> [Color, 0..1]: your colour striped over the leader's, thicker as your vote grows
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
 var communities = {}          # city name -> level of your party's community
@@ -49,8 +50,10 @@ func setup(game) -> void:
 			"color": Color(f.get("mapColor", "#cdbe9c"))})
 	districts.clear()
 	for d in game.DISTRICTS:
-		districts.append({"id": d.id, "region": d.region, "name": d.name, "polys": _parse(d.d), "label": d.label, "seats": int(d.seats)})
+		districts.append({"id": d.id, "region": d.region, "name": d.name, "polys": _parse(d.d), "label": d.label, "seats": int(d.seats), "area": float(d.get("area", 1.0))})
 		if d.cities.has(capital): capital_district = d.id
+	# big districts first, so a small one inside another (the capital) is drawn on top and clicked first
+	districts.sort_custom(func(a, b): return a.area > b.area)
 	_features = load("res://assets/map-features.png")
 	_grain = Look.noise_texture(512, 512, Color(0.35, 0.25, 0.12, 0.0), Color(0.35, 0.25, 0.12, 0.22), 0.02, 4)
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -154,7 +157,8 @@ func _hit(screen: Vector2) -> Dictionary:
 		if _plates[id].has_point(screen): return {"id": id, "kind": "foreign"}
 	if capital_district != "" and _cap_spot.has_point(screen): return {"id": capital_district, "kind": "district"}
 	var p = to_map(screen)
-	for d in districts:
+	for i in range(districts.size() - 1, -1, -1):
+		var d: Dictionary = districts[i]
 		for poly in d.polys:
 			if Geometry2D.is_point_in_polygon(p, poly): return {"id": d.id, "kind": "district"}
 	for kind in ["region", "foreign"]:
@@ -229,6 +233,7 @@ func _draw() -> void:
 			var sp = PackedVector2Array()
 			for p in poly: sp.append(o + p * s)
 			draw_colored_polygon(sp, col)
+			if stripes.has(d.id): _stripes(sp, stripes[d.id][0], float(stripes[d.id][1]))
 	for d in districts:
 		for poly in d.polys:
 			var sp = PackedVector2Array()
@@ -327,6 +332,21 @@ func _hatch(poly: PackedVector2Array) -> void:
 		var b = bb.position + Vector2(d + bb.size.y, 0)
 		var segs = Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([a, b]), poly)
 		for sg in segs: draw_polyline(sg, c, 1.0)
+		d += gap
+
+## Diagonal bands of one colour over a shape; `k` (0..1) is how much of it they cover.
+func _stripes(poly: PackedVector2Array, col: Color, k: float) -> void:
+	if k <= 0.01: return
+	var bb = Rect2(poly[0], Vector2.ZERO)
+	for p in poly: bb = bb.expand(p)
+	var gap = 18.0
+	var w = maxf(1.5, gap * clampf(k, 0, 0.95))
+	var d = -bb.size.y
+	while d < bb.size.x:
+		var a = bb.position + Vector2(d, bb.size.y)
+		var b = bb.position + Vector2(d + bb.size.y, 0)
+		for sg in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([a, b]), poly):
+			draw_polyline(sg, col, w)
 		d += gap
 
 func _star(c: Vector2, r: float, col: Color) -> void:
