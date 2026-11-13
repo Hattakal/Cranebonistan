@@ -1,5 +1,5 @@
 {
- "_note": "The media. Every outlet works on its audience every month: it pulls their views toward its slant ('pos', only the issues it cares about, -100..100 like the axes), warms them to the party it favours, and shields that party (its audience forgives its unpopular statements). 'honesty' 0..1: honest outlets reach widely, move each viewer a little and report what you actually do; partisan ones move and shield their own audience much more and favour whoever is closest to their slant. 'reach': base share of a group that follows it, times 'by' (age, class, region, nationality multipliers). 'tones': how each way of speaking plays there (1 = neutral). 'kind': public, paper, tabloid, business, network, online, regional, platform, foreign. 'price': millions of pezo to buy it (0 = not for sale). Drafts: rename and retune freely. Foreign outlets name their 'country'. Personalities (kind 'influencer') can be sponsored: 'sponsor' is the price per quarter in millions; a sponsored personality backs the party paying, but is believed less, and the deal can come out. FOREIGN_MONEY: what comes with the secret foreign offers in content.json (FUNDING_OFFERS, by 'offer' id) once you take one: 'quarterly' millions more every quarter, the country's channel ('country', if it has one) on your side, free bot farms on social media, and favours asked now and then ('demands', each with a 'comply' answer and its effects; refusing ends the money). It ends when the offer's leak event comes out.",
+ "_note": "The media. Every outlet works on its audience every month: it pulls their views toward its slant ('pos', only the issues it cares about, -100..100 like the axes), warms them to the party it favours, and shields that party (its audience forgives its unpopular statements). 'honesty' 0..1: honest outlets reach widely, move each viewer a little and report what you actually do; partisan ones move and shield their own audience much more and favour whoever is closest to their slant. 'reach': base share of a group that follows it, times 'by' (age, class, region, nationality multipliers). 'tones': how each way of speaking plays there (1 = neutral). 'kind': public, paper, tabloid, business, network, online, regional, platform, foreign. 'price': millions of pezo to buy it (0 = not for sale). Drafts: rename and retune freely. Foreign outlets name their 'country'. Personalities (kind 'influencer') have 'subs', followers in millions: their reach ('reach.base' is the reach at that number) and their price (a quarter costs 0.4 + 1.0 per million followers) follow their followers, which grow a little every month and fall after one of their own scandals (INFLUENCER_SCANDALS, 'loss' = share of followers lost). Sponsoring one is an open secret, not a scandal: they back whoever pays, a little less believably. FOREIGN_MONEY: what comes with the secret foreign offers in content.json (FUNDING_OFFERS, by 'offer' id) once you take one: 'quarterly' millions more every quarter, the country's channel ('country', if it has one) on your side, free bot farms on social media, and favours asked now and then ('demands', each with a 'comply' answer and its effects; refusing ends the money). It ends when the offer's leak event comes out.",
  "OUTLETS": [
   {
    "id": "cbc",
@@ -378,7 +378,6 @@
     "society": -35
    },
    "price": 0,
-   "sponsor": 2.0,
    "reach": {
     "base": 0.05,
     "by": {
@@ -400,7 +399,8 @@
     "folksy": 1.0,
     "fiery": 1.4,
     "provocative": 1.2
-   }
+   },
+   "subs": 0.9
   },
   {
    "id": "bakk",
@@ -415,7 +415,6 @@
     "system": -25
    },
    "price": 0,
-   "sponsor": 1.5,
    "reach": {
     "base": 0.05,
     "by": {
@@ -440,7 +439,8 @@
     "folksy": 1.6,
     "fiery": 1.2,
     "provocative": 1.0
-   }
+   },
+   "subs": 1.1
   },
   {
    "id": "dunn",
@@ -455,7 +455,6 @@
     "foreign": -20
    },
    "price": 0,
-   "sponsor": 2.5,
    "reach": {
     "base": 0.06,
     "by": {
@@ -477,7 +476,8 @@
     "folksy": 1.1,
     "fiery": 1.5,
     "provocative": 1.6
-   }
+   },
+   "subs": 1.4
   },
   {
    "id": "pim",
@@ -488,7 +488,6 @@
    "honesty": 0.4,
    "pos": {},
    "price": 0,
-   "sponsor": 3.0,
    "reach": {
     "base": 0.1,
     "by": {
@@ -505,7 +504,8 @@
     "folksy": 1.3,
     "fiery": 1.0,
     "provocative": 1.5
-   }
+   },
+   "subs": 2.6
   },
   {
    "id": "ross",
@@ -516,7 +516,6 @@
    "honesty": 0.25,
    "pos": {},
    "price": 0,
-   "sponsor": 2.0,
    "reach": {
     "base": 0.07,
     "by": {
@@ -536,7 +535,8 @@
     "folksy": 1.2,
     "fiery": 1.1,
     "provocative": 1.5
-   }
+   },
+   "subs": 1.6
   },
   {
    "id": "teller",
@@ -551,7 +551,6 @@
     "system": 30
    },
    "price": 0,
-   "sponsor": 1.5,
    "reach": {
     "base": 0.04,
     "by": {
@@ -572,7 +571,8 @@
     "folksy": 0.8,
     "fiery": 0.6,
     "provocative": 0.5
-   }
+   },
+   "subs": 0.5
   },
   {
    "id": "nina",
@@ -585,7 +585,6 @@
     "nation": 20
    },
    "price": 0,
-   "sponsor": 1.0,
    "reach": {
     "base": 0.06,
     "by": {
@@ -609,7 +608,8 @@
     "folksy": 1.4,
     "fiery": 0.8,
     "provocative": 1.0
-   }
+   },
+   "subs": 0.8
   }
  ],
  "FOREIGN_MONEY": [
@@ -732,6 +732,43 @@
      }
     }
    ]
+  }
+ ],
+ "INFLUENCER_SCANDALS": [
+  {
+   "title": "{name}'s old posts resurface",
+   "text": "Someone dug up what {name} was posting at nineteen. The apology video is eleven minutes long and filmed in front of a plain wall.",
+   "loss": 0.3
+  },
+  {
+   "title": "{name} in a giveaway that never paid out",
+   "text": "Thousands of followers entered a giveaway for a car. Nobody can find anyone who won it.",
+   "loss": 0.35
+  },
+  {
+   "title": "{name} caught pushing a betting app",
+   "text": "A sponsored 'tip' turned out to be an ad for an unlicensed betting app. Parents' groups are furious.",
+   "loss": 0.25
+  },
+  {
+   "title": "{name}'s feud gets ugly",
+   "text": "A public feud with another creator ended in leaked voice messages. Both sides have lost followers; {name} has lost more.",
+   "loss": 0.2
+  },
+  {
+   "title": "{name}'s 'prank' was staged",
+   "text": "The video that made {name} famous was staged with paid actors, one of the actors says, with receipts.",
+   "loss": 0.3
+  },
+  {
+   "title": "{name} promoted a coin that collapsed",
+   "text": "A cryptocurrency {name} called 'the future' lost ninety-eight percent of its value in a week. The comments are not kind.",
+   "loss": 0.4
+  },
+  {
+   "title": "{name}'s ex tells all",
+   "text": "A long video from {name}'s former partner has more views than anything {name} ever made.",
+   "loss": 0.25
   }
  ]
 }

@@ -133,7 +133,7 @@ func _build_bar() -> Control:
 	h.add_child(_section(_stats, 10))
 	var menu = HBoxContainer.new()
 	menu.add_theme_constant_override("separation", 0)
-	for m in [["debates", "flame", "Debates"], ["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["actions", "megaphone", "Actions"], ["parties", "landmark", "Country"], ["media", "newspaper", "Media"], ["polls", "chart-line", "Polls"], ["diary", "book-open", "Diary"]]:
+	for m in [["debates", "flame", "Debates"], ["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["actions", "megaphone", "Actions"], ["parties", "landmark", "Country"], ["media", "newspaper", "Media"], ["polls", "chart-line", "Parties"], ["diary", "book-open", "Diary"]]:
 		var b = _menu_button(m[1], m[2])
 		b.pressed.connect(func(): _show_file(m[0]))
 		menu.add_child(b)

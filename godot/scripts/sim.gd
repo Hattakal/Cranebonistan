@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 28
+const SAVE_VERSION := 29
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -61,6 +61,7 @@ var TOURS: Dictionary = {}     # short stories from the leader's trips (data/tou
 var LEADER_TYPES: Array = []   # the kinds of leader voters want (data/leader_types.json)
 var OUTLETS: Array = []        # newspapers, channels and platforms (data/media.json)
 var FOREIGN_MONEY: Array = []  # what comes with secret foreign money (data/media.json)
+var INFLUENCER_SCANDALS: Array = []   # what goes wrong for personalities (data/media.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -94,6 +95,7 @@ func load_content(path: String) -> void:
 	var media_data = JSON.parse_string(FileAccess.get_file_as_string("res://data/media.json")) if FileAccess.file_exists("res://data/media.json") else {}
 	OUTLETS = media_data.get("OUTLETS", [])
 	FOREIGN_MONEY = media_data.get("FOREIGN_MONEY", [])
+	INFLUENCER_SCANDALS = media_data.get("INFLUENCER_SCANDALS", [])
 	LEADER_TYPES = JSON.parse_string(FileAccess.get_file_as_string("res://data/leader_types.json")).TYPES if FileAccess.file_exists("res://data/leader_types.json") else []
 	if not C.has("typeWeight"): C.typeWeight = 0.8
 	TOURS = JSON.parse_string(FileAccess.get_file_as_string("res://data/tours.json")) if FileAccess.file_exists("res://data/tours.json") else {}
@@ -692,7 +694,7 @@ func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Diction
 		if party.isPlayer:
 			gw += float(st.goodwill)
 			aw = aw + float(st.aware) * (1 - aw)
-		else: gw += float(st.rivals.get(party.id, 0))
+		else: gw += float(st.rivals.get(party.id, 0)) + float(st.get("rtrip", {}).get(party.id, 0))
 	sc += gw
 	sc += log(maxf(aw, 0.001))
 	if party.isPlayer: sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
@@ -1162,6 +1164,131 @@ func rivals_monthly(s: Dictionary, now_support: Dictionary) -> void:
 			falling = p; break
 	if falling: collapse_party(s, falling)
 
+# ---------- The rivals' turn ----------
+## Rivals play the same game as you, a little less freely: a budget every quarter,
+## a trip a month to a province they want, adverts, personalities, now and then an
+## outlet, and investigators digging into other parties (you included).
+const RIVAL_EDGE := 0.7     # how much of the player's effect a rival's move has
+
+func rival_move(s: Dictionary, p: Dictionary, text: String, loud := false) -> void:
+	if not s.has("rivalMoves"): s.rivalMoves = []
+	s.rivalMoves.append({"week": s.week, "party": p.id, "text": text})
+	if s.rivalMoves.size() > 120: s.rivalMoves = s.rivalMoves.slice(-120)
+	# the ticker carries every move; only what lands on you stops the clock
+	push_news(s, {"party": p.id, "kind": "threat", "title": text.trim_suffix("."), "text": "", "quiet": not loud})
+
+func rival_income(s: Dictionary, p: Dictionary, share: float) -> float:
+	return C.incomeBase * 0.8 + share * C.incomePerShare + C.businessBase * (0.3 + 0.9 * float(p.get("establishment", 0.5))) * 0.8
+
+func rivals_turn(s: Dictionary, now: Dictionary) -> void:
+	var quarter: bool = calendar(s.week).isQuarterStart
+	var proj: Dictionary = s.get("projection", {})
+	for p in rivals(s):
+		if not p.has("money"): p.money = 5.0 + 6.0 * float(p.get("establishment", 0.5))
+		if quarter: p.money = float(p.money) + rival_income(s, p, float(now.get(p.id, 0)))
+		_rival_trip(s, p, proj)
+		_rival_ads(s, p)
+		_rival_media(s, p)
+		_rival_dig(s, p, now)
+
+## The province where a trip matters most: one they could take, or one they could lose.
+func _rival_trip(s: Dictionary, p: Dictionary, proj: Dictionary) -> void:
+	var best = null
+	var best_v = 0.0
+	var reach: Dictionary = by_id(PARTIES, p.id).get("reach", {}) if by_id(PARTIES, p.id) else {}
+	for d in DISTRICTS:
+		var x: Dictionary = proj.get(d.id, {})
+		if x.is_empty(): continue
+		if float(reach.get(d.region, reach.get("default", 1))) < 0.5: continue   # a party tours where it organises
+		var tot: float = dsum(x.votes)
+		if tot <= 0: continue
+		var mine: float = float(x.votes.get(p.id, 0)) / tot
+		var gap: float = absf(float(x.share) - mine) if x.winner != p.id else float(x.margin)
+		if gap > 0.12: continue
+		var v: float = float(d.seats) * (0.13 - gap) * (0.7 + rand(s) * 0.6)
+		if v > best_v: best_v = v; best = d
+	if best == null: return
+	var st: Dictionary = s.districts[best.id]
+	if not st.has("rtrip"): st.rtrip = {}
+	st.rtrip[p.id] = float(st.rtrip.get(p.id, 0)) + VISIT_GOODWILL * RIVAL_EDGE * sqrt(float(p.charisma) / 50.0)
+	rival_move(s, p, "%s toured %s." % [p.leader, best.name])
+
+## Adverts: some of the money goes on the groups the party wants most.
+func _rival_ads(s: Dictionary, p: Dictionary) -> void:
+	if float(p.money) < 2 or rand(s) > 0.8: return
+	var spend: float = snappedf(minf(float(p.money) * 0.4, 1.0 + float(p.money) * 0.1), 0.5)
+	if spend <= 0: return
+	p.money = float(p.money) - spend
+	var k: float = 0.012 * spend * RIVAL_EDGE
+	for pop in s.pops:
+		# closer voters are the cheap ones to win
+		var near: float = clampf2(1.0 - distance(s, pop, p.perceived) / 60.0, 0, 1)
+		pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] + k * near, -2, 2)
+	rival_move(s, p, "%s spent ₱%sM on adverts." % [p.short, fmt1(spend)])
+
+## A personality whose line is close to theirs, and once in a while an outlet for sale.
+func _rival_media(s: Dictionary, p: Dictionary) -> void:
+	if not s.has("media"): return
+	var have = false
+	for o in OUTLETS:
+		if s.media[o.id].get("sponsor", "") == p.id: have = true
+	if not have and rand(s) < 0.2:
+		var best = null
+		var bf = 0.1
+		for o in OUTLETS:
+			if o.kind != "influencer" or s.media[o.id].get("sponsor", "") != "": continue
+			var f: float = outlet_favour(s, o, p) + float(s.media[o.id].get("reachNat", 0)) * 2
+			if f > bf and float(p.money) >= sponsor_price(s, o) * 2: bf = f; best = o
+		if best:
+			var price: float = sponsor_price(s, best)
+			p.money = float(p.money) - price
+			s.media[best.id].sponsor = p.id
+			rival_move(s, p, "%s signed a deal with %s." % [p.short, best.name])
+	if rand(s) < 0.015:
+		for o in OUTLETS:
+			var st: Dictionary = s.media[o.id]
+			var price: float = float(o.get("price", 0))
+			if price <= 0 or st.owner != "" or float(p.money) < price * 1.3: continue
+			if outlet_favour(s, o, p) < 0.2: continue
+			p.money = float(p.money) - price
+			st.owner = p.id
+			rival_move(s, p, "Buyers close to %s took over %s." % [p.short, o.name])
+			break
+
+## Investigators: usually at whoever is closest to them in the polls.
+func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
+	if float(p.money) < 2 or rand(s) > 0.1: return
+	p.money = float(p.money) - 2.0
+	var target = null
+	var close = 1.0
+	for q in s.parties:
+		if q.id == p.id: continue
+		var gap: float = absf(float(now.get(q.id, 0)) - float(now.get(p.id, 0)))
+		if q.isPlayer: gap *= 0.7   # the new party is everyone's favourite target
+		if gap < close: close = gap; target = q
+	if target == null: return
+	var r = rand(s)
+	if r < 0.15:
+		for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.08, -2, 2)
+		rival_move(s, p, "%s's investigators were caught digging into %s." % [p.short, target.short], target.isPlayer)
+		if target.isPlayer: change_relation(s, p.id, -4, "they spied on you")
+		return
+	if r > 0.6:
+		rival_move(s, p, "%s had %s investigated, and found nothing." % [p.short, target.short])
+		return
+	if target.isPlayer:
+		var dirty: Array = s.record.money.filter(func(m): return m.dirty)
+		var hit: float = 0.22 if dirty.size() else 0.08
+		var what: String = ("where %s's money comes from" % target.short) if dirty.size() else "%s's expense claims" % target.leader
+		for pop in s.pops: pop.goodwill.player = clampf2(pop.goodwill.player - hit * (1 - shield_of(pop, "player")), -2, 2)
+		for o in OUTLETS: s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) - hit * float(o.get("honesty", 0.5)), -1, 1)
+		change_relation(s, p.id, -6, "they dug up dirt on you")
+		rival_move(s, p, "%s leaks a story about %s." % [p.short, what], true)
+	else:
+		target.stability = clampf2(float(target.stability) - 6, 0, 100)
+		for pop in s.pops: pop.goodwill[target.id] = clampf2(pop.goodwill[target.id] - 0.1 * (1 - shield_of(pop, target.id)), -2, 2)
+		rival_move(s, p, "%s leaks a damaging story about %s." % [p.short, target.short])
+
 func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 	if now.player < C.scrutinyFrom or rand(s) > C.scrutinyChance: return
 	var story: Dictionary = pick(s, SCRUTINY_STORIES)
@@ -1219,6 +1346,7 @@ func monthly_update(s: Dictionary) -> void:
 			for p in s.parties: pop.loyal[p.id] *= 0.85 / loyal_total
 	var now: Dictionary = summarize(s, s.pops).support
 	rivals_monthly(s, now)
+	rivals_turn(s, now)
 	frontrunner_scrutiny(s, now)
 	s.trustHistory.append({"week": s.week, "trust": s.trust})
 	s.lastSupport = now
@@ -1235,7 +1363,8 @@ const SHIELD_MAX := 0.6
 func new_media(s: Dictionary) -> Dictionary:
 	var out = {}
 	for o in OUTLETS:
-		out[o.id] = {"pos": o.get("pos", {}).duplicate(), "owner": "", "sponsor": "", "grudge": -9999, "audience": 1.0, "buzz": 0.0, "favour": {}, "reachNat": 0.0}
+		out[o.id] = {"pos": o.get("pos", {}).duplicate(), "owner": "", "sponsor": "", "audience": 1.0, "buzz": 0.0, "favour": {}, "reachNat": 0.0,
+			"subs": float(o.get("subs", 0))}
 	return out
 
 func outlet_by_id(id: String) -> Variant:
@@ -1245,6 +1374,7 @@ func outlet_by_id(id: String) -> Variant:
 func outlet_reach(s: Dictionary, o: Dictionary, pop: Dictionary) -> float:
 	var st: Dictionary = s.media.get(o.id, {})
 	var r: float = float(o.get("reach", {}).get("base", 0.1)) * float(st.get("audience", 1.0))
+	if float(o.get("subs", 0)) > 0: r *= float(st.get("subs", o.subs)) / float(o.subs)   # a personality reaches as many as follow them
 	var by: Dictionary = o.get("reach", {}).get("by", {})
 	for key in ["age", "class", "region", "nationality"]:
 		r *= float(by.get(key, {}).get(pop[key], 1.0))
@@ -1253,12 +1383,16 @@ func outlet_reach(s: Dictionary, o: Dictionary, pop: Dictionary) -> float:
 ## How honest an outlet is now: a party-owned one is less believed.
 func outlet_honesty(s: Dictionary, o: Dictionary) -> float:
 	var h: float = float(o.get("honesty", 0.5))
-	var st: Dictionary = s.media[o.id]
-	return h * 0.5 if st.owner != "" or st.get("sponsor", "") != "" else h
+	return h * 0.5 if s.media[o.id].owner != "" else h
 
-## How much an outlet's word counts with its audience: a paid voice counts for less.
+## How much an outlet's word counts with its audience: a paid voice a little less
+## (everyone knows they're paid; nobody minds much).
 func outlet_weight(s: Dictionary, o: Dictionary) -> float:
-	return 0.5 if s.media[o.id].get("sponsor", "") != "" else 1.0
+	return 0.75 if s.media[o.id].get("sponsor", "") != "" else 1.0
+
+## A personality's price for a quarter, from their followers.
+func sponsor_price(s: Dictionary, o: Dictionary) -> float:
+	return snappedf(0.4 + float(s.media[o.id].get("subs", o.get("subs", 1))) * 1.0, 0.1)
 
 ## How an outlet treats a party, -1..1. Partisan outlets back whoever is closest to
 ## their slant; honest ones follow what you actually say and how it goes ("buzz").
@@ -1266,8 +1400,6 @@ func outlet_favour(s: Dictionary, o: Dictionary, p: Dictionary) -> float:
 	var st: Dictionary = s.media[o.id]
 	if st.owner != "": return 1.0 if st.owner == p.id else -0.3
 	if st.get("sponsor", "") != "": return 1.0 if st.sponsor == p.id else -0.1
-	# a personality caught being paid by you turns on you for half a year
-	if p.isPlayer and s.week - int(st.get("grudge", -9999)) < 6 * WEEKS_PER_MONTH: return -0.6
 	# a foreign channel backs the party its government pays
 	var pat = s.get("patron")
 	if p.isPlayer and pat and o.kind == "foreign" and o.get("country", "") == pat.country: return 1.0
@@ -1386,13 +1518,12 @@ func act_sponsor(s: Dictionary, id: String) -> Dictionary:
 	if o == null or o.kind != "influencer": return {"ok": false, "text": "No such personality."}
 	var st: Dictionary = s.media[id]
 	if st.sponsor != "": return {"ok": false, "text": "%s already has a deal." % o.name}
-	if s.week - int(st.grudge) < 6 * WEEKS_PER_MONTH: return {"ok": false, "text": "%s won't take your calls." % o.name}
-	var price: float = float(o.get("sponsor", 2))
+	var price: float = sponsor_price(s, o)
 	var err = can_act(s, price)
 	if err: return {"ok": false, "text": err}
 	spend_action(s, price)
 	st.sponsor = "player"
-	var text = "%s has signed a \"content partnership\" with friends of the party: ₱%sM a quarter. Expect warm words, and keep it quiet." % [o.name, fmt1(price)]
+	var text = "%s has signed a \"content partnership\" with friends of the party: ₱%sM a quarter. Everyone will guess; nobody will mind much." % [o.name, fmt1(price)]
 	_log(s, "action", "Sponsored %s." % o.name)
 	return {"ok": true, "text": text}
 
@@ -1403,30 +1534,34 @@ func act_end_sponsor(s: Dictionary, id: String) -> Dictionary:
 	_log(s, "action", "Ended the deal with %s." % o.name)
 	return {"ok": true, "text": "The deal with %s is over. No hard feelings, officially." % o.name}
 
-## Quarterly fees, and the chance that someone finds the contract.
+## Followers come and go; fees are paid every quarter; now and then a personality
+## has a scandal of their own and loses a share of their followers.
+const INFLUENCER_SCANDAL := 0.025   # monthly chance, each
+
 func sponsors_monthly(s: Dictionary) -> void:
 	var quarter: bool = calendar(s.week).isQuarterStart
 	for o in OUTLETS:
 		if o.kind != "influencer": continue
 		var st: Dictionary = s.media[o.id]
-		if st.get("sponsor", "") != "player": continue
-		if quarter:
-			var price: float = float(o.get("sponsor", 2))
+		st.subs = maxf(0.05, float(st.get("subs", o.subs)) * (1.0 + 0.012 + rand_normal(s) * 0.01))
+		if INFLUENCER_SCANDALS.size() and rand(s) < INFLUENCER_SCANDAL:
+			var sc: Dictionary = pick(s, INFLUENCER_SCANDALS)
+			st.subs = float(st.subs) * (1 - float(sc.get("loss", 0.3)))
+			push_news(s, {"kind": "issue", "quiet": st.get("sponsor", "") != "player", "title": String(sc.title).format({"name": o.name}),
+				"text": String(sc.text).format({"name": o.name}) + (" Your party's deal with them was mentioned, briefly." if st.get("sponsor", "") == "player" else "")})
+		var spon: String = st.get("sponsor", "")
+		if spon == "" or not quarter: continue
+		var price: float = sponsor_price(s, o)
+		if spon == "player":
 			if s.money < price:
 				st.sponsor = ""
 				push_news(s, {"kind": "issue", "quiet": true, "title": "%s drops your party" % o.name, "text": "The money stopped, and so did the warm words."})
 				continue
 			s.money -= price
-		if rand(s) < SPONSOR_LEAK:
-			st.sponsor = ""
-			st.grudge = s.week
-			s.record.money.append({"week": s.week, "source": "%s (a paid sponsorship)" % o.name, "amount": 0.0, "dirty": true})
-			for pop in s.pops:
-				var r: float = outlet_reach(s, o, pop)
-				if r > 0.01: pop.goodwill.player = clampf2(pop.goodwill.player - 1.2 * r, -2, 2)
-			for x in OUTLETS: s.media[x.id].buzz = clampf2(float(s.media[x.id].buzz) - 0.5 * float(x.get("honesty", 0.5)), -1, 1)
-			push_news(s, {"kind": "bad", "title": "%s was paid to praise %s" % [o.name, player_party(s).short],
-				"text": "A leaked contract shows %s took party money for \"content\". %s's followers feel used, and say so." % [o.name, o.name]})
+		else:
+			var rp = party_of(s, spon)
+			if rp == null or float(rp.get("money", 0)) < price: st.sponsor = ""
+			else: rp.money = float(rp.money) - price
 
 # ---------- Foreign money: patrons ----------
 func foreign_deal(offer_id: String) -> Variant:
@@ -2427,6 +2562,8 @@ func districts_monthly(s: Dictionary) -> void:
 		var st: Dictionary = s.districts[id]
 		st.aware = float(st.aware) * 0.985
 		st.goodwill = float(st.goodwill) * 0.95
+		var rt: Dictionary = st.get("rtrip", {})
+		for pid in rt: rt[pid] = float(rt[pid]) * 0.95
 	for name in s.communities:
 		var d = district_of_city(name)
 		if d: district_boost(s, d.id, 0.006 * int(s.communities[name]), 0.018 * int(s.communities[name]))

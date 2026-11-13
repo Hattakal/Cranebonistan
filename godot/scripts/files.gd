@@ -11,7 +11,7 @@ signal speak(id: String, side: String)   # open the sheet to pick your words
 signal raise(opt: Dictionary)             # open the sheet to start a debate
 
 const TITLES := {"debates": "The national debate", "electorate": "The electorate", "platform": "Platform and leader", "actions": "This month's moves",
-	"parties": "The country", "media": "The media", "polls": "Polls", "diary": "Campaign diary"}
+	"parties": "The country", "media": "The media", "polls": "Parties and polls", "diary": "Campaign diary"}
 
 var G
 var S: Dictionary
@@ -1114,7 +1114,7 @@ func _media() -> void:
 	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
 	for part in [["Newspapers, channels and platforms", false], ["Personalities", true]]:
 		_eyebrow(part[0])
-		if part[1]: _p("Commentators, streamers and gossip channels. An independent one works like a small partisan outlet. You can sponsor one: they back you, but a paid voice counts for less, the fee comes every quarter, and if the contract leaks their followers feel used.", null, Look.MUTED, 13)
+		if part[1]: _p("Commentators, streamers and gossip channels. Their reach and their price follow their followers, who come and go, and leave in numbers after one of their scandals. An independent one works like a small partisan outlet. Sponsoring one is an open secret: they back you, a little less believably, for a fee every quarter.", null, Look.MUTED, 13)
 		var g = GridContainer.new()
 		g.columns = 3 if size.x > 1100 else 1
 		g.add_theme_constant_override("h_separation", 12)
@@ -1161,7 +1161,8 @@ func _media_card(g: Control, row: Dictionary, blocked: bool) -> void:
 			c.add_child(b)
 		if o.kind == "influencer":
 			var spon: String = st.get("sponsor", "")
-			var fee: float = float(o.get("sponsor", 2))
+			var fee: float = G.sponsor_price(S, o)
+			_add(Look.label("%sM followers" % Game.fmt1(float(st.get("subs", o.get("subs", 0)))), "body_bold", 12, Look.INK, true), c)
 			if spon == "player":
 				_add(Look.label("Sponsored by friends of the party: ₱%sM a quarter." % Game.fmt1(fee), "body_bold", 12, Look.RED, true), c)
 				c.add_child(_btn("End the deal", func():
@@ -1169,21 +1170,56 @@ func _media_card(g: Control, row: Dictionary, blocked: bool) -> void:
 					toast.emit(res.text)
 					changed.emit(), S.result != null))
 			elif spon != "":
-				_add(Look.label("Has a deal with someone.", "body", 12, Look.MUTED, true), c)
+				var rp = G.party_of(S, spon)
+				_add(Look.label("Sponsored by %s." % (rp.short if rp else "someone"), "body", 12, Look.MUTED, true), c)
 			else:
 				var sb = _btn("Sponsor · ₱%sM a quarter" % Game.fmt1(fee), func():
 					var res: Dictionary = G.act_sponsor(S, o.id)
 					toast.emit(res.text)
-					changed.emit(), blocked or S.money < fee or S.week - int(st.get("grudge", -9999)) < 6 * G.WEEKS_PER_MONTH)
-				sb.tooltip_text = "Uses one of this month's actions; the fee is paid now and every quarter. A paid voice counts for half, and about one deal in thirty leaks each month."
+					changed.emit(), blocked or S.money < fee)
+				sb.tooltip_text = "Uses one of this month's actions; the fee is paid now and every quarter, and follows their followers. Everyone knows they're paid, so their word counts a little less, but it is no scandal."
 				c.add_child(sb)
 
 # ---------- Polls ----------
+static func funds_word(m: float) -> String:
+	if m >= 30: return "Flush"
+	if m >= 12: return "Comfortable"
+	if m >= 4: return "Getting by"
+	return "Tight"
+
 func _polls() -> void:
 	if S.polls.is_empty():
 		_p("No polls yet."); return
 	var poll: Dictionary = S.polls[-1]
 	var prev = S.polls[-2] if S.polls.size() > 1 else null
+	# the parties, and what they have been up to
+	var seats: Dictionary = G.projected_seats(S.projection) if S.get("projection", {}).size() else {}
+	var order: Array = Game.ssort(S.parties.duplicate(), func(a, b): return float(poll.national.get(b.id, 0)) - float(poll.national.get(a.id, 0)))
+	var g = GridContainer.new()
+	g.columns = 3 if size.x > 1100 else 1
+	g.add_theme_constant_override("h_separation", 12)
+	g.add_theme_constant_override("v_separation", 12)
+	_add(g)
+	var moves: Array = S.get("rivalMoves", [])
+	for p in order:
+		var c = _card(g)
+		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var top = HBoxContainer.new()
+		c.add_child(top)
+		var nm = Look.label(("You · " if p.isPlayer else "") + p.name, "display", 19, Color(p.color).darkened(0.3), true)
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(nm)
+		var now: float = float(poll.national.get(p.id, 0)) * 100
+		var was: float = float(prev.national.get(p.id, 0)) * 100 if prev else now
+		top.add_child(Look.label("%s%% %s" % [Game.fmt1(now), "▲" if now - was > 0.4 else ("▼" if now - was < -0.4 else "")], "display", 19, Look.INK))
+		_add(Look.label("Leader: %s · %d seats if the election were today · funds: %s" % [p.leader, int(seats.get(p.id, 0)), funds_word(float(S.money) if p.isPlayer else float(p.get("money", 0))).to_lower()], "body", 12, Look.MUTED, true), c)
+		if p.isPlayer: continue
+		var mine: Array = moves.filter(func(m): return m.party == p.id and S.week - int(m.week) < 2 * G.WEEKS_PER_MONTH)
+		if mine.is_empty():
+			_add(Look.label("Quiet lately.", "body_italic", 12, Look.MUTED, true), c)
+		for m in mine.slice(-4):
+			_add(Look.label("· " + m.text, "body", 13, Look.INK, true), c)
+	_rule()
 	_eyebrow("National vote intention · %s · %s" % [poll.label, G.date_label(poll.week, false)])
 	_bars(poll.national, prev.national if prev else null)
 	_p("Expected turnout %d%%. Margin of error about ±%s points." % [Game.jround(poll.turnout * 100), Game.fmt1(G.C.pollError * 200)])
