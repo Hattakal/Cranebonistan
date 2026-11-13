@@ -1,0 +1,26 @@
+{
+ "_note": "What kind of leader voters want. Every group wants a mix of these. A group's wish for a type = base + 'by' (its age, class, region or nationality) + 'lean' (it leans that way on an issue: 'order:L' = Authority, beyond 25) + 'disaffected' x how fed up it is + 'pull' x how much it votes on personality. 'climate' raises the wish while the country is in that state: crisis (the major crisis), war (a neighbour is hot), hard_times (jobs or prices are bad), distrust (trust in politics is low). How well a leader fits each type is worked out in sim.gd (leader_fit) from their style, record and positions. label: a noun phrase; want: how a group's wish reads in the Electorate file.",
+ "TYPES": [
+  {"id": "star", "label": "A star", "want": "someone exciting to watch",
+   "base": 0.9, "by": {"age": {"18-29": 0.6, "30-45": 0.3}}, "pull": 1.2,
+   "climate": {}},
+  {"id": "statesman", "label": "A steady statesman", "want": "a steady hand",
+   "base": 1.0, "by": {"age": {"46-60": 0.4, "61+": 0.8}, "class": {"middle": 0.4, "upper": 0.3}}, "lean": {"system:R": 0.6},
+   "climate": {"crisis": 0.4, "war": 0.3}},
+  {"id": "revolutionary", "label": "A revolutionary", "want": "someone to tear the system down",
+   "base": 0.4, "by": {"age": {"18-29": 0.4}}, "lean": {"system:L": 0.9}, "disaffected": 1.6,
+   "climate": {"distrust": 0.7, "hard_times": 0.3}},
+  {"id": "strongman", "label": "A strongman", "want": "a firm hand",
+   "base": 0.5, "lean": {"order:L": 0.8, "nation:L": 0.4, "foreign:L": 0.3},
+   "climate": {"crisis": 0.6, "war": 0.7}},
+  {"id": "one_of_us", "label": "One of us", "want": "someone like them",
+   "base": 0.8, "by": {"class": {"working": 0.6}, "region": {"fauraifai": 0.3, "erland": 0.2}},
+   "climate": {"hard_times": 0.4}},
+  {"id": "clean", "label": "Clean hands", "want": "someone untouched by the old politics",
+   "base": 0.6, "disaffected": 0.6, "lean": {"system:L": 0.2},
+   "climate": {"distrust": 0.8}},
+  {"id": "expert", "label": "An expert", "want": "someone who knows how things work",
+   "base": 0.6, "by": {"class": {"upper": 0.6, "middle": 0.3}, "age": {"46-60": 0.2}}, "lean": {"economy:R": 0.3},
+   "climate": {"hard_times": 0.5, "crisis": 0.2}}
+ ]
+}

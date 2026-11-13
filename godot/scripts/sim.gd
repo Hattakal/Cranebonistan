@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 24
+const SAVE_VERSION := 25
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -58,6 +58,7 @@ var FIGURES: Array = []       # your party's politicians (data/party.json)
 var CITY_INFO: Dictionary = {} # population, lean and a line per city (data/cities.json)
 var FLAGSHIP: Array = []       # the year-three flagship promise (data/flagship.json)
 var TOURS: Dictionary = {}     # short stories from the leader's trips (data/tours.json)
+var LEADER_TYPES: Array = []   # the kinds of leader voters want (data/leader_types.json)
 var _event_axis = {}
 
 func _init() -> void:
@@ -88,6 +89,8 @@ func load_content(path: String) -> void:
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
 	FLAGSHIP = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagship.json")).ISSUES if FileAccess.file_exists("res://data/flagship.json") else []
+	LEADER_TYPES = JSON.parse_string(FileAccess.get_file_as_string("res://data/leader_types.json")).TYPES if FileAccess.file_exists("res://data/leader_types.json") else []
+	if not C.has("typeWeight"): C.typeWeight = 0.8
 	TOURS = JSON.parse_string(FileAccess.get_file_as_string("res://data/tours.json")) if FileAccess.file_exists("res://data/tours.json") else {}
 	_load_districts()
 	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
@@ -483,7 +486,124 @@ func score_context(s: Dictionary) -> Dictionary:
 			var v: float = owners[pid]
 			if v < 0.02 or not own.has(pid): continue
 			own[pid].append({"axis": parts[0], "side": parts[1], "value": v / maxf(total, C.ownShareFloor + v * 0.5)})
-	return {"inc": inc, "own": own, "distrust": (50.0 - s.trust) / 50.0}
+	var distrust: float = (50.0 - s.trust) / 50.0
+	var fit = {}
+	for p in s.parties: fit[p.id] = leader_fit(s, p)
+	return {"inc": inc, "own": own, "distrust": distrust, "fit": fit, "clim": leader_climate(s, distrust)}
+
+# ---------- What kind of leader people want ----------
+## A group's wish for each kind of leader (data/leader_types.json), summing to 1.
+## It comes from who they are; the climate (leader_climate) then raises some wishes.
+func pop_wants(pop: Dictionary) -> Dictionary:
+	var w = {}
+	var tot = 0.0
+	for t in LEADER_TYPES:
+		var v: float = float(t.get("base", 1))
+		var by: Dictionary = t.get("by", {})
+		v += float(by.get("age", {}).get(pop.age, 0)) + float(by.get("class", {}).get(pop.class, 0))
+		v += float(by.get("region", {}).get(pop.region, 0)) + float(by.get("nationality", {}).get(pop.nationality, 0))
+		var lean: Dictionary = t.get("lean", {})
+		for key in lean:
+			var parts: PackedStringArray = String(key).split(":")
+			var x: float = float(pop.pos[parts[0]])
+			if (parts[1] == "L" and x < -25) or (parts[1] == "R" and x > 25): v += float(lean[key])
+		v += float(t.get("disaffected", 0)) * maxf(0, float(pop.disaffection) - 1)
+		v += float(t.get("pull", 0)) * (float(pop.leaderPull) - 1)
+		w[t.id] = maxf(0.05, v)
+		tot += w[t.id]
+	for k in w: w[k] = w[k] / tot
+	return w
+
+## How the times change what people want: a crisis, a hot border, hard times, low trust,
+## and anything events added (s.wantMod, which fades).
+func leader_climate(s: Dictionary, distrust: float) -> Dictionary:
+	var war = false
+	for f in FOREIGN:
+		if s.countries.get(f.id, {}).get("hot", false): war = true
+	var hard: float = maxf(metric_badness(s, "jobs"), metric_badness(s, "prices")) if s.has("world") else 0.0
+	var mods: Dictionary = s.get("wantMod", {})
+	var out = {}
+	for t in LEADER_TYPES:
+		var cl: Dictionary = t.get("climate", {})
+		var k: float = 1.0 + float(mods.get(t.id, 0))
+		if s.get("crisis"): k += float(cl.get("crisis", 0))
+		if war: k += float(cl.get("war", 0))
+		k += float(cl.get("hard_times", 0)) * hard
+		k += float(cl.get("distrust", 0)) * maxf(0, distrust)
+		out[t.id] = maxf(0.2, k)
+	return out
+
+## How well a party's leader fits each kind (0..1): your leader from the words you
+## choose, your record and how voters see you; rivals from their party.
+func leader_fit(s: Dictionary, p: Dictionary) -> Dictionary:
+	var pos: Dictionary = p.perceived
+	var ch: float = clampf2((float(p.charisma) - 30) / 50.0, 0, 1)
+	var est: float = float(p.get("establishment", 0.5))
+	var radical: float = clampf2(-float(pos.system) / 70.0, 0, 1)
+	var auth: float = clampf2(-float(pos.order) / 70.0, 0, 1)
+	var hawk: float = clampf2(-float(pos.foreign) / 70.0, 0, 1)
+	var ext = 0.0
+	for ax in AXES: ext += absf(float(pos[ax.id])) / 80.0
+	var calm: float = clampf2(1 - ext / AXES.size(), 0, 1)
+	var tone = {"statesman": 0.25 + 0.5 * est, "fiery": 0.15 + 0.3 * maxf(radical, auth), "folksy": 0.2, "provocative": 0.1 * radical}
+	var visits = 0
+	var stains = 0.0
+	var slips = 0.0
+	var memes = 0.0
+	if p.isPlayer:
+		est = clampf2(0.5 + float(pos.system) / 140.0, 0, 1)
+		var sh: Dictionary = style_profile(s).shares
+		if sh.size(): tone = {"statesman": float(sh.get("statesman", 0)), "fiery": float(sh.get("fiery", 0)), "folksy": float(sh.get("folksy", 0)), "provocative": float(sh.get("provocative", 0))}
+		for id in s.get("districts", {}): visits += int(s.districts[id].get("visits", 0))
+		stains = s.record.money.filter(func(m): return m.dirty).size() * 0.35 + float(s.record.outrages) * 0.1
+		slips = float(s.record.gaffes)
+		memes = float(s.record.memes)
+	else:
+		stains = clampf2((60 - float(p.get("stability", 60))) / 60.0, 0, 1)
+	var f = {
+		"star": 0.6 * ch + 0.3 * (tone.folksy + tone.provocative) + minf(0.2, memes * 0.04),
+		"statesman": 0.45 * tone.statesman + 0.3 * calm + 0.25 * (1 - radical) - minf(0.4, slips * 0.06),
+		"revolutionary": 0.55 * radical + 0.3 * (tone.fiery + tone.provocative) + 0.15 * (1 - est),
+		"strongman": 0.35 * auth + 0.15 * hawk + 0.3 * tone.fiery + 0.2 * ch,
+		"one_of_us": 0.5 * tone.folksy + 0.3 * (1 - est) + 0.2 * minf(1, visits / 12.0),
+		"clean": 0.5 * (1 - est) + 0.5 * (1 - minf(1, stains)),
+		"expert": 0.45 * tone.statesman + 0.35 * calm + 0.2 * (1 - minf(1, tone.provocative * 2)) - minf(0.3, slips * 0.05),
+	}
+	for k in f: f[k] = clampf2(f[k], 0, 1)
+	return f
+
+## What a set of voters wants in a leader today, strongest first: [{type, share}].
+func group_wants(s: Dictionary, pops: Array) -> Array:
+	var clim: Dictionary = leader_climate(s, (50.0 - s.trust) / 50.0)
+	var sum = {}
+	var tot = 0.0
+	for pop in pops:
+		if not pop.has("wants"): pop.wants = pop_wants(pop)
+		for k in pop.wants:
+			var v: float = float(pop.size) * float(pop.wants[k]) * float(clim.get(k, 1.0))
+			sum[k] = float(sum.get(k, 0)) + v
+			tot += v
+	var out = []
+	for t in LEADER_TYPES: out.append({"type": t, "share": float(sum.get(t.id, 0)) / tot if tot else 0.0})
+	return ssort(out, func(a, b): return b.share - a.share)
+
+## How a party's leader comes across, best fit first: [{type, fit}].
+func leader_image(s: Dictionary, p: Dictionary) -> Array:
+	var f: Dictionary = leader_fit(s, p)
+	var out = []
+	for t in LEADER_TYPES: out.append({"type": t, "fit": float(f.get(t.id, 0))})
+	return ssort(out, func(a, b): return b.fit - a.fit)
+
+## How well a party's leader matches what this group wants (0..1).
+func leader_match(pop: Dictionary, fit: Dictionary, clim: Dictionary) -> float:
+	if not pop.has("wants"): pop.wants = pop_wants(pop)
+	var num = 0.0
+	var den = 0.0
+	for k in pop.wants:
+		var w: float = float(pop.wants[k]) * float(clim.get(k, 1.0))
+		num += w * float(fit.get(k, 0.4))
+		den += w
+	return num / den if den > 0 else 0.4
 
 func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Dictionary) -> float:
 	var dev = devotion_of(pop, party)
@@ -492,6 +612,8 @@ func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Diction
 	sc += log(pop.aware[party.id])
 	if party.isPlayer: sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
 	else: sc += C.rivalLeaderWeight * ((party.charisma - 50) / 50.0) * pop.leaderPull
+	# the kind of leader they want, against the kind this one is
+	if LEADER_TYPES.size() and ctx.has("fit"): sc += C.typeWeight * (leader_match(pop, ctx.fit[party.id], ctx.clim) - 0.4) * pop.leaderPull
 	var penalty = maxf(0, ctx.inc[party.id] - C.inconsistencyTolerance) / 4.0
 	sc -= penalty * pop.engagement * (1 - C.devotionBlind * dev)
 	sc += C.trustWeight * ctx.distrust * (0.5 - party.establishment) * pop.disaffection
@@ -676,6 +798,10 @@ func apply_effects(s: Dictionary, fx: Dictionary) -> void:
 				var amt: float = float(g) if (g is float or g is int) else g.amt
 				if matches(pop, who): pop.leader.player = clampf2(pop.leader.player + amt * scale, -2, 2)
 	if fx.get("charisma"): player.charisma = clampf2(player.charisma + fx.charisma, 10, 100)
+	# events can make people want a different kind of leader for a while: {"wants": {"strongman": 0.4}}
+	if fx.has("wants"):
+		if not s.has("wantMod"): s.wantMod = {}
+		for k in fx.wants: s.wantMod[k] = clampf2(float(s.wantMod.get(k, 0)) + float(fx.wants[k]), -0.6, 1.5)
 	for ax in fx.get("salience", {}):
 		s.salMod[ax] = clampf2(float(s.salMod.get(ax, 0)) + fx.salience[ax] * (1.0 if from_news else inf), -0.5, 1.5)
 	if fx.get("trust"): change_trust(s, fx.trust * (1.0 if (from_news or fx.trust > 0) else inf))
@@ -948,6 +1074,8 @@ func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 # ---------- Monthly dynamics ----------
 func monthly_update(s: Dictionary) -> void:
 	for ax in s.salMod: s.salMod[ax] *= C.salienceDecay
+	var wm: Dictionary = s.get("wantMod", {})
+	for k in wm: wm[k] = float(wm[k]) * 0.85
 	debates_monthly(s)
 	issues_monthly(s)
 	communities_monthly(s)

@@ -323,7 +323,12 @@ func _electorate() -> void:
 		["View of " + G.player_party(S).leader, "%s (%s)" % [leader_words(sum.leader), leader_score(sum.leader)]],
 		["Fed up with the system", "Very" if dis > 1.25 else ("Quite" if dis > 1.05 else ("Somewhat" if dis > 0.85 else "Hardly"))],
 	], d)
-	if sum.leaderPull > 1.12: _p("Looks for a strong, charismatic leader.", d, Look.RED)
+	var wants: Array = G.group_wants(S, G.pops_matching(S, g.who))
+	if wants.size() >= 2:
+		var fitd: Dictionary = G.leader_fit(S, G.player_party(S))
+		var you = func(t): return "you fit well" if float(fitd.get(t.id, 0)) >= 0.55 else ("you fit somewhat" if float(fitd.get(t.id, 0)) >= 0.35 else "not you, yet")
+		_p("Wants %s (%s), or %s (%s)." % [wants[0].type.want, you.call(wants[0].type), wants[1].type.want, you.call(wants[1].type)], d, Look.INK, 14)
+	if sum.leaderPull > 1.12: _p("Votes on personality more than most.", d, Look.RED)
 	elif sum.leaderPull < 0.88: _p("Hard to win over with personality alone.", d, Look.RED)
 	_eyebrow("Cares most about", d)
 	var issues: Array = Game.ssort(G.AXES.duplicate(), func(a, b): return sum.sal[b.id] - sum.sal[a.id]).slice(0, 3)
@@ -401,10 +406,11 @@ func _platform() -> void:
 		["Charisma", charisma_word(player.charisma)],
 		["Personal image", "%s (%s)" % [leader_words(nation.leader), leader_score(nation.leader)]],
 		["Speaking style", G.style_profile(S).label],
+		["Comes across as", G.leader_image(S, player)[0].type.label if G.LEADER_TYPES.size() else "—"],
 		["Devotion", "Fanatical" if dev > 0.4 else ("Strong" if dev > 0.2 else ("Growing" if dev > 0.08 else "Little"))],
 		["Would follow you anywhere", ("%sM" % Game.fmt1(nation.followers / 1e6)) if nation.followers >= 1e6 else "%dk" % Game.jround(nation.followers / 1000.0)],
 	], c1, 2)
-	_p("Your style comes from the words you choose: a recognisable voice builds charisma. Devoted voters care less about your positions and forgive flip-flops.", c1)
+	_p("Your style comes from the words you choose: a recognisable voice builds charisma. Devoted voters care less about your positions and forgive flip-flops. What kind of leader you come across as depends on your words, your record and your positions; each group wants a different kind (see the Electorate file), and a crisis, a war, hard times or low trust change what they want.", c1)
 	var c2 = _card(top)
 	c2.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Consistency", c2)
