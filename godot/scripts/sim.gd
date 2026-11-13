@@ -1996,22 +1996,56 @@ func noisy(s: Dictionary, shares: Dictionary, sd: float) -> Dictionary:
 	for id in out: out[id] /= total
 	return out
 
+## A poll asks a sample, not everyone: a few groups in every province, picked at
+## random by size and weighted up to the province's people. It is quick, and it can
+## be wrong in the way real polls are. The election itself counts everyone.
+const POLL_PER_DISTRICT := 8
+
+func poll_sample(s: Dictionary) -> Array:
+	var by_d = {}
+	for pop in s.pops:
+		var id: String = pop.get("district", pop.region)
+		if not by_d.has(id): by_d[id] = []
+		by_d[id].append(pop)
+	var out = []
+	for id in by_d:
+		var pool: Array = by_d[id].duplicate()
+		var total = 0.0
+		for pop in pool: total += float(pop.size)
+		var picked = []
+		while picked.size() < POLL_PER_DISTRICT and pool.size():
+			var left = 0.0
+			for pop in pool: left += float(pop.size)
+			var r: float = rand(s) * left
+			var k = 0
+			while k < pool.size() - 1 and r > float(pool[k].size):
+				r -= float(pool[k].size); k += 1
+			picked.append(pool[k])
+			pool.remove_at(k)
+		# picked in proportion to size, so each one stands for an equal share of the province
+		for pop in picked:
+			var q: Dictionary = pop.duplicate(false)
+			q.size = total / picked.size()
+			out.append(q)
+	return out
+
 func take_poll(s: Dictionary, label: String, silent := false) -> void:
 	var ctx = score_context(s)
 	var cache = {}
-	var nation = summarize(s, s.pops, ctx, cache)
-	var poll = {"week": s.week, "label": label, "national": noisy(s, nation.support, C.pollError),
+	var sample: Array = poll_sample(s)
+	var nation = summarize(s, sample, ctx, cache)
+	var poll = {"week": s.week, "label": label, "national": noisy(s, nation.support, C.pollError * 0.5),
 		"turnout": nation.turnout, "trust": s.trust, "regions": {}, "groups": {}}
 	for kind in group_kinds():
 		for g in kind.groups:
-			var sm = summarize(s, pops_matching(s, g.who), ctx, cache)
+			var sm = summarize(s, sample.filter(func(p): return matches(p, g.who)), ctx, cache)
 			if not sm.size: continue
-			var entry = {"support": noisy(s, sm.support, C.pollError * 2), "core": sm.core}
+			var entry = {"support": noisy(s, sm.support, C.pollError), "core": sm.core}
 			poll.groups[kind.id + ":" + g.id] = entry
 			if kind.id == "region": poll.regions[g.id] = entry.support
 	poll.tracker = silent
 	s.polls.append(poll)
-	s.projection = district_results(s, cache, ctx)   # who would win each district today
+	s.projection = district_results(s, cache, ctx, sample)   # who would win each district today, by this poll
 	if silent: return
 	var prev_annual = null
 	var i: int = s.polls.size() - 2
@@ -2092,10 +2126,10 @@ func district_boost(s: Dictionary, id: String, aware: float, goodwill: float) ->
 	st.goodwill = clampf2(st.goodwill + goodwill, -1, 1.2)
 
 ## Votes in one district: its own voters (build_pops), with its local standing (party_score).
-func district_votes(s: Dictionary, d: Dictionary, ctx, cache = null) -> Dictionary:
+func district_votes(s: Dictionary, d: Dictionary, ctx, cache = null, pops = null) -> Dictionary:
 	var out = {}
 	for p in s.parties: out[p.id] = 0.0
-	for pop in s.pops:
+	for pop in (pops if pops != null else s.pops):
 		if pop.get("district", "") != d.id: continue
 		var sup = cache[pop.id] if cache != null and cache.has(pop.id) else pop_support(s, pop, null, ctx)
 		var votes = pop_votes(pop, sup)
@@ -2103,17 +2137,19 @@ func district_votes(s: Dictionary, d: Dictionary, ctx, cache = null) -> Dictiona
 	return out
 
 ## Every district: votes, the winner, the runner-up and the winning margin (share points).
-func district_results(s: Dictionary, cache = null, ctx = null) -> Dictionary:
+func district_results(s: Dictionary, cache = null, ctx = null, pops = null) -> Dictionary:
 	if ctx == null: ctx = score_context(s)
 	var out = {}
-	for d in DISTRICTS:
-		var v: Dictionary = district_votes(s, d, ctx, cache)
-		var tot = dsum(v)
-		var ids: Array = ssort(v.keys(), func(a, b): return v[b] - v[a])
-		out[d.id] = {"votes": v, "winner": ids[0], "second": ids[1], "seats": int(d.seats),
-			"share": v[ids[0]] / tot if tot else 0.0, "margin": (v[ids[0]] - v[ids[1]]) / tot if tot else 0.0,
-			"you": v.player / tot if tot else 0.0}
+	for d in DISTRICTS: out[d.id] = district_result(s, d, ctx, cache, pops)
 	return out
+
+func district_result(s: Dictionary, d: Dictionary, ctx, cache = null, pops = null) -> Dictionary:
+	var v: Dictionary = district_votes(s, d, ctx, cache, pops)
+	var tot = dsum(v)
+	var ids: Array = ssort(v.keys(), func(a, b): return v[b] - v[a])
+	return {"votes": v, "winner": ids[0], "second": ids[1], "seats": int(d.seats),
+		"share": v[ids[0]] / tot if tot else 0.0, "margin": (v[ids[0]] - v[ids[1]]) / tot if tot else 0.0,
+		"you": v.player / tot if tot else 0.0}
 
 ## The leader on the road: once a month, free, one district. People there hear
 ## of you and warm to you; the rest of the region a little. Going back to the same
@@ -2173,7 +2209,7 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	if block: return {"ok": false, "text": block}
 	var d = district_by_id(id)
 	var st: Dictionary = s.districts[id]
-	var before: float = float(s.projection.get(id, {}).get("you", 0))
+	var before: float = float(district_result(s, d, score_context(s)).you)   # counted properly: the trip team knows the place
 	var pw: Dictionary = visit_power(s, id)
 	var k: float = pw.k
 	st.visits = int(st.visits) + 1
@@ -2182,7 +2218,7 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	for o in DISTRICTS:
 		if o.region == d.region and o.id != id: district_boost(s, o.id, VISIT_AWARE * k * 0.1, VISIT_GOODWILL * k * 0.06)
 	s.lastVisit = s.week
-	s.projection = district_results(s)
+	s.projection[id] = district_result(s, d, score_context(s))
 	var after: float = float(s.projection[id].you)
 	var text = "%s spent the month in %s: town halls, a market walkabout, a local radio phone-in. Your vote there: %d%% → %d%%." % [player_party(s).leader, d.name, jround(before * 100), jround(after * 100)]
 	if pw.why.size():
