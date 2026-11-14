@@ -8,6 +8,7 @@ func _init() -> void:
 		if f.type == "event": G.resolve_event(s, 0, -1)
 		elif f.type == "budget": G.resolve_budget(s, {"road": 1.0, "social": 1.0, "tv": 0.0, "tour": 0.0}, [])
 		elif f.type == "debate": G.answer_debate(s, 0)
+		elif f.type == "interview": G.answer_interview(s, 0)
 		else: G.dismiss_front(s)
 	var kinds = {}
 	for m in s.rivalMoves:

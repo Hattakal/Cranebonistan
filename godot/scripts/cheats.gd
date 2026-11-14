@@ -131,6 +131,7 @@ func _settle_one() -> bool:
 				left -= alloc[k]
 			G.resolve_budget(S, alloc, [])
 		"debate": G.answer_debate(S, 0)
+		"interview": G.answer_interview(S, 0)
 		"election": return false
 		_: G.dismiss_front(S)
 	return true

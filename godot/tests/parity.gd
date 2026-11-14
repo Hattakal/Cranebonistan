@@ -52,6 +52,9 @@ func _init() -> void:
 			G.resolve_budget(s, alloc, [])
 		elif f.type == "debate":
 			G.answer_debate(s, s.debate.step % 4)
+		elif f.type == "interview":
+			G.answer_interview(s, s.interview.step % 4)
+			if s.interview.verdict: print("INTERVIEW %s score=%d on %s" % [s.interview.verdict.title, s.interview.score, s.interview.outletName])
 		else:
 			if f.type == "poll":
 				var p: Dictionary = s.polls[f.index]

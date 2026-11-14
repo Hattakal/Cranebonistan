@@ -1,0 +1,158 @@
+{
+ "_note": "The big interview, in the first year: the country meets the leader. It is done by the most trusted outlet (the most honest one with a wide reach), and it can't be gamed: dodging a question, or answering against your own manifesto, costs you; plain answers in your own voice pay. Questions: who you are (by tone), the boldest line in your manifesto, what the country cares most about, your second boldest line, and your record. Answers to issue questions are the lines in debate_lines.json (AXIS_LINES), plus a dodge. Placeholders: {leader} {party} {stance} {issue} {home} {first} {second} {source}. 'verdicts': picked by how clear you were (score: +1 a clear answer in line with your manifesto or your record owned, -1 a dodge, -1 a U-turn, -2 a denial of something real). Drafts: rewrite freely.",
+ "INTERVIEWERS": {
+  "cbc": "Hanne Morel",
+  "herald": "Piet Lagarde",
+  "ledger": "Ines Castell",
+  "courier": "Ruben Hart"
+ },
+ "MONTH": 8,
+ "OPENING": {
+  "title": "Who are you?",
+  "prompt": "{interviewer}: \"Half the country knows your name and nothing else. Who is {leader}?\"",
+  "lines": [
+   {
+    "tone": "statesman",
+    "text": "\"Someone who ran a city and kept its books straight. I would like to do the same for the country.\""
+   },
+   {
+    "tone": "folksy",
+    "text": "\"Someone who still does their own shopping. You learn more in a queue than in a ministry.\""
+   },
+   {
+    "tone": "fiery",
+    "text": "\"Someone who got angry, and stayed angry, and decided to do something about it.\""
+   },
+   {
+    "tone": "provocative",
+    "text": "\"Someone the people at the top are already afraid of. Ask them why.\""
+   }
+  ]
+ },
+ "BOLD": {
+  "title": "The boldest line",
+  "prompt": "{interviewer}: \"Your manifesto says {stance} on {issue}. Plenty of people would call that extreme. Are they wrong?\""
+ },
+ "BIG": {
+  "title": "What people care about",
+  "prompt": "{interviewer}: \"The question everyone is asking this year is {issue}. Where do you stand, exactly?\""
+ },
+ "SECOND": {
+  "title": "And another thing",
+  "prompt": "{interviewer}: \"You also say {stance} on {issue}. Is that a promise, or a slogan?\""
+ },
+ "DODGES": [
+  {
+   "tone": "statesman",
+   "text": "\"That's a complicated question, and it deserves a serious answer, which we'll set out in due course.\""
+  },
+  {
+   "tone": "folksy",
+   "text": "\"Honestly, people I meet don't ask me that. They ask about the price of bread.\""
+  }
+ ],
+ "RECORD_FLIP": {
+  "title": "Your record",
+  "prompt": "{interviewer}: \"In {first_date} you said: {first}. In {second_date}: {second}. Which one did you mean?\"",
+  "lines": [
+   {
+    "kind": "own",
+    "tone": "statesman",
+    "text": "\"The second. I listened and I changed my mind, and I'd rather admit it than pretend.\""
+   },
+   {
+    "kind": "deflect",
+    "tone": "folksy",
+    "text": "\"I meant both, in their way. Real life isn't a quiz.\""
+   },
+   {
+    "kind": "attack",
+    "tone": "provocative",
+    "text": "\"You've had a team going through my old quotes for a week. That tells people what this programme is for.\""
+   },
+   {
+    "kind": "deny",
+    "tone": "fiery",
+    "text": "\"I never said the first one. You've taken it out of context.\""
+   }
+  ]
+ },
+ "RECORD_MONEY": {
+  "title": "Your money",
+  "prompt": "{interviewer}: \"Your party took money from {source}. What did they get for it?\"",
+  "lines": [
+   {
+    "kind": "own",
+    "tone": "statesman",
+    "text": "\"A party needs money to be heard. It's all declared, and nobody buys my vote.\""
+   },
+   {
+    "kind": "deflect",
+    "tone": "folksy",
+    "text": "\"Less than they hoped, I can promise you that.\""
+   },
+   {
+    "kind": "attack",
+    "tone": "provocative",
+    "text": "\"Shall we talk about who owns this channel's shares instead?\""
+   },
+   {
+    "kind": "deny",
+    "tone": "fiery",
+    "text": "\"We have never taken a pezo we couldn't account for. Next question.\""
+   }
+  ]
+ },
+ "RECORD_HOME": {
+  "title": "Your record",
+  "prompt": "{interviewer}: \"As mayor of {home}, you left the city with a deficit and a half-built tram line. Why should the country trust you with more?\"",
+  "lines": [
+   {
+    "kind": "own",
+    "tone": "statesman",
+    "text": "\"The deficit was the price of the tram. The tram will be finished, and people will use it.\""
+   },
+   {
+    "kind": "deflect",
+    "tone": "folksy",
+    "text": "\"Ask anyone in {home} whether the buses run on time now. Go on, ask them.\""
+   },
+   {
+    "kind": "attack",
+    "tone": "provocative",
+    "text": "\"The deficit was there when I arrived. Funny how nobody asked my predecessor.\""
+   },
+   {
+    "kind": "deny",
+    "tone": "fiery",
+    "text": "\"There was no deficit. Those numbers were cooked by my opponents.\""
+   }
+  ]
+ },
+ "VERDICTS": [
+  {
+   "from": 4,
+   "title": "A real contender",
+   "text": "Clear, sure of the line, and nobody's puppet. Whatever you think of the answers, there were answers."
+  },
+  {
+   "from": 2,
+   "title": "Sure of the big things",
+   "text": "Plain on what matters to the party, vaguer on the rest. A decent first outing."
+  },
+  {
+   "from": 0,
+   "title": "Charming, but what is it for?",
+   "text": "Likeable on screen. Ask what the party would actually do, and the answers get thin."
+  },
+  {
+   "from": -99,
+   "title": "Evasive",
+   "text": "The interviewer asked; the leader talked about something else. Viewers noticed."
+  }
+ ],
+ "LOOSE": {
+  "title": "A loose cannon",
+  "text": "Two slips in one hour. Some viewers loved it; the people who decide elections winced."
+ }
+}

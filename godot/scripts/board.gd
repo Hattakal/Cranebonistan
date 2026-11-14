@@ -364,6 +364,8 @@ func _front_summary(s: Dictionary, front) -> Dictionary:
 			return {"kicker": s.polls[front.index].label, "title": "The poll is in", "text": "The numbers for every party, and the map, are updated.", "stamp": "Read it"}
 		"news":
 			return {"kicker": "Breaking", "title": front.items[0].title, "text": front.items[0].text, "stamp": "Read it"}
+		"interview":
+			return {"kicker": "Year one", "title": "The big interview", "text": "An hour on %s with %s. The country is about to meet you." % [s.interview.outletName, s.interview.who], "stamp": "On air"}
 		"debate":
 			return {"kicker": "Live on CBC", "title": "The final debate", "text": "Seven million people are watching. Your rivals have been reading your old quotes.", "stamp": "Tonight"}
 		"election":

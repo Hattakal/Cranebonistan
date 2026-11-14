@@ -299,6 +299,7 @@ func _react() -> void:
 			"budget": _advisor.say("budget", false, 0.8)
 			"event": _advisor.say("event", false, 0.5)
 			"debate": _advisor.say("debate_night", true)
+			"interview": _advisor.say("event", false, 0.8)
 	if now.polls > was.polls and S.polls.size() > 1:
 		var d: float = S.polls[-1].national.player - S.polls[-2].national.player
 		if not S.polls[-1].get("tracker", true): _advisor.say("annual_poll", false, 0.9)
@@ -563,6 +564,7 @@ func _open_front() -> void:
 		"poll": _poll_sheet(front)
 		"news": _news_sheet(front)
 		"debate": _debate_sheet()
+		"interview": _interview_sheet()
 		"election": _election_sheet()
 
 func _done(p: Paper) -> void:
@@ -998,6 +1000,58 @@ func _debate_round(p: Paper) -> void:
 			p.top())
 	p.top()
 
+# ---------- The big interview ----------
+func _interview_sheet() -> void:
+	var p = _paper(860)
+	_interview_round(p)
+
+func _interview_round(p: Paper) -> void:
+	p.clear()
+	var iv: Dictionary = S.interview
+	var rd: Dictionary = iv.rounds[iv.step]
+	p.tv_strap(iv.outletName, "The big interview · question %d of %d" % [iv.step + 1, iv.rounds.size()])
+	if iv.step == 0: p.text("An hour with %s on %s: the first time most of the country hears %s properly. %s doesn't take sides, and doesn't let a dodge go." % [iv.who, iv.outletName, G.player_party(S).leader, iv.who], 15, "news_italic")
+	p.heading(rd.title, 36)
+	p.text(rd.prompt, 18)
+	p.step("Your answer", "What do you say?")
+	for j in rd.lines.size():
+		var line: Dictionary = rd.lines[j]
+		p.card("slip", func(box): box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
+			var res: Dictionary = G.answer_interview(S, j)
+			p.clear()
+			p.decided()
+			p.tv_strap(iv.outletName, "The big interview · " + res.round)
+			p.add(Look.label(res.quote, "news_bold", 24, Look.INK, true))
+			p.text(res.press, 17, "news_italic")
+			if res.note != "": p.small(res.note, Look.INK)
+			if res.outcome == "viral": p.stamp("The clip of the year", Look.GOOD)
+			elif res.outcome == "gaffe": p.stamp("Gaffe", Look.RED)
+			_changes_chips(p, res.changes)
+			var more: bool = S.queue.size() and S.queue[0].type == "interview"
+			p.actions([p.button("Next question" if more else "Read the piece", func():
+				if more: _interview_round(p)
+				else: _interview_piece(p))])
+			p.top())
+	p.top()
+
+## The piece the outlet runs the next morning.
+func _interview_piece(p: Paper) -> void:
+	p.clear()
+	p.decided()
+	var iv: Dictionary = S.interview
+	var v: Dictionary = iv.get("verdict", {}) if iv.get("verdict") else {"title": "", "text": ""}
+	p.masthead(G.date_label(S.week), iv.outletName, "The big interview")
+	p.kicker("%s meets %s" % [iv.who, G.player_party(S).leader])
+	p.heading(v.title, 40)
+	p.text(v.text, 18, "news_italic")
+	var best = null
+	for r in iv.results:
+		if best == null or r.outcome == "viral": best = r
+	if best: p.quote(String(best.quote).trim_prefix("\"").trim_suffix("\""), "%s, %s" % [G.player_party(S).leader, iv.outletName])
+	p.small("Most of the country now knows who %s is. What they think of it is another matter." % G.player_party(S).leader, Look.INK)
+	p.actions([p.button("Back to work", func(): _done(p))])
+	p.top()
+
 func _election_sheet() -> void:
 	var r: Dictionary = S.result
 	var p = _paper(860, false)
@@ -1367,6 +1421,7 @@ func _shot(args: Dictionary) -> void:
 			"event": G.resolve_event(S, 0, 0 if G.event_of(f).choices[0].get("lines", []).size() else -1)
 			"budget": G.resolve_budget(S, {"tour": S.money * 0.5, "road": S.money * 0.3}, [])
 			"debate": G.answer_debate(S, 0)
+			"interview": G.answer_interview(S, 0)
 			_: G.dismiss_front(S)
 	# stop on the next decision so the board shows one (or on a given kind)
 	G.advance_to_decision(S)
@@ -1381,12 +1436,16 @@ func _shot(args: Dictionary) -> void:
 			"event": G.resolve_event(S, 0, -1)
 			"budget": G.resolve_budget(S, {"tour": S.money * 0.5}, [])
 			"debate": G.answer_debate(S, 0)
+			"interview": G.answer_interview(S, 0)
 			_: G.dismiss_front(S)
 	render()
 	for i in 20: await get_tree().process_frame
 	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
 	if args.has("flagship"):
 		S.queue.push_front({"type": "event", "event": G.flagship_event(S)})
+	if args.has("ivdone") and S.queue.size() and S.queue[0].type == "interview":
+		while S.queue.size() and S.queue[0].type == "interview": G.answer_interview(S, int(args.ivdone))
+		_interview_piece(_paper(860))
 	if args.has("open"): _open_front()
 	if args.has("found"):
 		_founding_sheet()
@@ -1454,6 +1513,7 @@ func _shot(args: Dictionary) -> void:
 				"event": G.resolve_event(S, 0, -1)
 				"budget": G.resolve_budget(S, {"tour": S.money * 0.5}, [])
 				"debate": G.answer_debate(S, 0)
+				"interview": G.answer_interview(S, 0)
 				_: G.dismiss_front(S)
 		render()
 		await get_tree().create_timer(float(args.then)).timeout

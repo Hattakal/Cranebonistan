@@ -15,6 +15,7 @@ func _init() -> void:
 				"event": G.resolve_event(s, 0, -1); events += 1
 				"budget": G.resolve_budget(s, {"tour": s.money * 0.6}, [])
 				"debate": G.answer_debate(s, 0)
+				"interview": G.answer_interview(s, 0)
 				_: G.dismiss_front(s)
 			continue
 		var c = G.calendar(s.week)
