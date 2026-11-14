@@ -41,6 +41,8 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/media.json` | Newspapers, channels and platforms: audience, slant, honesty, what tone plays well |
 | `godot/data/leader_types.json` | The kinds of leader voters want, and who wants which |
 | `godot/data/tours.json` | Short stories from the leader's trips |
+| `godot/data/names.json` | Name pools by background (Cranbia French, Yamlin Italian/Greek, Erland British, Fauran Slavic, Alinni Nordic/Germanic, Norbanian Japanese, Golba Chinese) |
+| `godot/data/scandals.json`, `violence.json`, `interview.json` | Secrets and scandals; political violence and rivals' labels; the year-one interview |
 | `godot/data/districts.json` | Province overrides: names, seats, local leans |
 | `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
 | `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |

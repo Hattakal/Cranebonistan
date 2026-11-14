@@ -502,7 +502,8 @@ func _platform() -> void:
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		top2.add_child(nm)
 		top2.add_child(Look.label(G.loyalty_word(f.loyalty), "body_bold", 13, Look.RED if f.loyalty < 40 else (Look.GOOD if f.loyalty >= 55 else Look.INK)))
-		c.add_child(Look.label("%s · %s · %s" % [f.role, Game.by_id(G.REGIONS, f.region).name, G.skill_word(float(f.get("skill", 70)))], "body", 12, Look.MUTED, true))
+		var from: String = (" · from %s" % f.hometown) if str(f.get("hometown", "")) != "" else ""
+		c.add_child(Look.label("%s · %s · %s%s" % [f.role, Game.by_id(G.REGIONS, f.region).name, G.skill_word(float(f.get("skill", 70))), from], "body", 12, Look.MUTED, true))
 		var lb = Bar.new(Look.RED if f.loyalty < 40 else Color("8a6d4a"), f.loyalty / 100.0)
 		lb.custom_minimum_size.y = 6
 		c.add_child(lb)
@@ -1228,7 +1229,10 @@ func _polls() -> void:
 		var now: float = float(poll.national.get(p.id, 0)) * 100
 		var was: float = float(prev.national.get(p.id, 0)) * 100 if prev else now
 		top.add_child(Look.label("%s%% %s" % [Game.fmt1(now), "▲" if now - was > 0.4 else ("▼" if now - was < -0.4 else "")], "display", 19, Look.INK))
-		_add(Look.label("Leader: %s · %d seats if the election were today · funds: %s" % [p.leader, int(seats.get(p.id, 0)), funds_word(float(S.money) if p.isPlayer else float(p.get("money", 0))).to_lower()], "body", 12, Look.MUTED, true), c)
+		var lhome: String = str(p.get("leaderHome", ""))
+		var lfrom: String = (", from " + lhome) if lhome != "" else ""
+		var fw: String = funds_word(float(S.money) if p.isPlayer else float(p.get("money", 0))).to_lower()
+		_add(Look.label("Leader: %s%s · %d seats if the election were today · funds: %s" % [p.leader, lfrom, int(seats.get(p.id, 0)), fw], "body", 12, Look.MUTED, true), c)
 		if p.isPlayer: continue
 		var mine: Array = moves.filter(func(m): return m.party == p.id and S.week - int(m.week) < 2 * G.WEEKS_PER_MONTH)
 		if mine.is_empty():

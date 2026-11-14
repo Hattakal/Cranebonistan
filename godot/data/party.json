@@ -1,5 +1,5 @@
 {
- "_note": "The people in your party. Each cares most about one side of one issue. At the start they share the manifesto: a figure whose side differs from the manifesto's is turned around, and 'noteOther' replaces their note. One of them (never Teyl), picked at random each game, is the exception and starts against the manifesto. Steering the manifesto, or speaking, against their side costs loyalty; below 25 they quit and a less able yes-man takes the chair. 'skill' 0-100 (the bench's strength). Margaret Teyl is the party secretary and always starts in the party.",
+ "_note": "The people in your party. Each cares most about one side of one issue. At the start they share the manifesto: a figure whose side differs from the manifesto's is turned around, and 'noteOther' replaces their note. One of them (never Teyl), picked at random each game, is the exception and starts against the manifesto. Steering the manifesto, or speaking, against their side costs loyalty; below 25 they quit and a less able yes-man takes the chair. 'skill' 0-100 (the bench's strength). Margaret Teyl is the party secretary and always starts in the party. 'hometown': where they grew up.",
  "FIGURES": [
   {
    "id": "teyl",
@@ -10,7 +10,8 @@
    "side": "R",
    "note": "Respected by everyone in the party. Hates cutting corners.",
    "sex": "f",
-   "skill": 80
+   "skill": 80,
+   "hometown": "Cranebo"
   },
   {
    "id": "orlik",
@@ -22,7 +23,8 @@
    "note": "Brought half the steelworkers with him.",
    "sex": "m",
    "skill": 70,
-   "noteOther": "Ran the steelworkers' pension fund for ten years. Thinks the state makes a poor shareholder."
+   "noteOther": "Ran the steelworkers' pension fund for ten years. Thinks the state makes a poor shareholder.",
+   "hometown": "Tarropolis"
   },
   {
    "id": "vanna",
@@ -34,7 +36,8 @@
    "note": "Young, sharp, good on television.",
    "sex": "f",
    "skill": 75,
-   "noteOther": "Young, sharp, good on television. Thinks the old ways got the country this far."
+   "noteOther": "Young, sharp, good on television. Thinks the old ways got the country this far.",
+   "hometown": "Nikecisa"
   },
   {
    "id": "brandt",
@@ -46,7 +49,8 @@
    "note": "Speaks for the villages. Distrusts Cranebo.",
    "sex": "m",
    "skill": 65,
-   "noteOther": "Speaks for the villages, where the harvest is picked by people from three countries. Distrusts Cranebo."
+   "noteOther": "Speaks for the villages, where the harvest is picked by people from three countries. Distrusts Cranebo.",
+   "hometown": "Bayernal"
   },
   {
    "id": "kaya",
@@ -58,7 +62,8 @@
    "note": "Knows where every pezo goes. Hates promises nobody can pay for.",
    "sex": "f",
    "skill": 72,
-   "noteOther": "Knows where every pezo goes, and thinks most of them should go to pensions."
+   "noteOther": "Knows where every pezo goes, and thinks most of them should go to pensions.",
+   "hometown": "Athenilo"
   },
   {
    "id": "aikut",
@@ -70,7 +75,8 @@
    "note": "Grew up with checkpoints. Will not defend them.",
    "sex": "f",
    "skill": 68,
-   "noteOther": "Grew up with checkpoints, and with what they kept out. Will not apologise for them."
+   "noteOther": "Grew up with checkpoints, and with what they kept out. Will not apologise for them.",
+   "hometown": "Törün"
   },
   {
    "id": "sarn",
@@ -82,7 +88,8 @@
    "note": "Fauran's only well-known politician in the party.",
    "sex": "m",
    "skill": 60,
-   "noteOther": "Fauran's only well-known politician in the party. Balanced Kravk's books three years running."
+   "noteOther": "Fauran's only well-known politician in the party. Balanced Kravk's books three years running.",
+   "hometown": "Kravk"
   }
  ]
 }

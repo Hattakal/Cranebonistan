@@ -801,7 +801,8 @@
     "welfare": 5,
     "system": 25,
     "order": -35
-   }
+   },
+   "leaderHome": "Teksmisa"
   },
   {
    "id": "clf",
@@ -828,7 +829,8 @@
     "welfare": -50,
     "system": -10,
     "order": 5
-   }
+   },
+   "leaderHome": "Tarropolis"
   },
   {
    "id": "oc",
@@ -856,7 +858,8 @@
     "welfare": 45,
     "system": -15,
     "order": 35
-   }
+   },
+   "leaderHome": "Cranebo"
   },
   {
    "id": "apv",
@@ -887,7 +890,8 @@
     "welfare": -30,
     "system": -40,
     "order": 40
-   }
+   },
+   "leaderHome": "Aikütest"
   }
  ],
  "LEADER_POOL": [
@@ -1016,7 +1020,7 @@
   {
    "id": "steppe",
    "name": "Land and Hearth",
-   "leader": "Kerem Ashvar",
+   "leader": "Bogdan Sokol",
    "portrait": 5,
    "color": "#8b5a2b",
    "emblem": "wheat",

@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 32
+const SAVE_VERSION := 33
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -63,6 +63,7 @@ var OUTLETS: Array = []        # newspapers, channels and platforms (data/media.
 var INTERVIEW: Dictionary = {}  # the big interview in year one (data/interview.json)
 var SCANDALS: Dictionary = {}   # secrets and how they come out (data/scandals.json)
 var VIOLENCE: Dictionary = {}   # political violence and rivals' labels (data/violence.json)
+var NAMES: Dictionary = {}      # name pools by background (data/names.json)
 var FOREIGN_MONEY: Array = []  # what comes with secret foreign money (data/media.json)
 var INFLUENCER_SCANDALS: Array = []   # what goes wrong for personalities (data/media.json)
 var _event_axis = {}
@@ -95,6 +96,7 @@ func load_content(path: String) -> void:
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
 	FLAGSHIP = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagship.json")).ISSUES if FileAccess.file_exists("res://data/flagship.json") else []
+	NAMES = JSON.parse_string(FileAccess.get_file_as_string("res://data/names.json")) if FileAccess.file_exists("res://data/names.json") else {}
 	VIOLENCE = JSON.parse_string(FileAccess.get_file_as_string("res://data/violence.json")) if FileAccess.file_exists("res://data/violence.json") else {}
 	SCANDALS = JSON.parse_string(FileAccess.get_file_as_string("res://data/scandals.json")) if FileAccess.file_exists("res://data/scandals.json") else {}
 	INTERVIEW = JSON.parse_string(FileAccess.get_file_as_string("res://data/interview.json")) if FileAccess.file_exists("res://data/interview.json") else {}
@@ -311,6 +313,7 @@ func new_game(opts := {}) -> Dictionary:
 			"short": initials(party_name) if me else p.short,
 			"leader": leader_name if me else p.leader,
 			"leaderSex": pp.sex if me else p.get("leaderSex", "m"),
+			"leaderHome": str(opts.get("home", "")) if me else str(p.get("leaderHome", "")),
 			"leaderAge": pp.age if me else p.get("leaderAge", 60),
 			"charisma": float(C.startCharisma) if me else float(p.get("charisma", 50)),
 			"stability": float(p.get("stability", 60)),
@@ -1023,9 +1026,10 @@ func _happening_run(id: String, s: Dictionary, p: Dictionary) -> void:
 				"text": "A faction inside %s is openly attacking %s. Party members are taking sides." % [p.name, p.leader]})
 		"new_leader":
 			var old: String = p.leader
-			var used = s.parties.map(func(x): return x.leader)
-			var nxt: Dictionary = pick(s, LEADER_POOL.filter(func(n): return not used.has(n.name)))
-			p.leader = nxt.name; p.leaderSex = nxt.sex; p.leaderAge = nxt.age
+			var reach: Dictionary = by_id(PARTIES, p.id).get("reach", {}) if by_id(PARTIES, p.id) else {}
+			var home_region: String = "alinni" if float(reach.get("alinni", 0)) >= 1 and float(reach.get("default", 1)) < 1 else ""
+			var nxt: Dictionary = make_person(s, home_region, "alinnian" if home_region == "alinni" else "", "", 45 + int(rand(s) * 25))
+			p.leader = nxt.name; p.leaderSex = nxt.sex; p.leaderAge = nxt.age; p.leaderHome = nxt.hometown
 			p.charisma = float(jround(28 + rand(s) * 50))
 			p.stability = 58.0
 			var ax: String = pick(s, AXES).id
@@ -1171,6 +1175,46 @@ func rivals_monthly(s: Dictionary, now_support: Dictionary) -> void:
 		if p.stability < C.collapseAt and s.week - int(p.get("lastCollapse", -999)) > C.collapseCooldownMonths * WEEKS_PER_MONTH:
 			falling = p; break
 	if falling: collapse_party(s, falling)
+
+# ---------- People the game creates ----------
+## A new person: a name from the pool that fits their background (data/names.json)
+## and a hometown in their region. region "" picks one by population; nationality ""
+## picks one by the region's mix. Names already in use are skipped.
+func make_person(s: Dictionary, region := "", nationality := "", sex := "", age := 0) -> Dictionary:
+	if region == "":
+		var tot = 0.0
+		for r in REGIONS: tot += float(r.adults)
+		var x: float = rand(s) * tot
+		region = REGIONS[-1].id
+		for r in REGIONS:
+			x -= float(r.adults)
+			if x <= 0: region = r.id; break
+	var reg = by_id(REGIONS, region)
+	if nationality == "" and reg:
+		var x2: float = rand(s)
+		nationality = "cranebonian"
+		for nid in reg.nationalities:
+			x2 -= float(reg.nationalities[nid])
+			if x2 <= 0: nationality = nid; break
+	if sex == "": sex = "f" if rand(s) < 0.5 else "m"
+	if age <= 0: age = 32 + int(rand(s) * 30)
+	var key: String = "alinni" if nationality == "alinnian" else ("norbanian" if nationality == "norbanian" else String(NAMES.get("REGIONS", {}).get(region, "cranbia")))
+	var pool: Dictionary = NAMES.get("POOLS", {}).get(key, {})
+	var name = ""
+	var used = {}
+	for p in s.parties: used[p.leader] = true
+	for f in s.figures: used[f.name] = true
+	for l in s.get("figuresLost", []): used[l.name] = true
+	if pool.is_empty():
+		var lp = LEADER_POOL.filter(func(n): return not used.has(n.name))
+		name = pick(s, lp).name if lp.size() else "Alex Mercer"
+	else:
+		for i in 30:
+			name = "%s %s" % [pick(s, pool[sex]), pick(s, pool.last)]
+			if not used.has(name): break
+	var towns = MAP.cities.filter(func(c): return c.area == region)
+	var home: String = pick(s, towns).name if towns.size() and rand(s) < 0.8 else (reg.name if reg else "")
+	return {"name": name, "sex": sex, "age": age, "region": region, "nationality": nationality, "hometown": home}
 
 # ---------- Secrets and scandals ----------
 ## A secret is what the public doesn't know about you (data/scandals.json): the
@@ -2164,13 +2208,11 @@ func figures_monthly(s: Dictionary) -> void:
 ## Someone who agrees with the manifesto takes the empty chair: loyal, because they
 ## owe the job to you, and usually less able than the person who left.
 func _replace_figure(s: Dictionary, gone: Dictionary) -> void:
-	var pool = LEADER_POOL.filter(func(x): return not s.figures.any(func(f): return f.name == x.name) and not s.parties.any(func(q): return q.leader == x.name) and not s.figuresLost.any(func(l): return l.name == x.name))
-	if pool.is_empty(): return
-	var who: Dictionary = pick(s, pool)
+	var who: Dictionary = make_person(s, gone.region)
 	var mine = manifesto_side(s, gone.axis)
 	var side: String = mine if mine != "" else gone.side
 	var lean_word: String = side_label(side_key(gone.axis, side)).to_lower()
-	s.figures.append({"id": "new_%d_%s" % [s.week, gone.id], "name": who.name, "sex": who.get("sex", "m"), "role": gone.role, "region": gone.region,
+	s.figures.append({"id": "new_%d_%s" % [s.week, gone.id], "name": who.name, "sex": who.get("sex", "m"), "role": gone.role, "region": gone.region, "hometown": who.hometown,
 		"axis": gone.axis, "side": side, "loyalty": 78.0, "skill": 30.0 + rand(s) * 20.0, "yes": true,
 		"note": "Took over from %s. Agrees with the manifesto on %s, and on most things you say." % [gone.name, lean_word]})
 	_log(s, "action", "%s replaces %s as %s." % [who.name, gone.name, String(gone.role).to_lower()])
@@ -2375,12 +2417,11 @@ func act_poach(s: Dictionary, party_id: String) -> Dictionary:
 	var text = "Local %s organisers crossed over to you, bringing about %dk core voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
 	change_relation(s, party_id, -10, "you poached their organisers")
 	var claims = ownership_table(s).filter(func(r): return r.owners.any(func(o): return o.party == party_id))
-	var pool = LEADER_POOL.filter(func(x): return not s.figures.any(func(f): return f.name == x.name) and not s.parties.any(func(q): return q.leader == x.name))
 	# organisers cross over easily; one of their politicians only rarely comes with them
-	if claims.size() and pool.size() and rand(s) < POACH_FIGURE_CHANCE:
-		var who: Dictionary = pick(s, pool)
+	if claims.size() and rand(s) < POACH_FIGURE_CHANCE:
+		var who: Dictionary = make_person(s, "")
 		var key: String = claims[0].key
-		s.figures.append({"id": "poach_%d" % s.week, "name": who.name, "sex": who.sex, "role": "Former %s politician" % p.short, "region": pick(s, REGIONS).id,
+		s.figures.append({"id": "poach_%d" % s.week, "name": who.name, "sex": who.sex, "role": "Former %s politician" % p.short, "region": who.region, "hometown": who.hometown,
 			"axis": key.split(":")[0], "side": key.split(":")[1], "loyalty": 45.0, "note": "Came over from %s. Still thinks like them on %s." % [p.short, side_label(key).to_lower()]})
 		text += " %s, one of their politicians, came with them." % who.name
 		change_relation(s, party_id, -8, "%s defected to you" % who.name)
