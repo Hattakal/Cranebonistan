@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 31
+const SAVE_VERSION := 32
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -62,6 +62,7 @@ var LEADER_TYPES: Array = []   # the kinds of leader voters want (data/leader_ty
 var OUTLETS: Array = []        # newspapers, channels and platforms (data/media.json)
 var INTERVIEW: Dictionary = {}  # the big interview in year one (data/interview.json)
 var SCANDALS: Dictionary = {}   # secrets and how they come out (data/scandals.json)
+var VIOLENCE: Dictionary = {}   # political violence and rivals' labels (data/violence.json)
 var FOREIGN_MONEY: Array = []  # what comes with secret foreign money (data/media.json)
 var INFLUENCER_SCANDALS: Array = []   # what goes wrong for personalities (data/media.json)
 var _event_axis = {}
@@ -94,6 +95,7 @@ func load_content(path: String) -> void:
 	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
 	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
 	FLAGSHIP = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagship.json")).ISSUES if FileAccess.file_exists("res://data/flagship.json") else []
+	VIOLENCE = JSON.parse_string(FileAccess.get_file_as_string("res://data/violence.json")) if FileAccess.file_exists("res://data/violence.json") else {}
 	SCANDALS = JSON.parse_string(FileAccess.get_file_as_string("res://data/scandals.json")) if FileAccess.file_exists("res://data/scandals.json") else {}
 	INTERVIEW = JSON.parse_string(FileAccess.get_file_as_string("res://data/interview.json")) if FileAccess.file_exists("res://data/interview.json") else {}
 	var media_data = JSON.parse_string(FileAccess.get_file_as_string("res://data/media.json")) if FileAccess.file_exists("res://data/media.json") else {}
@@ -1424,6 +1426,88 @@ func _teyl_walkout(s: Dictionary) -> void:
 		push_news(s, {"kind": "threat", "title": "%s walks out of %s" % ["Margaret Teyl", player_party(s).short],
 			"text": "The party secretary has resigned, and %s went with her. The people who built the party are leaving it to the people who owe it their jobs." % " and ".join(went)})
 
+# ---------- Political violence ----------
+## Violence happens in the world, never by the player's hand. It becomes likelier
+## as trust in politics falls, unrest rises and the debate gets hotter; the leader
+## only chooses how to react (data/violence.json).
+func violence_monthly(s: Dictionary) -> void:
+	if VIOLENCE.is_empty() or s.result: return
+	if s.week - int(s.get("lastViolence", -9999)) < 4 * WEEKS_PER_MONTH: return
+	var distrust: float = maxf(0, (50.0 - s.trust) / 50.0)
+	var heat = 0.0
+	for d in s.debates: heat = maxf(heat, float(d.heat))
+	var chance: float = 0.015 + 0.06 * distrust + 0.04 * metric_badness(s, "unrest") + 0.02 * heat / 100.0
+	if rand(s) > chance: return
+	s.lastViolence = s.week
+	# which camp: nationalist anger when migration and the border are in the news, the other when money is
+	var right_w: float = 1.0 + metric_badness(s, "migration") + metric_badness(s, "border")
+	var left_w: float = 1.0 + metric_badness(s, "jobs") + metric_badness(s, "prices")
+	var camp: String = "right" if rand(s) * (right_w + left_w) < right_w else "left"
+	var pool: Array = VIOLENCE.EVENTS.filter(func(e): return e.camp == camp and not s.flags.has("seen:violence:" + e.title))
+	if pool.is_empty(): pool = VIOLENCE.EVENTS.filter(func(e): return e.camp == camp)
+	var ev: Dictionary = pick(s, pool)
+	s.flags["seen:violence:" + ev.title] = s.week
+	change_trust(s, -3)
+	s.world.unrest = clampf2(float(s.world.unrest) + 5, 0, 100)
+	var R: Dictionary = VIOLENCE.REACTIONS
+	var choices = []
+	for key in ["condemn", "allsides", "understand"]:
+		choices.append({"label": R[key].label, "note": R[key].help, "effects": {"violence": {"how": key, "camp": camp}},
+			"lines": R[key].lines.map(func(l): return merged(l, {"text": "\"%s\"" % l.text}))})
+	s.queue.append({"type": "event", "event": {"id": "violence_%d" % s.week, "kind": "violence", "title": ev.title, "text": ev.text + "\n\nEveryone wants to know what the party leaders will say.", "choices": choices}})
+
+func violence_answer(s: Dictionary, a: Dictionary) -> String:
+	var symp: Dictionary = VIOLENCE.get("SYMPATHY", {}).get(a.camp, {})
+	var who_symp = {"lean": symp}
+	var hon = func(d: float) -> void:
+		for o in OUTLETS:
+			if float(o.get("honesty", 0.5)) >= 0.55: s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) + d, -1, 1)
+	match a.how:
+		"condemn":
+			hon.call(0.15)
+			for pop in s.pops:
+				if matches(pop, who_symp): pop.goodwill.player = clampf2(pop.goodwill.player - 0.05, -2, 2)
+				elif absf(float(pop.pos.system)) < 40: pop.goodwill.player = clampf2(pop.goodwill.player + 0.04, -2, 2)
+			return " The papers quoted you in full."
+		"allsides":
+			hon.call(-0.1)
+			for pop in s.pops:
+				if matches(pop, who_symp): pop.goodwill.player = clampf2(pop.goodwill.player + 0.03, -2, 2)
+			return " Everyone heard what they wanted to hear. The honest press noticed what you didn't say."
+		"understand":
+			hon.call(-0.4)
+			change_trust(s, -2)
+			s.record.understood = int(s.record.get("understood", 0)) + 1
+			s.flags["edge:" + a.camp] = int(s.flags.get("edge:" + a.camp, 0)) + 1
+			for pop in s.pops:
+				if matches(pop, who_symp):
+					pop.goodwill.player = clampf2(pop.goodwill.player + 0.1, -2, 2)
+					pop.leader.player = clampf2(pop.leader.player + 0.05, -2, 2)
+				else: pop.goodwill.player = clampf2(pop.goodwill.player - 0.08 * (1 - shield_of(pop, "player")), -2, 2)
+			return " Some people will never forget you said it. Some of them will vote for you because of it."
+	return ""
+
+## Rivals call you names when your record puts you near an edge: positions, and how
+## you reacted to violence. It polarises: their voters go cold, yours dig in.
+func labels_monthly(s: Dictionary) -> void:
+	if VIOLENCE.is_empty() or rand(s) > 0.25: return
+	var me: Dictionary = player_party(s).perceived
+	var right: float = maxf(0, -float(me.nation)) / 100.0 + maxf(0, -float(me.order)) / 100.0 + maxf(0, -float(me.system)) / 100.0 + maxf(0, float(me.society)) / 100.0 + 0.5 * int(s.flags.get("edge:right", 0))
+	var left: float = maxf(0, -float(me.economy)) / 100.0 + maxf(0, -float(me.welfare)) / 100.0 + maxf(0, -float(me.system)) / 100.0 + 0.5 * int(s.flags.get("edge:left", 0))
+	var camp: String = "right" if right >= left else "left"
+	if maxf(right, left) < 1.5: return
+	# the rival furthest from you on what you're accused of says it
+	var axis: String = "nation" if camp == "right" else "economy"
+	var who = null
+	for p in rivals(s):
+		if who == null or absf(float(p.perceived[axis]) - float(me[axis])) > absf(float(who.perceived[axis]) - float(me[axis])): who = p
+	if who == null: return
+	var word: String = pick(s, VIOLENCE.LABELS[camp])
+	for pop in s.pops:
+		if float(pop.loyal.get(who.id, 0)) > 0.2: pop.goodwill.player = clampf2(pop.goodwill.player - 0.04, -2, 2)
+		elif devotion_of(pop, player_party(s)) > 0.3 or float(pop.disaffection) > 1.2: pop.goodwill.player = clampf2(pop.goodwill.player + 0.02, -2, 2)
+	push_news(s, {"party": who.id, "kind": "threat", "quiet": true, "title": "%s calls %s %s" % [who.short, player_party(s).short, word], "text": ""})
+
 # ---------- The rivals' turn ----------
 ## Rivals play the same game as you, a little less freely: a budget every quarter,
 ## a trip a month to a province they want, adverts, personalities, now and then an
@@ -1575,6 +1659,8 @@ func monthly_update(s: Dictionary) -> void:
 	figures_monthly(s)
 	media_monthly(s)
 	secrets_monthly(s)
+	violence_monthly(s)
+	labels_monthly(s)
 	if rand(s) < C.newsWaveChance:
 		var ax: Dictionary = pick(s, AXES)
 		s.salMod[ax.id] = clampf2(float(s.salMod.get(ax.id, 0)) + C.newsWaveSize, -0.5, 1.5)
@@ -2535,6 +2621,7 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 	var extra = ""
 	if fx.has("patron"): extra += patron_answer(s, fx.patron)
 	if fx.has("secretAnswer"): extra += scandal_answer(s, fx.secretAnswer)
+	if fx.has("violence"): extra += violence_answer(s, fx.violence)
 	if fx.get("defect"):
 		var moved = defect(s, fx.defect.from, fx.defect.share)
 		change_relation(s, fx.defect.from, -10, "you took in their rebels")

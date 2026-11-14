@@ -281,7 +281,7 @@ func _snapshot() -> Dictionary:
 		"flips": S.flips.filter(func(f): return f.party == "player").size(),
 		"dirty": S.record.money.filter(func(m): return m.dirty).size(),
 		"hyp": S.get("secrets", []).filter(func(x): return x.kind == "hypocrisy").size(),
-		"deny": int(S.record.get("denials", 0)), "scape": int(S.record.get("scapegoats", 0))}
+		"deny": int(S.record.get("denials", 0)), "scape": int(S.record.get("scapegoats", 0)), "under": int(S.record.get("understood", 0))}
 
 func _react() -> void:
 	if _advisor == null or _founding: return   # Carlos waits until the party exists
@@ -326,6 +326,7 @@ func _react() -> void:
 	if now.hyp > was.hyp: _margaret("hypocrisy")
 	if now.deny > was.deny: _margaret("deny")
 	if now.scape > was.scape: _margaret("scapegoat", true)   # she always speaks then
+	if now.under > was.under: _margaret("violence", true)
 
 ## Margaret only appears now and then: at most once every two months.
 var _margaret_said := ""   # what Margaret's latest note was about
@@ -602,7 +603,7 @@ func _effects_lines(box: VBoxContainer, fx: Dictionary) -> void:
 	if tags.size(): box.add_child(Look.label(" · ".join(tags), "body_italic", 12, Look.MUTED, true))
 
 # ----- Events: the front page, what you say, how you say it, how it played -----
-const KINDS := {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences", "secret": "In confidence"}
+const KINDS := {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences", "secret": "In confidence", "violence": "Political violence"}
 
 func _event_header(p: Paper, ev: Dictionary) -> void:
 	var crisis = ""
@@ -1459,6 +1460,9 @@ func _shot(args: Dictionary) -> void:
 	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
 	if args.has("flagship"):
 		S.queue.push_front({"type": "event", "event": G.flagship_event(S)})
+	if args.has("violence"):
+		S.queue.clear()
+		_cheats._violence()
 	if args.has("leak"):
 		S.queue.clear()
 		var live: Array = G.live_secrets(S)

@@ -364,6 +364,11 @@ The gap between the leader's public image and the real record. Content in `godot
 
 Cranebonistan sits on the edge of Western European democracy: closer to Poland or Hungary than to the core, with some American inspiration. Its extremes are illiberal populists, hard nationalists and hard-left populists, not fascists, communists or religious fundamentalists. Keep content inside that range.
 
+- **No labels from the narrator.** The game never calls anyone an extremist. Rivals do: when your positions and your reactions put you near an edge, the rival furthest from you calls you names ("fascists in good suits", "communists"). It polarises: their voters go cold, your devoted and fed-up voters dig in. (Ticker only; `godot/data/violence.json` LABELS.)
+- **Dog whistles stay as they are.** Everyone hears them; their purpose is the motte and bailey: say the bold thing, and retreat to the defensible one when challenged. No decoding mechanic.
+- **No fringe parties for now.** Small decorative parties may come later. Normalisation (the penalty for an extreme reputation shrinking as trust falls and rivals copy you) is a later idea, too advanced for now.
+- **Violence: react, never encourage, never do.** No option anywhere lets the player call for violence, not even as a bad choice. Political violence happens in the world as events, from either side (right: an arson at an Alinni community centre, armed "patrols" at the border, a journalist beaten; left: a bank bombed at night, a data centre burned, an energy chief shot), roughly once or twice a game. They grow likelier as trust in politics falls, unrest rises and the debate heats up — the dark link is intended. The leader only reacts: condemn plainly (the middle and the honest press notice; some angry voters think you've gone soft), condemn "violence on all sides" (the motte: everyone hears what they want), or say the anger is understandable (failing to denounce: sympathisers remember it, everyone else does too, trust falls, rivals' labels follow, and Margaret always speaks). A coup attempt is out: the timeframe is too short and it rarely makes sense.
+
 ### Technology
 
 **Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.

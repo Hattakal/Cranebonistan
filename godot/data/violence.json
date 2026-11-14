@@ -1,0 +1,33 @@
+{
+ "_note": "Political violence happens in the world; the leader only reacts, never encourages and never does it. It becomes likelier as trust in politics falls, as unrest rises and as the national debate heats up. Each event has a camp ('right' or 'left'), the issue it is about ('axis'), and who sympathises ('sympathy': voters beyond that lean). Reactions: condemn plainly; condemn 'violence on all sides' (the safe-sounding retreat that lets everyone hear what they want); or say the anger is understandable (failing to denounce). LABELS: what a rival calls you when your record and your reactions put you near one edge. Drafts: rewrite freely.",
+ "EVENTS": [
+  {"camp": "right", "axis": "nation", "title": "Fire at the Alinni community centre in Arthemta", "text": "Someone set fire to the Alinni community centre in Arthemta overnight. Nobody was hurt; the building is gone. Slogans about 'taking the country back' were painted on the wall next door."},
+  {"camp": "right", "axis": "nation", "title": "Masked men 'patrol' the Trueant border", "text": "A group of masked men with hunting rifles have set up roadblocks near the Trueant border, stopping cars and checking papers. The police say they are 'monitoring the situation'."},
+  {"camp": "right", "axis": "society", "title": "A journalist beaten outside her flat", "text": "Elke Varn, who writes about Cranebo's far-right groups, was beaten outside her flat by three men who told her to 'write about something else'."},
+  {"camp": "left", "axis": "economy", "title": "A bomb at a bank in Gilopolis", "text": "A bomb went off at night in an empty branch of the Pezo Trust in Gilopolis. A note sent to the papers calls it 'an answer to the evictions'."},
+  {"camp": "left", "axis": "system", "title": "A data centre burned outside Lilapolis", "text": "Saboteurs set fire to a data centre outside Lilapolis that runs half the country's banking apps. A statement online calls it 'unplugging the machine'."},
+  {"camp": "left", "axis": "economy", "title": "An energy chief shot in Cranebo", "text": "The head of Cranebo's largest energy company was shot and wounded outside his home. The suspect, arrested at the scene, is a former employee who lost his pension. Online, some are calling him a hero."}
+ ],
+ "SYMPATHY": {"right": {"nation": "<-50"}, "left": {"economy": "<-50"}},
+ "REACTIONS": {
+  "condemn": {"label": "Condemn it, plainly", "help": "The honest press and the middle notice. Some angry voters think you've gone soft.",
+   "lines": [
+    {"tone": "statesman", "text": "There is no excuse for this. None. Whoever did it belongs in prison, and I hope they're there by the weekend."},
+    {"tone": "folksy", "text": "Whatever you're angry about, you don't do this. Not in this country. Not in my name."}
+   ]},
+  "allsides": {"label": "Condemn 'violence on all sides'", "help": "It sounds like a condemnation, and lets everyone hear what they want. The honest press notices what you didn't say.",
+   "lines": [
+    {"tone": "statesman", "text": "We condemn violence in all its forms, from whatever side it comes, and we always have."},
+    {"tone": "folksy", "text": "Nobody wants this. But people should ask why so many are so angry."}
+   ]},
+  "understand": {"label": "Say the anger is understandable", "help": "The ones who sympathise will remember it; so will everyone else. Margaret will too.",
+   "lines": [
+    {"tone": "fiery", "text": "I won't pretend to be surprised. For years nobody listened to these people, and now they're shouting."},
+    {"tone": "provocative", "text": "Everyone is very upset about a building. Where was this outrage when it was our people losing everything?"}
+   ]}
+ },
+ "LABELS": {
+  "right": ["fascists in good suits", "the far right", "dangerous extremists"],
+  "left": ["communists", "the hard left", "a danger to every family's savings"]
+ }
+}
