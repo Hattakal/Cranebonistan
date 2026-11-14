@@ -1,0 +1,55 @@
+{
+ "_note": "Secrets: what the public doesn't know about you, and might one day. 'size' (0.5-3) sets how hard it hits when it leaks. PAST: the leader's small skeletons from the years as mayor (one or two drawn at founding; never anything big). PARTY: what a hastily hired politician may bring with them. HYPOCRISY: grows each time your words contradict your record (see sim.gd). Money secrets come from the secret offers in content.json and use their leak events' titles and texts. RESPONSES: what you do when one leaks (the chosen wording matters: each has lines with tones; 'gaffe' marks a line that is simply wrong). Placeholders: {leader} {party} {home} {name} {source} {figure}. Drafts: rewrite freely.",
+ "PAST": [
+  {"id": "contract", "title": "{leader}'s old contract for a friend", "what": "As mayor, you gave the {home} bus-shelter contract to an old school friend's firm. It was cheap and they were good. It was also not put out to tender.", "text": "Documents show {leader}, as mayor of {home}, handed a city contract to a friend's firm without a tender.", "size": 0.8, "who": {"class": "middle"}},
+  {"id": "cousin", "title": "A cousin on the {home} payroll", "what": "Your cousin spent two years as a 'cultural adviser' to the city of {home}. Nobody is quite sure what was advised.", "text": "{leader}'s cousin drew a city salary in {home} as a 'cultural adviser'. Former staff say they never saw the advice.", "size": 0.6, "who": {"age": ["46-60", "61+"]}},
+  {"id": "tram", "title": "The {home} tram budget", "what": "The tram line in {home} cost twice the budget, and you signed the second half without telling the council.", "text": "Council papers show {leader} doubled the {home} tram budget without a council vote.", "size": 0.7, "who": {"class": ["middle", "upper"]}},
+  {"id": "flat", "title": "{leader}'s city flat", "what": "For a year as mayor you lived in a city-owned flat at a quarter of the market rent. It was legal. It does not look it.", "text": "{leader} rented a city-owned flat in {home} at a quarter of the market rate while mayor.", "size": 0.6, "who": {"class": "working"}},
+  {"id": "speech", "title": "{leader}'s old speech", "what": "Ten years ago, at a private dinner, you said things about the voters of your own region you would rather nobody had recorded. Somebody did.", "text": "A recording from a private dinner has {leader} calling ordinary voters 'easily led'.", "size": 0.9, "who": {}}
+ ],
+ "PARTY": [
+  {"title": "{name}'s unpaid taxes", "text": "{name}, newly promoted in {party}, owes the tax office three years of returns.", "size": 0.6},
+  {"title": "{name}'s old posts", "text": "{name}, one of {party}'s new faces, spent years posting things online the party would rather not see printed.", "size": 0.7},
+  {"title": "{name}'s failed company", "text": "{name}'s last company went bankrupt owing its workers two months' wages. {name} now speaks for {party}.", "size": 0.8}
+ ],
+ "HYPOCRISY": {
+  "elites": {"title": "{leader} attacks the elites, banks their money", "what": "You speak against the people at the top, and your party takes business money. Every speech makes the gap wider.", "text": "{leader} has spent the year attacking 'the people at the top'. {party}'s accounts show the people at the top paying for it.", "who": {"lean": {"system": "<-25"}}},
+  "workers": {"title": "The workers' champion and the chamber of commerce", "what": "You speak for workers against business, and the Chamber of Commerce helps pay your bills.", "text": "{party} talks like a union and is funded like a bank, the papers say, with the receipts.", "who": {"class": "working"}}
+ },
+ "LIE": {"title": "The denial falls apart", "text": "Your denial lasted until {source} printed the proof. Now the story is not what you did; it is that you lied about it."},
+ "EVIDENCE": [
+  {"from": 0.65, "word": "They have documents.", "carlos": "Boss, they have the papers. Denying this is a long shot."},
+  {"from": 0.35, "word": "They have a source.", "carlos": "They have someone talking, boss, but no papers. Could go either way."},
+  {"from": 0.0, "word": "It's a rumour.", "carlos": "It's a rumour, boss. One source, no paper. We could make it go away."}
+ ],
+ "RESPONSES": {
+  "deny": {"label": "Deny it", "help": "Free if it holds. If they have proof, a worse story follows.",
+   "lines": [
+    {"tone": "statesman", "text": "There is no truth in this, and our lawyers are looking at it."},
+    {"tone": "fiery", "text": "A lie, from start to finish, and everyone knows who's spreading it!"}
+   ]},
+  "own": {"label": "Own it and apologise", "help": "Costs now, ends it. Honest outlets and older voters respect it.",
+   "lines": [
+    {"tone": "statesman", "text": "I got this wrong. I'm sorry, and I'm putting it right."},
+    {"tone": "folksy", "text": "I made a mistake. Most people have. The difference is mine was in the newspaper."}
+   ]},
+  "attack": {"label": "Attack the messenger", "help": "Your own people rally; honest outlets turn on you. Works best when nobody trusts anyone.",
+   "lines": [
+    {"tone": "provocative", "text": "Of course they printed this. Look who owns them, and look who's rising in the polls."},
+    {"tone": "fiery", "text": "They are frightened of us, and this is what frightened people do."}
+   ]},
+  "subject": {"label": "Change the subject", "help": "Start a louder argument elsewhere. Uses one of this month's actions.",
+   "lines": [
+    {"tone": "folksy", "text": "People don't care about this. They care about the price of bread, and so do I."},
+    {"tone": "fiery", "text": "While they dig through old papers, the country is falling apart. Let's talk about that."}
+   ]},
+  "scapegoat": {"label": "Ask {figure} to take the fall", "help": "{figure} resigns 'for personal reasons' and the story dies with the job. It has a price, and a deal like that is a secret too.",
+   "lines": [
+    {"tone": "statesman", "text": "{figure} has resigned. I accept the decision, and I thank {figure} for the work."},
+    {"tone": "folksy", "text": "{figure} did the decent thing. That's more than you can say for most people in this business."}
+   ]}
+ },
+ "GAFFES": {
+  "money": {"tone": "provocative", "text": "Money is money. Everyone takes it; we're just honest enough to spend it on something.", "gaffe": true}
+ }
+}

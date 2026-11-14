@@ -75,6 +75,7 @@ func _build() -> void:
 		_row([[k.capitalize() + " +10", func(): _world(k, 10)], [k.capitalize() + " −10", func(): _world(k, -10)]])
 	_row([["Start the crisis now", func(): main.G.start_crisis(main.S)], ["Budget now", func(): main.S.queue.append({"type": "budget", "offers": main.G.draw_offers(main.S)})]])
 	_row([["Foreign money on offer", func(): _foreign_offer()], ["A random event", func(): _random_event()]])
+	_row([["Leak a secret now", func(): _leak()], ["Margaret loyalty −20", func(): _teyl(-20)], ["+20", func(): _teyl(20)]])
 	_head("Rivals")
 	for p in main.G.rivals(main.S):
 		var pid: String = p.id
@@ -188,6 +189,14 @@ func _foreign_offer() -> void:
 	if ids.is_empty(): return
 	ids.shuffle()
 	main.S.queue.append({"type": "budget", "offers": ids.slice(0, 2)})
+
+func _leak() -> void:
+	var live: Array = main.G.live_secrets(main.S)
+	if live.size(): main.G.leak_secret(main.S, live[0], "")
+
+func _teyl(d: float) -> void:
+	var t = main.G.teyl(main.S)
+	if t: t.loyalty = clampf(t.loyalty + d, 0, 100)
 
 func _random_event() -> void:
 	var id = main.G.draw_event(main.S)

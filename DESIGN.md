@@ -349,6 +349,21 @@ The designer's aims: the game should be enjoyable first, and it should look like
 
 For testing: ` (backtick) or F12 opens a cheat panel. Skip a month, three, six, a year, to the last month or to the election (decisions on the way take the first answer and last quarter's budget); settle or clear the decision waiting; money, actions, another trip; everyone's goodwill up or down, awareness, charisma; trust and each world number; start the crisis, a budget now, a foreign money offer, a random event, or any event by name; each rival's stability and money.
 
+### Secrets and scandals (decided November 2026; built)
+
+The gap between the leader's public image and the real record. Content in `godot/data/scandals.json` (drafts).
+
+- **Secrets** are what the public doesn't know. They come from: the leader's past (one or two *small* skeletons from the mayor years, drawn at founding: a contract for a friend, a cousin on the payroll, the tram budget; never anything big, so the start never feels unfair); dirty money (the secret offers; a foreign one grows with every nationalist line you give); hypocrisy (attacking the elites while taking business money, speaking for workers while the Chamber of Commerce pays; it grows with each such speech); and the party (a hasty yes-man can bring a past). The Platform file lists them under "What only you know", with the risk in words.
+- **Leaks.** Each month a secret may come out: likelier the bigger you are, the more honest outlets dislike you, the older it is, when insiders are unhappy, and when Margaret has gone; less likely while a loyal Margaret keeps the books. Rivals' investigators who dig into you find your biggest secret.
+- **The scandal** is a decision: what you do, then the words. Carlos says how strong their evidence is ("a rumour", "a source", "documents"). Deny (free if it holds; the likelier it fails the stronger the evidence, and a failed denial returns a month or two later as "the lie", which costs more); own it and apologise (costs now, closes it, gives dirty money back, ends a foreign patron); attack the messenger (spares your shielded and fed-up voters, angers honest outlets, works best when trust is low); change the subject (one action); ask a colleague to take the fall.
+- **Taking the fall** is bought, not ordered: the most loyal colleague is the cheapest; they resign "for personal reasons", the story dies with the job, and the payment becomes a secret of its own. Margaret always speaks then, and loses a lot of faith.
+- **Cost** scales with the secret's size, the reach of the honest press not on your side, and doubles among the voters it betrays (nationalists for foreign money, the anti-system for elite money). It fades over months. Checked: taking business and foreign money still clearly pays, scandals included.
+- **Margaret.** New notes on hypocrisy, on a denial (she knows it's true), and always on a scapegoat. Agreeing with her about money or hypocrisy makes her keep the books for a year (money secrets leak half as often), and doing it again after agreeing costs far more of her loyalty. If she quits, the original crew who are more loyal to her than to you (everyone not devoted to you, except the yes-men) walk out with her, and are replaced by yes-men; and with them gone, secrets leak more easily. (Before, proposed and rejected: a tell-all interview.)
+
+### The political spectrum (decided November 2026)
+
+Cranebonistan sits on the edge of Western European democracy: closer to Poland or Hungary than to the core, with some American inspiration. Its extremes are illiberal populists, hard nationalists and hard-left populists, not fascists, communists or religious fundamentalists. Keep content inside that range.
+
 ### Technology
 
 **Godot 4.7**, with the rules in `sim.gd` and no screen code there, so whole games can be played and tested headless. Hosted on GitHub.

@@ -1,5 +1,5 @@
 {
- "_note": "Margaret Teyl, party secretary. She speaks in text only and appears rarely: when you cross a line. At most once every two months. 'Agree' raises her loyalty; 'dismiss' lowers it. If her loyalty falls below 25 she leaves the party.",
+ "_note": "Margaret Teyl, party secretary. She speaks in text only and appears rarely: when you cross a line. At most once every two months. 'Agree' raises her loyalty; 'dismiss' lowers it. If her loyalty falls below 25 she leaves the party. New triggers: hypocrisy (a speech against the people whose money the party takes), deny (denying a scandal that's true), scapegoat (a colleague paid to take the fall; she always speaks then). Agreeing with her about money or hypocrisy makes her keep the books for a year (money secrets leak half as often); doing it again after agreeing costs much more of her loyalty.",
  "LINES": {
   "flip": [
    "You said the opposite of what you said in spring. People keep cuttings, you know. So do I.",
@@ -24,8 +24,28 @@
   "figure_quit": [
    "That's a good person gone. I'd like to know whose turn it is next.",
    "When people like that leave, it isn't because of the coffee."
+  ],
+  "hypocrisy": [
+   "You told a hall full of people the elites are robbing them. Then you cashed the elites' cheque. I keep both the speech and the receipt.",
+   "We can be against the people at the top, or we can take their money. Not both. Not for long."
+  ],
+  "deny": [
+   "You denied it. We both know what's in the files. I hope whoever wrote that denial has a good lawyer.",
+   "A denial is a bet that nobody has the papers. Somebody always has the papers."
+  ],
+  "scapegoat": [
+   "You put a colleague in front of the bus and paid for the ticket. The people who built this party were watching.",
+   "I've worked with them for years. They didn't deserve that, and you know it."
   ]
  },
- "AGREE": ["You're right, Margaret.", "Point taken.", "I'll think about it. Seriously."],
- "DISMISS": ["Not now, Margaret.", "It's politics. Everyone does it.", "We'll talk after the election."]
+ "AGREE": [
+  "You're right, Margaret.",
+  "Point taken.",
+  "I'll think about it. Seriously."
+ ],
+ "DISMISS": [
+  "Not now, Margaret.",
+  "It's politics. Everyone does it.",
+  "We'll talk after the election."
+ ]
 }

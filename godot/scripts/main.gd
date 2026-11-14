@@ -115,6 +115,9 @@ func _build() -> void:
 	_advisor.margaret_answered.connect(func(agreed):
 		var t = G.teyl(S)
 		if t: t.loyalty = clampf(t.loyalty + (6.0 if agreed else -8.0), 0, 100)
+		if agreed:
+			S.flags["teylPromised:" + _margaret_said] = true
+			if _margaret_said in ["dirty_money", "hypocrisy"]: S.teylClean = S.week   # she keeps the books for a year
 		_save())
 
 func _build_bar() -> Control:
@@ -276,7 +279,9 @@ func _snapshot() -> Dictionary:
 	return {"month": c.year * 12 + c.monthIndex, "polls": S.polls.size(), "front": S.queue[0].type if S.queue.size() else "",
 		"lost": S.figuresLost.size(), "comm": comm, "steer": S.steer != null, "result": S.result != null,
 		"flips": S.flips.filter(func(f): return f.party == "player").size(),
-		"dirty": S.record.money.filter(func(m): return m.dirty).size()}
+		"dirty": S.record.money.filter(func(m): return m.dirty).size(),
+		"hyp": S.get("secrets", []).filter(func(x): return x.kind == "hypocrisy").size(),
+		"deny": int(S.record.get("denials", 0)), "scape": int(S.record.get("scapegoats", 0))}
 
 func _react() -> void:
 	if _advisor == null or _founding: return   # Carlos waits until the party exists
@@ -318,12 +323,22 @@ func _react() -> void:
 	if now.dirty > was.dirty:
 		_advisor.say("dirty_money", false, 0.7)
 		_margaret("dirty_money")
+	if now.hyp > was.hyp: _margaret("hypocrisy")
+	if now.deny > was.deny: _margaret("deny")
+	if now.scape > was.scape: _margaret("scapegoat", true)   # she always speaks then
 
 ## Margaret only appears now and then: at most once every two months.
-func _margaret(trigger: String) -> void:
+var _margaret_said := ""   # what Margaret's latest note was about
+
+func _margaret(trigger: String, force := false) -> void:
 	if G.teyl(S) == null: return
-	if S.week - int(S.flags.get("margaretLast", -999)) < 8: return
+	if not force and S.week - int(S.flags.get("margaretLast", -999)) < 8: return
 	S.flags["margaretLast"] = S.week
+	_margaret_said = trigger
+	# she remembers being promised: doing it again after agreeing with her costs far more
+	if S.flags.get("teylPromised:" + trigger, false):
+		var t0 = G.teyl(S)
+		if t0: t0.loyalty = clampf(t0.loyalty - 12, 0, 100)
 	_advisor.margaret(trigger)
 
 func _show_file(tab: String) -> void:
@@ -636,6 +651,7 @@ func _event_step1(p: Paper, ev: Dictionary) -> void:
 		var ch: Dictionary = ev.choices[i]
 		p.card("index", func(box):
 			box.add_child(Look.label(ch.label, "type", 19, Color("1f2a44"), true))
+			if ch.has("note"): box.add_child(Look.label(ch.note, "body", 13, Look.MUTED, true))
 			_effects_lines(box, ch.effects),
 			func():
 				if ch.get("lines", []).size(): _event_step2(p, ev, i)
@@ -1443,6 +1459,10 @@ func _shot(args: Dictionary) -> void:
 	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
 	if args.has("flagship"):
 		S.queue.push_front({"type": "event", "event": G.flagship_event(S)})
+	if args.has("leak"):
+		S.queue.clear()
+		var live: Array = G.live_secrets(S)
+		if live.size(): G.leak_secret(S, live[0], "")
 	if args.has("ivdone") and S.queue.size() and S.queue[0].type == "interview":
 		while S.queue.size() and S.queue[0].type == "interview": G.answer_interview(S, int(args.ivdone))
 		_interview_piece(_paper(860))

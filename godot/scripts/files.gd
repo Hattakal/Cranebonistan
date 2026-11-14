@@ -468,6 +468,22 @@ func _platform() -> void:
 			b.tooltip_text = tip
 			b.add_theme_font_size_override("font_size", Look.fs(11))
 			sr.add_child(b)
+	# what only you know
+	var secs: Array = S.get("secrets", []).filter(func(x): return not x.get("closed", false) and not x.get("leaked", false))
+	if secs.size():
+		_rule()
+		_eyebrow("What only you know")
+		_p("Things the public doesn't know, and might one day. The bigger you get, and the more honest outlets dislike you, the likelier they come out. When one does, how you answer decides what it costs.", null, Look.MUTED, 13)
+		for x in secs:
+			var c = _card()
+			var srow = HBoxContainer.new()
+			c.add_child(srow)
+			var snm = Look.label(x.title, "display", 17, Look.INK, true)
+			snm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			srow.add_child(snm)
+			var r: float = G.secret_risk(S, x)
+			srow.add_child(Look.label(G.risk_word(r), "body_bold", 13, Look.RED if r >= 0.025 else Look.INK))
+			c.add_child(Look.label(x.get("what", ""), "body_italic", 13, Look.MUTED, true))
 	# the people in the party
 	_rule()
 	_eyebrow("Your party's politicians")

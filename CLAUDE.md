@@ -33,12 +33,14 @@ Find the Godot executable first (it may not be on PATH; ask Ozan where it is if 
 godot --headless --path godot -s tests/parity.gd -- 42     # plays a whole seeded game; must end with a RESULT line and no SCRIPT ERROR
 godot --headless --path godot -s tests/debates.gd -- 7     # prints how debates develop and how many events happen (aim: ~1 event every 2-3 months)
 godot --headless --path godot --import                     # needed after adding a new class_name script
+godot --headless --path godot -s tests/scandals.gd -- deny 4   # a game that takes dirty money and answers every scandal one way (deny/own/attack/subject/scapegoat)
+godot --headless --path godot -s tests/rivals.gd            # what the rival parties did over a whole game
 ```
 
 Screenshots of the real game (use these to check any visual change; look at the image before claiming it works):
 
 ```
-godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|actions|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--clear=1] [--scroll=700]
+godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|actions|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--leak=1 --open=1] [--clear=1] [--scroll=700]
     [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5]
 ```
 
@@ -50,6 +52,7 @@ In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd
 - Containers reset a child's rotation and scale: tilt cards via a wrapper control (see `Holder` in board.gd).
 - Autowrapped labels need a minimum width or a sized parent, or they balloon or collapse.
 - Signals connected after a node is added may miss `ready`; start tweens directly.
+- The test games load only sim.gd: a parse error in a screen script (main, files, board, cheats...) only shows up when the game itself runs. After editing one, take a screenshot and check its log for SCRIPT ERROR.
 - `Game.ssort` is a stable merge sort; use it instead of `sort_custom` where order matters.
 - Lambdas capture loop variables by value per iteration in GDScript 4; fine to use in loops.
 
