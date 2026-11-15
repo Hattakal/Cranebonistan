@@ -95,7 +95,7 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 	if fx.get("defect"):
 		var moved = defect(s, fx.defect.from, fx.defect.share)
 		change_relation(s, fx.defect.from, -10, "you took in their rebels")
-		extra = " About %dk core voters came with them." % jround(moved / 1000.0)
+		extra = " About %dk of their loyal voters followed them across." % jround(moved / 1000.0)
 	var delivery = null
 	var quote = null
 	var tone = null

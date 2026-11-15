@@ -10,7 +10,7 @@ signal open_country(id: String)
 signal speak(id: String, side: String)   # open the sheet to pick your words
 signal raise(opt: Dictionary)             # open the sheet to start a debate
 
-const TITLES := {"debates": "The national debate", "electorate": "The electorate", "platform": "Platform and leader", "actions": "This month's moves",
+const TITLES := {"debates": "The national debate", "electorate": "The electorate", "platform": "Platform, leader and offices",
 	"parties": "The country", "media": "The media", "polls": "Parties and polls", "diary": "Campaign diary"}
 
 var G
@@ -104,7 +104,6 @@ func render() -> void:
 		"debates": _debates()
 		"electorate": _electorate()
 		"platform": _platform()
-		"actions": _actions()
 		"parties": _country()
 		"media": _media()
 		"polls": _polls()
@@ -425,19 +424,33 @@ func _platform() -> void:
 		["Would follow you anywhere", ("%sM" % Game.fmt1(nation.followers / 1e6)) if nation.followers >= 1e6 else "%dk" % Game.jround(nation.followers / 1000.0)],
 	], c1, 2)
 	_p("Your style comes from the words you choose: a recognisable voice builds charisma. Devoted voters care less about your positions and forgive flip-flops. What kind of leader you come across as depends on your words, your record and your positions; each group wants a different kind (see the Electorate file), and a crisis, a war, hard times or low trust change what they want.", c1)
-	var c2 = _card(top)
-	c2.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_eyebrow("Consistency", c2)
 	var state: Array = ["Consistent", "Voters believe you mean what you say."] if inc < 0.5 else (["Wobbling", "A few voters have noticed you changing your tune."] if inc < 2 else (["Unreliable", "Your core supporters are leaving, and engaged voters punish you."] if inc < 5 else ["Flip-flopper", "Nobody knows what you stand for. Your base is collapsing."]))
-	_h(state[0], 28, c2)
-	var meter = DriftMeter.new(clampf(inc / 8.0, 0, 1))
-	meter.custom_minimum_size.y = 18
-	c2.add_child(meter)
-	_p(state[1] + " Up to one stance away from your manifesto is free; two or more costs you.", c2)
+	_add(Look.label("Consistency: %s. %s" % [state[0], state[1]], "body_bold", 13, Look.RED if inc >= 2 else Look.INK, true), c1)
 	var flips: Array = S.flips.filter(func(f): return f.party == "player" and S.week - f.week < G.C.flipMemoryWeeks)
 	flips.reverse()
-	for f in flips.slice(0, 5):
-		_add(Look.label("%s   %s → %s" % [G.date_label(f.week, false), G.stance_name(f.axis, f.from), G.stance_name(f.axis, f.to)], "type", 13, Look.INK), c2)
+	if flips.size(): _add(Look.label("Changed stance: " + "; ".join(flips.slice(0, 3).map(func(f): return "%s → %s (%s)" % [G.stance_name(f.axis, f.from).to_lower(), G.stance_name(f.axis, f.to).to_lower(), G.date_label(f.week, false)])), "body", 12, Look.MUTED, true), c1)
+	# party offices
+	var c2 = _card(top)
+	c2.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_eyebrow("Party offices", c2)
+	var blocked_o: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
+	_p("Open an office in a city, then grow it (one action, ₱1–2M). It works every month on its own province: supporters there become core voters and turn out, and members pay a little in dues. You can also open one by clicking the province on the map.", c2)
+	for r in G.REGIONS:
+		var line = HFlowContainer.new()
+		line.add_theme_constant_override("h_separation", 6)
+		line.add_theme_constant_override("v_separation", 6)
+		var rl = Look.caps(r.name, 10, Look.MUTED, 1)
+		rl.custom_minimum_size.x = 70
+		line.add_child(rl)
+		for c in G.MAP.cities:
+			if c.area != r.id: continue
+			var lvl: int = G.community_level(S, c.name)
+			var cost: float = G.COMMUNITY_COST[lvl] if lvl < G.COMMUNITY_MAX else 0.0
+			var b = _btn("%s %s" % [c.name, "●".repeat(lvl) + "○".repeat(G.COMMUNITY_MAX - lvl)], func(): _did(G.act_community(S, c.name)), lvl >= G.COMMUNITY_MAX or blocked_o or S.money < cost, lvl > 0)
+			b.tooltip_text = ("Full size." if lvl >= G.COMMUNITY_MAX else ("Open an office: ₱%sM" % Game.fmt1(cost) if lvl == 0 else "Grow it: ₱%sM" % Game.fmt1(cost)))
+			b.add_theme_font_size_override("font_size", Look.fs(11))
+			line.add_child(b)
+		c2.add_child(line)
 	_rule()
 	var lg = _row(null, 14)
 	lg.add_child(Look.label("■ Manifesto", "body", 12, Color("b3261e")))
@@ -564,67 +577,6 @@ class AxisTrack extends Control:
 		draw_string(f, Vector2(0, y + h + 16), txt, HORIZONTAL_ALIGNMENT_LEFT, size.x, 12, Look.RED if off else Look.MUTED)
 
 # ---------- This month's moves ----------
-func _actions() -> void:
-	var blocked: bool = S.queue.size() > 0 or S.result != null
-	var left: int = S.actionsLeft
-	var dis = func(cost := 0.0) -> bool: return blocked or left <= 0 or S.money < cost
-	if blocked and not S.result: _p("Finish the decision on the board first.", null, Look.RED, 14)
-	var head = HBoxContainer.new()
-	_add(head)
-	var hl = VBoxContainer.new()
-	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(hl)
-	_eyebrow("Actions this month", hl)
-	_add(Look.label("%d of %d left" % [left, int(G.C.actionsPerMonth)], "display", 26, Look.INK), hl)
-	var hr = VBoxContainer.new()
-	head.add_child(hr)
-	_eyebrow("Funds", hr)
-	_add(Look.label("₱%sM" % Game.fmt1(S.money), "display", 26, Look.INK), hr)
-	_rule()
-	# grassroots
-	_section("Build communities", "₱1–2M", "Open a party office in a city, then grow it. A community works every month on its own province: it turns your supporters there into core voters, gets them to the polls, and pays a little in members' dues. Slow, but it lasts. The capital and big cities count for more.")
-	var cg = GridContainer.new()
-	cg.columns = 5 if size.x > 1100 else 2
-	cg.add_theme_constant_override("h_separation", 12)
-	cg.add_theme_constant_override("v_separation", 8)
-	_add(cg)
-	for r in G.REGIONS:
-		var col = VBoxContainer.new()
-		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(Look.caps(r.name, 10, Look.MUTED, 1))
-		for c in G.MAP.cities:
-			if c.area != r.id: continue
-			var lvl: int = G.community_level(S, c.name)
-			var pips = "●".repeat(lvl) + "○".repeat(G.COMMUNITY_MAX - lvl)
-			var cost: float = G.COMMUNITY_COST[lvl] if lvl < G.COMMUNITY_MAX else 0.0
-			var b = _btn("%s  %s" % [c.name, pips], func(): _did(G.act_community(S, c.name)), lvl >= G.COMMUNITY_MAX or dis.call(cost), lvl > 0)
-			b.tooltip_text = ("Full size." if lvl >= G.COMMUNITY_MAX else ("Open an office: ₱%sM" % Game.fmt1(cost) if lvl == 0 else "Grow it: ₱%sM" % Game.fmt1(cost)))
-			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			col.add_child(b)
-		cg.add_child(col)
-	# opposition research
-	_section(G.ACTIONS.research.label, "₱%sM" % str(G.ACTIONS.research.cost), G.ACTIONS.research.help + " About half the time you find something; one time in seven you get caught.")
-	var rr = _row()
-	for p in G.rivals(S): rr.add_child(_btn(p.short, func(): _did(G.act_research(S, p.id)), dis.call(G.ACTIONS.research.cost)))
-	if S.dossiers.size():
-		_eyebrow("Your dossiers")
-		for i in S.dossiers.size():
-			var dd: Dictionary = S.dossiers[i]
-			var line = HBoxContainer.new()
-			_add(line)
-			var t = Look.label("%s: %s (%s)" % [G.party_of(S, dd.party).short, dd.what, ["", "minor", "damaging", "explosive"][int(dd.severity)]], "type", 14, Look.INK, true)
-			t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			line.add_child(t)
-			line.add_child(_btn("Release", func(): _did(G.act_release(S, i)), dis.call()))
-	# poach
-	_section(G.ACTIONS.poach.label, "₱%sM" % str(G.ACTIONS.poach.cost), G.ACTIONS.poach.help)
-	var pr = _row()
-	for p in G.rivals(S):
-		var ok: bool = G.can_poach(S, p.id)
-		var b = _btn("%s · %s" % [p.short, stability_word(p.stability)], func(): _did(G.act_poach(S, p.id)), (not ok) or dis.call(G.ACTIONS.poach.cost))
-		b.tooltip_text = "Ready to defect" if ok else ("Raided recently" if p.stability < 40 else "Too stable")
-		pr.add_child(b)
-
 func _section(title: String, cost: String, help: String) -> void:
 	_rule()
 	var h = HBoxContainer.new()
@@ -1122,80 +1074,138 @@ static func favour_word(f: float) -> String:
 	return "Hostile"
 
 func _media() -> void:
-	_p("Every outlet works on its audience month after month: it pulls their views toward its own line, warms them to the party it favours, and makes them forgive that party. Honest outlets reach many people and report what you actually say; partisan ones reach fewer, but move and protect their audience much more. Measured and folksy lines play best on television and in the papers, fiery and provocative ones on social media.", null, Look.MUTED, 13)
+	_p("Every outlet works on its audience month after month: it pulls their views toward its own line, warms them to the party it favours, and makes them forgive that party. Honest outlets reach many and report what you actually say; partisan ones reach fewer but move and protect their audience more. Measured and folksy lines play best in the press and on television, fiery and provocative ones on social media. Hover a name for more.", null, Look.MUTED, 13)
 	var pat = S.get("patron")
 	if pat:
 		var since: int = int((S.week - int(pat.since)) / G.WEEKS_PER_MONTH)
 		_p("Your friends abroad (%s) have been paying for %d month%s: money every quarter, their channel on your side and help on social media. Every month it runs, someone else might find out." % [str(pat.country).capitalize(), since, "" if since == 1 else "s"], null, Look.RED, 14)
 	var nation: Array = G.group_media(S, S.pops)
 	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
-	for part in [["Newspapers, channels and platforms", false], ["Personalities", true]]:
-		_eyebrow(part[0])
-		if part[1]: _p("Commentators, streamers and gossip channels. Their reach and their price follow their followers, who come and go, and leave in numbers after one of their scandals. An independent one works like a small partisan outlet. Sponsoring one is an open secret: they back you, a little less believably, for a fee every quarter.", null, Look.MUTED, 13)
-		var g = GridContainer.new()
-		g.columns = 3 if size.x > 1100 else 1
-		g.add_theme_constant_override("h_separation", 12)
-		g.add_theme_constant_override("v_separation", 12)
-		_add(g)
-		for row in nation:
-			if (row.outlet.kind == "influencer") != part[1]: continue
-			_media_card(g, row, blocked)
+	var cols = HBoxContainer.new()
+	cols.add_theme_constant_override("separation", 28)
+	_add(cols)
+	var left = VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_theme_constant_override("separation", 4)
+	cols.add_child(left)
+	var right = VBoxContainer.new()
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.add_theme_constant_override("separation", 4)
+	cols.add_child(right)
+	_eyebrow("Press and television", left)
+	_media_head(left)
+	for row in nation:
+		if not (row.outlet.kind in ["platform", "influencer"]): _media_row(left, row, blocked)
+	_eyebrow("Social media", right)
+	_media_head(right)
+	for row in nation:
+		if row.outlet.kind == "platform": _media_row(right, row, blocked)
+	var gap = Control.new(); gap.custom_minimum_size.y = 10
+	right.add_child(gap)
+	_eyebrow("Personalities", right)
+	_add(Look.label("Their reach and price follow their followers, who leave in numbers after a scandal. Sponsoring one is an open secret: they back whoever pays, a little less believably.", "body", 12, Look.MUTED, true), right)
+	_media_head(right)
+	for row in nation:
+		if row.outlet.kind == "influencer": _media_row(right, row, blocked)
 
-func _media_card(g: Control, row: Dictionary, blocked: bool) -> void:
-		var o: Dictionary = row.outlet
-		var st: Dictionary = S.media[o.id]
-		var c = _card(g)
-		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		_add(Look.caps(KIND_NAMES.get(o.kind, o.kind), 10, Look.MUTED, 1), c)
-		_h(o.name, 20, c)
-		_add(Look.label(o.blurb, "body_italic", 12, Look.MUTED, true), c)
-		var fav: Dictionary = st.get("favour", {})
-		var mine: float = float(fav.get("player", 0))
-		var best = ""
-		var best_f = 0.15
-		for pid in fav:
-			if pid != "player" and float(fav[pid]) > best_f: best_f = float(fav[pid]); best = pid
-		var h: float = G.outlet_honesty(S, o)
-		var reach_word = "Huge" if row.reach >= 0.25 else ("Large" if row.reach >= 0.12 else ("Medium" if row.reach >= 0.05 else "Small"))
-		var plays = []
-		for t in o.get("tones", {}):
-			if float(o.tones[t]) >= 1.15: plays.append(TONE_WORDS.get(t, t))
-		_facts([
-			["On you", favour_word(mine)],
-			["Reach", reach_word],
-			["Style", "Honest" if h >= 0.65 else ("Slanted" if h >= 0.35 else "Partisan")],
-		], c)
-		if best != "": _add(Look.label("Favours %s." % G.party_of(S, best).short, "body_bold", 12, Look.INK, true), c)
-		if plays.size(): _add(Look.label("Plays well: %s." % ", ".join(plays), "body", 12, Look.INK, true), c)
-		_add(Look.label("Owner: %s." % ("friends of your party" if st.owner == "player" else o.owner), "body", 12, Look.MUTED, true), c)
-		var price: float = float(o.get("price", 0))
-		if st.owner == "" and price > 0:
-			var b = _btn("Buy it · ₱%sM" % Game.fmt1(price), func():
-				var res: Dictionary = G.act_buy_outlet(S, o.id)
+const MEDIA_COLS := [150, 70, 62, 66]   # on you, reach, style, favours
+
+func _media_head(to: Control) -> void:
+	var h = HBoxContainer.new()
+	h.add_theme_constant_override("separation", 8)
+	var n = Look.caps("", 9, Look.MUTED, 1)
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(n)
+	var heads = ["On you", "Reach", "Style", "Favours"]
+	for i in 4:
+		var l = Look.caps(heads[i], 9, Look.MUTED, 1)
+		l.custom_minimum_size.x = MEDIA_COLS[i] if i > 0 else 70
+		h.add_child(l)
+	var sp = Control.new(); sp.custom_minimum_size.x = 150
+	h.add_child(sp)
+	to.add_child(h)
+
+## One outlet on one line: name, how it treats you, reach, style, whom it favours, and what you can do.
+func _media_row(to: Control, row: Dictionary, blocked: bool) -> void:
+	var o: Dictionary = row.outlet
+	var st: Dictionary = S.media[o.id]
+	var fav: Dictionary = st.get("favour", {})
+	var mine: float = float(fav.get("player", 0))
+	var best = ""
+	var best_f = 0.15
+	for pid in fav:
+		if pid != "player" and float(fav[pid]) > best_f: best_f = float(fav[pid]); best = pid
+	var h: float = G.outlet_honesty(S, o)
+	var plays = []
+	for t in o.get("tones", {}):
+		if float(o.tones[t]) >= 1.15: plays.append(TONE_WORDS.get(t, t))
+	var panel = PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.box(Color(1, 1, 1, 0.35), 0, Look.LINE, 1, 0, 6))
+	var line = HBoxContainer.new()
+	line.add_theme_constant_override("separation", 8)
+	panel.add_child(line)
+	var name_box = VBoxContainer.new()
+	name_box.add_theme_constant_override("separation", -2)
+	name_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm = Look.label(o.name, "display", 16, Look.INK)
+	nm.clip_text = true
+	name_box.add_child(nm)
+	var sub: String = KIND_NAMES.get(o.kind, o.kind)
+	if o.kind == "influencer": sub = "%sM followers" % Game.fmt1(float(st.get("subs", o.get("subs", 0))))
+	if plays.size(): sub += " · likes " + ", ".join(plays)
+	var sl = Look.label(sub, "body", 11, Look.MUTED)
+	sl.clip_text = true
+	name_box.add_child(sl)
+	line.add_child(name_box)
+	panel.tooltip_text = "%s\nOwner: %s." % [o.blurb, "friends of your party" if st.owner == "player" else o.owner]
+	var reach_word = "Huge" if row.reach >= 0.25 else ("Large" if row.reach >= 0.12 else ("Medium" if row.reach >= 0.05 else "Small"))
+	var fw: String = favour_word(mine)
+	var cells = [[fw, Look.GOOD if mine >= 0.15 else (Look.RED if mine <= -0.15 else Look.INK)], [reach_word, Look.INK],
+		["Honest" if h >= 0.65 else ("Slanted" if h >= 0.35 else "Partisan"), Look.INK], [G.party_of(S, best).short if best != "" else "—", Look.INK]]
+	for i in 4:
+		var l = Look.label(cells[i][0], "body_bold", 13, cells[i][1])
+		l.custom_minimum_size.x = MEDIA_COLS[i] if i > 0 else 70
+		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		line.add_child(l)
+	var act = HBoxContainer.new()
+	act.custom_minimum_size.x = 150
+	act.alignment = BoxContainer.ALIGNMENT_END
+	line.add_child(act)
+	var price: float = float(o.get("price", 0))
+	if st.owner == "player":
+		act.add_child(Look.label("Yours", "body_bold", 12, Look.RED))
+	elif st.owner != "":
+		act.add_child(Look.label("Owned by %s" % (G.party_of(S, st.owner).short if G.party_of(S, st.owner) else "a party"), "body", 12, Look.MUTED))
+	elif price > 0:
+		var b = _btn("Buy · ₱%sM" % Game.fmt1(price), func():
+			var res: Dictionary = G.act_buy_outlet(S, o.id)
+			toast.emit(res.text)
+			changed.emit(), blocked or S.money < price)
+		b.tooltip_text = "Uses one of this month's actions. A bought outlet turns your way and shields your voters, but it is believed less and loses readers to the others."
+		b.add_theme_font_size_override("font_size", Look.fs(11))
+		act.add_child(b)
+	if o.kind == "influencer":
+		var spon: String = st.get("sponsor", "")
+		var fee: float = G.sponsor_price(S, o)
+		if spon == "player":
+			var eb = _btn("End deal (₱%sM/q)" % Game.fmt1(fee), func():
+				var res: Dictionary = G.act_end_sponsor(S, o.id)
 				toast.emit(res.text)
-				changed.emit(), blocked or S.money < price)
-			b.tooltip_text = "Uses one of this month's actions. A bought outlet turns your way and shields your voters, but it is believed less and loses readers to the others."
-			c.add_child(b)
-		if o.kind == "influencer":
-			var spon: String = st.get("sponsor", "")
-			var fee: float = G.sponsor_price(S, o)
-			_add(Look.label("%sM followers" % Game.fmt1(float(st.get("subs", o.get("subs", 0)))), "body_bold", 12, Look.INK, true), c)
-			if spon == "player":
-				_add(Look.label("Sponsored by friends of the party: ₱%sM a quarter." % Game.fmt1(fee), "body_bold", 12, Look.RED, true), c)
-				c.add_child(_btn("End the deal", func():
-					var res: Dictionary = G.act_end_sponsor(S, o.id)
-					toast.emit(res.text)
-					changed.emit(), S.result != null))
-			elif spon != "":
-				var rp = G.party_of(S, spon)
-				_add(Look.label("Sponsored by %s." % (rp.short if rp else "someone"), "body", 12, Look.MUTED, true), c)
-			else:
-				var sb = _btn("Sponsor · ₱%sM a quarter" % Game.fmt1(fee), func():
-					var res: Dictionary = G.act_sponsor(S, o.id)
-					toast.emit(res.text)
-					changed.emit(), blocked or S.money < fee)
-				sb.tooltip_text = "Uses one of this month's actions; the fee is paid now and every quarter, and follows their followers. Everyone knows they're paid, so their word counts a little less, but it is no scandal."
-				c.add_child(sb)
+				changed.emit(), S.result != null)
+			eb.add_theme_font_size_override("font_size", Look.fs(11))
+			act.add_child(eb)
+		elif spon != "":
+			var rp = G.party_of(S, spon)
+			act.add_child(Look.label("Paid by %s" % (rp.short if rp else "someone"), "body", 12, Look.MUTED))
+		else:
+			var sb = _btn("Sponsor · ₱%sM/q" % Game.fmt1(fee), func():
+				var res: Dictionary = G.act_sponsor(S, o.id)
+				toast.emit(res.text)
+				changed.emit(), blocked or S.money < fee)
+			sb.tooltip_text = "Uses one of this month's actions; the fee is paid now and every quarter, and follows their followers. Everyone knows they're paid, so their word counts a little less, but it is no scandal."
+			sb.add_theme_font_size_override("font_size", Look.fs(11))
+			act.add_child(sb)
+	to.add_child(panel)
 
 # ---------- Polls ----------
 static func funds_word(m: float) -> String:
@@ -1218,6 +1228,8 @@ func _polls() -> void:
 	g.add_theme_constant_override("v_separation", 12)
 	_add(g)
 	var moves: Array = S.get("rivalMoves", [])
+	var act_blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
+	_p("A rival's tour warms the voters of that province to them, so every other party's share there shrinks for a few months, yours included. Their adverts do the same more thinly, everywhere.", null, Look.MUTED, 13)
 	for p in order:
 		var c = _card(g)
 		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1233,12 +1245,32 @@ func _polls() -> void:
 		var lfrom: String = (", from " + lhome) if lhome != "" else ""
 		var fw: String = funds_word(float(S.money) if p.isPlayer else float(p.get("money", 0))).to_lower()
 		_add(Look.label("Leader: %s%s · %d seats if the election were today · funds: %s" % [p.leader, lfrom, int(seats.get(p.id, 0)), fw], "body", 12, Look.MUTED, true), c)
-		if p.isPlayer: continue
+		if p.isPlayer:
+			_add(Look.label("%d of %d actions left this month." % [S.actionsLeft, int(G.C.actionsPerMonth)], "body", 12, Look.INK, true), c)
+			for i in S.dossiers.size():
+				var dd: Dictionary = S.dossiers[i]
+				var dl = HBoxContainer.new()
+				c.add_child(dl)
+				var dt = Look.label("Dossier on %s: %s (%s)" % [G.party_of(S, dd.party).short, dd.what, ["", "minor", "damaging", "explosive"][int(dd.severity)]], "type", 13, Look.INK, true)
+				dt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				dl.add_child(dt)
+				var rb = _btn("Release", func(): _did(G.act_release(S, i)), act_blocked)
+				rb.tooltip_text = G.ACTIONS.release.help
+				dl.add_child(rb)
+			continue
 		var mine: Array = moves.filter(func(m): return m.party == p.id and S.week - int(m.week) < 2 * G.WEEKS_PER_MONTH)
 		if mine.is_empty():
 			_add(Look.label("Quiet lately.", "body_italic", 12, Look.MUTED, true), c)
 		for m in mine.slice(-4):
 			_add(Look.label("· " + m.text, "body", 13, Look.INK, true), c)
+		var acts = _row(c, 6)
+		var ib = _btn("Investigate · ₱%sM" % str(G.ACTIONS.research.cost), func(): _did(G.act_research(S, p.id)), act_blocked or S.money < float(G.ACTIONS.research.cost))
+		ib.tooltip_text = G.ACTIONS.research.help + " About half the time you find something; one time in seven you get caught."
+		acts.add_child(ib)
+		var can: bool = G.can_poach(S, p.id)
+		var pb = _btn("Win over a branch · ₱%sM" % str(G.ACTIONS.poach.cost), func(): _did(G.act_poach(S, p.id)), (not can) or act_blocked or S.money < float(G.ACTIONS.poach.cost))
+		pb.tooltip_text = G.ACTIONS.poach.help + ("" if can else ("\nThey were raided recently." if p.stability < 40 else "\nThe party is too stable for anyone to leave: %s." % stability_word(p.stability).to_lower()))
+		acts.add_child(pb)
 	_rule()
 	_eyebrow("National vote intention · %s · %s" % [poll.label, G.date_label(poll.week, false)])
 	_bars(poll.national, prev.national if prev else null)

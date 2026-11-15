@@ -140,7 +140,7 @@ func _build_bar() -> Control:
 	h.add_child(_section(_stats, 10))
 	var menu = HBoxContainer.new()
 	menu.add_theme_constant_override("separation", 0)
-	for m in [["debates", "flame", "Debates"], ["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["actions", "megaphone", "Actions"], ["parties", "landmark", "Country"], ["media", "newspaper", "Media"], ["polls", "chart-line", "Parties"], ["diary", "book-open", "Diary"]]:
+	for m in [["debates", "flame", "Debates"], ["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["parties", "landmark", "Country"], ["media", "newspaper", "Media"], ["polls", "chart-line", "Parties"], ["diary", "book-open", "Diary"]]:
 		var b = _menu_button(m[1], m[2])
 		b.pressed.connect(func(): _show_file(m[0]))
 		menu.add_child(b)
@@ -318,7 +318,7 @@ func _react() -> void:
 	if now.comm > was.comm: _advisor.say("community", false, 0.7)
 	if now.steer and not was.steer:
 		_advisor.say("steer", false, 0.8)
-		_margaret("steer")
+		if not S.steer.get("back", false): _margaret("steer")   # going back to the founding manifesto is fine by her
 	if now.flips > was.flips: _margaret("flip")
 	if now.dirty > was.dirty:
 		_advisor.say("dirty_money", false, 0.7)
@@ -490,20 +490,28 @@ func _render_map() -> void:
 		var x: Dictionary = proj[d.id]
 		if _leaders.has(d.id) and _leaders[d.id] != x.winner: _map.flash(d.id)
 		_leaders[d.id] = x.winner
-		var strength = clampf(0.28 + float(x.margin) * 2.6, 0.28, 0.85)
+		# the leader's colour, a little deeper when the lead is safe (a narrow range, so a province
+		# won with 41% and one won with 50% read as the same party at a glance)
+		var strength = clampf(0.66 + float(x.margin) * 0.9, 0.66, 0.85)
 		_map.fills[d.id] = Look.mix(Look.LAND, Color(G.party_of(S, x.winner).color), strength * 0.85)
-		# not yours yet: your colour in stripes, thicker the closer your vote is to the leader's
-		# (only once you are a real contender there: at least a quarter of the leader's vote)
-		var k: float = clampf(float(x.you) / maxf(0.01, float(x.share)), 0.0, 1.0)
-		if x.winner != "player" and k >= 0.25:
-			var t: float = (k - 0.25) / 0.75
-			_map.stripes[d.id] = [Look.mix(Look.LAND, Color(G.player_party(S).color), 0.85), 0.12 + 0.68 * t]
+		# not yours yet: stripes in your colour covering your share of the vote there (30% of the
+		# vote, 30% of the province), never more than the leader's own band
+		if x.winner != "player" and float(x.you) >= 0.10:
+			_map.stripes[d.id] = [Look.mix(Look.LAND, Color(G.player_party(S).color), 0.85), minf(float(x.you), 0.45)]
 	for f in G.FOREIGN:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
 	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
 	_map.legend = Game.ssort(S.parties.duplicate(), func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Color(p.color)])
-	_map.legend_note = ("Seats if the election were today · %s. %d to win." % [poll.label, int(G.C.seats / 2 + 1)]) if poll else "No poll yet."
+	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1)]) if poll else "No poll yet."
 	_map.queue_redraw()
+
+## Rivals whose leaders have toured this province recently (their push is still felt).
+func _rivals_here(id: String) -> Array:
+	var rt: Dictionary = S.districts.get(id, {}).get("rtrip", {})
+	var out = []
+	for pid in rt:
+		if float(rt[pid]) >= 0.05 and G.party_of(S, pid): out.append(G.party_of(S, pid).short)
+	return out
 
 func _tip(id: String, kind: String) -> Array:
 	if kind == "district":
@@ -518,7 +526,9 @@ func _tip(id: String, kind: String) -> Array:
 			lines.append("Your vote here: %d%%" % Game.jround(float(x.you) * 100))
 			if x.winner != "player":
 				lines.append("You'd need about %d more points" % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)))
-		lines.append("Click to campaign here")
+		var here: Array = _rivals_here(id)
+		if here.size(): lines.append("Campaigning here lately: " + ", ".join(here))
+		lines.append("Click to tour, or to open an office")
 		return lines
 	if kind == "region":
 		var r = Game.by_id(G.REGIONS, id)
@@ -1122,6 +1132,28 @@ func _district_sheet(id: String) -> void:
 		if w < int(d.seats): p.small("The other %d seat%s go to parties by their vote across the whole country, so every vote here still counts toward them." % [int(d.seats) - w, "" if int(d.seats) - w == 1 else "s"])
 	var st: Dictionary = S.districts.get(id, {})
 	if int(st.get("visits", 0)) > 0: p.small("%s has toured here %d time%s." % [G.player_party(S).leader, int(st.visits), "" if int(st.visits) == 1 else "s"])
+	# rivals campaigning here: why your share can fall without you doing anything
+	var here: Array = _rivals_here(id)
+	if here.size(): p.callout("%s %s been campaigning here. When a rival's leader tours a province, people there warm to them, and every other party's share shrinks, yours included. It fades over a few months; a trip or an office of your own answers it." % [" and ".join(here), "has" if here.size() == 1 else "have"], Look.MUTED)
+	# offices in this province's cities
+	for cname in d.cities:
+		var lvl: int = G.community_level(S, cname)
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var lab = Look.label("%s · party office %s" % [cname, "●".repeat(lvl) + "○".repeat(G.COMMUNITY_MAX - lvl)], "type", 15, Look.INK)
+		lab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(lab)
+		if lvl < G.COMMUNITY_MAX:
+			var cost: float = G.COMMUNITY_COST[lvl]
+			var ob = p.button(("Open an office · ₱%sM" if lvl == 0 else "Grow it · ₱%sM") % Game.fmt1(cost), func():
+				var res: Dictionary = G.act_community(S, cname)
+				_toast(res.text)
+				p.close()
+				_after_change()
+				if res.ok: _district_sheet(id), false, G.can_act(S, cost) != "" or S.queue.size() > 0)
+			ob.tooltip_text = "One action. An office works every month on this province: it turns your supporters here into core voters, gets them to the polls and pays a little in dues."
+			row.add_child(ob)
+		p.add(row)
 	var block: String = G.visit_block(S)
 	var go = p.button("Tour %s this month" % d.name, func():
 		var res: Dictionary = G.act_visit(S, id)

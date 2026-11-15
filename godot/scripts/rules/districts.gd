@@ -84,6 +84,20 @@ func district_result(s: Dictionary, d: Dictionary, ctx, cache = null, pops = nul
 		"share": v[ids[0]] / tot if tot else 0.0, "margin": (v[ids[0]] - v[ids[1]]) / tot if tot else 0.0,
 		"you": v.player / tot if tot else 0.0}
 
+## A district's poll figures with one party's share moved to `share`, the others
+## keeping their proportions (so the map and the trip page tell the same story).
+func _with_share(res: Dictionary, d: Dictionary, pid: String, share: float) -> Dictionary:
+	var v: Dictionary = res.votes.duplicate()
+	var rest = 0.0
+	for k in v:
+		if k != pid: rest += float(v[k])
+	if rest <= 0 or share >= 1: return res
+	v[pid] = share / (1.0 - share) * rest
+	var tot = dsum(v)
+	var ids: Array = ssort(v.keys(), func(a, b): return v[b] - v[a])
+	return {"votes": v, "winner": ids[0], "second": ids[1], "seats": int(d.seats),
+		"share": v[ids[0]] / tot, "margin": (v[ids[0]] - v[ids[1]]) / tot, "you": float(v.get("player", 0)) / tot}
+
 func visit_block(s: Dictionary) -> String:
 	if s.result: return "The election is over."
 	if int(s.get("lastVisit", -99)) / WEEKS_PER_MONTH == s.week / WEEKS_PER_MONTH: return "%s has already been on the road this month." % player_party(s).leader
@@ -136,7 +150,9 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	if block: return {"ok": false, "text": block}
 	var d = district_by_id(id)
 	var st: Dictionary = s.districts[id]
-	var before: float = float(district_result(s, d, score_context(s)).you)   # counted properly: the trip team knows the place
+	var exact_before: float = float(district_result(s, d, score_context(s)).you)
+	# the number the player sees on the map is the poll's; the trip moves it by what really changed
+	var before: float = float(s.projection.get(id, {}).get("you", exact_before))
 	var pw: Dictionary = visit_power(s, id)
 	var k: float = pw.k
 	st.visits = int(st.visits) + 1
@@ -145,8 +161,9 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	for o in DISTRICTS:
 		if o.region == d.region and o.id != id: district_boost(s, o.id, VISIT_AWARE * k * 0.1, VISIT_GOODWILL * k * 0.06)
 	s.lastVisit = s.week
-	s.projection[id] = district_result(s, d, score_context(s))
-	var after: float = float(s.projection[id].you)
+	var real: Dictionary = district_result(s, d, score_context(s))
+	var after: float = clampf2(before + (float(real.you) - exact_before), 0.0, 0.95)
+	s.projection[id] = _with_share(s.projection.get(id, real), d, "player", after)
 	var text = "%s spent the month in %s: town halls, a market walkabout, a local radio phone-in. Your vote there: %d%% → %d%%." % [player_party(s).leader, d.name, jround(before * 100), jround(after * 100)]
 	if pw.why.size():
 		var w: String = ", ".join(pw.why)

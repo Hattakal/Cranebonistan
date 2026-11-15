@@ -66,6 +66,17 @@ func flash(id: String) -> void:
 
 func _process(d: float) -> void:
 	var moving = false
+	# W A S D (or the arrow keys) move the map while the mouse is over it
+	if get_viewport().gui_get_hovered_control() == self and get_viewport().gui_get_focus_owner() == null:
+		var dir = Vector2.ZERO
+		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT): dir.x += 1
+		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT): dir.x -= 1
+		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): dir.y += 1
+		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN): dir.y -= 1
+		if dir != Vector2.ZERO:
+			offset += dir * 700.0 * d
+			_clamp_offset()
+			moving = true
 	for id in fills:
 		var target: Color = fills[id]
 		var cur: Color = _shown.get(id, target)
@@ -291,7 +302,7 @@ func _draw() -> void:
 			var rr = maxf(8.0, (20 + lvl * 6) * s)
 			draw_arc(p, rr, 0, TAU, 32, party_color, maxf(1.5, (2 + lvl) * s), true)
 	_plates.clear()
-	_seat_badges(s)
+	if zoom >= 1.5: _seat_badges(s)   # seat numbers only when zoomed in; the tooltip always has them
 	_labels(s)
 	# paper grain over everything
 	if _grain: draw_texture_rect(_grain, map_rect, true)
@@ -300,7 +311,7 @@ func _draw() -> void:
 
 var legend: Array = []   # [[short name, Color], ...]
 var legend_note := ""
-var legend_title := "WHO WOULD WIN EACH DISTRICT"
+var legend_title := "IF THE ELECTION WERE TODAY"
 
 func _legend() -> void:
 	if legend.is_empty(): return
@@ -339,8 +350,8 @@ func _stripes(poly: PackedVector2Array, col: Color, k: float) -> void:
 	if k <= 0.01: return
 	var bb = Rect2(poly[0], Vector2.ZERO)
 	for p in poly: bb = bb.expand(p)
-	var gap = 18.0
-	var w = maxf(1.5, gap * clampf(k, 0, 0.95))
+	var gap = 24.0
+	var w = maxf(2.0, gap * clampf(k, 0, 0.95))   # the band's share of each repeat is the share of the vote
 	var d = -bb.size.y
 	while d < bb.size.x:
 		var a = bb.position + Vector2(d, bb.size.y)

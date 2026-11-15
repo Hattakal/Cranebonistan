@@ -115,6 +115,7 @@ func new_game(opts := {}) -> Dictionary:
 	s.pops = build_pops(s)
 	_home_start(s, str(opts.get("home", "")))
 	seed_loyalty(s)
+	s.manifesto0 = player_party(s).manifesto.duplicate()   # what the party was founded on
 	s.figures = new_figures(s)
 	s.media = new_media(s)
 	s.secrets = []

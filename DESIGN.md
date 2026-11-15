@@ -345,6 +345,17 @@ The designer's aims: the game should be enjoyable first, and it should look like
   - *Friendly journalists:* opposition research goes through the honest outlet that likes you most: better odds, less chance of being caught, and a leaked dossier they run hits harder and is traced to you less.
 - **Rival parties' turn — built (November 2026).** Every rival has money: an income every quarter from its support, its members and business (more for establishment parties). Each month it may tour the province where a trip matters most (one it could take or could lose, only in regions where it organises), spend on adverts that warm the voters closest to it, sign a personality close to its line, very rarely buy an outlet that likes it, and pay investigators to dig into whoever is closest in the polls, the new party most of all (a leak about you hits harder if you have taken dirty money; a caught investigator hurts them). Their moves have about 0.7 of the player's effect. The Polls file is now "Parties and polls": each party's polling, projected seats, funds and its moves of the last two months, above the poll tables. Leaks aimed at you stop the clock; everything else goes to the ticker.
 
+### Fifth playtest (November 2026)
+
+- **The Actions file is gone.** Party offices are on the Platform file, in the place the big Consistency card had (consistency is now one line under the leader), and can also be opened from a province's sheet on the map. Opposition research, dossiers and winning over a branch are on each party's card on the Parties page.
+- **"Recruit defectors" is "Win over a branch".** A local branch crosses over: its organisers and some loyal voters. The event after a rival splits is "A wing of X asks to join you": named MPs and their branches, with the papers calling it rats leaving a sinking ship.
+- **Media page:** one line per outlet in two columns (press and television; social media platforms with the personalities under them), details on hover.
+- **Map:** stripes cover your actual share of a province's vote (30% of the vote, 30% of the area), from 10% up and never more than 45%, so the leader's band stays the wider one; a won province's colour varies only a little with the margin; the legend is "If the election were today" with each party's seats; seat numbers show only when zoomed in (the tooltip always has them); W A S D or the arrow keys move the map.
+- **Why your share falls:** a province's sheet and tooltip say which rivals have been campaigning there, and why that shrinks everyone else's share; the Parties page says it too.
+- **One number per province.** The map shows the poll's figure; a trip now reports the change from that same figure (before, the trip page counted exactly and disagreed with the map by a few points).
+- **Going back to the founding manifesto** upsets nobody: the party remembers what it was founded on, Margaret says nothing, and the politicians barely mind.
+- Margaret's note on the board goes when she does. The "Dillihan fishing boats" issue is now "Dillihan border stones" (the two countries share no sea).
+
 ### Offices work on their province (November 2026)
 
 A party office works every month on its own province (the people who can walk in through the door), at twice the old strength there, instead of thinly across the whole region. (Before: offices turned supporters into core voters across the region, a leftover from before provinces had their own voters.)

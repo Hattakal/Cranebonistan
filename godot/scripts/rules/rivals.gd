@@ -93,12 +93,12 @@ func defector_event(s: Dictionary, p: Dictionary, _freed: float) -> Dictionary:
 	var small = {}
 	for x in diffs.slice(0, 1): small[x.ax] = signf(x.d) * 5
 	return {
-		"id": "defectors_" + p.id, "kind": "opportunity", "title": "%s rebels want to join you" % p.short,
-		"text": "Fifteen MPs who walked out of %s are offering to join your party, with their local organisations. They expect you to make room for their views." % p.name,
+		"id": "defectors_" + p.id, "kind": "opportunity", "title": "A wing of %s asks to join you" % p.short,
+		"text": "The fifteen MPs who walked out of %s want a new home, and they have asked for yours. They would bring their local branches with them, and expect room for their views. The papers are already calling it rats leaving a sinking ship; your rivals will call you an opportunist either way." % p.name,
 		"choices": [
-			{"label": "Welcome all of them", "effects": {"shift": shift, "awareness": 0.05, "defect": {"from": p.id, "share": 0.22},
+			{"label": "Take them all in, MPs and branches", "effects": {"shift": shift, "awareness": 0.05, "defect": {"from": p.id, "share": 0.22},
 				"goodwill": [{"who": {"loyalTo": p.id}, "amt": 0.3}]}},
-			{"label": "Take only the local organisers, not the MPs", "effects": {"shift": small, "defect": {"from": p.id, "share": 0.1},
+			{"label": "Take the local branches, not the MPs", "effects": {"shift": small, "defect": {"from": p.id, "share": 0.1},
 				"goodwill": [{"who": {"loyalTo": p.id}, "amt": 0.12}]}},
 			{"label": "Refuse: we are not a home for failed politicians", "effects": {"awareness": 0.02, "trust": 1,
 				"goodwill": [{"who": {"lean": {"system": "<-20"}}, "amt": 0.15}]}},
@@ -444,7 +444,7 @@ func act_poach(s: Dictionary, party_id: String) -> Dictionary:
 	var moved = defect(s, party_id, 0.07)
 	var diffs = biggest_differences(s, player_party(s), p, 1)
 	shift_perceived(s, {diffs[0].ax: signf(diffs[0].d) * 5})
-	var text = "Local %s organisers crossed over to you, bringing about %dk core voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
+	var text = "A local %s branch has crossed over to you: its organisers, and about %dk of its loyal voters. Your image moved a little toward theirs." % [p.short, jround(moved / 1000.0)]
 	change_relation(s, party_id, -10, "you poached their organisers")
 	var claims = ownership_table(s).filter(func(r): return r.owners.any(func(o): return o.party == party_id))
 	# organisers cross over easily; one of their politicians only rarely comes with them

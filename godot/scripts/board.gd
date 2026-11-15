@@ -234,7 +234,7 @@ func render(s: Dictionary) -> void:
 	sign.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	pv.add_child(sign)
 	# speaking is free; the other actions cost money, so a poor party is sent to the debates
-	pim.pressed.connect(func(): open_file.emit("debates" if s.money < 1.5 else "actions"))
+	pim.pressed.connect(func(): open_file.emit("debates"))
 	# 4. Margaret's note, only when earned
 	var teyl = _teyl_note(s)
 	if teyl != "":
@@ -388,6 +388,7 @@ func _pim_note(s: Dictionary) -> String:
 	return "Quiet week. I've moved the bad news to Monday."
 
 func _teyl_note(s: Dictionary) -> String:
+	if game.teyl(s) == null: return ""   # she has left the party
 	if game.inconsistency_of(s, game.player_party(s)) >= 2: return "Pick a position and keep it. People are starting to notice."
 	if s.record.outrages >= 3: return "Shouting gets you noticed. It doesn't get you trusted."
 	for m in s.record.money:

@@ -138,6 +138,14 @@ func steer_block(s: Dictionary, axis: String, dir: int) -> String:
 	if st + dir < 0 or st + dir > 4: return "The manifesto can't go further that way."
 	return ""
 
+## Is this move a step back toward the manifesto the party was founded on?
+func steer_returns(s: Dictionary, axis: String, dir: int) -> bool:
+	var m0: Dictionary = s.get("manifesto0", {})
+	if not m0.has(axis): return false
+	var now: int = stance_of(player_party(s).manifesto[axis])
+	var home: int = stance_of(m0[axis])
+	return absi(now + dir - home) < absi(now - home)
+
 ## Who would be upset, and who pleased, by moving `axis` one stance in `dir`.
 func steer_reactions(s: Dictionary, axis: String, dir: int) -> Dictionary:
 	var toward = "L" if dir < 0 else "R"
@@ -156,14 +164,17 @@ func act_steer(s: Dictionary, axis: String, dir: int) -> Dictionary:
 	if err: return {"ok": false, "text": err}
 	spend_action(s, 0)
 	s.steer = {"axis": axis, "dir": dir, "started": s.week, "months": 0}
+	var back: bool = steer_returns(s, axis, dir)
+	s.steer.back = back
 	var rx = steer_reactions(s, axis, dir)
-	for f in rx.angry: f.loyalty = clampf2(f.loyalty - 15, 0, 100)
+	# going back to what the party was founded on angers nobody much
+	for f in rx.angry: f.loyalty = clampf2(f.loyalty - (4 if back else 15), 0, 100)
 	for f in rx.pleased: f.loyalty = clampf2(f.loyalty + 5, 0, 100)
 	var t = teyl(s)
-	if t: t.loyalty = clampf2(t.loyalty - 5, 0, 100)
+	if t: t.loyalty = clampf2(t.loyalty + (4 if back else -5), 0, 100)
 	var ax = by_id(AXES, axis)
 	var to_name = stance_name(axis, stance_of(player_party(s).manifesto[axis]) + dir)
-	var text = "You told the party's leadership it is time to move toward \"%s\" on %s. It will take three months, and not everyone is happy." % [to_name.to_lower(), ax.issue.to_lower()]
+	var text = ("You told the party's leadership it is time to go back to \"%s\" on %s, where the party started. It will take three months." if back else "You told the party's leadership it is time to move toward \"%s\" on %s. It will take three months, and not everyone is happy.") % [to_name.to_lower(), ax.issue.to_lower()]
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
@@ -172,7 +183,7 @@ func steer_monthly(s: Dictionary) -> void:
 	var st: Dictionary = s.steer
 	st.months += 1
 	var rx = steer_reactions(s, st.axis, st.dir)
-	for f in rx.angry: f.loyalty = clampf2(f.loyalty - 8, 0, 100)
+	for f in rx.angry: f.loyalty = clampf2(f.loyalty - (2 if st.get("back", false) else 8), 0, 100)
 	if st.months < STEER_MONTHS: return
 	var player = player_party(s)
 	var cur = stance_of(player.manifesto[st.axis])

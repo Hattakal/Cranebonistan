@@ -10642,9 +10642,9 @@
    "help": "Leak what you found to the press. It weakens the rival's support and stability, and lowers trust in politics, which helps outsiders like you."
   },
   "poach": {
-   "label": "Recruit defectors",
+   "label": "Win over a branch",
    "cost": 2,
-   "help": "Only possible when a rival is unstable, and once every six months per party. Win over some of their local organisers and core voters, but they bring their views with them."
+   "help": "Only possible when a rival is unstable, and once every six months per party. One of their local branches crosses over to you: its organisers and some of its loyal voters, who bring their views with them. Very occasionally one of their politicians comes too."
   },
   "outrage": {
    "label": "Provoke outrage",
