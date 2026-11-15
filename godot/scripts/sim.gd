@@ -12,7 +12,7 @@
 ## time · descriptions
 extends Node
 
-const SAVE_VERSION := 33
+const SAVE_VERSION := 34
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -426,8 +426,55 @@ func initials(name: String) -> String:
 ## province, and every game adds a little local difference (s.districts[id].lean).
 const POP_MIN := 3000.0
 
+## Each province's class and nationality mix: tilted by how urban it is (towns are
+## more middle-class and more mixed), then fitted so that every region still adds
+## up to the mix set for it in content.json.
+func _province_mixes() -> Dictionary:
+	var out = {}
+	for d in DISTRICTS:
+		var r = by_id(REGIONS, d.region)
+		var people: float = float(r.adults) * 1e6 * float(d.share)
+		var city_people = 0.0
+		for name in d.cities:
+			var c: Dictionary = city_by_name(name)
+			if not c.is_empty(): city_people += city_population(c) * 0.75
+		var urban: float = clampf2(city_people / people, 0, 1) if people > 0 else 0.0
+		var cls = {}
+		for c in CLASSES:
+			var k: float = {"working": 1 - 0.35 * urban, "middle": 1 + 0.3 * urban, "upper": 1 + 0.6 * urban}.get(c.id, 1.0)
+			cls[c.id] = float(r.classes.get(c.id, 0)) * k
+		var big = 0.0
+		for m in NATIONALITIES: big = maxf(big, float(r.nationalities.get(m.id, 0)))
+		var nat = {}
+		for n in NATIONALITIES:
+			var share: float = float(r.nationalities.get(n.id, 0))
+			if share > 0: nat[n.id] = share * (1.0 if share >= big else 1 + 0.5 * urban)   # minorities gather in towns
+		out[d.id] = {"urban": urban, "cls": cls, "nat": nat, "share": float(d.share), "region": d.region}
+	for kind in ["cls", "nat"]:
+		for it in 4:
+			for d_id in out:   # each province's mix sums to 1
+				var m: Dictionary = out[d_id][kind]
+				var t = dsum(m)
+				for k in m: m[k] = m[k] / t if t > 0 else 0.0
+			for r in REGIONS:   # each region's provinces add up to the region's mix
+				var target: Dictionary = r.classes if kind == "cls" else r.nationalities
+				for k in target:
+					var have = 0.0
+					for d_id in out:
+						if out[d_id].region == r.id: have += out[d_id].share * float(out[d_id][kind].get(k, 0))
+					if have <= 0: continue
+					var f: float = float(target[k]) / have
+					for d_id in out:
+						if out[d_id].region == r.id and out[d_id][kind].has(k): out[d_id][kind][k] = float(out[d_id][kind][k]) * f
+		for d_id in out:
+			var m2: Dictionary = out[d_id][kind]
+			var t2 = dsum(m2)
+			for k in m2: m2[k] = m2[k] / t2 if t2 > 0 else 0.0
+	return out
+
 func build_pops(s: Dictionary) -> Array:
 	var pops = []
+	var mixes: Dictionary = _province_mixes()
 	for d in DISTRICTS:
 		var r = by_id(REGIONS, d.region)
 		var people: float = float(r.adults) * 1e6 * float(d.share)
@@ -442,23 +489,11 @@ func build_pops(s: Dictionary) -> Array:
 			city_people += cp
 			var cl: Dictionary = CITY_INFO.get(name, {}).get("lean", {})
 			for ax in cl: city_lean[ax] = float(city_lean.get(ax, 0)) + float(cl[ax]) * cp
-		var urban: float = clampf2(city_people / people, 0, 1) if people > 0 else 0.0
-		var cls = {}
-		var ctot = 0.0
-		for c in CLASSES:
-			var k: float = {"working": 1 - 0.35 * urban, "middle": 1 + 0.3 * urban, "upper": 1 + 0.6 * urban}.get(c.id, 1.0)
-			cls[c.id] = float(r.classes.get(c.id, 0)) * k
-			ctot += cls[c.id]
-		var nats = {}
-		var ntot = 0.0
-		for n in NATIONALITIES:
-			var share: float = float(r.nationalities.get(n.id, 0))
-			if share <= 0: continue
-			# minorities gather in towns
-			var big = 0.0
-			for m in NATIONALITIES: big = maxf(big, float(r.nationalities.get(m.id, 0)))
-			nats[n.id] = share * (1.0 if share >= big else 1 + 0.5 * urban)
-			ntot += nats[n.id]
+		var urban: float = mixes[d.id].urban
+		var cls: Dictionary = mixes[d.id].cls
+		var nats: Dictionary = mixes[d.id].nat
+		var ctot = 1.0
+		var ntot = 1.0
 		var local_lean = {}
 		for ax in AXES:
 			var v: float = float(st.get("lean", {}).get(ax.id, 0))
@@ -468,10 +503,20 @@ func build_pops(s: Dictionary) -> Array:
 		local_lean.nation = float(local_lean.get("nation", 0)) + (urban - 0.4) * 15     # towns more mixed
 		for a in AGES:
 			for c in CLASSES:
+				# a group too small to model joins the biggest group of its age and class there, so nobody is lost
+				var main_nat = ""
+				for nid in nats:
+					if main_nat == "" or float(nats[nid]) > float(nats[main_nat]): main_nat = nid
+				var folded = 0.0
+				for nid in nats:
+					if nid != main_nat and people * float(a.share) * cls[c.id] / ctot * nats[nid] / ntot < POP_MIN:
+						folded += people * float(a.share) * cls[c.id] / ctot * nats[nid] / ntot
 				for nid in nats:
 					var n = by_id(NATIONALITIES, nid)
 					var size: float = people * float(a.share) * cls[c.id] / ctot * nats[nid] / ntot
-					if size < POP_MIN: continue
+					if nid == main_nat: size += folded
+					elif size < POP_MIN: continue
+					if size <= 0: continue
 					var local: Dictionary = r.get("local", {}).get(nid, {})
 					var pos = {}
 					var sal = {}
@@ -658,17 +703,6 @@ func leader_image(s: Dictionary, p: Dictionary) -> Array:
 	var out = []
 	for t in LEADER_TYPES: out.append({"type": t, "fit": float(f.get(t.id, 0))})
 	return ssort(out, func(a, b): return b.fit - a.fit)
-
-## How well a party's leader matches what this group wants (0..1).
-func leader_match(pop: Dictionary, fit: Dictionary, clim: Dictionary) -> float:
-	if not pop.has("wants"): pop.wants = pop_wants(pop)
-	var num = 0.0
-	var den = 0.0
-	for k in pop.wants:
-		var w: float = float(pop.wants[k]) * float(clim.get(k, 1.0))
-		num += w * float(fit.get(k, 0.4))
-		den += w
-	return num / den if den > 0 else 0.4
 
 ## What doesn't depend on the party, worked out once per group (pop_support).
 func pop_prep(s: Dictionary, pop: Dictionary, ctx: Dictionary) -> Dictionary:
@@ -1607,7 +1641,8 @@ func _rival_trip(s: Dictionary, p: Dictionary, proj: Dictionary) -> void:
 	if best == null: return
 	var st: Dictionary = s.districts[best.id]
 	if not st.has("rtrip"): st.rtrip = {}
-	st.rtrip[p.id] = float(st.rtrip.get(p.id, 0)) + VISIT_GOODWILL * RIVAL_EDGE * sqrt(float(p.charisma) / 50.0)
+	var had: float = float(st.rtrip.get(p.id, 0))
+	st.rtrip[p.id] = minf(0.8, had + VISIT_GOODWILL * RIVAL_EDGE * sqrt(float(p.charisma) / 50.0) / (1.0 + 2.0 * had))
 	rival_move(s, p, "%s toured %s." % [p.leader, best.name])
 
 ## Adverts: some of the money goes on the groups the party wants most.
@@ -1617,9 +1652,17 @@ func _rival_ads(s: Dictionary, p: Dictionary) -> void:
 	if spend <= 0: return
 	p.money = float(p.money) - spend
 	var k: float = 0.012 * spend * RIVAL_EDGE
+	var perc: Dictionary = p.perceived
 	for pop in s.pops:
-		# closer voters are the cheap ones to win
-		var near: float = clampf2(1.0 - distance(s, pop, p.perceived) / 60.0, 0, 1)
+		# closer voters are the cheap ones to win (by what each group cares about)
+		var d = 0.0
+		var w = 0.0
+		var sal: Dictionary = pop.sal
+		var pp: Dictionary = pop.pos
+		for ax in sal:
+			d += sal[ax] * absf(pp[ax] - perc[ax])
+			w += sal[ax]
+		var near: float = clampf2(1.0 - (d / w if w > 0 else 0.0) / 60.0, 0, 1)
 		pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] + k * near, -2, 2)
 	rival_move(s, p, "%s spent ₱%sM on adverts." % [p.short, fmt1(spend)])
 
@@ -1765,6 +1808,7 @@ const VIEW_HOME := 0.04       # monthly pull of every group's views back to wher
 const MEDIA_VIEW := 0.03      # how far a full-time viewer moves toward an outlet's slant each month
 const MEDIA_WARM := 0.05      # goodwill a full-time viewer gains for the favoured party each month
 const SHIELD_MAX := 0.6
+const SHIELD_GAIN := 0.3      # how fast friendly coverage builds cover (it fades by 30% a month)
 
 func new_media(s: Dictionary) -> Dictionary:
 	var out = {}
@@ -1839,7 +1883,9 @@ func media_monthly(s: Dictionary) -> void:
 	sponsors_monthly(s)
 	var people = 0.0
 	for pop in s.pops: people += float(pop.size)
+	var keys = []
 	for pop in s.pops:
+		keys.append("%s|%s|%s|%s" % [pop.age, pop.class, pop.region, pop.nationality])
 		if pop.has("base"):
 			for ax in pop.base: pop.pos[ax] += (float(pop.base[ax]) - float(pop.pos[ax])) * VIEW_HOME
 		var shd: Dictionary = pop.get("shield", {})
@@ -1864,16 +1910,31 @@ func media_monthly(s: Dictionary) -> void:
 		var k: float = (0.15 + 0.6 * (1 - h)) * wgt     # how hard it moves a viewer
 		var sk: float = (0.1 + 0.8 * (1 - h)) * wgt     # how much it shields its favourite
 		var nat = 0.0
-		for pop in s.pops:
-			var r: float = outlet_reach(s, o, pop)
+		# worked out once per outlet, not once per voter group: who it favours, what it pushes,
+		# and its reach for each kind of person (reach depends only on age, class, region, nationality)
+		var favs = []
+		for pid in fav:
+			if absf(float(fav[pid])) >= 0.05: favs.append([pid, k * float(fav[pid]) * MEDIA_WARM, sk * float(fav[pid]) * SHIELD_GAIN if float(fav[pid]) > 0 else 0.0])
+		var pulls = []
+		for ax in st.pos: pulls.append([ax, float(st.pos[ax]), k * MEDIA_VIEW])
+		var reach_of = {}
+		for i in s.pops.size():
+			var pop: Dictionary = s.pops[i]
+			var key: String = keys[i]
+			var r: float
+			if reach_of.has(key): r = reach_of[key]
+			else:
+				r = outlet_reach(s, o, pop)
+				reach_of[key] = r
 			if r < 0.01: continue
 			nat += r * float(pop.size)
-			for ax in st.pos: pop.pos[ax] = clampf2(float(pop.pos[ax]) + (float(st.pos[ax]) - float(pop.pos[ax])) * r * k * MEDIA_VIEW, -100, 100)
-			for pid in fav:
-				var f: float = fav[pid]
-				if absf(f) < 0.05: continue
-				pop.goodwill[pid] = clampf2(pop.goodwill[pid] + r * k * f * MEDIA_WARM, -2, 2)
-				if f > 0: pop.shield[pid] = minf(SHIELD_MAX, shield_of(pop, pid) + r * sk * f)
+			var pos: Dictionary = pop.pos
+			for pl in pulls: pos[pl[0]] = clampf2(pos[pl[0]] + (pl[1] - pos[pl[0]]) * r * pl[2], -100, 100)
+			var gw: Dictionary = pop.goodwill
+			var shd: Dictionary = pop.shield
+			for fv in favs:
+				gw[fv[0]] = clampf2(gw[fv[0]] + r * fv[1], -2, 2)
+				if fv[2] > 0: shd[fv[0]] = minf(SHIELD_MAX, float(shd.get(fv[0], 0.0)) + r * fv[2])
 		st.reachNat = nat / people if people > 0 else 0.0
 		st.buzz = float(st.buzz) * 0.5
 	media_agenda(s)
@@ -2009,13 +2070,6 @@ func patron_answer(s: Dictionary, answer: String) -> String:
 		s.patron = null
 		return " The money stops. Nobody says why, and nobody needs to."
 	return " Your friends are pleased. The money keeps coming."
-
-## The leak comes out: the arrangement is over.
-func end_patron_on_leak(s: Dictionary, event_id: String) -> void:
-	var pat = s.get("patron")
-	if not pat: return
-	var offer = by_id(FUNDING_OFFERS, pat.offer)
-	if offer and offer.effects.get("scandal", {}).get("event", "") == event_id: s.patron = null
 
 ## Friendly journalists: your best friend among the honest outlets (0..1).
 func friendly_press(s: Dictionary) -> Dictionary:
@@ -2609,12 +2663,6 @@ func draw_event(s: Dictionary) -> Variant:
 			var id = s.scheduled[i].id
 			s.scheduled.remove_at(i)
 			return id
-	for i in s.scandals.size():
-		var sc: Dictionary = s.scandals[i]
-		if rand(s) < sc.chance * C.scandalChanceScale:
-			s.scandals.remove_at(i)
-			end_patron_on_leak(s, sc.event)
-			return sc.event
 	var pool = eligible_events(s)
 	if pool.is_empty(): return null
 	var total = 0.0

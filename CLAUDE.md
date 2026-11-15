@@ -29,6 +29,8 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 
 Find the Godot executable first (it may not be on PATH; ask Ozan where it is if you can't find it). From the repository root:
 
+`tools/check.sh [path-to-godot]` runs everything below in one go, and first boots the real game headless: the only check that loads the screen scripts. Run it before every push.
+
 ```
 godot --headless --path godot -s tests/parity.gd -- 42     # plays a whole seeded game; must end with a RESULT line and no SCRIPT ERROR
 godot --headless --path godot -s tests/debates.gd -- 7     # prints how debates develop and how many events happen (aim: ~1 event every 2-3 months)
