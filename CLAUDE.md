@@ -21,7 +21,7 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 
 ## The project
 
-- Godot 4.7, GDScript, project in `godot/`. Rules in `godot/scripts/sim.gd` (autoload `Game`, no screen code). All content is JSON in `godot/data/`, edited directly. There is no browser version any more (old prototype on the `browser-version` branch; never merge it back).
+- Godot 4.7, GDScript, project in `godot/`. The rules (no screen code) are a chain of files in `godot/scripts/rules/`, each extending the one before (base → voters → districts → media → party → scandals → rivals → world → moments), ending in `godot/scripts/sim.gd`, the autoload `Game`; see the top of `rules/base.gd`. A file may only call functions in itself or earlier in the chain; a call that must go the other way is declared as a hook at the bottom of `base.gd`. New constants and state variables go in `base.gd`. All content is JSON in `godot/data/`, edited directly. There is no browser version any more (old prototype on the `browser-version` branch; never merge it back).
 - Seven axes: economy (State/Market), welfare (Welfare/Austerity), nation (Nationalist/Multicultural), society (Progressive/Traditional), order (Authority/Liberty), foreign (Hawk/Dove), system (Radical/Establishment). Positions run -100 (left label) to +100 (right label); "L"/"R" sides in keys like `nation:L`.
 - `SAVE_VERSION` in sim.gd: bump it whenever the shape of the saved state changes (old saves then start a new game).
 
@@ -54,7 +54,7 @@ In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd
 - Containers reset a child's rotation and scale: tilt cards via a wrapper control (see `Holder` in board.gd).
 - Autowrapped labels need a minimum width or a sized parent, or they balloon or collapse.
 - Signals connected after a node is added may miss `ready`; start tweens directly.
-- The test games load only sim.gd: a parse error in a screen script (main, files, board, cheats...) only shows up when the game itself runs. After editing one, take a screenshot and check its log for SCRIPT ERROR.
+- The test games load only the rules: a parse error in a screen script (main, files, board, cheats...) only shows up when the game itself runs. After editing one, take a screenshot and check its log for SCRIPT ERROR.
 - `Game.ssort` is a stable merge sort; use it instead of `sort_custom` where order matters.
 - Lambdas capture loop variables by value per iteration in GDScript 4; fine to use in loops.
 

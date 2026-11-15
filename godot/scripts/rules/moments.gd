@@ -1,0 +1,306 @@
+## rules/moments.gd — The big moments: the year-three flagship promise, the year-one interview, the final debate and the end-of-game profile.
+extends "res://scripts/rules/world.gd"
+
+# ---------- The flagship promise (year three) ----------
+## A year before the election the party commits to one tangible answer for the
+## country's biggest issue: which promise, then the exact words. Afterwards the
+## party owns that side of the issue, the issue stays in the news, and the
+## promise keeps rallying the voters who like it, month after month.
+func flagship_week() -> int:
+	return 3 * WEEKS_PER_YEAR
+
+## The issue the country cares most about now: how much voters care about it
+## (a crisis raises that on its issues), plus how bad its numbers are.
+func flagship_issue(s: Dictionary) -> Dictionary:
+	var nation: Dictionary = summarize(s, s.pops)
+	var best: Dictionary = FLAGSHIP[0]
+	var best_score = -INF
+	for it in FLAGSHIP:
+		var sc: float = float(nation.sal[it.axis])
+		for m in it.metrics: sc += metric_badness(s, m) * 0.8
+		if sc > best_score:
+			best_score = sc; best = it
+	return best
+
+func flagship_event(s: Dictionary) -> Dictionary:
+	var it: Dictionary = flagship_issue(s)
+	var choices: Array = it.promises.duplicate(true)
+	for ch in choices: ch.lines = shuffle(s, ch.lines)   # so the plain bad one isn't always last
+	return {"id": "flagship_" + it.id, "kind": "flagship", "flagship": it.id, "title": it.title, "text": it.text, "choices": choices}
+
+## Every month until the election, the promise keeps its voters warm.
+func flagship_monthly(s: Dictionary) -> void:
+	var f = s.get("flagship")
+	if f == null or typeof(f) != TYPE_DICTIONARY or f.is_empty(): return
+	var sg = -1.0 if f.side == "L" else 1.0
+	for pop in s.pops:
+		if sg * float(pop.pos[f.axis]) > 20: pop.goodwill.player = clampf2(pop.goodwill.player + 0.01 * minf(1.5, pop.sal[f.axis]), -2, 2)
+
+# ---------- The final debate ----------
+func debate_rounds(s: Dictionary) -> Array:
+	var player = player_party(s)
+	var rival: Dictionary = ssort(rivals(s), func(a, b): return float(s.lastSupport.get(b.id, 0)) - float(s.lastSupport.get(a.id, 0)))[0]
+	var cons = contradictions(s)
+	var con = cons[0] if cons.size() else null
+	var blamed = s.record.blamed[0] if s.record.blamed.size() else null
+	var dirty = null
+	for m in s.record.money:
+		if m.dirty: dirty = m; break
+	var attack: String
+	if con: attack = "\"In %s you said: '%s' In %s you said: '%s' Which one do you actually believe?\"" % [date_label(con.first.week, false), con.first.text, date_label(con.second.week, false), con.second.text]
+	elif blamed: attack = "\"Your whole campaign has been about blaming %s. Is that all you have to offer?\"" % blamed.group
+	elif dirty: attack = "\"Where does your party's money come from? Because it isn't from ordinary Cranebonians.\""
+	else: attack = "\"You have never run anything in your life. Why should anyone trust you with a country?\""
+	var hurt = [{"who": {"class": "middle"}, "amt": -0.12}, {"who": {"age": "61+"}, "amt": -0.08}] if (con or blamed or dirty) else []
+	return [
+		{"title": "Opening statement", "prompt": "The moderator turns to %s: \"Your party didn't exist four years ago. Why should anyone vote for it?\"" % player.leader,
+			"lines": [
+				{"tone": "statesman", "text": "\"Because Cranebonistan deserves a government that keeps its word. That is all %s has ever asked for.\"" % player.name},
+				{"tone": "fiery", "text": "\"Because for thirty years the people on this stage have robbed you blind, and tonight that ends.\""},
+				{"tone": "folksy", "text": "\"I'm not a career politician. I'm someone who got tired of waiting for a bus that never comes.\""},
+				{"tone": "provocative", "text": "\"Look at the people next to me. Would you lend any of them your car?\""},
+			]},
+		{"title": "%s attacks" % rival.leader, "prompt": "%s of the %s turns to you: %s" % [rival.leader, rival.short, attack], "rival": rival.id, "hurt": hurt,
+			"lines": [
+				{"tone": "statesman", "text": "\"I have listened and I have learned. A leader who never changes their mind isn't listening.\""},
+				{"tone": "fiery", "text": "\"How dare you lecture anyone? Your party has lied to this country for a generation.\""},
+				{"tone": "folksy", "text": "\"At least I change my mind now and then. %s hasn't changed a thing since the cassette tape.\"" % rival.leader, "react": [{"who": {"loyalTo": rival.id}, "amt": -0.1}]},
+				{"tone": "provocative", "text": "\"That's invented. Everybody knows your people make things up.\"", "react": [{"who": {"class": "middle"}, "amt": -0.1}]},
+			]},
+		{"title": "Closing statement", "prompt": "\"You have thirty seconds. Speak to the voters.\"",
+			"lines": [
+				{"tone": "statesman", "text": "\"On election day, vote for the country you want your children to grow up in.\""},
+				{"tone": "fiery", "text": "\"They are afraid of you. On election day, prove them right.\""},
+				{"tone": "folksy", "text": "\"If you want more of the same, you know who to vote for. If you don't, you know where to find me.\""},
+				{"tone": "provocative", "text": "\"If they win again, don't say I didn't warn you.\""},
+			]},
+	]
+
+func start_debate(s: Dictionary) -> void:
+	s.debate = {"rounds": debate_rounds(s), "step": 0, "results": []}
+	s.queue.append({"type": "debate"})
+
+func answer_debate(s: Dictionary, line_index: int) -> Dictionary:
+	var d: Dictionary = s.debate
+	var round: Dictionary = d.rounds[d.step]
+	var line: Dictionary = round.lines[line_index]
+	var before = snapshot_groups(s)
+	if round.get("hurt", []).size(): apply_effects(s, {"goodwill": round.hurt, "awareness": 0})
+	var react: Array = line.get("react", []).duplicate()
+	react.append_array(TONES[line.tone].react)
+	var res = deliver_line(s, merged(line, {"react": react}))
+	apply_effects(s, {"awareness": 0.04})
+	var text: String = line.text
+	if text.begins_with("\""): text = text.substr(1)
+	if text.ends_with("\""): text = text.substr(0, text.length() - 1)
+	record_statement(s, {"text": text, "title": "The final debate", "tone": line.tone, "spoken": true})
+	var result = merged(res, {"quote": line.text, "changes": group_changes(s, before), "round": round.title})
+	d.results.append(result)
+	d.step += 1
+	if d.step >= d.rounds.size(): finish_front(s, "debate")
+	return result
+
+# ---------- The big interview (year one) ----------
+## The country meets the leader: an hour with the most trusted outlet. Questions
+## come from your manifesto and your record (data/interview.json); dodging or
+## answering against your own manifesto costs you, plain answers in your own
+## voice pay. The interviewer is impartial, so there is no friend to lean on.
+func interview_week() -> int:
+	return int(INTERVIEW.get("MONTH", 8)) * WEEKS_PER_MONTH
+
+func interview_outlet(s: Dictionary) -> Dictionary:
+	var best = OUTLETS[0] if OUTLETS.size() else {"id": "cbc", "name": "CBC"}
+	var bv = -1.0
+	for o in OUTLETS:
+		if not (o.kind in ["public", "paper", "business", "regional"]): continue
+		if float(o.get("honesty", 0)) < 0.7 or s.media[o.id].owner != "": continue
+		var v: float = float(o.honesty) * (0.1 + float(s.media[o.id].get("reachNat", 0)))
+		if v > bv: bv = v; best = o
+	return best
+
+func _iv_fill(text: String, fill: Dictionary) -> String:
+	return text.format(fill)
+
+func _iv_issue(s: Dictionary, q: Dictionary, ax: Dictionary, fill: Dictionary) -> Dictionary:
+	var player = player_party(s)
+	var side: String = manifesto_side(s, ax.id)
+	var f = fill.duplicate()
+	f.issue = String(ax.issue).to_lower()
+	f.stance = stance_name(ax.id, stance_of(player.manifesto[ax.id])).to_lower()
+	var quote = func(l: Dictionary, kind: String, sd: String) -> Dictionary:
+		var t: String = String(l.text)
+		if not t.begins_with("\""): t = "\"" + t + "\""
+		return {"tone": l.tone, "text": t, "kind": kind, "side": sd}
+	var lines = []
+	if side != "":
+		var other: String = "R" if side == "L" else "L"
+		for l in shuffle(s, LINES.AXIS_LINES[ax.id][side]).slice(0, 2): lines.append(quote.call(l, "clear", side))
+		lines.append(quote.call(pick(s, LINES.AXIS_LINES[ax.id][other]), "uturn", other))
+	else:
+		# a manifesto in the middle can lean either way and still be itself
+		for sd in ["L", "R"]: lines.append(quote.call(pick(s, LINES.AXIS_LINES[ax.id][sd]), "clear", sd))
+	var dg: Dictionary = pick(s, INTERVIEW.DODGES)
+	lines.append({"tone": dg.tone, "text": dg.text, "kind": "dodge", "side": ""})
+	return {"title": q.title, "prompt": _iv_fill(q.prompt, f), "axis": ax.id, "lines": shuffle(s, lines)}
+
+func start_interview(s: Dictionary) -> void:
+	var o: Dictionary = interview_outlet(s)
+	var who: String = INTERVIEW.get("INTERVIEWERS", {}).get(o.id, "The interviewer")
+	var player = player_party(s)
+	var fill = {"interviewer": who, "leader": player.leader, "party": player.name, "home": s.get("home", "")}
+	var rounds = []
+	var op: Dictionary = INTERVIEW.OPENING
+	rounds.append({"title": op.title, "prompt": _iv_fill(op.prompt, fill), "axis": "", "lines": op.lines.map(func(l): return merged(l, {"kind": "style", "side": ""}))})
+	var axes: Array = ssort(AXES.duplicate(), func(a, b): return absf(float(player.manifesto[b.id])) - absf(float(player.manifesto[a.id])))
+	var sal: Dictionary = summarize(s, s.pops).sal
+	var big = null
+	for ax in ssort(AXES.duplicate(), func(a, b): return float(sal[b.id]) - float(sal[a.id])):
+		if ax.id != axes[0].id and ax.id != axes[1].id: big = ax; break
+	rounds.append(_iv_issue(s, INTERVIEW.BOLD, axes[0], fill))
+	if big: rounds.append(_iv_issue(s, INTERVIEW.BIG, big, fill))
+	rounds.append(_iv_issue(s, INTERVIEW.SECOND, axes[1], fill))
+	# the record: a U-turn on file, dirty money, or the years as mayor
+	var rq = null
+	var f2 = fill.duplicate()
+	var cons = contradictions(s)
+	var dirty: Array = s.record.money.filter(func(m): return m.dirty)
+	if cons.size():
+		rq = INTERVIEW.RECORD_FLIP
+		f2.first = "\"%s\"" % cons[0].first.text
+		f2.second = "\"%s\"" % cons[0].second.text
+		f2.first_date = date_label(cons[0].first.week)
+		f2.second_date = date_label(cons[0].second.week)
+	elif dirty.size():
+		rq = INTERVIEW.RECORD_MONEY
+		f2.source = dirty[0].source
+	elif s.get("home", "") != "":
+		rq = INTERVIEW.RECORD_HOME
+	if rq:
+		rounds.append({"title": rq.title, "prompt": _iv_fill(rq.prompt, f2), "axis": "",
+			"lines": rq.lines.map(func(l): return merged(l, {"text": _iv_fill(l.text, f2), "side": ""}))})
+	s.interview = {"outlet": o.id, "outletName": o.name, "who": who, "rounds": rounds, "step": 0, "results": [], "score": 0, "verdict": null}
+	s.queue.append({"type": "interview"})
+
+func answer_interview(s: Dictionary, line_index: int) -> Dictionary:
+	var iv: Dictionary = s.interview
+	var rd: Dictionary = iv.rounds[iv.step]
+	var line: Dictionary = rd.lines[line_index]
+	var before = snapshot_groups(s)
+	var res = deliver_line(s, line)
+	var kind: String = line.get("kind", "style")
+	var note = ""
+	var d = 0
+	match kind:
+		"clear":
+			d = 1
+			var sg = -1.0 if line.side == "L" else 1.0
+			shift_perceived(s, {rd.axis: sg * 4})
+			s.spoke[side_key(rd.axis, line.side)] = s.week
+			figures_heard(s, rd.axis, line.side)
+			for pop in s.pops:
+				var p: float = pop.pos[rd.axis]
+				if (line.side == "L" and p < -15) or (line.side == "R" and p > 15):
+					pop.goodwill.player = clampf2(pop.goodwill.player + 0.05 * pop.sal[rd.axis], -2, 2)
+			note = "A straight answer. Whatever people made of it, they knew where you stood."
+		"uturn":
+			d = -1
+			shift_perceived(s, {rd.axis: (-6.0 if line.side == "L" else 6.0)})
+			figures_heard(s, rd.axis, line.side)
+			note = "Against your own manifesto, live on air. The clip will be played back for years."
+		"dodge":
+			d = -1
+			for o in OUTLETS: s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) - 0.15 * float(o.get("honesty", 0.5)), -1, 1)
+			note = "%s asked again. And again." % iv.who
+		"own":
+			d = 1
+			note = "Owning it went down better than anyone expected."
+		"attack":
+			for o in OUTLETS: s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) + (0.2 if float(o.get("honesty", 0.5)) < 0.5 else -0.2), -1, 1)
+			note = "Your fans loved it. The rest of the room went quiet."
+		"deny":
+			d = -2
+			note = "The programme had the footage, and showed it."
+		"deflect":
+			note = "A laugh, and no answer. It got the laugh."
+	iv.score = int(iv.score) + d
+	if kind in ["clear", "uturn"]:
+		var t: String = String(line.text).trim_prefix("\"").trim_suffix("\"")
+		record_statement(s, {"text": t, "title": "The big interview", "effects": {"shift": {rd.axis: (-5 if line.side == "L" else 5)}}, "tone": line.tone, "spoken": true})
+	var result = merged(res, {"quote": line.text, "note": note, "changes": group_changes(s, before), "round": rd.title})
+	iv.results.append(result)
+	iv.step = int(iv.step) + 1
+	if iv.step >= iv.rounds.size():
+		_interview_done(s)
+		finish_front(s, "interview")
+	return result
+
+## The piece runs: the country now knows who you are, for better or worse.
+func _interview_done(s: Dictionary) -> void:
+	var iv: Dictionary = s.interview
+	var score: int = int(iv.score)
+	var gaffes: int = iv.results.filter(func(r): return r.outcome == "gaffe").size()
+	var v: Dictionary = INTERVIEW.VERDICTS[-1]
+	for x in INTERVIEW.VERDICTS:
+		if score >= int(x.from): v = x; break
+	if gaffes >= 2 and INTERVIEW.has("LOOSE"): v = INTERVIEW.LOOSE
+	iv.verdict = {"title": v.title, "text": v.text}
+	var reach: float = float(s.media.get(iv.outlet, {}).get("reachNat", 0.3))
+	for pop in s.pops:
+		pop.aware.player = clampf2(pop.aware.player + (0.12 + reach * 0.3) * (1 - pop.aware.player), 0, 1)
+		pop.leader.player = clampf2(pop.leader.player + 0.05 * clampf2(score, -3, 4) * pop.leaderPull, -2, 2)
+	for o in OUTLETS:
+		if float(o.get("honesty", 0.5)) >= 0.55: s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) + 0.1 * clampf2(score, -3, 4), -1, 1)
+	_log(s, "event", "The big interview on %s: \"%s\"" % [iv.outletName, v.title])
+
+# ---------- The end-of-game profile ----------
+func build_profile(s: Dictionary) -> Dictionary:
+	var player = player_party(s)
+	var rec: Dictionary = s.record
+	var cons = contradictions(s)
+	var shares: Dictionary = style_profile(s).shares
+	var sh = func(k): return float(shares.get(k, 0))
+	var nation = summarize(s, s.pops)
+	var dirty: Array = rec.money.filter(func(m): return m.dirty)
+	var drift = inconsistency_of(s, player)
+	var ext: float = player.get("extremity", 0.0)
+	var player_flips: int = s.flips.filter(func(f): return f.party == "player").size()
+	var scores = {
+		"weathervane": mini(cons.size(), 6) * 0.8 + mini(rec.betrayed.size(), 5) * 1.2 + mini(player_flips, 10) * 0.3,
+		"believer": ext * 8 + (3.0 if drift < 1 else 0.0) - mini(cons.size(), 6),
+		"strongman": sh.call("fiery") * 8 + sh.call("statesman") * 3 + nation.devotion * 20,
+		"clown": (sh.call("folksy") + sh.call("provocative")) * 7 + rec.memes * 1.5 + rec.gaffes * 1.5,
+		"technocrat": sh.call("statesman") * 9 + (1 - ext) * 3,
+		"fixer": dirty.size() * 3 + rec.dossiers * 2,
+		"demagogue": rec.blamed.size() * 3 + rec.outrages * 1.2,
+	}
+	var entries = []
+	for k in scores: entries.append([k, scores[k]])
+	var archetype: String = ssort(entries, func(a, b): return b[1] - a[1])[0][0]
+	var r: Dictionary = s.result
+	var L: String = player.leader.to_upper()
+	var P: String = player.name.to_upper()
+	var headline: String
+	if r.majority: headline = "%s SWEEPS TO POWER" % L
+	elif r.playerWon: headline = "%s BECOMES THE LARGEST PARTY" % P
+	elif r.votes.player < 0.1: headline = "%s FADES INTO THE FOOTNOTES" % P
+	else: headline = "%s'S GAMBLE FALLS SHORT" % L
+	var quotes: Array = rec.quotes.filter(func(q): return q.title != "The final debate" and q.spoken)
+	var signature = null
+	var best = -1.0
+	for q in quotes:
+		var sz = 0.0
+		for k in q.shift: sz += absf(q.shift[k])
+		if sz > best:
+			best = sz; signature = q
+	var blamed = []
+	for b in rec.blamed:
+		if not blamed.has(b.group): blamed.append(b.group)
+	var crisis = by_id(CRISES, s.crisis.id) if s.crisis else null
+	return {
+		"archetype": ARCHETYPES[archetype], "headline": headline,
+		"contradictions": cons.slice(0, 3), "blamed": blamed, "betrayed": rec.betrayed.slice(0, 3),
+		"money": rec.money,
+		"crisis": {"name": crisis.name, "odds": s.crisis.odds, "blamed": crisis_blames_you(s)} if crisis else null,
+		"memes": rec.memes, "gaffes": rec.gaffes, "statements": rec.quotes.size(),
+		"style": style_profile(s).label, "signature": signature,
+	}

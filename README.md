@@ -49,7 +49,8 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |
 | `godot/data/margaret.json` | Margaret's notes and the two ways to answer her |
 | `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Teyl (not yet shown in the Godot version) |
-| `godot/scripts/sim.gd` | The rules (autoload `Game`). No screen code |
+| `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile). No screen code |
+| `godot/scripts/sim.gd` | The end of the chain, the autoload `Game`: loading content, a new game, the monthly update, the clock |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |
 | `godot/scripts/board.gd` | The evidence board: what needs you now |
 | `godot/scripts/files.gd` | The planning files along the top bar |
