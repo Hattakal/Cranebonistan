@@ -1216,6 +1216,15 @@ func make_person(s: Dictionary, region := "", nationality := "", sex := "", age 
 	var home: String = pick(s, towns).name if towns.size() and rand(s) < 0.8 else (reg.name if reg else "")
 	return {"name": name, "sex": sex, "age": age, "region": region, "nationality": nationality, "hometown": home}
 
+## Someone from abroad (a minister, an envoy, a businessman): a name from their
+## country's pool (names.json FOREIGN).
+func make_foreign_person(s: Dictionary, country: String, sex := "") -> Dictionary:
+	if sex == "": sex = "f" if rand(s) < 0.5 else "m"
+	var key: String = String(NAMES.get("FOREIGN", {}).get(country, ""))
+	var pool: Dictionary = NAMES.get("POOLS", {}).get(key, {})
+	if pool.is_empty(): return {"name": "", "sex": sex, "country": country}
+	return {"name": "%s %s" % [pick(s, pool[sex]), pick(s, pool.last)], "sex": sex, "country": country}
+
 # ---------- Secrets and scandals ----------
 ## A secret is what the public doesn't know about you (data/scandals.json): the
 ## leader's small skeletons from the mayor years, dirty money, hypocrisy (words
