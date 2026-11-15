@@ -38,6 +38,7 @@ godot --headless --path godot -s tests/debates.gd -- 7     # prints how debates 
 godot --headless --path godot --import                     # needed after adding a new class_name script
 godot --headless --path godot -s tests/scandals.gd -- deny 4   # a game that takes dirty money and answers every scandal one way (deny/own/attack/subject/scapegoat)
 godot --headless --path godot -s tests/rivals.gd            # what the rival parties did over a whole game
+godot --headless --path godot -s tests/strong.gd -- populist 2   # a competent player (populist | centrist | left), to measure difficulty; add e.g. nospeak,notrips or trace
 ```
 
 Screenshots of the real game (use these to check any visual change; look at the image before claiming it works):

@@ -409,6 +409,26 @@ Cranebonistan sits on the edge of Western European democracy: closer to Poland o
 
 ## 8. Balance targets
 
+**Measured in Godot, November 2026** (after the fifth playtest, where the designer won by a lot as a fiery national populist despite gaffes). `tests/strong.gd` plays a competent, clean campaign: one manifesto and one tone, a trip a month to the province where it matters most, every action spent speaking for the manifesto, a sensible budget.
+
+| Style (3 seeded games) | Before | After |
+|---|---|---|
+| Fiery national populist | 26–31%, charisma always 100 | 22–23%, charisma 55–70 |
+| Measured centrist | 21–25% | 18–21% |
+| Folksy left | 16–23% | 11–14% |
+
+What was wrong, and the fixes:
+- **Charisma ran away.** Speaking in one tone gave charisma every time, charisma raised the odds of viral moments, and those gave more charisma: it always reached the maximum, and it multiplies the leader's pull everywhere. Now charisma is harder to gain the more you have (half speed at 75), a recognisable voice gives less (and half that in small debates), and viral and gaffe odds depend less on charisma.
+- **Gaffes were cheap.** A gaffe now costs more charisma, and everybody (not only the offended group) thinks a little less of the leader.
+- **Repeating yourself was free.** Speaking for the same cause again and again now wins less each time; it recovers over a few months.
+- **The flagship promise was worth nine points on its own**, almost all from making you the owner of a hot issue. It is now worth about three.
+- Speaking is still what wins: without it the same campaign gets 12%. Trips and offices add a few points; the national advertising budget adds almost nothing (to look at).
+
+A skilled player who also uses money, media and the best lines should beat these numbers; the old targets below (principled 15–20%, opportunist 25–30% and sometimes winning, active and dirty 30%+) are roughly where this now sits. The folksy left is weak and may need help.
+
+### Older targets
+
+
 **Out of date:** these numbers were measured in the browser version, before the national debate, speaking, communities and the seven axes. They need measuring again in Godot. The "principled" target also predates the decision that calm, centrist play should be able to win, just with more effort (section 1).
 
 Measured with simple bots over five seeded games each, after the funding change (these bots pick sound bites at random and take all dirty money, so a thoughtful player does better). The winning party usually takes 26–35%.

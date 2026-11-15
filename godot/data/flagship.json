@@ -19,20 +19,20 @@
        "nation": -4
       },
       "salience": {
-       "economy": 0.4
+       "economy": 0.16
       },
       "goodwill": [
        {
         "who": {
          "class": "working"
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "region": "erland"
         },
-        "amt": 0.2
+        "amt": 0.12
        },
        {
         "who": {
@@ -40,20 +40,20 @@
           "nation": "<-25"
          }
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
          "class": "upper"
         },
-        "amt": -0.35
+        "amt": -0.21
        },
        {
         "who": {
          "region": "yamlin",
          "class": "middle"
         },
-        "amt": -0.2
+        "amt": -0.12
        }
       ]
      },
@@ -132,20 +132,20 @@
        "welfare": -6
       },
       "salience": {
-       "economy": 0.4
+       "economy": 0.16
       },
       "goodwill": [
        {
         "who": {
          "class": "working"
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "age": "61+"
         },
-        "amt": 0.2
+        "amt": 0.12
        },
        {
         "who": {
@@ -153,13 +153,13 @@
           "welfare": "<-25"
          }
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
          "class": "upper"
         },
-        "amt": -0.35
+        "amt": -0.21
        },
        {
         "who": {
@@ -167,7 +167,7 @@
           "economy": ">25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        }
       ]
      },
@@ -252,20 +252,20 @@
        "welfare": 5
       },
       "salience": {
-       "economy": 0.4
+       "economy": 0.16
       },
       "goodwill": [
        {
         "who": {
          "class": "middle"
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "class": "working"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -273,7 +273,7 @@
           "welfare": ">25"
          }
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -281,13 +281,13 @@
           "welfare": "<-25"
          }
         },
-        "amt": -0.25
+        "amt": -0.15
        },
        {
         "who": {
          "class": "upper"
         },
-        "amt": -0.05
+        "amt": -0.03
        }
       ]
      },
@@ -382,7 +382,7 @@
        "nation": -8
       },
       "salience": {
-       "nation": 0.4
+       "nation": 0.16
       },
       "goodwill": [
        {
@@ -391,20 +391,20 @@
           "nation": "<-25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "region": "erland"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
          "region": "yamlin",
          "class": "working"
         },
-        "amt": 0.2
+        "amt": 0.12
        },
        {
         "who": {
@@ -412,19 +412,19 @@
           "nation": ">25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "nationality": "alinnian"
         },
-        "amt": -0.25
+        "amt": -0.15
        },
        {
         "who": {
          "class": "upper"
         },
-        "amt": -0.1
+        "amt": -0.06
        }
       ]
      },
@@ -517,20 +517,20 @@
        "economy": 3
       },
       "salience": {
-       "nation": 0.4
+       "nation": 0.16
       },
       "goodwill": [
        {
         "who": {
          "class": "upper"
         },
-        "amt": 0.25
+        "amt": 0.15
        },
        {
         "who": {
          "class": "middle"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -538,7 +538,7 @@
           "nation": ">25"
          }
         },
-        "amt": 0.2
+        "amt": 0.12
        },
        {
         "who": {
@@ -546,14 +546,14 @@
           "nation": "<-25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "region": "yamlin",
          "class": "working"
         },
-        "amt": -0.15
+        "amt": -0.09
        }
       ]
      },
@@ -640,20 +640,20 @@
        "nation": -2
       },
       "salience": {
-       "welfare": 0.4
+       "welfare": 0.16
       },
       "goodwill": [
        {
         "who": {
          "region": "yamlin"
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "class": "working"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -661,7 +661,7 @@
           "welfare": "<-25"
          }
         },
-        "amt": 0.1
+        "amt": 0.06
        },
        {
         "who": {
@@ -669,13 +669,13 @@
           "welfare": ">25"
          }
         },
-        "amt": -0.25
+        "amt": -0.15
        },
        {
         "who": {
          "region": "cranbia"
         },
-        "amt": -0.05
+        "amt": -0.03
        }
       ]
      },
@@ -773,7 +773,7 @@
        "order": -3
       },
       "salience": {
-       "foreign": 0.4
+       "foreign": 0.16
       },
       "goodwill": [
        {
@@ -782,19 +782,19 @@
           "foreign": "<-25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "age": "61+"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
          "region": "fauraifai"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -802,13 +802,13 @@
           "foreign": ">25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "age": "18-29"
         },
-        "amt": -0.15
+        "amt": -0.09
        },
        {
         "who": {
@@ -816,7 +816,7 @@
           "welfare": ">25"
          }
         },
-        "amt": -0.1
+        "amt": -0.06
        }
       ]
      },
@@ -909,20 +909,20 @@
        "nation": 3
       },
       "salience": {
-       "foreign": 0.4
+       "foreign": 0.16
       },
       "goodwill": [
        {
         "who": {
          "class": "middle"
         },
-        "amt": 0.25
+        "amt": 0.15
        },
        {
         "who": {
          "class": "upper"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -930,7 +930,7 @@
           "system": ">25"
          }
         },
-        "amt": 0.1
+        "amt": 0.06
        },
        {
         "who": {
@@ -938,7 +938,7 @@
           "nation": "<-25"
          }
         },
-        "amt": -0.25
+        "amt": -0.15
        },
        {
         "who": {
@@ -946,7 +946,7 @@
           "system": "<-25"
          }
         },
-        "amt": -0.1
+        "amt": -0.06
        }
       ]
      },
@@ -1030,7 +1030,7 @@
        "foreign": 8
       },
       "salience": {
-       "foreign": 0.4
+       "foreign": 0.16
       },
       "goodwill": [
        {
@@ -1039,19 +1039,19 @@
           "foreign": ">25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "age": "18-29"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
          "nationality": "alinnian"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -1059,13 +1059,13 @@
           "foreign": "<-25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "region": "fauraifai"
         },
-        "amt": -0.1
+        "amt": -0.06
        }
       ]
      },
@@ -1168,7 +1168,7 @@
        "order": -8
       },
       "salience": {
-       "order": 0.4
+       "order": 0.16
       },
       "goodwill": [
        {
@@ -1177,19 +1177,19 @@
           "order": "<-25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "age": "61+"
         },
-        "amt": 0.2
+        "amt": 0.12
        },
        {
         "who": {
          "class": "middle"
         },
-        "amt": 0.1
+        "amt": 0.06
        },
        {
         "who": {
@@ -1197,13 +1197,13 @@
           "order": ">25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "age": "18-29"
         },
-        "amt": -0.15
+        "amt": -0.09
        }
       ]
      },
@@ -1288,20 +1288,20 @@
        "welfare": -4
       },
       "salience": {
-       "order": 0.4
+       "order": 0.16
       },
       "goodwill": [
        {
         "who": {
          "age": "18-29"
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "class": "working"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -1309,7 +1309,7 @@
           "order": ">25"
          }
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
@@ -1317,13 +1317,13 @@
           "order": "<-25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "age": "61+"
         },
-        "amt": -0.1
+        "amt": -0.06
        }
       ]
      },
@@ -1404,7 +1404,7 @@
        "order": 3
       },
       "salience": {
-       "system": 0.4
+       "system": 0.16
       },
       "goodwill": [
        {
@@ -1413,19 +1413,19 @@
           "system": "<-25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "age": "18-29"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
          "nationality": "alinnian"
         },
-        "amt": 0.1
+        "amt": 0.06
        },
        {
         "who": {
@@ -1433,7 +1433,7 @@
           "system": ">25"
          }
         },
-        "amt": -0.25
+        "amt": -0.15
        },
        {
         "who": {
@@ -1441,7 +1441,7 @@
           "order": "<-25"
          }
         },
-        "amt": -0.2
+        "amt": -0.12
        }
       ]
      },
@@ -1541,7 +1541,7 @@
        "society": 8
       },
       "salience": {
-       "society": 0.4
+       "society": 0.16
       },
       "goodwill": [
        {
@@ -1550,19 +1550,19 @@
           "society": ">25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "age": "61+"
         },
-        "amt": 0.2
+        "amt": 0.12
        },
        {
         "who": {
          "region": "erland"
         },
-        "amt": 0.1
+        "amt": 0.06
        },
        {
         "who": {
@@ -1570,13 +1570,13 @@
           "society": "<-25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "age": "18-29"
         },
-        "amt": -0.15
+        "amt": -0.09
        }
       ]
      },
@@ -1674,7 +1674,7 @@
        "society": -8
       },
       "salience": {
-       "society": 0.4
+       "society": 0.16
       },
       "goodwill": [
        {
@@ -1683,19 +1683,19 @@
           "society": "<-25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "age": "18-29"
         },
-        "amt": 0.2
+        "amt": 0.12
        },
        {
         "who": {
          "region": "cranbia"
         },
-        "amt": 0.1
+        "amt": 0.06
        },
        {
         "who": {
@@ -1703,13 +1703,13 @@
           "society": ">25"
          }
         },
-        "amt": -0.3
+        "amt": -0.18
        },
        {
         "who": {
          "age": "61+"
         },
-        "amt": -0.15
+        "amt": -0.09
        }
       ]
      },
@@ -1793,7 +1793,7 @@
        "order": 6
       },
       "salience": {
-       "order": 0.4
+       "order": 0.16
       },
       "goodwill": [
        {
@@ -1802,19 +1802,19 @@
           "order": ">25"
          }
         },
-        "amt": 0.3
+        "amt": 0.18
        },
        {
         "who": {
          "class": "middle"
         },
-        "amt": 0.15
+        "amt": 0.09
        },
        {
         "who": {
          "age": "30-45"
         },
-        "amt": 0.1
+        "amt": 0.06
        },
        {
         "who": {
@@ -1822,7 +1822,7 @@
           "order": "<-25"
          }
         },
-        "amt": -0.2
+        "amt": -0.12
        },
        {
         "who": {
@@ -1830,7 +1830,7 @@
           "society": ">25"
          }
         },
-        "amt": -0.1
+        "amt": -0.06
        }
       ]
      },

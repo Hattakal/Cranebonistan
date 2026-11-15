@@ -153,6 +153,8 @@ func _home_start(s: Dictionary, city: String) -> void:
 # ---------- Monthly dynamics ----------
 func monthly_update(s: Dictionary) -> void:
 	for ax in s.salMod: s.salMod[ax] *= C.salienceDecay
+	var hd: Dictionary = s.get("heard", {})
+	for k in hd: hd[k] = float(hd[k]) * 0.75
 	var wm: Dictionary = s.get("wantMod", {})
 	for k in wm: wm[k] = float(wm[k]) * 0.85
 	debates_monthly(s)

@@ -199,8 +199,8 @@ func _flagship_made(s: Dictionary, ev: Dictionary, choice: Dictionary, quote) ->
 			axis = ax; sh = float(choice.effects.shift[ax]); break
 	var side = "L" if sh < 0 else "R"
 	s.flagship = {"issue": it.id, "axis": axis, "side": side, "label": choice.label, "quote": quote if quote else choice.label, "week": s.week}
-	add_ownership(s, "player", side_key(axis, side), 0.25)
-	s.salMod[axis] = clampf2(float(s.salMod.get(axis, 0)) + 0.3, -0.5, 1.5)
+	add_ownership(s, "player", side_key(axis, side), float(C.get("flagshipOwnership", 0.05)))
+	s.salMod[axis] = clampf2(float(s.salMod.get(axis, 0)) + float(C.get("flagshipSalience", 0.05)), -0.5, 1.5)
 
 # ---------- The state of the nation (world.js) ----------
 func indicator_word(id: String, v: float) -> String:
@@ -430,7 +430,10 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 		elif ownership_of(s, rp.id, key) > 0.05: change_relation(s, rp.id, 1.5 if major else 0.75, "you backed their line on %s" % by_id(AXES, d.axis).issue.to_lower())
 	s.spoke[key] = s.week
 	figures_heard(s, d.axis, side)
-	var k = 1.0 if major else 0.6
+	# people have heard it: the same cause, again and again, wins less each time (fades over months)
+	if not s.has("heard"): s.heard = {}
+	var k = (1.0 if major else 0.6) / (1.0 + 0.35 * float(s.heard.get(key, 0)))
+	s.heard[key] = float(s.heard.get(key, 0)) + 1.0
 	for pop in s.pops:
 		var p: float = pop.pos[d.axis]
 		var on_side = p < -15 if side == "L" else p > 15
@@ -713,6 +716,10 @@ func contradictions(s: Dictionary) -> Array:
 
 ## quick: a line in a smaller debate. No viral clip or gaffe; it mostly
 ## shapes your speaking style, and groups react less.
+## Charisma is harder to gain the more of it you have: half speed at 75, a crawl past 90.
+func gain_charisma(player: Dictionary, d: float) -> void:
+	player.charisma = clampf2(player.charisma + d * clampf2((100.0 - player.charisma) / 50.0, 0.05, 1.0), 10, 100)
+
 func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary:
 	var player = player_party(s)
 	var tone: String = line.tone if TONES.has(line.get("tone", "")) else "statesman"
@@ -721,8 +728,8 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	var charm: float = player.charisma / 100.0
 	var outcome = "normal"
 	if quick: pass
-	elif r < risk * (0.3 + charm * 0.6): outcome = "viral"
-	elif r > 1 - risk * (0.55 - charm * 0.35): outcome = "gaffe"
+	elif r < risk * (0.3 + charm * 0.3): outcome = "viral"     # charm helps, but a risky line stays risky
+	elif r > 1 - risk * (0.5 - charm * 0.2): outcome = "gaffe"
 	var pos = 1.6 if outcome == "viral" else 1.0
 	var neg = 1.8 if outcome == "gaffe" else (1.3 if outcome == "viral" else 1.0)
 	var reacts: Array = TONES[tone].react.duplicate()
@@ -742,7 +749,7 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	var share: float = top[1] / total
 	var style_note = ""
 	if total > 3 and tone == top[0] and share > 0.45:
-		player.charisma = clampf2(player.charisma + 0.8, 10, 100)
+		gain_charisma(player, 0.25 if quick else 0.5)
 		style_note = "It sounded like you. People are starting to recognise your voice."
 	elif total > 3 and tone != top[0] and share > 0.5:
 		player.charisma = clampf2(player.charisma - 0.6, 10, 100)
@@ -750,8 +757,12 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	media_hear(s, tone, outcome, 0.5 if quick else 1.0)
 	if outcome == "viral":
 		s.record.memes += 1
-		player.charisma = clampf2(player.charisma + 1.5, 10, 100)
+		gain_charisma(player, 1.5)
 	if outcome == "gaffe":
 		s.record.gaffes += 1
-		player.charisma = clampf2(player.charisma - 1, 10, 100)
+		player.charisma = clampf2(player.charisma - 2.5, 10, 100)
+		# a gaffe is remembered: everyone thinks a little less of the leader, not only the offended
+		for pop in s.pops:
+			pop.leader.player = clampf2(pop.leader.player - 0.04, -2, 2)
+			pop.goodwill.player = clampf2(pop.goodwill.player - 0.03 * (1 - shield_of(pop, "player")), -2, 2)
 	return {"outcome": outcome, "press": TONES[tone].press[outcome], "styleNote": style_note}

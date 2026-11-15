@@ -86,7 +86,9 @@
   "crisisBlameFrom": 0.3,
   "styleMemory": 0.93,
   "scandalChanceScale": 1,
-  "typeWeight": 0.8
+  "typeWeight": 0.8,
+  "flagshipOwnership": 0.05,
+  "flagshipSalience": 0.05
  },
  "AXES": [
   {
