@@ -388,7 +388,7 @@ func _region_cities(region: String, to: Control) -> void:
 			var cost: float = G.COMMUNITY_COST[lvl]
 			var b = _btn(("Open an office" if lvl == 0 else "Grow it") + " · ₱%sM" % Game.fmt1(cost), func(): _did(G.act_community(S, c.name)),
 				S.result != null or left <= 0 or S.money < cost, lvl == 0)
-			b.tooltip_text = "Uses one of this month's actions. A community works every month: it turns your supporters in %s into core voters and gets them to the polls." % Game.by_id(G.REGIONS, region).name
+			b.tooltip_text = "Uses one of this month's actions. A community works every month on its own province: it turns your supporters there into core voters and gets them to the polls."
 			row.add_child(b)
 
 func _people(n: float) -> String:
@@ -582,7 +582,7 @@ func _actions() -> void:
 	_add(Look.label("₱%sM" % Game.fmt1(S.money), "display", 26, Look.INK), hr)
 	_rule()
 	# grassroots
-	_section("Build communities", "₱1–2M", "Open a party office in a city, then grow it. A community works every month: it turns your supporters in that region into core voters, gets them to the polls, and pays a little in members' dues. Slow, but it lasts. The capital and big cities count for more.")
+	_section("Build communities", "₱1–2M", "Open a party office in a city, then grow it. A community works every month on its own province: it turns your supporters there into core voters, gets them to the polls, and pays a little in members' dues. Slow, but it lasts. The capital and big cities count for more.")
 	var cg = GridContainer.new()
 	cg.columns = 5 if size.x > 1100 else 2
 	cg.add_theme_constant_override("h_separation", 12)

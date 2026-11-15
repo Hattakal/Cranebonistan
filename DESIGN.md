@@ -345,6 +345,10 @@ The designer's aims: the game should be enjoyable first, and it should look like
   - *Friendly journalists:* opposition research goes through the honest outlet that likes you most: better odds, less chance of being caught, and a leaked dossier they run hits harder and is traced to you less.
 - **Rival parties' turn — built (November 2026).** Every rival has money: an income every quarter from its support, its members and business (more for establishment parties). Each month it may tour the province where a trip matters most (one it could take or could lose, only in regions where it organises), spend on adverts that warm the voters closest to it, sign a personality close to its line, very rarely buy an outlet that likes it, and pay investigators to dig into whoever is closest in the polls, the new party most of all (a leak about you hits harder if you have taken dirty money; a caught investigator hurts them). Their moves have about 0.7 of the player's effect. The Polls file is now "Parties and polls": each party's polling, projected seats, funds and its moves of the last two months, above the poll tables. Leaks aimed at you stop the clock; everything else goes to the ticker.
 
+### Offices work on their province (November 2026)
+
+A party office works every month on its own province (the people who can walk in through the door), at twice the old strength there, instead of thinly across the whole region. (Before: offices turned supporters into core voters across the region, a leftover from before provinces had their own voters.)
+
 ### Code review (November 2026)
 
 Found by measuring a full game, and fixed:

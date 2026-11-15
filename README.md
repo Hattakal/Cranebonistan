@@ -34,7 +34,8 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 
 | Path | What it holds |
 |------|---------------|
-| `godot/data/content.json` | All game content: balance settings (`CONFIG`), axes, demographics, regions, neighbours, parties, events and their sound bites, initiatives, crises, the map. Edited directly |
+| `godot/data/content.json` | Most game content: balance settings (`CONFIG`), axes, demographics, regions, neighbours, parties, events and their sound bites, initiatives, crises. Edited directly |
+| `godot/data/map.json` | The map: shapes, label spots, cities, provinces (written by `tools/build_map.py`) |
 | `godot/data/debates.json` | Debate topics, including the ones the economy starts by itself |
 | `godot/data/issues.json` | Minor issues: local stories, each with its own lines |
 | `godot/data/party.json` | Your party's politicians |
@@ -83,4 +84,4 @@ python3 tools/build_map.py path/to/map.kra
 
 The current source is `art/map3.kra` (`python3 tools/build_map.py art/map3.kra`).
 
-This rewrites the `MAP` entry in `godot/data/content.json` and `godot/assets/map-features.png`. It needs Python with numpy, scipy, opencv-python and Pillow. If a border is moved so much that an area no longer contains its seed point, adjust `AREA_SEEDS` at the top of the script.
+This rewrites `godot/data/map.json` and `godot/assets/map-features.png`. It needs Python with numpy, scipy, opencv-python and Pillow. If a border is moved so much that an area no longer contains its seed point, adjust `AREA_SEEDS` at the top of the script.

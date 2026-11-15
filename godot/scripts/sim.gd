@@ -81,7 +81,7 @@ func load_content(path: String) -> void:
 	CAMPAIGN = d.CAMPAIGN; EVENTS = d.EVENTS; FUNDING_OFFERS = d.FUNDING_OFFERS; INITIATIVES = d.INITIATIVES
 	CRISES = d.CRISES; INDICATORS = d.INDICATORS; TONES = d.TONES; TONE_RISK = d.TONE_RISK
 	ARCHETYPES = d.ARCHETYPES; ACTIONS = d.ACTIONS; SCRUTINY_STORIES = d.SCRUTINY_STORIES
-	MONTH_NAMES = d.MONTH_NAMES; MAP = d.MAP; FLAG_INFO = d.FLAG_INFO; FEEDBACK_GROUPS = d.FEEDBACK_GROUPS
+	MONTH_NAMES = d.MONTH_NAMES; MAP = JSON.parse_string(FileAccess.get_file_as_string("res://data/map.json")) if FileAccess.file_exists("res://data/map.json") else d.get("MAP", {}); FLAG_INFO = d.FLAG_INFO; FEEDBACK_GROUPS = d.FEEDBACK_GROUPS
 	WEEKS_PER_MONTH = int(C.weeksPerMonth)
 	WEEKS_PER_YEAR = int(C.weeksPerMonth) * int(C.monthsPerYear)
 	ELECTION_WEEK = int(C.electionYears) * WEEKS_PER_YEAR
@@ -2175,14 +2175,18 @@ func act_community(s: Dictionary, city: String) -> Dictionary:
 func _community_tick(s: Dictionary, c: Dictionary, k := 1.0) -> void:
 	var lvl = community_level(s, c.name)
 	var weight = lvl * (1.0 + 0.5 * float(c.get("size", 0))) * (2.0 if c.name == MAP.capital else 1.0)
+	# an office works on its own province: the people who can walk in through the door
+	var d = district_of_city(c.name)
+	var where: String = d.id if d else ""
 	var ctx = score_context(s)
 	for pop in s.pops:
-		if pop.region != c.area: continue
+		if where != "" and pop.get("district", "") != where: continue
+		if where == "" and pop.region != c.area: continue
 		var sup = pop_support(s, pop, null, ctx)
 		var floating = maxf(0, sup.player - pop.loyal.player)
-		pop.loyal.player = clampf2(pop.loyal.player + floating * 0.006 * weight * k, 0, 0.9)
-		pop.mobilized = clampf2(pop.mobilized + 0.002 * weight * k, 0, 0.15)
-		pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.003 * weight * k, 0, 1)
+		pop.loyal.player = clampf2(pop.loyal.player + floating * 0.012 * weight * k, 0, 0.9)
+		pop.mobilized = clampf2(pop.mobilized + 0.004 * weight * k, 0, 0.15)
+		pop.aware.player = clampf2(pop.aware.player + (1 - pop.aware.player) * 0.006 * weight * k, 0, 1)
 
 func communities_monthly(s: Dictionary) -> void:
 	for name in s.communities:

@@ -4,7 +4,7 @@ build_districts.py: split each region of the game map into electoral districts.
 
     python3 tools/build_districts.py
 
-Reads the region shapes and cities from the MAP entry in godot/data/content.json
+Reads the region shapes and cities from godot/data/map.json
 (written by build_map.py, which also runs this at the end) and writes MAP.districts:
 one entry per district with its shape, a label spot, its share of the region's
 people and the cities inside it.
@@ -24,6 +24,7 @@ from scipy import ndimage
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONTENT = os.path.join(ROOT, "godot", "data", "content.json")
+MAPFILE = os.path.join(ROOT, "godot", "data", "map.json")
 CITIES = os.path.join(ROOT, "godot", "data", "cities.json")
 DISTRICTS = {"cranbia": 7, "yamlin": 7, "erland": 7, "alinni": 6, "fauraifai": 6}
 REGION_NAMES = {"cranbia": "Cranbia", "yamlin": "Yamlin", "erland": "Erland", "alinni": "Alinni", "fauraifai": "Fauran"}
@@ -90,7 +91,7 @@ def direction(dx, dy):
 
 def main():
     content = json.load(open(CONTENT, encoding="utf-8"))
-    m = content["MAP"]
+    m = json.load(open(MAPFILE, encoding="utf-8"))
     info = json.load(open(CITIES, encoding="utf-8"))["CITIES"] if os.path.exists(CITIES) else {}
     w, h = m["w"] // K, m["h"] // K
     rng = np.random.default_rng(SEED)
@@ -150,7 +151,7 @@ def main():
             d["id"] = f"{region}_{i}"
         out.extend(sorted(districts, key=lambda d: d["id"]))
     m["districts"] = [{"id": d["id"], **{k2: v for k2, v in d.items() if k2 != "id"}} for d in out]
-    json.dump(content, open(CONTENT, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    json.dump(m, open(MAPFILE, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print(f"districts: {len(out)} ({', '.join(f'{r} {sum(1 for d in out if d['region'] == r)}' for r in DISTRICTS)})")
     for d in out: print(f"  {d['id']:12} {d['name']:24} share {d['share']:.3f} cities {d['cities']}")
 

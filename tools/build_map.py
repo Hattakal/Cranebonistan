@@ -14,7 +14,7 @@ Reads these Krita layers (by name):
   (a vector/text layer) names typed next to each city; big text (area names) is skipped
 
 Writes:
-  godot/data/content.json   its MAP entry: shapes, label spots and cities (game coordinates)
+  godot/data/map.json       the map: shapes, label spots, cities and provinces (game coordinates)
   godot/assets/map-features.png   rivers and mountains, recoloured as ink
 and then runs build_districts.py to split the regions into electoral districts.
 
@@ -341,11 +341,13 @@ def main(path):
     godot = os.path.join(ROOT, "godot")
     img.save(os.path.join(godot, "assets", "map-features.png"), optimize=True)
 
-    # the map lives inside the game's content file, next to everything else
-    path = os.path.join(godot, "data", "content.json")
-    content = json.load(open(path, encoding="utf-8"))
-    content["MAP"] = out
-    json.dump(content, open(path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    # the map has its own file; the regions' people come from the content file
+    path = os.path.join(godot, "data", "map.json")
+    content = json.load(open(os.path.join(godot, "data", "content.json"), encoding="utf-8"))
+    note = json.load(open(path, encoding="utf-8")).get("_note", "") if os.path.exists(path) else ""
+    mapdata = {"_note": note, **out} if note else dict(out)
+    content["MAP"] = mapdata
+    json.dump(mapdata, open(path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print(f"map: {len(out['regions'])} regions, {len(out['foreign'])} neighbours, {len(out['cities'])} cities")
     # electoral districts: the designer's provinces if drawn, otherwise an automatic split
     if any(k.strip().lower() == "provinces" for k in layers):
@@ -353,7 +355,7 @@ def main(path):
         city_pop = {n: float(v.get("population", 0.1)) for n, v in json.load(open(cpath, encoding="utf-8"))["CITIES"].items()} if os.path.exists(cpath) else {}
         adults = {r["id"]: float(r["adults"]) for r in content["REGIONS"]}
         content["MAP"]["districts"] = build_provinces(full, order, find_layer(layers, "Provinces"), borders, prov_texts, out["cities"], adults, city_pop)
-        json.dump(content, open(path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+        json.dump(content["MAP"], open(path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
         print(f"provinces: {len(content['MAP']['districts'])}")
         for d in content["MAP"]["districts"]:
             print(f"  {d['id']:12} {d['name']:22} {'' if d['named'] else '(unnamed) '}share {d['share']:.3f} cities {d['cities']}")
