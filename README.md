@@ -71,6 +71,10 @@ godot --headless --path godot -s tests/parity.gd -- 42
 godot --headless --path godot -s tests/debates.gd -- 7
 ```
 
+## Modding
+
+Almost everything is data, and mods change it without touching the game's files: see [MODDING.md](MODDING.md). An example mod is in `mods/example-more-cities/`.
+
 ## Setting
 
 Cranebonistan has five regions: Cranbia (capital Cranebo, industrial and educated), Yamlin (trade gateway, mixed and tense), Erland (nationalist breadbasket), Alinni (conquered from the Southern Trueants fifty years ago, minority-heavy) and Fauran (the poorest). Its neighbours are the Southern Trueants, the Dillihan Republic, the Bordon Federation and James. Further away are Golba, Norbanistan and Potania. Rivers and mountains are still to be drawn on the new map.

@@ -349,6 +349,10 @@ The designer's aims: the game should be enjoyable first, and it should look like
 
 A party office works every month on its own province (the people who can walk in through the door), at twice the old strength there, instead of thinly across the whole region. (Before: offices turned supporters into core voters across the region, a leftover from before provinces had their own voters.)
 
+### Moddable (November 2026)
+
+The game must be easy to mod. Mods are folders (user data, next to the executable, or the repository's `mods/`) whose data files merge into the game's (by key, by id for lists of things, `_append` for plain lists) and whose assets replace the game's. Everything loads through `scripts/mods.gd`; the remaining hard-coded settings and the final debate's lines moved into data. Guide: MODDING.md. Not moddable yet: the rules' logic and some interface text.
+
 ### Code review (November 2026)
 
 Found by measuring a full game, and fixed:

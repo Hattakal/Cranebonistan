@@ -1,0 +1,55 @@
+{
+ "CONFIG": {
+  "actionsPerMonth": 4
+ },
+ "PARTIES": [
+  {
+   "id": "oc",
+   "leader": "Camille Fontanel",
+   "leaderHome": "Gilopolis"
+  }
+ ],
+ "EVENTS": [
+  {
+   "id": "example_ferry_strike",
+   "kind": "regional",
+   "title": "Ferry crews strike in Nikecisa",
+   "text": "The island ferries have stopped. Fishermen are selling their catch from the quay, and the islands are running out of bread.",
+   "choices": [
+    {
+     "label": "Back the crews",
+     "effects": {
+      "shift": {
+       "economy": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working",
+         "region": "yamlin"
+        },
+        "amt": 0.3
+       }
+      ]
+     }
+    },
+    {
+     "label": "Call for the army to run the ferries",
+     "effects": {
+      "shift": {
+       "order": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "yamlin"
+        },
+        "amt": -0.1
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

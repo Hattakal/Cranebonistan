@@ -46,34 +46,25 @@ func debate_rounds(s: Dictionary) -> Array:
 	var dirty = null
 	for m in s.record.money:
 		if m.dirty: dirty = m; break
-	var attack: String
-	if con: attack = "\"In %s you said: '%s' In %s you said: '%s' Which one do you actually believe?\"" % [date_label(con.first.week, false), con.first.text, date_label(con.second.week, false), con.second.text]
-	elif blamed: attack = "\"Your whole campaign has been about blaming %s. Is that all you have to offer?\"" % blamed.group
-	elif dirty: attack = "\"Where does your party's money come from? Because it isn't from ordinary Cranebonians.\""
-	else: attack = "\"You have never run anything in your life. Why should anyone trust you with a country?\""
-	var hurt = [{"who": {"class": "middle"}, "amt": -0.12}, {"who": {"age": "61+"}, "amt": -0.08}] if (con or blamed or dirty) else []
+	var F: Dictionary = FINAL_DEBATE
+	var fill = {"leader": player.leader, "party": player.name, "rival": rival.leader, "rival_party": rival.short, "rival_id": rival.id}
+	if con: fill.merge({"first_date": date_label(con.first.week, false), "first": con.first.text, "second_date": date_label(con.second.week, false), "second": con.second.text})
+	if blamed: fill.group = blamed.group
+	var atk: Dictionary = F.ATTACK.attacks
+	fill.attack = String(atk.contradiction if con else (atk.blamed if blamed else (atk.money if dirty else atk.default))).format(fill)
+	var lines_of = func(round: Dictionary) -> Array:
+		return round.lines.map(func(l):
+			var x: Dictionary = l.duplicate(true)
+			x.text = String(l.text).format(fill)
+			for r in x.get("react", []):
+				for k in r.get("who", {}):
+					if r.who[k] is String: r.who[k] = String(r.who[k]).format(fill)
+			return x)
 	return [
-		{"title": "Opening statement", "prompt": "The moderator turns to %s: \"Your party didn't exist four years ago. Why should anyone vote for it?\"" % player.leader,
-			"lines": [
-				{"tone": "statesman", "text": "\"Because Cranebonistan deserves a government that keeps its word. That is all %s has ever asked for.\"" % player.name},
-				{"tone": "fiery", "text": "\"Because for thirty years the people on this stage have robbed you blind, and tonight that ends.\""},
-				{"tone": "folksy", "text": "\"I'm not a career politician. I'm someone who got tired of waiting for a bus that never comes.\""},
-				{"tone": "provocative", "text": "\"Look at the people next to me. Would you lend any of them your car?\""},
-			]},
-		{"title": "%s attacks" % rival.leader, "prompt": "%s of the %s turns to you: %s" % [rival.leader, rival.short, attack], "rival": rival.id, "hurt": hurt,
-			"lines": [
-				{"tone": "statesman", "text": "\"I have listened and I have learned. A leader who never changes their mind isn't listening.\""},
-				{"tone": "fiery", "text": "\"How dare you lecture anyone? Your party has lied to this country for a generation.\""},
-				{"tone": "folksy", "text": "\"At least I change my mind now and then. %s hasn't changed a thing since the cassette tape.\"" % rival.leader, "react": [{"who": {"loyalTo": rival.id}, "amt": -0.1}]},
-				{"tone": "provocative", "text": "\"That's invented. Everybody knows your people make things up.\"", "react": [{"who": {"class": "middle"}, "amt": -0.1}]},
-			]},
-		{"title": "Closing statement", "prompt": "\"You have thirty seconds. Speak to the voters.\"",
-			"lines": [
-				{"tone": "statesman", "text": "\"On election day, vote for the country you want your children to grow up in.\""},
-				{"tone": "fiery", "text": "\"They are afraid of you. On election day, prove them right.\""},
-				{"tone": "folksy", "text": "\"If you want more of the same, you know who to vote for. If you don't, you know where to find me.\""},
-				{"tone": "provocative", "text": "\"If they win again, don't say I didn't warn you.\""},
-			]},
+		{"title": String(F.OPENING.title).format(fill), "prompt": String(F.OPENING.prompt).format(fill), "lines": lines_of.call(F.OPENING)},
+		{"title": String(F.ATTACK.title).format(fill), "prompt": String(F.ATTACK.prompt).format(fill), "rival": rival.id,
+			"hurt": F.ATTACK.get("hurt", []) if (con or blamed or dirty) else [], "lines": lines_of.call(F.ATTACK)},
+		{"title": String(F.CLOSING.title).format(fill), "prompt": String(F.CLOSING.prompt).format(fill), "lines": lines_of.call(F.CLOSING)},
 	]
 
 func start_debate(s: Dictionary) -> void:

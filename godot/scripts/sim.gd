@@ -5,11 +5,12 @@ extends "res://scripts/rules/moments.gd"
 
 # ---------- Starting a new game ----------
 func _init() -> void:
-	load_content("res://data/content.json")
+	load_content()
 
-func load_content(path: String) -> void:
-	var f = FileAccess.open(path, FileAccess.READ)
-	var d: Dictionary = JSON.parse_string(f.get_as_text())
+## Every data file comes through Mods.data(): the game's file with the enabled mods
+## merged on top (see scripts/mods.gd and MODDING.md).
+func load_content(_unused := "") -> void:
+	var d: Dictionary = Mods.data("content")
 	C = d.CONFIG; AXES = d.AXES; AGES = d.AGES; CLASSES = d.CLASSES; NATIONALITIES = d.NATIONALITIES
 	REGIONS = d.REGIONS; FOREIGN = d.FOREIGN; CAPITAL = d.CAPITAL; VIEW_GROUPS = d.VIEW_GROUPS
 	PARTIES = d.PARTIES; LEADER_POOL = d.LEADER_POOL; PARTY_TEMPLATES = d.PARTY_TEMPLATES
@@ -17,7 +18,8 @@ func load_content(path: String) -> void:
 	CAMPAIGN = d.CAMPAIGN; EVENTS = d.EVENTS; FUNDING_OFFERS = d.FUNDING_OFFERS; INITIATIVES = d.INITIATIVES
 	CRISES = d.CRISES; INDICATORS = d.INDICATORS; TONES = d.TONES; TONE_RISK = d.TONE_RISK
 	ARCHETYPES = d.ARCHETYPES; ACTIONS = d.ACTIONS; SCRUTINY_STORIES = d.SCRUTINY_STORIES
-	MONTH_NAMES = d.MONTH_NAMES; MAP = JSON.parse_string(FileAccess.get_file_as_string("res://data/map.json")) if FileAccess.file_exists("res://data/map.json") else d.get("MAP", {}); FLAG_INFO = d.FLAG_INFO; FEEDBACK_GROUPS = d.FEEDBACK_GROUPS
+	MONTH_NAMES = d.MONTH_NAMES; FLAG_INFO = d.FLAG_INFO; FEEDBACK_GROUPS = d.FEEDBACK_GROUPS
+	MAP = _data("map", d.get("MAP", {}))
 	WEEKS_PER_MONTH = int(C.weeksPerMonth)
 	WEEKS_PER_YEAR = int(C.weeksPerMonth) * int(C.monthsPerYear)
 	ELECTION_WEEK = int(C.electionYears) * WEEKS_PER_YEAR
@@ -26,32 +28,32 @@ func load_content(path: String) -> void:
 	BUDGET_KEYS.append_array(["road", "social", "tv", "tour"])
 	_events_by_id = {}
 	for e in EVENTS: _events_by_id[e.id] = e
-	TOPICS = JSON.parse_string(FileAccess.get_file_as_string("res://data/debates.json")).TOPICS
-	LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/debate_lines.json"))
-	ISSUES = JSON.parse_string(FileAccess.get_file_as_string("res://data/issues.json")).ISSUES
-	FIGURES = JSON.parse_string(FileAccess.get_file_as_string("res://data/party.json")).FIGURES
-	CITY_INFO = JSON.parse_string(FileAccess.get_file_as_string("res://data/cities.json")).CITIES if FileAccess.file_exists("res://data/cities.json") else {}
-	FLAGSHIP = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagship.json")).ISSUES if FileAccess.file_exists("res://data/flagship.json") else []
-	NAMES = JSON.parse_string(FileAccess.get_file_as_string("res://data/names.json")) if FileAccess.file_exists("res://data/names.json") else {}
-	VIOLENCE = JSON.parse_string(FileAccess.get_file_as_string("res://data/violence.json")) if FileAccess.file_exists("res://data/violence.json") else {}
-	SCANDALS = JSON.parse_string(FileAccess.get_file_as_string("res://data/scandals.json")) if FileAccess.file_exists("res://data/scandals.json") else {}
-	INTERVIEW = JSON.parse_string(FileAccess.get_file_as_string("res://data/interview.json")) if FileAccess.file_exists("res://data/interview.json") else {}
-	var media_data = JSON.parse_string(FileAccess.get_file_as_string("res://data/media.json")) if FileAccess.file_exists("res://data/media.json") else {}
+	TOPICS = _data("debates", {}).get("TOPICS", [])
+	LINES = _data("debate_lines", {})
+	ISSUES = _data("issues", {}).get("ISSUES", [])
+	FIGURES = _data("party", {}).get("FIGURES", [])
+	CITY_INFO = _data("cities", {}).get("CITIES", {})
+	FLAGSHIP = _data("flagship", {}).get("ISSUES", [])
+	NAMES = _data("names", {})
+	VIOLENCE = _data("violence", {})
+	SCANDALS = _data("scandals", {})
+	INTERVIEW = _data("interview", {})
+	FINAL_DEBATE = _data("final_debate", {})
+	var media_data: Dictionary = _data("media", {})
 	OUTLETS = media_data.get("OUTLETS", [])
 	FOREIGN_MONEY = media_data.get("FOREIGN_MONEY", [])
 	INFLUENCER_SCANDALS = media_data.get("INFLUENCER_SCANDALS", [])
-	LEADER_TYPES = JSON.parse_string(FileAccess.get_file_as_string("res://data/leader_types.json")).TYPES if FileAccess.file_exists("res://data/leader_types.json") else []
-	if not C.has("typeWeight"): C.typeWeight = 0.8
-	TOURS = JSON.parse_string(FileAccess.get_file_as_string("res://data/tours.json")) if FileAccess.file_exists("res://data/tours.json") else {}
+	LEADER_TYPES = _data("leader_types", {}).get("TYPES", [])
+	TOURS = _data("tours", {})
 	_load_districts()
 	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
 		if CITY_INFO.get(c.name, {}).has("size"): c.size = int(CITY_INFO[c.name].size)
 	_event_axis = {}
-	# Godot rules: the national debate is the main game, events are rarer
-	C.actionsPerMonth = 3
-	C.eventChance = 0.22
-	C.maxQuietMonths = 3
-	C.newsWaveChance = 0.0
+
+## A data file through the mod loader, or a default when no file exists.
+func _data(name: String, fallback):
+	var v = Mods.data(name)
+	return fallback if v == null else v
 
 ## opts: seed, partyName, leaderName, manifesto {axisId: 0..4}, color, emblem, portrait
 func new_game(opts := {}) -> Dictionary:
@@ -128,6 +130,7 @@ func new_game(opts := {}) -> Dictionary:
 		s.issues.append({"id": it.id, "week": s.week})
 		s.issueCooldown[it.id] = s.week
 	s.lastSupport = summarize(s, s.pops).support
+	s.mods = Mods.enabled().map(func(m): return "%s %s" % [m.name, m.version])   # what this game was started with
 	run_hooks(s)
 	return s
 

@@ -60,9 +60,9 @@
   "maxSignatureIssues": 2,
   "ownDecay": 0.97,
   "ownShareFloor": 0.25,
-  "newsWaveChance": 0.2,
+  "newsWaveChance": 0.0,
   "newsWaveSize": 0.8,
-  "actionsPerMonth": 2,
+  "actionsPerMonth": 3,
   "mobilizeDecay": 0.88,
   "rivalEventChance": 0.2,
   "collapseAt": 20,
@@ -70,8 +70,8 @@
   "poachCooldownMonths": 6,
   "scrutinyChance": 0.35,
   "pollError": 0.012,
-  "eventChance": 0.6,
-  "maxQuietMonths": 1,
+  "eventChance": 0.22,
+  "maxQuietMonths": 3,
   "influenceAt": 0.2,
   "influenceMin": 0.2,
   "influenceMax": 1.6,
@@ -85,7 +85,8 @@
   "crisisBoostMax": 1.667,
   "crisisBlameFrom": 0.3,
   "styleMemory": 0.93,
-  "scandalChanceScale": 1
+  "scandalChanceScale": 1,
+  "typeWeight": 0.8
  },
  "AXES": [
   {

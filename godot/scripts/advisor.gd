@@ -31,8 +31,8 @@ func _process(d: float) -> void:
 		_bubble.modulate.a = move_toward(_bubble.modulate.a, want, d * 6.0)
 
 func _ready() -> void:
-	LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/carlos.json")).LINES
-	M_LINES = JSON.parse_string(FileAccess.get_file_as_string("res://data/margaret.json"))
+	LINES = Mods.data("carlos").LINES
+	M_LINES = Mods.data("margaret")
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_audio = AudioStreamPlayer.new()
@@ -139,8 +139,8 @@ func _next() -> void:
 func _play(id: String) -> void:
 	for ext in ["ogg", "wav", "mp3"]:
 		var p = "res://assets/voice/carlos/%s.%s" % [id, ext]
-		if ResourceLoader.exists(p):
-			_audio.stream = load(p)
+		if Mods.has_asset(p):
+			_audio.stream = Mods.audio(p)
 			_audio.play()
 			return
 

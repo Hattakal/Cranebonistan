@@ -1,0 +1,114 @@
+# Modding Cranebonistan
+
+Almost everything in the game is data: the country, the parties, every event and line, the media, the map, the names, the balance settings. A mod changes that data, or the pictures and sounds, **without touching the game's own files**. Several mods can run together.
+
+## Where mods go
+
+A mod is a folder with a `mod.json` in it. The game looks for mod folders in:
+
+| Where | When |
+|---|---|
+| `user://mods/` (the game's data folder; on Windows `%APPDATA%\Godot\app_userdata\Cranebonistan\mods\`) | always |
+| a `mods` folder next to the game's executable | the exported game |
+| `mods/` at the top of this repository | running from the Godot editor |
+
+`mod.json`:
+
+```json
+{
+ "name": "Harder Elections",
+ "version": "1.0",
+ "description": "Fewer actions, angrier voters.",
+ "enabled": true,
+ "priority": 0
+}
+```
+
+Mods load by `priority` (lower first), then by folder name; when two mods change the same thing, the later one wins. `"enabled": false` switches a mod off. The founding sheet lists the mods in use, and a save remembers which mods it was started with (loading it with different mods works, but you get a warning).
+
+## Changing data
+
+Put a file in your mod's `data/` folder with the **same name** as the game's file in `godot/data/`. You don't copy the whole file: write only what you change, and it is merged in.
+
+| Game file | What's in it |
+|---|---|
+| `content.json` | Settings (`CONFIG`), the seven issues (`AXES`), ages, classes, nationalities, regions and their people, neighbours, rival parties, founding templates, events (`EVENTS`), money offers, initiatives, crises, tones, actions, the end-of-game archetypes |
+| `map.json` | Region, neighbour and province shapes, cities (written by `tools/build_map.py`) |
+| `districts.json` | Province names, fixed seats and local leans |
+| `cities.json` | City population, size, lean and one-line fact |
+| `debates.json`, `debate_lines.json`, `issues.json` | The national debate: topics, what the leader can say, local issues |
+| `flagship.json`, `interview.json`, `final_debate.json` | The year-three promise, the year-one interview, the final debate |
+| `media.json` | Outlets, personalities, their scandals, foreign money |
+| `scandals.json`, `violence.json` | Secrets and how they leak; political violence and rivals' labels |
+| `party.json` | Your party's founding politicians |
+| `leader_types.json` | What kind of leader each group wants |
+| `names.json` | Name pools by background |
+| `tours.json` | Stories from the leader's trips |
+| `carlos.json`, `margaret.json` | What Carlos and Margaret say |
+
+Every game file starts with a `_note` explaining its fields.
+
+### How merging works
+
+- **Objects merge key by key.** `{"CONFIG": {"actionsPerMonth": 4}}` changes one setting and keeps the rest.
+- **A key set to `null` is removed.**
+- **`"_replace": true`** inside an object replaces that whole object instead of merging.
+- **Lists of things with an `"id"`** (events, parties, regions, outlets, crises…) merge by id: an id the game knows is merged into, a new id is added, and `{"id": "x", "_remove": true}` removes one. Lists of things with a `"name"` and no id merge by name.
+- **Other lists are replaced**, unless you write `{"_append": [...]}`, which adds to the list (good for names and lines).
+
+Examples:
+
+```json
+// data/content.json: a new event, a renamed rival leader, a setting
+{
+ "CONFIG": {"actionsPerMonth": 4},
+ "PARTIES": [{"id": "oc", "leader": "Camille Fontanel", "leaderHome": "Gilopolis"}],
+ "EVENTS": [{"id": "my_ferry_strike", "kind": "regional", "title": "Ferry crews strike in Nikecisa", "text": "...",
+   "choices": [{"label": "Back the crews", "effects": {"shift": {"economy": -6}}}]}]
+}
+```
+
+```json
+// data/names.json: more Yamlin names
+{"POOLS": {"yamlin": {"m": {"_append": ["Ettore", "Filippo"]}}}}
+```
+
+```json
+// data/content.json: remove an event
+{"EVENTS": [{"id": "port_automation", "_remove": true}]}
+```
+
+A working example is in `mods/example-more-cities/` (switched off; set `"enabled": true` to try it).
+
+## Changing pictures, sounds and fonts
+
+Put a file in your mod's `assets/` folder at the same path as in `godot/assets/`, and it is used instead:
+
+- `assets/tours/great.png`, `good.png`, `flat.png`: the trip photos
+- `assets/voice/carlos/<line id>.ogg`: Carlos's voice (ids are in `carlos.json` and `VOICE.md`)
+- `assets/map-features.png`: rivers and mountains on the map
+- `assets/icons/<name>.svg`, `assets/fonts/<file>.ttf`
+
+## Things the game relies on
+
+The rules refer to a few things by id. Change their names, numbers and text freely, but **don't remove them**:
+
+- **Party** `player`; **politician** `teyl` (Margaret Teyl).
+- **Region** `alinni`, and **nationalities** `cranebonian`, `alinnian`, `norbanian`.
+- **Ages** `18-29`, `30-45`, `46-60`, `61+`; **classes** `working`, `middle`, `upper`.
+- **Tones** `statesman`, `fiery`, `folksy`, `provocative`.
+- **World numbers** `jobs`, `prices`, `migration`, `border`, `unrest`.
+- **Money offers** `chamber` and `tycoon` (business money that feeds hypocrisy).
+- **Leader types** `star`, `statesman`, `revolutionary`, `strongman`, `one_of_us`, `clean`, `expert`.
+- **Media kinds** `public`, `paper`, `tabloid`, `business`, `network`, `online`, `regional`, `platform`, `foreign`, `influencer`.
+- **The seven issues** (`economy`, `welfare`, `nation`, `society`, `order`, `foreign`, `system`).
+
+## What a mod can't change (yet)
+
+- **The rules themselves:** how voters choose, what an action does. They live in `godot/scripts/rules/`. You can change their numbers through `CONFIG` and the data, but not the logic.
+- **Some interface text** is still written in the screens' code.
+- **Old saves:** a save started without your mod keeps the parties, voters and outlets it was started with.
+
+## Testing a mod
+
+Run the game from the editor with your mod in `mods/`. The cheat panel (` or F12) skips time and queues any event by id, including yours. `godot --headless --path godot -s tests/mods.gd` checks that the loader works, and `tools/check.sh` runs every check.

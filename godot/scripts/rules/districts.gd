@@ -16,8 +16,8 @@ func flush_news(s: Dictionary) -> void:
 func _load_districts() -> void:
 	DISTRICTS = MAP.get("districts", [])
 	var data: Dictionary = {}
-	if FileAccess.file_exists("res://data/districts.json"):
-		data = JSON.parse_string(FileAccess.get_file_as_string("res://data/districts.json"))
+	var dd = Mods.data("districts")
+	if dd is Dictionary: data = dd
 	var over: Dictionary = data.get("DISTRICTS", {})
 	var weight: Dictionary = data.get("REGION_WEIGHT", {})
 	# overrides by id or by name: a new name, fixed seats, a lean of its own

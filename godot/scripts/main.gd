@@ -1168,8 +1168,7 @@ class TourPhoto extends Control:
 	var party_color := Color("b03a2e")
 	var _tex: Texture2D = null
 	func _ready() -> void:
-		var path = "res://assets/tours/%s.png" % kind
-		if ResourceLoader.exists(path): _tex = load(path)
+		_tex = Mods.texture("res://assets/tours/%s.png" % kind)
 	func _draw() -> void:
 		var r = Rect2(Vector2.ZERO, size)
 		if _tex:
@@ -1227,6 +1226,8 @@ func _founding_build(p: Paper) -> void:
 	p.kicker("A new party")
 	p.heading("Founding night", 42)
 	p.text("Until last month you were a mayor, and a member of somebody else's party. You walked out. Tonight, in a back room above a print shop, you start your own: four years to become the largest party in the National Assembly.", 17)
+	var mods: Array = Mods.enabled()
+	if mods.size(): p.small("Mods: " + ", ".join(mods.map(func(m): return "%s %s" % [m.name, m.version])), Look.RED)
 	# 1. who you are
 	p.step("One", "Who are you?")
 	var grid = GridContainer.new()
@@ -1421,6 +1422,8 @@ func _load() -> Variant:
 		return null
 	# JSON turns whole numbers into floats; the rules expect ints in a few places
 	d.week = int(d.week); d.rng = int(d.rng); d.actionsLeft = int(d.actionsLeft); d.quietMonths = int(d.quietMonths)
+	var now_mods: Array = Mods.enabled().map(func(m): return "%s %s" % [m.name, m.version])
+	if d.get("mods", []) != now_mods: push_warning("This save was started with mods %s; now loaded: %s. It may behave oddly." % [str(d.get("mods", [])), str(now_mods)])
 	return d
 
 # ---------- Screenshots for checking the look (godot ... -- --shot=path --weeks=N) ----------

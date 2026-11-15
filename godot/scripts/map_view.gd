@@ -54,7 +54,7 @@ func setup(game) -> void:
 		if d.cities.has(capital): capital_district = d.id
 	# big districts first, so a small one inside another (the capital) is drawn on top and clicked first
 	districts.sort_custom(func(a, b): return a.area > b.area)
-	_features = load("res://assets/map-features.png")
+	_features = Mods.texture("res://assets/map-features.png")
 	_grain = Look.noise_texture(512, 512, Color(0.35, 0.25, 0.12, 0.0), Color(0.35, 0.25, 0.12, 0.22), 0.02, 4)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true

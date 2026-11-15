@@ -34,7 +34,11 @@ const PIN_COLORS := {"red": Color("c0392b"), "yellow": Color("d4a017"), "blue": 
 static var _fonts := {}
 
 static func _file(path: String) -> FontFile:
-	return load(path) as FontFile
+	var p: String = Mods.asset_path(path)   # a mod may replace a font
+	if p.begins_with("res://"): return load(p) as FontFile
+	var f = FontFile.new()
+	f.load_dynamic_font(p)
+	return f
 
 static func font(name: String) -> Font:
 	if _fonts.has(name): return _fonts[name]
@@ -104,8 +108,7 @@ static func box(bg: Color, radius := 0, border := Color.TRANSPARENT, border_w :=
 	return s
 
 static func icon(name: String) -> Texture2D:
-	var p = "res://assets/icons/%s.svg" % name
-	return load(p) if ResourceLoader.exists(p) else null
+	return Mods.texture("res://assets/icons/%s.svg" % name)
 
 static func mix(a: Color, b: Color, t: float) -> Color:
 	return a.lerp(b, clampf(t, 0, 1))

@@ -1,0 +1,5 @@
+{
+ "POOLS": {
+  "yamlin": {"m": {"_append": ["Ettore", "Filippo"]}, "last": {"_append": ["Calvino", "Spanos"]}}
+ }
+}
