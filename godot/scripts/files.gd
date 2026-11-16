@@ -332,6 +332,10 @@ func _electorate() -> void:
 		var you = func(t): return "you fit well" if float(fitd.get(t.id, 0)) >= 0.55 else ("you fit somewhat" if float(fitd.get(t.id, 0)) >= 0.35 else "not you, yet")
 		_p("Wants %s (%s), or %s (%s)." % [wants[0].type.want, you.call(wants[0].type), wants[1].type.want, you.call(wants[1].type)], d, Look.INK, 14)
 	var gpops: Array = G.pops_matching(S, g.who)
+	var yt: Dictionary = G.supporters_turnout(S, gpops, "player")
+	if yt.rate > 0:
+		var why: String = G.turnout_reason(yt)
+		_p("Of your supporters here, about %d%% will vote%s." % [Game.jround(yt.rate * 100), (": " + why) if why != "" else ""], d, Look.RED if yt.drift >= 0.04 else Look.INK, 14)
 	var follows: Array = G.group_media(S, gpops).filter(func(x): return x.reach >= 0.06).slice(0, 3)
 	if follows.size():
 		var bits = follows.map(func(x): return "%s (%s)" % [x.outlet.name, favour_word(float(S.media[x.outlet.id].get("favour", {}).get("player", 0))).to_lower()])
@@ -1247,6 +1251,9 @@ func _polls() -> void:
 		_add(Look.label("Leader: %s%s · %d seats if the election were today · funds: %s" % [p.leader, lfrom, int(seats.get(p.id, 0)), fw], "body", 12, Look.MUTED, true), c)
 		if p.isPlayer:
 			_add(Look.label("%d of %d actions left this month." % [S.actionsLeft, int(G.C.actionsPerMonth)], "body", 12, Look.INK, true), c)
+			var mt: Dictionary = G.supporters_turnout(S, S.pops, "player")
+			var mwhy: String = G.turnout_reason(mt)
+			_add(Look.label("About %d%% of your supporters will vote%s." % [Game.jround(mt.rate * 100), (": " + mwhy) if mwhy != "" else ""], "body_bold", 12, Look.RED if mt.drift >= 0.04 else Look.INK, true), c)
 			for i in S.dossiers.size():
 				var dd: Dictionary = S.dossiers[i]
 				var dl = HBoxContainer.new()

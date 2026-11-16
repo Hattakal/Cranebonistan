@@ -65,7 +65,7 @@ func district_votes(s: Dictionary, d: Dictionary, ctx, cache = null, pops = null
 	for pop in (pops if pops != null else s.pops):
 		if pop.get("district", "") != d.id: continue
 		var sup = cache[pop.id] if cache != null and cache.has(pop.id) else pop_support(s, pop, null, ctx)
-		var votes = pop_votes(pop, sup)
+		var votes = pop_votes(pop, sup, ctx)
 		for id in votes: out[id] += votes[id]
 	return out
 

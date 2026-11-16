@@ -88,7 +88,10 @@
   "scandalChanceScale": 1,
   "typeWeight": 0.8,
   "flagshipOwnership": 0.05,
-  "flagshipSalience": 0.05
+  "flagshipSalience": 0.05,
+  "turnoutDistrust": 0.3,
+  "turnoutProtest": 0.15,
+  "turnoutDrift": 2.0
  },
  "AXES": [
   {

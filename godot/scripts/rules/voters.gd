@@ -218,7 +218,12 @@ func score_context(s: Dictionary) -> Dictionary:
 	var distrust: float = (50.0 - s.trust) / 50.0
 	var fit = {}
 	for p in s.parties: fit[p.id] = leader_fit(s, p)
-	return {"inc": inc, "own": own, "distrust": distrust, "fit": fit, "clim": leader_climate(s, distrust)}
+	# what decides whether each party's supporters bother to vote (see turnout_for)
+	var turn = {}
+	for p in s.parties:
+		turn[p.id] = {"perc": p.perceived, "man": p.manifesto, "est": float(p.get("establishment", 0.5)), "player": p.isPlayer,
+			"charisma": float(p.charisma), "pull": p}
+	return {"inc": inc, "own": own, "distrust": distrust, "fit": fit, "clim": leader_climate(s, distrust), "turn": turn}
 
 # ---------- What kind of leader people want ----------
 ## A group's wish for each kind of leader (data/leader_types.json), summing to 1.
@@ -401,12 +406,73 @@ func pop_support(s: Dictionary, pop: Dictionary, exclude, ctx = null) -> Diction
 		out[parties[i].id] = pop.loyal[parties[i].id] + (1 - loyal_total) * (weights[i] / total)
 	return out
 
-func pop_votes(pop: Dictionary, sup: Dictionary) -> Dictionary:
+## Votes cast by one group: each party's supporters there turn out at their own rate.
+func pop_votes(pop: Dictionary, sup: Dictionary, ctx = null) -> Dictionary:
 	var out = {}
 	for id in sup:
-		var t: float = minf(0.97, pop.turnout + pop.mobilized) if id == "player" else pop.turnout
-		out[id] = pop.size * t * sup[id]
+		out[id] = pop.size * turnout_for(pop, id, ctx) * sup[id]
 	return out
+
+## How many of a party's supporters in this group actually vote (0..0.97).
+## - Low trust keeps people at home, above all those whose party is part of the system;
+##   fed-up voters with an anti-system party to vote for come out to protest instead.
+## - A party that has drifted away from its own manifesto, toward the other side of what
+##   this group cares about, disheartens its supporters here: they stay home.
+## - Devoted supporters and the people an office has organised come out.
+func turnout_for(pop: Dictionary, pid: String, ctx = null) -> float:
+	var t: float = float(pop.turnout)
+	if pid == "player": t += float(pop.mobilized)
+	if ctx == null or not ctx.has("turn") or not ctx.turn.has(pid): return minf(0.97, t)
+	var info: Dictionary = ctx.turn[pid]
+	var distrust: float = maxf(0.0, float(ctx.distrust))
+	var est: float = float(info.est)
+	t *= 1.0 - C.get("turnoutDistrust", 0.3) * distrust * (0.4 + est)
+	t *= 1.0 + C.get("turnoutProtest", 0.15) * distrust * maxf(0.0, float(pop.disaffection) - 1.0) * (1.0 - est)
+	# drift: how much further the party now looks from this group than its manifesto is
+	var perc: Dictionary = info.perc
+	var man: Dictionary = info.man
+	var pp: Dictionary = pop.pos
+	var sal: Dictionary = pop.sal
+	var drift = 0.0
+	var w = 0.0
+	for ax in sal:
+		var x: float = float(pp[ax])
+		drift += float(sal[ax]) * maxf(0.0, absf(x - float(perc[ax])) - absf(x - float(man[ax])))
+		w += float(sal[ax])
+	if w > 0: t *= clampf2(1.0 - C.get("turnoutDrift", 2.0) * drift / w / 100.0, 0.55, 1.0)
+	if info.player: t *= 1.0 + 0.12 * devotion_of(pop, info.pull)
+	return clampf2(t, 0.05, 0.97)
+
+## How many of a party's supporters in a set of groups will vote, and the main reason
+## the rest won't: {rate, usual, drift, distrust} (the last two: share of supporters lost to each).
+func supporters_turnout(s: Dictionary, pops: Array, pid: String) -> Dictionary:
+	var ctx = score_context(s)
+	var sup_tot = 0.0
+	var voting = 0.0
+	var usual = 0.0
+	var lost_drift = 0.0
+	var lost_trust = 0.0
+	var calm = ctx.duplicate()
+	calm.distrust = 0.0
+	var faithful = ctx.duplicate(true)
+	faithful.turn[pid].perc = faithful.turn[pid].man   # as if the party had kept to its manifesto
+	for pop in pops:
+		var sup: float = float(pop_support(s, pop, null, ctx).get(pid, 0)) * float(pop.size)
+		if sup <= 0: continue
+		var t: float = turnout_for(pop, pid, ctx)
+		sup_tot += sup
+		voting += sup * t
+		usual += sup * minf(0.97, float(pop.turnout) + (float(pop.mobilized) if pid == "player" else 0.0))
+		lost_drift += sup * maxf(0.0, turnout_for(pop, pid, faithful) - t)
+		lost_trust += sup * maxf(0.0, turnout_for(pop, pid, calm) - t)
+	if sup_tot <= 0: return {"rate": 0.0, "usual": 0.0, "drift": 0.0, "distrust": 0.0}
+	return {"rate": voting / sup_tot, "usual": usual / sup_tot, "drift": lost_drift / sup_tot, "distrust": lost_trust / sup_tot}
+
+static func turnout_reason(t: Dictionary) -> String:
+	if t.drift >= 0.04 and t.drift >= t.distrust: return "some think the party is courting the other side"
+	if t.distrust >= 0.04: return "nobody trusts politicians, and some see no point voting"
+	if t.rate > t.usual + 0.01: return "the party's people are fired up"
+	return ""
 
 # ---------- Groups ----------
 func group_kinds() -> Array:
@@ -449,7 +515,7 @@ func summarize(s: Dictionary, pops: Array, ctx = null, cache = null) -> Dictiona
 		else:
 			sup = pop_support(s, pop, null, ctx)
 			if cache != null: cache[pop.id] = sup
-		var votes = pop_votes(pop, sup)
+		var votes = pop_votes(pop, sup, ctx)
 		res.size += pop.size
 		for p in s.parties:
 			res.support[p.id] += votes[p.id]
