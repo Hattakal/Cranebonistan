@@ -20,7 +20,8 @@ var _sheet_mat: ShaderMaterial
 
 # the colours of whatever is being read: ink on paper, or light on the screen
 var style := ""               # the newspaper being read ("tabloid", "broadsheet", "local"), or "" for any other sheet
-var _root: VBoxContainer      # the sheet itself; `v` may point at a column inside it for a while
+var _root: VBoxContainer      # the sheet's content
+var _print: Control = null    # the newsprint texture laid over a newspaper (see front_page)
 var ink := Look.INK
 var muted := Look.MUTED
 var line := Look.LINE
@@ -51,6 +52,7 @@ func _init(width := 820, can_put_down := false) -> void:
 	_sheet_mat = Look.material("paper")
 	_paper.material = _sheet_mat
 	_paper.add_theme_stylebox_override("panel", _sheet_box(false))
+	_paper.draw.connect(_draw_newsprint)
 	hb.add_child(_paper)
 	v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 14)
@@ -88,8 +90,10 @@ func _sheet_box(screen_on: bool) -> StyleBoxFlat:
 		sb = Look.box(Look.N850, 4, Look.N600, 1, 0, 0)
 		sb.shadow_color = Color(0.35, 0.55, 1.0, 0.1)    # the glow of the set in a dark room
 		sb.shadow_size = 60
+	elif style != "":
+		sb = Look.box(Color(0, 0, 0, 0))   # a newspaper draws its own, curled sheet (_draw_newsprint)
 	else:
-		sb = Look.box(Look.NEWSPRINT if style != "" else Look.PAPER, 1, Color.TRANSPARENT, 0, 0, 0)
+		sb = Look.box(Look.PAPER, 1, Color.TRANSPARENT, 0, 0, 0)
 		sb.shadow_color = Color(0, 0, 0, 0.6)
 		sb.shadow_size = 30
 		sb.shadow_offset = Vector2(0, 14)
@@ -113,6 +117,8 @@ func _ready() -> void:
 func screen() -> void:
 	if on_air: return
 	on_air = true
+	style = ""
+	_set_newsprint(false)
 	ink = Look.TXT; muted = Look.DIM; line = Look.N600; red = Look.RED_HI; good = Look.GOOD_HI
 	_sheet_mat = Look.material("screen", {"sheet": _paper.size})
 	_paper.material = _sheet_mat
@@ -136,9 +142,9 @@ func close() -> void:
 
 func clear() -> void:
 	v = _root
-	_side_col = null
 	if style != "":
 		style = ""
+		_set_newsprint(false)
 		if not on_air: _paper.add_theme_stylebox_override("panel", _sheet_box(false))
 	for c in v.get_children():
 		if c != _down_btn: c.queue_free()
@@ -210,6 +216,7 @@ func front_page(name: String, date: String, section: String, week := 0, region :
 	var info: Dictionary = paper_info(name, region)
 	style = info.style
 	_paper.add_theme_stylebox_override("panel", _sheet_box(false))
+	_set_newsprint(true)
 	var year = int(date.right(4)) if date.right(4).is_valid_int() else 2027
 	var issue = "No. %d" % (int(info.get("founded", 1990)) % 97 * 113 + week * 6 + 1)
 	var vol = "Vol. %d" % maxi(1, year - int(info.get("founded", 1990)))
@@ -252,10 +259,7 @@ func front_page(name: String, date: String, section: String, week := 0, region :
 				add(mo)
 			_dateline(vol + " · " + issue, date, section + " · " + info.price)
 		_:
-			# a broadsheet: an "ear" either side of a blackletter nameplate
-			var h = HBoxContainer.new()
-			h.add_theme_constant_override("separation", 12)
-			h.add_child(_ear("Weather", _weather(week)))
+			# a broadsheet: a blackletter nameplate
 			var mid = VBoxContainer.new()
 			mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			mid.add_theme_constant_override("separation", -4)
@@ -266,29 +270,59 @@ func front_page(name: String, date: String, section: String, week := 0, region :
 				var mo = Look.label(info.motto, "news_italic", 13, Look.MUTED)
 				mo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				mid.add_child(mo)
-			h.add_child(mid)
-			h.add_child(_ear("Price", "%s, and worth it" % info.price))
-			add(h)
-			_dateline(vol + " · " + issue, date, section)
+			add(mid)
+			_dateline(vol + " · " + issue, date, section + " · " + info.price)
 
-func _weather(week: int) -> String:
-	var w: Array = Mods.data("papers").get("WEATHER", [])
-	return String(w[(week / 4) % w.size()]) if w.size() else ""
+## A newspaper is cheap paper that has been rolled up and folded: the sheet is drawn with
+## wavy edges and lifted ends, and a texture (shaders/newsprint.gdshader) is multiplied
+## over everything printed on it.
+func _set_newsprint(on: bool) -> void:
+	if on and _print == null:
+		# the sheet lays its content out inside its margins; this holder sits there too,
+		# and the texture inside it reaches back out to the sheet's edges
+		_print = Control.new()
+		_print.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var sb: StyleBox = _paper.get_theme_stylebox("panel")
+		var tex = ColorRect.new()
+		tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tex.set_anchors_preset(Control.PRESET_FULL_RECT)
+		tex.offset_left = -sb.content_margin_left; tex.offset_top = -sb.content_margin_top
+		tex.offset_right = sb.content_margin_right; tex.offset_bottom = sb.content_margin_bottom
+		var m = Look.material("newsprint")
+		tex.material = m
+		tex.resized.connect(func(): m.set_shader_parameter("sheet", tex.size))
+		_print.add_child(tex)
+		_paper.add_child(_print)
+	elif not on and _print != null:
+		_print.queue_free()
+		_print = null
+	_paper.queue_redraw()
 
-## A small box in the corner of a nameplate.
-func _ear(title: String, body: String) -> Control:
-	var p = PanelContainer.new()
-	p.add_theme_stylebox_override("panel", Look.box(Color(0, 0, 0, 0), 0, Look.INK, 1, 0, 6))
-	p.custom_minimum_size.x = 132
-	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var b = VBoxContainer.new()
-	b.add_theme_constant_override("separation", 0)
-	b.add_child(Look.caps(title, 10, Look.INK, 1, "display_bold"))
-	var t = Look.label(body, "news", 12, Look.INK, true)
-	t.custom_minimum_size.x = 118
-	b.add_child(t)
-	p.add_child(b)
-	return p
+func _draw_newsprint() -> void:
+	if _print == null: return
+	var s: Vector2 = _paper.size
+	var pts = PackedVector2Array()
+	# the sides remember the roll: a slow wave; the ends lift, pulling the corners in a little
+	var n = 160
+	for i in n + 1:
+		var t = float(i) / n
+		pts.append(Vector2(1.6 * sin(t * s.y / 260.0) + 3.0 * pow(abs(t * 2 - 1), 4), t * s.y))
+	for i in range(n, -1, -1):
+		var t = float(i) / n
+		pts.append(Vector2(s.x - 1.6 * sin(t * s.y / 260.0 + 1.3) - 3.0 * pow(abs(t * 2 - 1), 4), t * s.y))
+	# the ends bow: the middle of the top and bottom edge sits a few pixels in from the corners
+	for i in pts.size():
+		var t = clampf(pts[i].x / s.x, 0, 1)
+		var bow = 4.0 * (1.0 - pow(t * 2 - 1, 2))
+		if pts[i].y <= 0.5: pts[i].y = bow
+		elif pts[i].y >= s.y - 0.5: pts[i].y = s.y - bow
+	# its shadow on the desk: soft, and further out where the ends lift
+	for k in 6:
+		var grow = 4.0 + k * 6.0
+		var sh = PackedVector2Array()
+		for q in pts: sh.append((q - s / 2) * Vector2(1 + grow / s.x, 1 + grow * 1.6 / s.y) + s / 2 + Vector2(0, 10 + k * 2))
+		_paper.draw_colored_polygon(sh, Color(0, 0, 0, 0.1))
+	_paper.draw_colored_polygon(pts, Look.NEWSPRINT)
 
 ## Between two rules: volume and number, the date, the section.
 func _dateline(left: String, mid: String, right: String) -> void:
@@ -310,49 +344,6 @@ func story(t: String, place := "", size := 17) -> Label:
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_FILL
 	l.justification_flags = TextServer.JUSTIFICATION_WORD_BOUND | TextServer.JUSTIFICATION_KASHIDA | TextServer.JUSTIFICATION_SKIP_LAST_LINE
 	return add(l)
-
-## Split the sheet into a main column and a narrow one beside it, with a rule between.
-## Everything added goes to the main column until aside(), then to the narrow one,
-## until join().
-var _side_col: VBoxContainer = null
-func split(side_width := 210) -> void:
-	var h = HBoxContainer.new()
-	h.add_theme_constant_override("separation", 16)
-	var main = VBoxContainer.new()
-	main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	main.add_theme_constant_override("separation", 12)
-	h.add_child(main)
-	var r = ColorRect.new()
-	r.color = Look.INK
-	r.custom_minimum_size.x = 1
-	h.add_child(r)
-	_side_col = VBoxContainer.new()
-	_side_col.custom_minimum_size.x = side_width
-	_side_col.add_theme_constant_override("separation", 7)
-	h.add_child(_side_col)
-	_root.add_child(h)
-	v = main
-
-func aside() -> void:
-	if _side_col: v = _side_col
-
-func join() -> void:
-	v = _root
-	_side_col = null
-
-## A short item in the narrow column: a small heading over a line or two.
-func brief(head: String, body := "") -> void:
-	if head != "": add(Look.label(head, "news_bold", 15, Look.INK, true))
-	if body != "": add(Look.label(body, "news", 13, Look.MUTED, true))
-	rule(1, Look.LINE)
-
-func side_head(t: String) -> void:
-	var p = PanelContainer.new()
-	var sb = Look.box(Look.INK, 0, Color.TRANSPARENT, 0, 0, 3)
-	sb.content_margin_left = 8
-	p.add_theme_stylebox_override("panel", sb)
-	p.add_child(Look.caps(t, 11, Color.WHITE, 2, "display_bold"))
-	v.add_child(p)
 
 func text(t: String, size := 17, font := "news", col := Look.INK) -> Label:
 	return add(Look.label(t, font, size, col, true))

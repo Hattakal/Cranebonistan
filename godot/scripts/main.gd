@@ -686,8 +686,7 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 	if ev.get("kind", "") == "crisis" and S.crisis: crisis = Game.by_id(G.CRISES, S.crisis.id).name
 	p.front_page("The Morning Post", G.date_label(S.week, false), ("Crisis · " + crisis) if crisis != "" else KINDS.get(ev.get("kind", ""), "Event"), S.week)
 	p.heading(ev.title, 42)
-	p.split()
-	p.photo(Photo.event(ev), 280)
+	p.photo(Photo.event(ev), 300)
 	p.story(ev.text, G.MAP.capital, 18)
 	if ev.get("government"):
 		var gov = null
@@ -713,27 +712,6 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 	if ev.get("echo") and S.record.blamed.size():
 		var b: Dictionary = S.record.blamed[-1]
 		p.quote(b.text, "%s, %s. Your words were quoted at the scene." % [G.player_party(S).leader, G.date_label(b.week, false)])
-	p.aside()
-	_front_aside(p)
-	p.join()
-
-## The narrow column of a front page: the other headlines, and how the country is doing.
-func _front_aside(p: Paper) -> void:
-	if S.log.size():
-		p.side_head("Also today")
-		for i in range(S.log.size() - 1, maxi(-1, S.log.size() - 4), -1): p.brief(S.log[i].text)
-	p.side_head("The country")
-	for ind in G.INDICATORS:
-		var row = HBoxContainer.new()
-		var l = Look.label(ind.label, "body", 13, Look.MUTED)
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(l)
-		row.add_child(Look.label(G.indicator_word(ind.id, S.world[ind.id]), "body_bold", 13, Look.INK))
-		p.add(row)
-	if p.style != "broadsheet":   # a broadsheet has its weather in a box by the nameplate
-		p.rule(1, Look.LINE)
-		p.side_head("Weather")
-		p.add(Look.label(p._weather(S.week), "news_italic", 14, Look.INK, true))
 
 func _event_sheet(front: Dictionary) -> void:
 	var ev: Dictionary = G.event_of(front)
@@ -1077,12 +1055,8 @@ func _news_sheet(front: Dictionary) -> void:
 	var lead: Dictionary = front.items[0]
 	p.kicker(labels.get(lead.get("kind", ""), "News"))
 	p.heading(lead.title, 42)
-	p.split()
-	p.photo(Photo.find(["news/" + str(lead.get("kind", ""))]), 240)
+	p.photo(Photo.find(["news/" + str(lead.get("kind", ""))]), 260)
 	p.story(lead.text, G.MAP.capital, 18)
-	p.aside()
-	_front_aside(p)
-	p.join()
 	if front.items.size() > 1:
 		p.rule(2)
 		# the rest of the page, in columns under the lead

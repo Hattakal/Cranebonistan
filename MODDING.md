@@ -82,7 +82,7 @@ A working example is in `mods/example-more-cities/` (switched off; set `"enabled
 
 ## Changing pictures, sounds and fonts
 
-The newspapers' front pages (nameplate style, motto, price, weather lines) are in `data/papers.json`; a mod can restyle a paper or add one, matched by the name the game prints.
+The newspapers' front pages (nameplate style, motto, price) are in `data/papers.json`; a mod can restyle a paper or add one, matched by the name the game prints.
 
 
 Put a file in your mod's `assets/` folder at the same path as in `godot/assets/`, and it is used instead:
