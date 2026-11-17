@@ -51,7 +51,7 @@ func _args() -> Dictionary:
 func _build() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg = ColorRect.new()
-	bg.color = Look.T900
+	bg.color = Look.SEA
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var root = VBoxContainer.new()
@@ -65,7 +65,7 @@ func _build() -> void:
 	root.add_child(hq)
 	var left = Control.new()
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left.size_flags_stretch_ratio = 0.82
+	left.size_flags_stretch_ratio = 0.64
 	hq.add_child(left)
 	_board = Board.new()
 	_board.game = G
@@ -108,6 +108,13 @@ func _build() -> void:
 	_advisor = Advisor.new()
 	_advisor.z_index = 25
 	add_child(_advisor)
+	# over everything: film grain and darker corners
+	var grain = ColorRect.new()
+	grain.material = Look.material("grain")
+	grain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	grain.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grain.z_index = 90
+	add_child(grain)
 	# the designer's cheat panel: ` or F12
 	_cheats = preload("res://scripts/cheats.gd").new()
 	_cheats.main = self
@@ -122,10 +129,10 @@ func _build() -> void:
 
 func _build_bar() -> Control:
 	_bar = PanelContainer.new()
-	var sb = Look.box(Color("221a13"))
-	sb.border_color = Look.BRASS
-	sb.border_width_bottom = 2
-	sb.shadow_color = Color(0, 0, 0, 0.6); sb.shadow_size = 10; sb.shadow_offset = Vector2(0, 4)
+	var sb = Look.box(Look.N850)
+	sb.border_color = Look.N600
+	sb.border_width_bottom = 1
+	sb.shadow_color = Color(0, 0, 0, 0.7); sb.shadow_size = 14; sb.shadow_offset = Vector2(0, 4)
 	_bar.add_theme_stylebox_override("panel", sb)
 	_bar.custom_minimum_size.y = 62
 	_bar.z_index = 5
@@ -136,8 +143,8 @@ func _build_bar() -> Control:
 	_party_box.add_theme_constant_override("separation", 10)
 	h.add_child(_section(_party_box, 16))
 	_stats = HBoxContainer.new()
-	_stats.add_theme_constant_override("separation", 6)
-	h.add_child(_section(_stats, 10))
+	_stats.add_theme_constant_override("separation", 0)
+	h.add_child(_section(_stats, 4))
 	var menu = HBoxContainer.new()
 	menu.add_theme_constant_override("separation", 0)
 	for m in [["debates", "flame", "Debates"], ["electorate", "users", "Electorate"], ["platform", "scroll-text", "Platform"], ["parties", "landmark", "Country"], ["media", "newspaper", "Media"], ["polls", "chart-line", "Parties"], ["diary", "book-open", "Diary"]]:
@@ -153,8 +160,8 @@ func _build_bar() -> Control:
 	var dates = VBoxContainer.new()
 	dates.alignment = BoxContainer.ALIGNMENT_CENTER
 	dates.add_theme_constant_override("separation", -2)
-	_date = Look.label("", "display", 17, Look.HEAD)
-	_date.add_theme_font_override("font", Look.spaced("display", 1))
+	_date = Look.label("", "display", 18, Look.HEAD)
+	_date.add_theme_font_override("font", Look.spaced("display", 2))
 	_date.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_countdown = Look.label("", "body", 12, Look.AMBER)
 	_countdown.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -168,7 +175,7 @@ func _build_bar() -> Control:
 	_btn_skip.pressed.connect(func(): _time_pressed(true))
 	time.add_child(_btn_skip)
 	var tsec = _section(time, 14)
-	(tsec.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = Color(0, 0, 0, 0.22)
+	(tsec.get_theme_stylebox("panel") as StyleBoxFlat).border_width_right = 0
 	h.add_child(tsec)
 	return _bar
 
@@ -206,7 +213,7 @@ func _section(inner: Control, pad: int) -> PanelContainer:
 	var p = PanelContainer.new()
 	var sb = Look.box(Color(0, 0, 0, 0))
 	sb.content_margin_left = pad; sb.content_margin_right = pad
-	sb.border_color = Color("45352a"); sb.border_width_right = 1
+	sb.border_color = Look.N700; sb.border_width_right = 1
 	p.add_theme_stylebox_override("panel", sb)
 	p.add_child(inner)
 	return p
@@ -222,17 +229,27 @@ func _menu_button(icon_name: String, text: String) -> Button:
 	b.add_theme_font_override("font", Look.spaced("display", 1))
 	b.add_theme_font_size_override("font_size", Look.fs(11))
 	b.tooltip_text = text
-	for st in ["normal", "focus", "disabled"]: b.add_theme_stylebox_override(st, Look.box(Color(0, 0, 0, 0), 0, Color("33271d"), 0, 0, 6))
-	var hov = Look.box(Color("3a2c20"), 0, Color.TRANSPARENT, 0, 0, 6)
-	b.add_theme_stylebox_override("hover", hov)
-	b.add_theme_stylebox_override("pressed", Look.box(Color("5a2a1d"), 0, Color.TRANSPARENT, 0, 0, 6))
-	b.add_theme_color_override("font_color", Color("cdbb9b"))
+	for st in ["normal", "focus", "disabled"]: b.add_theme_stylebox_override(st, _menu_box(false))
+	b.add_theme_stylebox_override("hover", _menu_box(false, Color(1, 1, 1, 0.05)))
+	b.add_theme_stylebox_override("pressed", _menu_box(true))
+	b.add_theme_color_override("font_color", Look.DIM)
 	b.add_theme_color_override("font_hover_color", Look.HEAD)
-	b.add_theme_color_override("icon_normal_color", Color("cdbb9b"))
+	b.add_theme_color_override("font_pressed_color", Look.HEAD)
+	b.add_theme_color_override("font_focus_color", Look.DIM)
+	b.add_theme_color_override("icon_normal_color", Look.DIM)
 	b.add_theme_color_override("icon_hover_color", Look.HEAD)
-	b.custom_minimum_size.x = 72
+	b.add_theme_color_override("icon_pressed_color", Look.HEAD)
+	b.add_theme_color_override("icon_focus_color", Look.DIM)
+	b.custom_minimum_size.x = 78
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	return b
+
+## A file's button on the top bar: nothing behind it, and a line of lamp light under the open one.
+func _menu_box(on: bool, bg := Color(0, 0, 0, 0)) -> StyleBoxFlat:
+	var sb = Look.box(Color(1, 1, 1, 0.04) if on else bg, 0, Look.LAMP, 0, 0, 6)
+	sb.border_width_bottom = 2
+	if not on: sb.border_color = Color(0, 0, 0, 0)
+	return sb
 
 func _speed_button(icon_name: String, tip: String, primary := false) -> Button:
 	var b = Button.new()
@@ -243,18 +260,10 @@ func _speed_button(icon_name: String, tip: String, primary := false) -> Button:
 	b.custom_minimum_size = Vector2(40 if not primary else 0, 36)
 	if primary:
 		b.text = tip.to_upper()
-		b.add_theme_font_override("font", Look.spaced("display", 1))
-		b.add_theme_font_size_override("font_size", Look.fs(13))
-	var base = Color("6b1f14") if primary else Color(0, 0, 0, 0.2)
-	b.add_theme_stylebox_override("normal", Look.box(base, 5, Look.BRASS if primary else Color("5a4632"), 1, 0, 8))
-	b.add_theme_stylebox_override("hover", Look.box(base.lightened(0.15), 5, Look.BRASS, 1, 0, 8))
-	b.add_theme_stylebox_override("pressed", Look.box(base.darkened(0.2), 5, Look.BRASS, 1, 0, 8))
-	b.add_theme_stylebox_override("disabled", Look.box(Color(0, 0, 0, 0.15), 5, Color("3a2c20"), 1, 0, 8))
-	b.add_theme_color_override("font_color", Look.HEAD)
-	b.add_theme_color_override("icon_normal_color", Look.HEAD if primary else Color("cdbb9b"))
-	b.add_theme_color_override("icon_disabled_color", Color(1, 1, 1, 0.25))
-	b.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.3))
-	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		b.add_theme_font_override("font", Look.spaced("display_bold", 2))
+		b.add_theme_font_size_override("font_size", Look.fs(14))
+		b.add_theme_constant_override("h_separation", 8)
+	Look.dark_button(b, primary, false, 10 if primary else 8)
 	return b
 
 # ---------- Rendering ----------
@@ -350,9 +359,8 @@ func _show_file(tab: String) -> void:
 func _sync_menu() -> void:
 	for k in _menu:
 		var on: bool = _files.visible and _files.tab == k
-		_menu[k].add_theme_stylebox_override("normal", Look.box(Color("5a2a1d") if on else Color(0, 0, 0, 0), 0, Color.TRANSPARENT, 0, 0, 6))
-		_menu[k].add_theme_color_override("font_color", Look.HEAD if on else Color("cdbb9b"))
-		_menu[k].add_theme_color_override("icon_normal_color", Look.HEAD if on else Color("cdbb9b"))
+		for st in ["normal", "focus"]: _menu[k].add_theme_stylebox_override(st, _menu_box(on))
+		for c in ["font_color", "font_focus_color", "icon_normal_color", "icon_focus_color"]: _menu[k].add_theme_color_override(c, Look.HEAD if on else Look.DIM)
 
 func _country_sheet(id: String) -> void:
 	var f = Game.by_id(G.FOREIGN, id)
@@ -361,7 +369,7 @@ func _country_sheet(id: String) -> void:
 	p.masthead("Foreign desk", "Diplomatic Brief", st.get("relation", f.relation))
 	p.heading(" ".join(f.name), 38)
 	p.text(f.summary, 17)
-	p.text("%s: %s" % [f.leader.title, f.leader.name], 15, "type")
+	p.text("%s: %s" % [f.leader.title, f.leader.name], 15, "body_bold")
 	p.rule(1)
 	p.kicker("Background")
 	for x in f.facts: p.text("•  " + x, 15)
@@ -389,10 +397,10 @@ func _render_bar() -> void:
 	var names = VBoxContainer.new()
 	names.alignment = BoxContainer.ALIGNMENT_CENTER
 	names.add_theme_constant_override("separation", -2)
-	var pn = Look.label(player.name.to_upper(), "display", 16, Look.HEAD)
-	pn.add_theme_font_override("font", Look.spaced("display", 1))
+	var pn = Look.label(player.name.to_upper(), "display_bold", 17, Look.HEAD)
+	pn.add_theme_font_override("font", Look.spaced("display_bold", 2))
 	names.add_child(pn)
-	names.add_child(Look.label("Leader: " + player.leader, "body", 12, Look.CREAM_DIM))
+	names.add_child(Look.label(player.leader, "body", 12, Look.DIM))
 	_party_box.add_child(names)
 	var mood: float = G.business_mood(S)
 	var biz = "Hostile" if mood < 0.25 else ("Distant" if mood < 0.4 else ("Cautious" if mood < 0.7 else ("Willing" if mood < 1.1 else "Generous")))
@@ -403,7 +411,7 @@ func _render_bar() -> void:
 		S.polls[-1].national.player * 100 if S.polls.size() else null, func(x): return "%s%%%s" % [Game.fmt1(x), arrow])
 	_chip("Known by", "%d%%" % Game.jround(G.national_awareness(S) * 100), "Share of adults who have heard of your party.", Color.TRANSPARENT,
 		G.national_awareness(S) * 100, func(x): return "%d%%" % Game.jround(x))
-	_chip("Business", biz, "Business donors are %s. Angry donors give less." % Game.business_word(mood), Look.RED.lightened(0.4) if mood < 0.4 else Color.TRANSPARENT)
+	_chip("Business", biz, "Business donors are %s. Angry donors give less." % Game.business_word(mood), Look.RED_HI if mood < 0.4 else Color.TRANSPARENT)
 	_chip("Trust in politics", Game.trust_label(S.trust), "How much people trust politicians and the system in general (not your party). Low trust helps outsiders.")
 	_date.text = G.date_label(S.week, false).to_upper()
 	var months_left = int(ceil(float(G.ELECTION_WEEK - S.week) / G.WEEKS_PER_MONTH))
@@ -421,14 +429,15 @@ func _chip(label: String, value: String, tip: String, warn := Color.TRANSPARENT,
 	var base: Color = warn if warn.a > 0 else Look.HEAD
 	if not _chips.has(label):
 		var p = PanelContainer.new()
-		var sb = Look.box(Color(0, 0, 0, 0.28), 5, Color("3f3024"), 1)
-		sb.content_margin_left = 10; sb.content_margin_right = 10; sb.content_margin_top = 3; sb.content_margin_bottom = 3
+		var sb = Look.box(Color(0, 0, 0, 0))
+		sb.content_margin_left = 12; sb.content_margin_right = 12
 		p.add_theme_stylebox_override("panel", sb)
-		p.custom_minimum_size.x = 74
+		p.custom_minimum_size.x = 78
 		var v = VBoxContainer.new()
-		v.add_theme_constant_override("separation", -3)
-		v.add_child(Look.caps(label, 10, Color("a8957a"), 1, "body"))
-		var l = Look.label(value, "display", 17, base)
+		v.alignment = BoxContainer.ALIGNMENT_CENTER
+		v.add_theme_constant_override("separation", -4)
+		v.add_child(Look.caps(label, 10, Look.DIM, 1))
+		var l = Look.label(value, "display_bold", 21, base)
 		l.pivot_offset = Vector2(0, 12)
 		v.add_child(l)
 		p.add_child(v)
@@ -447,7 +456,7 @@ func _chip(label: String, value: String, tip: String, warn := Color.TRANSPARENT,
 	# count from the old number to the new one, and flash the direction
 	if c.tw: c.tw.kill()
 	var up: bool = float(num) > float(last)
-	var flash: Color = Color("7fd18b") if up else Color("ff7a66")
+	var flash: Color = Look.GOOD_HI if up else Look.RED_HI
 	val.add_theme_color_override("font_color", flash)
 	val.text = fmt.call(float(last))
 	val.scale = Vector2(1.15, 1.15)
@@ -493,15 +502,15 @@ func _render_map() -> void:
 		# the leader's colour, a little deeper when the lead is safe (a narrow range, so a province
 		# won with 41% and one won with 50% read as the same party at a glance)
 		var strength = clampf(0.66 + float(x.margin) * 0.9, 0.66, 0.85)
-		_map.fills[d.id] = Look.mix(Look.LAND, Color(G.party_of(S, x.winner).color), strength * 0.85)
+		_map.fills[d.id] = Look.mix(Look.LAND, Look.lit(Color(G.party_of(S, x.winner).color)), strength * 0.8)
 		# not yours yet: stripes in your colour covering your share of the vote there (30% of the
 		# vote, 30% of the province), never more than the leader's own band
 		if x.winner != "player" and float(x.you) >= 0.10:
-			_map.stripes[d.id] = [Look.mix(Look.LAND, Color(G.player_party(S).color), 0.85), minf(float(x.you), 0.45)]
+			_map.stripes[d.id] = [Look.mix(Look.LAND, Look.lit(Color(G.player_party(S).color)), 0.8), minf(float(x.you), 0.45)]
 	for f in G.FOREIGN:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
 	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
-	_map.legend = Game.ssort(S.parties.duplicate(), func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Color(p.color)])
+	_map.legend = Game.ssort(S.parties.duplicate(), func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Look.lit(Color(p.color)), int(seats.get(p.id, 0))])
 	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1)]) if poll else "No poll yet."
 	_map.queue_redraw()
 
@@ -661,7 +670,7 @@ func _event_step1(p: Paper, ev: Dictionary) -> void:
 	for i in ev.choices.size():
 		var ch: Dictionary = ev.choices[i]
 		p.card("index", func(box):
-			box.add_child(Look.label(ch.label, "type", 19, Color("1f2a44"), true))
+			box.add_child(Look.label(ch.label, "news_bold", 21, Look.INK, true))
 			if ch.has("note"): box.add_child(Look.label(ch.note, "body", 13, Look.MUTED, true))
 			_effects_lines(box, ch.effects),
 			func():
@@ -674,8 +683,8 @@ func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
 	p.clear()
 	_event_header(p, ev)
 	p.step("Step 2 of 2", "How do you say it?")
-	if ev.get("kind", "") == "flagship": p.text("Your promise: %s. This goes on every poster for a year." % ch.label, 15, "type")
-	else: p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 15, "type")
+	if ev.get("kind", "") == "flagship": p.text("Your promise: %s. This goes on every poster for a year." % ch.label, 14, "type")
+	else: p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 14, "type")
 	p.small("The wording matters. The same position can win people over or blow up in your face.")
 	for j in ch.lines.size():
 		var line: Dictionary = ch.lines[j]
@@ -694,6 +703,7 @@ func _event_result(p: Paper, res: Dictionary) -> void:
 
 func _result_body(p: Paper, title: String, res: Dictionary, strap := "CBC · Evening news") -> void:
 	var player: Dictionary = G.player_party(S)
+	if strap.begins_with("CBC"): p.screen()   # it made the evening news
 	p.tv_strap(strap, "How it played · " + title)
 	if res.get("quote"):
 		p.add(Look.label("%s: “%s”" % [player.leader, res.quote], "news_bold", 26, Look.INK, true))
@@ -861,7 +871,7 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 			var taken: bool = _offers.has(id)
 			var dirty: bool = o.effects.has("scandal")
 			p.card("index", func(box):
-				box.add_child(Look.label(("✓ Taking it · " if taken else "") + o.title, "type", 17, Look.RED if dirty else Color("1f2a44"), true))
+				box.add_child(Look.label(("✓ Taking it · " if taken else "") + o.title, "news_bold", 19, Look.RED if dirty else Look.INK, true))
 				box.add_child(Look.label(o.note, "body", 13, Look.MUTED, true)),
 				func():
 					if taken: _offers.erase(id)
@@ -976,8 +986,8 @@ func _poll_sheet(front: Dictionary) -> void:
 	for r in G.REGIONS:
 		var sh: Dictionary = poll.regions[r.id]
 		var ids: Array = Game.ssort(sh.keys(), func(a, b): return sh[b] - sh[a])
-		p.add(Look.label("%s — %s leads with %d%%. You: %d%%." % [r.name, G.party_of(S, ids[0]).short, Game.jround(sh[ids[0]] * 100), Game.jround(sh.player * 100)], "type", 15, Look.INK, true))
-	p.actions([p.button("Pin it to the board", func(): G.dismiss_front(S); _done(p))])
+		p.add(Look.label("%s — %s leads with %d%%. You: %d%%." % [r.name, G.party_of(S, ids[0]).short, Game.jround(sh[ids[0]] * 100), Game.jround(sh.player * 100)], "body", 15, Look.INK, true))
+	p.actions([p.button("File it", func(): G.dismiss_front(S); _done(p))])
 
 func _news_sheet(front: Dictionary) -> void:
 	var labels = {"vacuum": "Power vacuum", "bad": "Trouble", "good": "Comeback", "neutral": "Change", "threat": "Threat", "issue": "Hot issue"}
@@ -998,6 +1008,7 @@ func _news_sheet(front: Dictionary) -> void:
 
 func _debate_sheet() -> void:
 	var p = _paper(860)
+	p.screen()
 	_debate_round(p)
 
 func _debate_round(p: Paper) -> void:
@@ -1030,6 +1041,7 @@ func _debate_round(p: Paper) -> void:
 # ---------- The big interview ----------
 func _interview_sheet() -> void:
 	var p = _paper(860)
+	p.screen()
 	_interview_round(p)
 
 func _interview_round(p: Paper) -> void:
@@ -1065,6 +1077,7 @@ func _interview_round(p: Paper) -> void:
 func _interview_piece(p: Paper) -> void:
 	p.clear()
 	p.decided()
+	p.paper()
 	var iv: Dictionary = S.interview
 	var v: Dictionary = iv.get("verdict", {}) if iv.get("verdict") else {"title": "", "text": ""}
 	p.masthead(G.date_label(S.week), iv.outletName, "The big interview")
@@ -1082,6 +1095,7 @@ func _interview_piece(p: Paper) -> void:
 func _election_sheet() -> void:
 	var r: Dictionary = S.result
 	var p = _paper(860, false)
+	p.screen()
 	p.tv_strap("CBC · Election night", "The results")
 	var you: Dictionary = G.player_party(S)
 	var first = G.party_of(S, r.ranking[0])
@@ -1092,7 +1106,7 @@ func _election_sheet() -> void:
 	seatbar.custom_minimum_size.y = 30
 	p.add(seatbar)
 	for id in r.ranking:
-		p.add(Look.label("%s — %d seats" % [G.party_of(S, id).name, r.seats.national[id]], "type", 15, Look.INK))
+		p.add(Look.label("%s — %d seats" % [G.party_of(S, id).name, r.seats.national[id]], "body", 15, Look.INK))
 	p.actions([
 		p.button("Read what the papers say", func(): _profile_sheet(), false),
 		p.button("Found a new party", func():
@@ -1124,7 +1138,7 @@ func _district_sheet(id: String) -> void:
 		if not shown.has("player"): shown.append("player")
 		for k in shown:
 			var name: String = "You" if k == "player" else G.party_of(S, k).short
-			p.add(Look.label("%s%s  %d%%" % ["★ " if k == x.winner else "", name, Game.jround(shares[k] * 100)], "type", 17, Color(G.party_of(S, k).color).darkened(0.25) if k != "player" else Look.RED))
+			p.add(Look.label("%s%s  %d%%" % ["★ " if k == x.winner else "", name, Game.jround(shares[k] * 100)], "body_bold", 17, Color(G.party_of(S, k).color).darkened(0.25) if k != "player" else Look.RED))
 		if x.winner == "player":
 			p.small("Yours today, by %d points. Votes beyond what wins it are wasted: if it's safe, campaign elsewhere." % maxi(1, Game.jround(float(x.margin) * 100)), Look.INK)
 		else:
@@ -1140,7 +1154,7 @@ func _district_sheet(id: String) -> void:
 		var lvl: int = G.community_level(S, cname)
 		var row = HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
-		var lab = Look.label("%s · party office %s" % [cname, "●".repeat(lvl) + "○".repeat(G.COMMUNITY_MAX - lvl)], "type", 15, Look.INK)
+		var lab = Look.label("%s · party office %s" % [cname, "●".repeat(lvl) + "○".repeat(G.COMMUNITY_MAX - lvl)], "body", 15, Look.INK)
 		lab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(lab)
 		if lvl < G.COMMUNITY_MAX:
@@ -1185,7 +1199,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	if res.story != "": p.text(res.story, 18, "news")
 	var b: int = Game.jround(float(res.before) * 100)
 	var a: int = Game.jround(float(res.after) * 100)
-	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.RED if a > b else Look.INK))
+	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.GOOD if a > b else Look.INK))
 	if res.why.size():
 		var w: String = ", ".join(res.why)
 		p.small(w.substr(0, 1).to_upper() + w.substr(1) + ".", Look.INK)
@@ -1289,7 +1303,7 @@ func _founding_build(p: Paper) -> void:
 		var le = LineEdit.new()
 		le.text = _found[f[1]]
 		le.max_length = 32
-		le.add_theme_font_override("font", Look.font("type"))
+		le.add_theme_font_override("font", Look.font("news"))
 		le.add_theme_font_size_override("font_size", Look.fs(18))
 		le.add_theme_color_override("font_color", Look.INK)
 		le.add_theme_stylebox_override("normal", Look.box(Color(1, 1, 1, 0.5), 0, Look.INK, 1, 0, 8))
@@ -1425,11 +1439,11 @@ func _said_pair(first: Dictionary, second: Dictionary, side_of) -> Control:
 	return h
 
 func _toast(text: String) -> void:
-	var t = Look.label(text, "type", 15, Look.INK, true)
+	var t = Look.label(text, "body", 15, Look.TXT, true)
 	t.custom_minimum_size.x = 520
 	var p = PanelContainer.new()
-	var sb = Look.box(Look.PAPER, 0, Look.RED, 0, 10, 12)
-	sb.border_width_left = 5; sb.border_color = Look.RED
+	var sb = Look.box(Look.N700, 2, Look.N500, 1, 14, 14)
+	sb.border_width_left = 4; sb.border_color = Look.RED
 	p.add_theme_stylebox_override("panel", sb)
 	p.add_child(t)
 	p.z_index = 30
@@ -1597,22 +1611,27 @@ class Ticker extends Control:
 		if _w > 0 and _x < -_w: _x += _w
 		queue_redraw()
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, size), Look.RED)
-		draw_rect(Rect2(0, 0, size.x, 2), Color("f2c14e"))
-		var f = Look.font("display")
-		var tag_w = 100.0
-		var x = tag_w + 20 + _x
-		var gap = 48.0
+		# a news channel left on with the sound off: a dark strap, the channel's red tag, a live light
+		draw_rect(Rect2(Vector2.ZERO, size), Look.N950)
+		draw_rect(Rect2(0, 0, size.x, 1), Look.N600)
+		var f = Look.spaced("display", 1)
+		var tag_w = 132.0
+		var x = tag_w + 24 + _x
+		var gap = 56.0
 		var total = 0.0
-		for t in items: total += f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + gap
+		for t in items: total += f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + gap
 		_w = total
 		while x < size.x:
 			for t in items:
-				draw_string(f, Vector2(x, size.y / 2 + 6), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("fff6e6"))
-				x += f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + gap
+				draw_rect(Rect2(x - gap / 2 - 2, size.y / 2 - 2, 4, 4), Look.RED)
+				draw_string(f, Vector2(x, size.y / 2 + 6), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Look.DIM)
+				x += f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + gap
 			if total <= 0: break
-		draw_rect(Rect2(0, 0, tag_w, size.y), Color("f2c14e"))
-		draw_string(Look.spaced("display_bold", 2), Vector2(12, size.y / 2 + 6), "CBC NEWS", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("2a1d12"))
+		draw_rect(Rect2(0, 0, tag_w + 14, size.y), Look.N950)
+		draw_rect(Rect2(0, 1, tag_w, size.y - 1), Look.RED)
+		draw_string(Look.spaced("display_bold", 2), Vector2(12, size.y / 2 + 6), "CBC NEWS", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+		var blink = 0.35 + 0.65 * absf(sin(Time.get_ticks_msec() / 700.0))
+		draw_circle(Vector2(tag_w - 16, size.y / 2), 3.5, Color(1, 1, 1, blink))
 
 class Portrait extends Control:
 	var col = Color.GRAY
@@ -1624,9 +1643,9 @@ class Portrait extends Control:
 	func _draw() -> void:
 		var c = size / 2
 		var r = minf(size.x, size.y) / 2
-		draw_circle(c, r + 2, Look.BRASS_DIM)
-		draw_circle(c, r, col.darkened(0.1))
+		draw_circle(c, r, col.darkened(0.15))
+		draw_arc(c, r, 0, TAU, 48, Look.lit(col), 1.5, true)
 		var f = Look.font("display_bold")
 		var fs = int(r * 0.9)
 		var w = f.get_string_size(initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(f, c + Vector2(-w / 2, fs * 0.36), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("fff3dc"))
+		draw_string(f, c + Vector2(-w / 2, fs * 0.36), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)
