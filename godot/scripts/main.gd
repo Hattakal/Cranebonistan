@@ -730,9 +730,10 @@ func _front_aside(p: Paper) -> void:
 		row.add_child(l)
 		row.add_child(Look.label(G.indicator_word(ind.id, S.world[ind.id]), "body_bold", 13, Look.INK))
 		p.add(row)
-	p.rule(1, Look.LINE)
-	p.side_head("Weather")
-	p.add(Look.label(p._weather(S.week), "news_italic", 14, Look.INK, true))
+	if p.style != "broadsheet":   # a broadsheet has its weather in a box by the nameplate
+		p.rule(1, Look.LINE)
+		p.side_head("Weather")
+		p.add(Look.label(p._weather(S.week), "news_italic", 14, Look.INK, true))
 
 func _event_sheet(front: Dictionary) -> void:
 	var ev: Dictionary = G.event_of(front)
