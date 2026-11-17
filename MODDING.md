@@ -84,10 +84,10 @@ A working example is in `mods/example-more-cities/` (switched off; set `"enabled
 
 Put a file in your mod's `assets/` folder at the same path as in `godot/assets/`, and it is used instead:
 
-- `assets/tours/great.png`, `good.png`, `flat.png`: the trip photos
+- Photographs (`.jpg`, `.png` or `.webp`; all are shown through the game's one filter): `assets/events/<event id>.jpg` or `assets/events/_<kind>.jpg`, `assets/portraits/<leader-name>.jpg` or `<party id>.jpg`, `assets/tours/<region>_<great|good|flat>.jpg` or `assets/tours/<great|good|flat>.jpg`, `assets/places/<country id>.jpg`. [IMAGES.md](IMAGES.md) has the full list. A mod can add pictures the game doesn't have yet
 - `assets/voice/carlos/<line id>.ogg`: Carlos's voice (ids are in `carlos.json` and `VOICE.md`)
 - `assets/map-features.png`: rivers and mountains on the map
-- `assets/icons/<name>.svg`, `assets/fonts/<file>.ttf`
+- `assets/icons/<name>.svg`, `assets/fonts/<file>.ttf` (the file names are at the top of `godot/scripts/look.gd`)
 
 ## Things the game relies on
 

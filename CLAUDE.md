@@ -26,6 +26,18 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 - **Keep it moddable.** Every data file is read through `Mods.data("<name>")` (`godot/scripts/mods.gd`), and every picture, sound and font through `Mods.texture/audio/asset_path`. Never read `res://data/` or `res://assets/` directly, and put new content in data files, not code. If the rules start depending on a new id, add it to the list in MODDING.md.
 - `SAVE_VERSION` in sim.gd: bump it whenever the shape of the saved state changes (old saves then start a new game).
 
+## The look (decided; see DESIGN.md 7.1)
+
+Neo-noir in a present-day setting: a campaign office at night. When adding or changing a screen:
+
+- **Colours and fonts only from `look.gd`**, never a hex code in a screen script. Dark surfaces (the desk, the files, the top bar) use `Look.dlabel`/`dcaps`, `Look.glass()` and `Look.dark_button()`; paper uses `Look.label`/`caps` (ink by default).
+- **Cold and dark around you, paper under a warm lamp in your hands.** `LAMP` (amber) is the only warm light: hover, city lights, Carlos. Party colours are the only strong colours; on the dark, pass them through `Look.lit()`.
+- **Red is rationed:** danger, and the one button to press next. Good news is `GOOD`/`GOOD_HI`, never red.
+- **Paper or screen:** what the player reads and decides is a `Paper` sheet; what the country watches (evening news, interview, debate, election night) is the same sheet after `p.screen()`. Build with the sheet's own blocks (`p.text`, `p.card`, `p.chips`...), which recolour themselves on a screen.
+- **The numbers stay plain.** The files are a clean briefing; don't dress data up as objects.
+- **Photographs** go through `Photo` (one filter for all, `shaders/photo.gdshader`); faces through `Face`. Never draw a texture straight to the screen. A missing picture shows nothing.
+- Fonts: `display*` Barlow Condensed (labels, numbers, buttons), `news*` Newsreader (headlines, papers, speech), `body*` Plex Sans Condensed, `type` Plex Mono (memos), `hand` Caveat (a margin note from Carlos, rarely).
+
 ## Running and checking
 
 Find the Godot executable first (it may not be on PATH; ask Ozan where it is if you can't find it). From the repository root:
@@ -45,7 +57,7 @@ Screenshots of the real game (use these to check any visual change; look at the 
 
 ```
 godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--leak=1 --open=1] [--clear=1] [--scroll=700]
-    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5]
+    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5] [--found=1] [--title=1 --then=4]
 ```
 
 In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd`): skip time, change money, support, trust, the world, rivals, queue any event. `--cheats=N` opens it in a screenshot after skipping N months. `--weeks` plays that many weeks automatically first; `--clear` empties the decision queue so files are usable; the other flags open specific sheets. (On Linux without a display, wrap it in `xvfb-run -a -s "-screen 0 1600x900x24"` and add `--rendering-driver opengl3`.)
@@ -64,13 +76,14 @@ In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd
 
 - About 300 written lines live in `debate_lines.json`, `issues.json`, `carlos.json`, `margaret.json`; events and sound bites in `content.json`. Keep Ozan's voice: dry, grounded, specific to the world (Cranebo, Bayernal, Tarropolis, the pezo), never cartoonish.
 - After changing Carlos's lines, run `python3 tools/voice_script.py` to regenerate VOICE.md (the recording script; recordings go in `godot/assets/voice/carlos/<id>.ogg`).
+- After adding events or pictures, run `python3 tools/image_list.py` to regenerate IMAGES.md (where pictures go and which are missing).
 - The map is built from Ozan's Krita file: `python3 tools/build_map.py art/map3.kra` (writes `godot/data/map.json` and the map features image).
 
 ## Open items Ozan knows about
 
 - Fauran is still written as nomads/herders in ~20 places; awaiting his new history.
 - `scenes.json` (back-room intro with Carlos and Margaret) still describes old rules and isn't shown in Godot yet.
-- **Visual direction (next):** the noir/old-print look clashes with the present-day setting. Options discussed: keep noir; "modern political drama" (dark office, warm desk lamp, cold desaturated halftone photos, colour only for party colours and a red accent; social media shown as printouts pinned to the board; the recommendation); screen-print poster; modern newsroom/TV. Agreed next step: three mock-ups of the same screen to compare. Zero budget: public-domain/CC0 photos given one shared newsprint treatment by a shader, open-licence fonts, CC0 sounds; no generative-AI art, ever; only Carlos's and Margaret's portraits might be commissioned.
+- **Visual direction (decided November 2026, first pass built; Ozan has not reviewed it yet):** neo-noir, "the campaign at night"; see DESIGN.md 7.1 and "The look" above. Still open: the photographs (Ozan is finding them; IMAGES.md is the list, written by `tools/image_list.py`), sound in Godot, time of day, election night province by province, portraits of Carlos and Margaret (might be commissioned). Zero budget: public-domain/CC0 photos, open-licence fonts, CC0 or synthesised sounds; no generative-AI art, ever.
 - **Turnout (draft, not on main):** per-party turnout from trust and drift is on the branch `claude/project-overview-roadmap-3813b2-sjo7ds` (commit "Draft (not on main): per-party turnout…"). Trust works; the drift penalty is far too strong (a competent populist fell from ~23% to ~12%). Open questions for Ozan: drift only against core supporters? measured against the founding or the current manifesto? how far low trust may push turnout down.
 - **Lore and names (Ozan is working on them):** his history of Cranebonistan and the world was discussed (comments: replace the religious split, add recent political history 1964–now, decide what Fauran is today). Planned renames: Büllünt → Vüllent, Crumland → Crümland, Cranbia cities lose -polis for "city" suffixes, Erland modelled on Castile and/or Alberta, possibly the country name itself (Cranebonia keeps "Cranebonian").
 - Planned: personas, continuing after a lost election, event pictures and portraits, sound, exports.

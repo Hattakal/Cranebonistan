@@ -1001,7 +1001,9 @@ func _country() -> void:
 		var pc = _card(pg)
 		pc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var top = HBoxContainer.new()
+		top.add_theme_constant_override("separation", 10)
 		pc.add_child(top)
+		top.add_child(Face.new(p.leader, Color(p.color), p.id, 38))
 		var nm = VBoxContainer.new()
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.add_theme_constant_override("separation", 0)
@@ -1226,7 +1228,9 @@ func _polls() -> void:
 		var c = _card(g)
 		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var top = HBoxContainer.new()
+		top.add_theme_constant_override("separation", 10)
 		c.add_child(top)
+		top.add_child(Face.new(p.leader, Color(p.color), p.id, 38))
 		var nm = Look.dlabel(("You · " if p.isPlayer else "") + p.name, "display", 19, Look.lit(Color(p.color)), true)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		top.add_child(nm)

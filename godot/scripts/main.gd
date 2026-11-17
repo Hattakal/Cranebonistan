@@ -39,6 +39,65 @@ func _ready() -> void:
 		S = G.new_game({"partyName": "People's Awakening", "leaderName": "Dorin Vask"})
 		render()
 		_founding_sheet()
+		_title_card()
+
+## The title, over the city at night, before a new party is founded. Any click or key moves on.
+func _title_card() -> void:
+	var t = Control.new()
+	t.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	t.z_index = 80
+	t.mouse_filter = Control.MOUSE_FILTER_STOP
+	t.focus_mode = Control.FOCUS_ALL
+	var bg = ColorRect.new()
+	bg.color = Look.N950
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	t.add_child(bg)
+	var room = Board.Room.new()
+	room.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	room.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	t.add_child(room)
+	var c = CenterContainer.new()
+	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	t.add_child(c)
+	var v = VBoxContainer.new()
+	v.add_theme_constant_override("separation", 22)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.add_child(v)
+	var name = Look.label(str(ProjectSettings.get_setting("application/config/name")).to_upper(), "display_light", 78, Color.WHITE)
+	name.add_theme_font_override("font", Look.spaced("display_light", 22))
+	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(name)
+	var rule = ColorRect.new()
+	rule.color = Look.RED
+	rule.custom_minimum_size = Vector2(0, 2)
+	rule.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(rule)
+	var sub = Look.label("Four years to an election. Nobody has heard of you yet.", "news_italic", 26, Look.DIM)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sub)
+	var gap = Control.new(); gap.custom_minimum_size.y = 40
+	v.add_child(gap)
+	var hint = Look.caps("Click to begin", 13, Look.FAINT, 4)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hint)
+	add_child(t)
+	for l in [name, sub, hint]: l.modulate.a = 0
+	var tw = t.create_tween()
+	tw.tween_property(name, "modulate:a", 1.0, 1.6).set_delay(0.4)
+	tw.parallel().tween_property(rule, "custom_minimum_size:x", 220.0, 1.4).set_delay(0.9).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(sub, "modulate:a", 1.0, 1.0)
+	tw.tween_property(hint, "modulate:a", 1.0, 0.8).set_delay(0.6)
+	var leave = func():
+		if t.has_meta("leaving"): return
+		t.set_meta("leaving", true)
+		var out = t.create_tween()
+		out.tween_property(t, "modulate:a", 0.0, 0.7)
+		out.tween_callback(t.queue_free)
+	t.gui_input.connect(func(e):
+		if (e is InputEventMouseButton and e.pressed) or (e is InputEventKey and e.pressed): leave.call())
+	t.grab_focus.call_deferred()
 
 func _args() -> Dictionary:
 	var out = {}
@@ -368,6 +427,7 @@ func _country_sheet(id: String) -> void:
 	var p = _paper(760, false)
 	p.masthead("Foreign desk", "Diplomatic Brief", st.get("relation", f.relation))
 	p.heading(" ".join(f.name), 38)
+	p.photo(Photo.find(["places/" + id]), 260)
 	p.text(f.summary, 17)
 	p.text("%s: %s" % [f.leader.title, f.leader.name], 15, "body_bold")
 	p.rule(1)
@@ -390,10 +450,7 @@ func _after_change() -> void:
 func _render_bar() -> void:
 	var player: Dictionary = G.player_party(S)
 	for c in _party_box.get_children(): c.queue_free()
-	var por = Portrait.new()
-	por.setup(player)
-	por.custom_minimum_size = Vector2(42, 42)
-	_party_box.add_child(por)
+	_party_box.add_child(Face.new(player.leader, Color(player.color), player.id, 42))
 	var names = VBoxContainer.new()
 	names.alignment = BoxContainer.ALIGNMENT_CENTER
 	names.add_theme_constant_override("separation", -2)
@@ -629,6 +686,7 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 	if ev.get("kind", "") == "crisis" and S.crisis: crisis = Game.by_id(G.CRISES, S.crisis.id).name
 	p.masthead(G.date_label(S.week, false), "The Morning Post", ("Crisis · " + crisis) if crisis != "" else KINDS.get(ev.get("kind", ""), "Event"))
 	p.heading(ev.title, 42)
+	p.photo(Photo.event(ev), 300)
 	p.text(ev.text, 18)
 	if ev.get("government"):
 		var gov = null
@@ -675,7 +733,7 @@ func _event_step1(p: Paper, ev: Dictionary) -> void:
 			_effects_lines(box, ch.effects),
 			func():
 				if ch.get("lines", []).size(): _event_step2(p, ev, i)
-				else: _event_result(p, G.resolve_event(S, i, -1)))
+				else: _event_result(p, G.resolve_event(S, i, -1), ev))
 	p.top()
 
 func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
@@ -685,25 +743,26 @@ func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
 	p.step("Step 2 of 2", "How do you say it?")
 	if ev.get("kind", "") == "flagship": p.text("Your promise: %s. This goes on every poster for a year." % ch.label, 14, "type")
 	else: p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 14, "type")
-	p.small("The wording matters. The same position can win people over or blow up in your face.")
+	p.scribble("The wording matters. The same position can win people over, or blow up in your face.  — C.")
 	for j in ch.lines.size():
 		var line: Dictionary = ch.lines[j]
 		p.card("slip", func(box): box.add_child(Look.label("“%s”" % line.text, "news_italic", 21, Look.INK, true)),
-			func(): _event_result(p, G.resolve_event(S, i, j)))
+			func(): _event_result(p, G.resolve_event(S, i, j), ev))
 	var back = p.button("← Say something else", func(): _event_step1(p, ev), false)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	p.add(back)
 
-func _event_result(p: Paper, res: Dictionary) -> void:
+func _event_result(p: Paper, res: Dictionary, ev := {}) -> void:
 	p.clear()
 	p.decided()
-	_result_body(p, res.get("title", ""), res)
+	_result_body(p, res.get("title", ""), res, "CBC · Evening news", Photo.event(ev) if ev.size() else null)
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 
-func _result_body(p: Paper, title: String, res: Dictionary, strap := "CBC · Evening news") -> void:
+func _result_body(p: Paper, title: String, res: Dictionary, strap := "CBC · Evening news", picture: Texture2D = null) -> void:
 	var player: Dictionary = G.player_party(S)
 	if strap.begins_with("CBC"): p.screen()   # it made the evening news
+	p.photo(picture, 240)
 	p.tv_strap(strap, "How it played · " + title)
 	if res.get("quote"):
 		p.add(Look.label("%s: “%s”" % [player.leader, res.quote], "news_bold", 26, Look.INK, true))
@@ -739,7 +798,7 @@ func _speak_sheet(id: String, side: String) -> void:
 	p.heading(d.title, 34)
 	p.text(d.text, 16)
 	p.step("Speaking for", (ax.left if side == "L" else ax.right))
-	if major: p.small("The whole country is watching. Your exact words will be quoted: they can go viral, or become a gaffe that helps the other side.")
+	if major: p.scribble("The whole country is watching. Your exact words will be quoted: they can go viral, or become a gaffe that helps the other side.  — C.")
 	else: p.small("A smaller argument. Your line mostly shapes how people hear you; it won't make the evening news.")
 	var lines: Array = G.debate_lines(d, side)
 	for j in lines.size():
@@ -1192,6 +1251,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	p.heading(head % ([G.player_party(S).leader, res.place] if res.kind != "flat" else [res.place, G.player_party(S).leader]), 34)
 	var photo = TourPhoto.new()
 	photo.kind = res.kind
+	photo.region = res.region
 	photo.party_color = Color(G.player_party(S).color)
 	photo.custom_minimum_size = Vector2(0, 260)
 	p.add(photo)
@@ -1207,29 +1267,33 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 
-## A placeholder photo until the real pictures exist (godot/assets/tours/<kind>.png):
+## The picture with the story: godot/assets/tours/<region>_<kind>.jpg, or tours/<kind>.jpg
+## (kind: great, good, flat). Until those exist, a drawn stand-in in the same two inks:
 ## a hall, a stage, and a crowd as big as the trip went well.
 class TourPhoto extends Control:
 	var kind := "good"
+	var region := ""
 	var party_color := Color("b03a2e")
 	var _tex: Texture2D = null
 	func _ready() -> void:
-		_tex = Mods.texture("res://assets/tours/%s.png" % kind)
+		_tex = Photo.find(["tours/%s_%s" % [region, kind], "tours/" + kind])
+		if _tex:
+			var ph = Photo.new(_tex)
+			ph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			add_child(ph)
 	func _draw() -> void:
 		var r = Rect2(Vector2.ZERO, size)
-		if _tex:
-			draw_texture_rect(_tex, r, false)
-			return
-		draw_rect(r, Color("2b2621"))
-		var inner = r.grow(-8)
-		draw_rect(inner, Color("6f675c"))
+		if _tex: return
+		var inner = r
+		var ink = Color("121a28")
+		draw_rect(inner, Look.mix(ink, Look.PAPER, 0.5))
 		# back wall, banner and stage
-		draw_rect(Rect2(inner.position, Vector2(inner.size.x, inner.size.y * 0.55)), Color("8a8174"))
+		draw_rect(Rect2(inner.position, Vector2(inner.size.x, inner.size.y * 0.55)), Look.mix(ink, Look.PAPER, 0.68))
 		var bw = inner.size.x * 0.42
-		draw_rect(Rect2(inner.position + Vector2((inner.size.x - bw) / 2, inner.size.y * 0.1), Vector2(bw, inner.size.y * 0.16)), Look.mix(Color("8a8174"), party_color, 0.65))
-		draw_rect(Rect2(inner.position + Vector2(inner.size.x * 0.3, inner.size.y * 0.45), Vector2(inner.size.x * 0.4, inner.size.y * 0.08)), Color("4a443c"))
-		draw_circle(inner.position + Vector2(inner.size.x * 0.5, inner.size.y * 0.33), inner.size.y * 0.05, Color("3a352f"))
-		draw_rect(Rect2(inner.position + Vector2(inner.size.x * 0.5 - inner.size.y * 0.04, inner.size.y * 0.37), Vector2(inner.size.y * 0.08, inner.size.y * 0.09)), Color("3a352f"))
+		draw_rect(Rect2(inner.position + Vector2((inner.size.x - bw) / 2, inner.size.y * 0.1), Vector2(bw, inner.size.y * 0.16)), party_color)
+		draw_rect(Rect2(inner.position + Vector2(inner.size.x * 0.3, inner.size.y * 0.45), Vector2(inner.size.x * 0.4, inner.size.y * 0.08)), Look.mix(ink, Look.PAPER, 0.25))
+		draw_circle(inner.position + Vector2(inner.size.x * 0.5, inner.size.y * 0.33), inner.size.y * 0.05, ink)
+		draw_rect(Rect2(inner.position + Vector2(inner.size.x * 0.5 - inner.size.y * 0.04, inner.size.y * 0.37), Vector2(inner.size.y * 0.08, inner.size.y * 0.09)), ink)
 		# the crowd: heads in rows, more of them the better it went
 		var row_n = {"great": 5, "good": 3, "flat": 1}
 		var fill_n = {"great": 1.0, "good": 0.75, "flat": 0.3}
@@ -1242,10 +1306,8 @@ class TourPhoto extends Control:
 			var y = inner.end.y - rad * 0.6 - row * inner.size.y * 0.085
 			var x = inner.position.x + rad
 			while x < inner.end.x - rad:
-				if rng.randf() < fill: draw_circle(Vector2(x + rng.randf() * 4, y), rad, Color(0.16 + rng.randf() * 0.08, 0.15, 0.14))
+				if rng.randf() < fill: draw_circle(Vector2(x + rng.randf() * 4, y), rad, Look.mix(ink, Look.PAPER, rng.randf() * 0.14))
 				x += rad * 1.7
-		# old newsprint: soften it
-		draw_rect(inner, Color(0.85, 0.8, 0.7, 0.18))
 
 # ---------- Founding the party (a new game) ----------
 var _found = {}
@@ -1376,10 +1438,9 @@ class SeatBar extends Control:
 		var x = 0.0
 		for part in parts:
 			var w: float = size.x * part[1] / total
-			draw_rect(Rect2(x, 0, w, size.y), part[0])
+			draw_rect(Rect2(x, 0, maxf(0.0, w - 2.0), size.y), Look.lit(part[0]))
 			x += w
-		draw_rect(Rect2(Vector2.ZERO, size), Look.INK, false, 2.0)
-		draw_line(Vector2(size.x / 2, -4), Vector2(size.x / 2, size.y + 4), Look.INK, 2.0)
+		draw_rect(Rect2(size.x / 2 - 1.5, -5, 3, size.y + 10), Color.WHITE)   # the majority line
 
 func _profile_sheet() -> void:
 	var pr: Dictionary = G.build_profile(S)
@@ -1535,7 +1596,7 @@ func _shot(args: Dictionary) -> void:
 		if ci >= 0: _event_step2(_sheet_layer.get_child(-1), ev, ci)
 	if args.has("result"):
 		var ev2: Dictionary = G.event_of(S.queue[0])
-		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1))
+		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1), ev2)
 	if args.has("file"):
 		if args.has("clear"): S.queue.clear()
 		_show_file(args.file)
@@ -1562,6 +1623,7 @@ func _shot(args: Dictionary) -> void:
 		render()
 	if args.has("carlos"):
 		_advisor.say(args.carlos, true)
+	if args.has("title"): _title_card()
 	if args.has("build"):
 		for name in ["Cranebo", "Tarropolis", "Bayernal"]:
 			S.actionsLeft = 3; S.money = 9.0
@@ -1632,20 +1694,3 @@ class Ticker extends Control:
 		draw_string(Look.spaced("display_bold", 2), Vector2(12, size.y / 2 + 6), "CBC NEWS", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
 		var blink = 0.35 + 0.65 * absf(sin(Time.get_ticks_msec() / 700.0))
 		draw_circle(Vector2(tag_w - 16, size.y / 2), 3.5, Color(1, 1, 1, blink))
-
-class Portrait extends Control:
-	var col = Color.GRAY
-	var initials = ""
-	func setup(p: Dictionary) -> void:
-		col = Color(p.color)
-		var parts: PackedStringArray = p.leader.split(" ")
-		initials = (parts[0][0] + (parts[-1][0] if parts.size() > 1 else "")).to_upper()
-	func _draw() -> void:
-		var c = size / 2
-		var r = minf(size.x, size.y) / 2
-		draw_circle(c, r, col.darkened(0.15))
-		draw_arc(c, r, 0, TAU, 48, Look.lit(col), 1.5, true)
-		var f = Look.font("display_bold")
-		var fs = int(r * 0.9)
-		var w = f.get_string_size(initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(f, c + Vector2(-w / 2, fs * 0.36), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)

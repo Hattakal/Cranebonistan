@@ -12,7 +12,7 @@ Carlos is the voice of headquarters: the advisor who hypes you up, spins every n
 | File | Line |
 |---|---|
 | `tut_1` | Boss! Welcome to headquarters. It's not much yet: a desk, a map, a kettle. But it's yours, and I've got a feeling about you. |
-| `tut_2` | The board on the left is what needs you right now. The map shows who leads where. Everything else is in the files along the top. |
+| `tut_2` | The desk on the left is what needs you right now. The map shows who leads where. Everything else is in the files along the top. |
 | `tut_3` | The whole country argues about something every month. Open Debates, pick a side, and say it your way. People remember how you said it. |
 | `tut_4` | You get three moves a month. Speak, start your own argument, open an office somewhere, dig into the competition. No wrong answers, boss. Well. Mostly. |
 | `tut_5` | When you're ready, press play and the weeks roll on. I'll be right here. I'm always right here. |
@@ -24,7 +24,7 @@ Carlos is the voice of headquarters: the advisor who hypes you up, spins every n
 |---|---|
 | `month_1` | New month, boss. Three fresh moves. The country's waiting. |
 | `month_2` | A new month! I've cleared your diary. Well, I've cleared it of things I didn't think you'd enjoy. |
-| `month_3` | Morning, boss. Coffee's on the desk, the debates are on the board. |
+| `month_3` | Morning, boss. Coffee's on the desk, and so are the debates. |
 | `month_4` | Another month. You know, I keep a list of everything you get right. I need a bigger notebook. |
 | `month_5` | Three moves this month. Make them count. Not that you'd do anything else. |
 | `month_6` | Fresh month, fresh headlines. Somebody out there is saying something you could answer. |

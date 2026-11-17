@@ -52,15 +52,18 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile). No screen code |
 | `godot/scripts/sim.gd` | The end of the chain, the autoload `Game`: loading content, a new game, the monthly update, the clock |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |
-| `godot/scripts/board.gd` | The evidence board: what needs you now |
+| `godot/scripts/board.gd` | The desk beside the map: what needs you now |
 | `godot/scripts/files.gd` | The planning files along the top bar |
-| `godot/scripts/paper.gd` | Decision sheets as paper: front pages, index cards, the ledger |
+| `godot/scripts/paper.gd` | Decision sheets: paper under the lamp (front pages, choices, drafts, the ledger) or a television screen (anything broadcast) |
 | `godot/scripts/map_view.gd` | The map |
 | `godot/scripts/advisor.gd` | Carlos in the corner of headquarters, and Margaret's notes |
-| `godot/scripts/look.gd` | Colours, fonts and small builders |
-| `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `voice/carlos/` for Carlos's recordings; `events/` and `portraits/` for pictures to come |
+| `godot/scripts/look.gd` | The look: colours, fonts and small builders |
+| `godot/scripts/photo.gd`, `face.gd` | A photograph through the game's one filter; a leader's face in a circle |
+| `godot/shaders/` | The photo filter, lamp light on paper, the television screen, film grain |
+| `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `voice/carlos/` for Carlos's recordings; `events/`, `portraits/`, `tours/` and `places/` for photographs (see [IMAGES.md](IMAGES.md)) |
 | `godot/tests/` | `parity.gd` plays a whole seeded game as a smoke test; `debates.gd` prints how the national debate develops |
 | `tools/build_map.py` | Builds the map from the Krita file |
+| `tools/image_list.py` | Writes [IMAGES.md](IMAGES.md): how pictures are used and which are still missing |
 | `tools/voice_script.py` | Writes [VOICE.md](VOICE.md), the recording script for Carlos, from his lines |
 | `tools/remap_axes.py` | One-off script that moved the content from eight axes to seven |
 

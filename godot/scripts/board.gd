@@ -166,6 +166,10 @@ func render(s: Dictionary) -> void:
 		var c = _card(true)
 		c.set_meta("wide", true)
 		var v = _vbox(c)
+		if sum.get("picture"):
+			var ph = Photo.new(sum.picture)
+			ph.custom_minimum_size.y = 150
+			v.add_child(ph)
 		v.add_child(Look.caps("%s · %s" % [sum.kicker, G.date_label(s.week, false)], 12, Look.RED))
 		v.add_child(Look.label(sum.title, "news_bold", 29, Look.INK, true))
 		if sum.text != "": v.add_child(_clamp_lines(Look.label(sum.text, "news", 16, Look.MUTED, true), 3))
@@ -332,7 +336,7 @@ func _front_summary(s: Dictionary, front) -> Dictionary:
 		"event":
 			var ev: Dictionary = game.event_of(front)
 			var kinds = {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity": "Opportunity", "trap": "Tricky moment", "scandal": "Scandal", "regional": "Regional issue", "foreign": "Foreign affairs", "followup": "Consequences", "secret": "In confidence", "violence": "Political violence"}
-			return {"kicker": kinds.get(ev.get("kind", ""), "Event"), "title": ev.title, "text": ev.text, "stamp": "Decision needed"}
+			return {"kicker": kinds.get(ev.get("kind", ""), "Event"), "title": ev.title, "text": ev.text, "stamp": "Decision needed", "picture": Photo.event(ev)}
 		"budget":
 			return {"kicker": "Quarterly budget", "title": "Where does the money go?", "text": "₱%sM in the account. Trips, social media, TV and the national tour are waiting for a decision." % Game.fmt1(s.money), "stamp": "Sign off"}
 		"poll":

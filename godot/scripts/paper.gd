@@ -182,10 +182,19 @@ func small(t: String, col := Look.MUTED) -> Label:
 	return add(Look.label(t, "body", 13, col, true))
 
 ## A note in the margin, in somebody's handwriting.
-func scribble(t: String, col := Look.RED) -> Label:
-	var l = Look.label(t, "hand", 22, col, true)
-	l.rotation_degrees = -1.0
+func scribble(t: String, col := Look.OXBLOOD) -> Label:
+	var l = Look.label(t, "hand", 23, col, true)
+	l.add_theme_constant_override("line_spacing", -3)
 	return add(l)
+
+## A photograph across the sheet (nothing at all if there is no picture). On paper it is
+## printed in the paper's two inks; on the screen it is the broadcast.
+func photo(tex: Texture2D, height := 280, caption := "") -> void:
+	if tex == null: return
+	var ph = Photo.new(tex, on_air)
+	ph.custom_minimum_size.y = height
+	v.add_child(ph)
+	if caption != "": small(caption)
 
 func masthead(left: String, name: String, right: String) -> void:
 	var h = HBoxContainer.new()
@@ -361,7 +370,9 @@ func button(t: String, cb: Callable, primary := true, disabled := false) -> Butt
 		b.add_theme_color_override("font_disabled_color", Color(0, 0, 0, 0.3))
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	b.pressed.connect(cb)
-	if t.length() <= 2: b.custom_minimum_size = Vector2(38, 36)
+	if t.length() <= 2:
+		b.custom_minimum_size = Vector2(38, 36)
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	return b
 
 func actions(buttons: Array) -> void:

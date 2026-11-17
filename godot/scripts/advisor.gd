@@ -193,12 +193,21 @@ func margaret(trigger: String) -> void:
 	var tw = _note.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_note, "position:y", size.y - _note.size.y - 70, 0.5)
 
-## Carlos until his portrait is painted: a man in a dark office with the lamp behind
-## him. A silhouette with a warm edge; it nods while he talks.
+## Carlos: his picture (godot/assets/portraits/carlos.jpg) or, until there is one, a man
+## in a dark office with the lamp behind him: a silhouette with a warm edge, which nods
+## while he talks.
 class Portrait extends Control:
 	var _talk := 0.0
+	var _has_photo := false
 	func _ready() -> void:
 		clip_contents = true
+		var tex = Photo.find(["portraits/carlos"])
+		if tex:
+			_has_photo = true
+			var ph = Photo.new(tex, true, true)
+			ph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			ph.show_behind_parent = true
+			add_child(ph)
 	func talk(seconds: float) -> void:
 		_talk = seconds
 	func _process(d: float) -> void:
@@ -209,6 +218,9 @@ class Portrait extends Control:
 		var c = size / 2
 		var r = size.x / 2
 		var bob = sin(Time.get_ticks_msec() / 90.0) * 1.5 if _talk > 0 else 0.0
+		if _has_photo:
+			draw_arc(c, r - 1, 0, TAU, 48, Look.LAMP if _talk > 0 else Look.N500, 1.5, true)
+			return
 		draw_circle(c, r - 1, Look.N700)
 		# the lamp somewhere behind his right shoulder
 		var lamp = c + Vector2(r * 0.3, -r * 0.18)
