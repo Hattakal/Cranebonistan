@@ -52,6 +52,17 @@ class Card extends PanelContainer:
 		if clickable and e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT and e.pressed:
 			pressed.emit(); accept_event()
 
+## Somebody put a cup down on it.
+class CoffeeRing extends Control:
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	func _draw() -> void:
+		var c = Vector2(size.x - 74, 46)
+		var col = Color(Look.LAMP_DIM, 0.22)
+		draw_arc(c, 27, 0.5, 5.3, 48, col, 2.6, true)
+		draw_arc(c, 24.5, 1.4, 4.2, 32, Color(col, 0.12), 1.4, true)
+		draw_circle(c + Vector2(34, 17), 2.2, Color(col, 0.18))
+
 ## A small light that breathes: something is waiting.
 class Pulse extends Control:
 	var col := Look.RED
@@ -91,6 +102,13 @@ class Room extends Control:
 		var glow_h = 300.0
 		draw_polygon(PackedVector2Array([Vector2(0, base - glow_h), Vector2(size.x, base - glow_h), Vector2(size.x, base), Vector2(0, base)]),
 			PackedColorArray([Color(Look.N600, 0.0), Color(Look.N600, 0.0), Color(Look.N500, 0.5), Color(Look.N500, 0.5)]))
+		# a big low moon, so the night isn't only grim
+		var moon = Vector2(size.x * 0.78, base - 215)
+		draw_circle(moon, 64, Color(Look.TXT, 0.03))
+		draw_circle(moon, 46, Color(Look.TXT, 0.05))
+		draw_circle(moon, 30, Color(Look.mix(Look.TXT, Look.LAMP, 0.25), 0.78))
+		draw_circle(moon + Vector2(-9, -6), 6, Color(Look.N500, 0.16))
+		draw_circle(moon + Vector2(8, 9), 4, Color(Look.N500, 0.14))
 		var rng = RandomNumberGenerator.new()
 		rng.seed = 1964
 		var tallest = Vector2.ZERO
@@ -166,6 +184,11 @@ func render(s: Dictionary) -> void:
 		var c = _card(true)
 		c.set_meta("wide", true)
 		var v = _vbox(c)
+		if not sum.get("picture"):
+			var ring = CoffeeRing.new()
+			ring.top_level = false
+			c.add_child(ring)
+			c.move_child(ring, 0)
 		if sum.get("picture"):
 			var ph = Photo.new(sum.picture)
 			ph.custom_minimum_size.y = 150

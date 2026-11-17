@@ -19,6 +19,8 @@ var on_air := false           # true once screen() has turned the sheet into a t
 var _sheet_mat: ShaderMaterial
 
 # the colours of whatever is being read: ink on paper, or light on the screen
+var style := ""               # the newspaper being read ("tabloid", "broadsheet", "local"), or "" for any other sheet
+var _root: VBoxContainer      # the sheet itself; `v` may point at a column inside it for a while
 var ink := Look.INK
 var muted := Look.MUTED
 var line := Look.LINE
@@ -53,6 +55,7 @@ func _init(width := 820, can_put_down := false) -> void:
 	v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 14)
 	_paper.add_child(v)
+	_root = v
 	if can_put_down:
 		var b = Button.new()
 		# a real button: it says what it does and looks pressable
@@ -86,7 +89,7 @@ func _sheet_box(screen_on: bool) -> StyleBoxFlat:
 		sb.shadow_color = Color(0.35, 0.55, 1.0, 0.1)    # the glow of the set in a dark room
 		sb.shadow_size = 60
 	else:
-		sb = Look.box(Look.PAPER, 1, Color.TRANSPARENT, 0, 0, 0)
+		sb = Look.box(Look.NEWSPRINT if style != "" else Look.PAPER, 1, Color.TRANSPARENT, 0, 0, 0)
 		sb.shadow_color = Color(0, 0, 0, 0.6)
 		sb.shadow_size = 30
 		sb.shadow_offset = Vector2(0, 14)
@@ -97,12 +100,14 @@ func _ready() -> void:
 	_paper.resized.connect(func():
 		_paper.pivot_offset = Vector2(_paper.size.x / 2, 200)
 		_sheet_mat.set_shader_parameter("sheet", _paper.size))
-	# no bounce: it is lifted into the light
-	_paper.scale = Vector2(0.965, 0.965)
+	# dropped on the desk in front of you: it lands a little crooked and settles
+	_paper.scale = Vector2(0.94, 0.94)
+	_paper.rotation_degrees = -2.2
 	modulate.a = 0
-	var tw = create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.tween_property(self, "modulate:a", 1.0, 0.28)
-	tw.tween_property(_paper, "scale", Vector2.ONE, 0.5)
+	var tw = create_tween().set_parallel().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "modulate:a", 1.0, 0.22)
+	tw.tween_property(_paper, "scale", Vector2.ONE, 0.42)
+	tw.tween_property(_paper, "rotation_degrees", 0.0, 0.5)
 
 ## Turn the sheet into a television: for what the country sees rather than what you read.
 func screen() -> void:
@@ -130,6 +135,11 @@ func close() -> void:
 	tw.tween_callback(func(): closed.emit(); queue_free())
 
 func clear() -> void:
+	v = _root
+	_side_col = null
+	if style != "":
+		style = ""
+		if not on_air: _paper.add_theme_stylebox_override("panel", _sheet_box(false))
 	for c in v.get_children():
 		if c != _down_btn: c.queue_free()
 
@@ -171,9 +181,178 @@ func kicker(text: String, col := Look.RED) -> void:
 	add(Look.caps(text, 13, col, 2))
 
 func heading(text: String, size := 36, font := "news_bold") -> void:
-	var l = Look.label(text, font, size, Look.INK, true)
-	l.add_theme_constant_override("line_spacing", -4)
+	var l: Label
+	if style == "tabloid" and not on_air:
+		# a tabloid shouts: heavy capitals, as big as will fit
+		l = Look.label(text.to_upper(), "display_bold", int(size * 1.45), Look.INK, true)
+		l.add_theme_constant_override("line_spacing", -12)
+	else:
+		l = Look.label(text, font, size, Look.INK, true)
+		l.add_theme_constant_override("line_spacing", -4)
 	add(l)
+
+# ---------- A newspaper's front page ----------
+## The paper's look, from papers.json, by the name the game uses for it.
+static func paper_info(name: String, region := "") -> Dictionary:
+	var data: Dictionary = Mods.data("papers")
+	var out: Dictionary = data.DEFAULT.duplicate()
+	for pp in data.PAPERS:
+		if String(pp.name).replace("{region}", region) == name:
+			out = pp.duplicate()
+	out.name = name
+	out.motto = String(out.get("motto", "")).replace("{region}", region)
+	return out
+
+## The top of a front page: the nameplate in the paper's own style, then the line with
+## the date, the issue number and the price. Everything after it on the sheet is set as
+## that newspaper would set it (see heading() and story()).
+func front_page(name: String, date: String, section: String, week := 0, region := "") -> void:
+	var info: Dictionary = paper_info(name, region)
+	style = info.style
+	_paper.add_theme_stylebox_override("panel", _sheet_box(false))
+	var year = int(date.right(4)) if date.right(4).is_valid_int() else 2027
+	var issue = "No. %d" % (int(info.get("founded", 1990)) % 97 * 113 + week * 6 + 1)
+	var vol = "Vol. %d" % maxi(1, year - int(info.get("founded", 1990)))
+	match style:
+		"tabloid":
+			var h = HBoxContainer.new()
+			h.add_theme_constant_override("separation", 16)
+			var block = PanelContainer.new()
+			var bsb = Look.box(Look.RED, 0, Color.TRANSPARENT, 0, 0, 0)
+			bsb.content_margin_left = 18; bsb.content_margin_right = 22; bsb.content_margin_top = 0; bsb.content_margin_bottom = 2
+			block.add_theme_stylebox_override("panel", bsb)
+			block.add_child(Look.label(name.to_upper(), "redtop", 46, Color.WHITE))
+			h.add_child(block)
+			var side = VBoxContainer.new()
+			side.alignment = BoxContainer.ALIGNMENT_CENTER
+			side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			side.add_theme_constant_override("separation", 0)
+			var mt = Look.label(info.motto, "body_italic", 13, Look.INK, true)
+			mt.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			side.add_child(mt)
+			var pr = Look.caps("%s · %s" % [date, info.price], 12, Look.MUTED, 1)
+			pr.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			side.add_child(pr)
+			h.add_child(side)
+			add(h)
+			var strip = PanelContainer.new()
+			var ssb = Look.box(Look.INK, 0, Color.TRANSPARENT, 0, 0, 4)
+			ssb.content_margin_left = 10
+			strip.add_theme_stylebox_override("panel", ssb)
+			strip.add_child(Look.caps(section, 14, Color.WHITE, 3, "display_bold"))
+			v.add_child(strip)
+		"local":
+			rule(3)
+			var nm = Look.caps(name, 34, Look.INK, 5, "news_bold")
+			nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			add(nm)
+			if info.motto != "":
+				var mo = Look.label(info.motto, "news_italic", 14, Look.MUTED)
+				mo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				add(mo)
+			_dateline(vol + " · " + issue, date, section + " · " + info.price)
+		_:
+			# a broadsheet: an "ear" either side of a blackletter nameplate
+			var h = HBoxContainer.new()
+			h.add_theme_constant_override("separation", 12)
+			h.add_child(_ear("Weather", _weather(week)))
+			var mid = VBoxContainer.new()
+			mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			mid.add_theme_constant_override("separation", -4)
+			var nm = Look.label(name, "blackletter", 54, Look.INK)
+			nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			mid.add_child(nm)
+			if info.motto != "":
+				var mo = Look.label(info.motto, "news_italic", 13, Look.MUTED)
+				mo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				mid.add_child(mo)
+			h.add_child(mid)
+			h.add_child(_ear("Price", "%s, and worth it" % info.price))
+			add(h)
+			_dateline(vol + " · " + issue, date, section)
+
+func _weather(week: int) -> String:
+	var w: Array = Mods.data("papers").get("WEATHER", [])
+	return String(w[(week / 4) % w.size()]) if w.size() else ""
+
+## A small box in the corner of a nameplate.
+func _ear(title: String, body: String) -> Control:
+	var p = PanelContainer.new()
+	p.add_theme_stylebox_override("panel", Look.box(Color(0, 0, 0, 0), 0, Look.INK, 1, 0, 6))
+	p.custom_minimum_size.x = 132
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var b = VBoxContainer.new()
+	b.add_theme_constant_override("separation", 0)
+	b.add_child(Look.caps(title, 10, Look.INK, 1, "display_bold"))
+	var t = Look.label(body, "news", 12, Look.INK, true)
+	t.custom_minimum_size.x = 118
+	b.add_child(t)
+	p.add_child(b)
+	return p
+
+## Between two rules: volume and number, the date, the section.
+func _dateline(left: String, mid: String, right: String) -> void:
+	rule(3)
+	var h = HBoxContainer.new()
+	var parts = [[left, HORIZONTAL_ALIGNMENT_LEFT], [mid, HORIZONTAL_ALIGNMENT_CENTER], [right, HORIZONTAL_ALIGNMENT_RIGHT]]
+	for part in parts:
+		var l = Look.caps(part[0], 11, Look.INK, 2)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		l.horizontal_alignment = part[1]
+		h.add_child(l)
+	v.add_child(h)
+	rule(1)
+
+## The story under a headline, as a newspaper sets it: a place and a dash, then
+## justified text.
+func story(t: String, place := "", size := 17) -> Label:
+	var l = Look.label((place.to_upper() + " — " if place != "" else "") + t, "news", size, Look.INK, true)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_FILL
+	l.justification_flags = TextServer.JUSTIFICATION_WORD_BOUND | TextServer.JUSTIFICATION_KASHIDA | TextServer.JUSTIFICATION_SKIP_LAST_LINE
+	return add(l)
+
+## Split the sheet into a main column and a narrow one beside it, with a rule between.
+## Everything added goes to the main column until aside(), then to the narrow one,
+## until join().
+var _side_col: VBoxContainer = null
+func split(side_width := 210) -> void:
+	var h = HBoxContainer.new()
+	h.add_theme_constant_override("separation", 16)
+	var main = VBoxContainer.new()
+	main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	main.add_theme_constant_override("separation", 12)
+	h.add_child(main)
+	var r = ColorRect.new()
+	r.color = Look.INK
+	r.custom_minimum_size.x = 1
+	h.add_child(r)
+	_side_col = VBoxContainer.new()
+	_side_col.custom_minimum_size.x = side_width
+	_side_col.add_theme_constant_override("separation", 7)
+	h.add_child(_side_col)
+	_root.add_child(h)
+	v = main
+
+func aside() -> void:
+	if _side_col: v = _side_col
+
+func join() -> void:
+	v = _root
+	_side_col = null
+
+## A short item in the narrow column: a small heading over a line or two.
+func brief(head: String, body := "") -> void:
+	if head != "": add(Look.label(head, "news_bold", 15, Look.INK, true))
+	if body != "": add(Look.label(body, "news", 13, Look.MUTED, true))
+	rule(1, Look.LINE)
+
+func side_head(t: String) -> void:
+	var p = PanelContainer.new()
+	var sb = Look.box(Look.INK, 0, Color.TRANSPARENT, 0, 0, 3)
+	sb.content_margin_left = 8
+	p.add_theme_stylebox_override("panel", sb)
+	p.add_child(Look.caps(t, 11, Color.WHITE, 2, "display_bold"))
+	v.add_child(p)
 
 func text(t: String, size := 17, font := "news", col := Look.INK) -> Label:
 	return add(Look.label(t, font, size, col, true))

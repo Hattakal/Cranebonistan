@@ -2,8 +2,8 @@
 // colours and gradients look photographed instead of drawn.
 shader_type canvas_item;
 
-uniform float grain = 0.03;      // how strong the grain is
-uniform float vignette = 0.42;    // how dark the corners get
+uniform float grain = 0.024;      // how strong the grain is
+uniform float vignette = 0.3;    // how dark the corners get
 
 float hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);

@@ -36,6 +36,7 @@ const CARD := Color("f8f5ee")
 const INK := Color("14171d")
 const MUTED := Color("5b626e")
 const LINE := Color("c8c3b7")
+const NEWSPRINT := Color("e7e1d1")   # cheaper, greyer paper: the newspapers
 # the map at night
 const SEA := Color("0a0e15")
 const LAND := Color("1a212d")
@@ -53,6 +54,7 @@ const T900 := N900
 # display: Barlow Condensed (labels, numbers, buttons)     body: IBM Plex Sans Condensed
 # news:    Newsreader (headlines, the papers, speeches)    type: IBM Plex Mono (memos, datelines)
 # hand:    Caveat (a note in the margin)
+# blackletter: Manufacturing Consent (a broadsheet's nameplate)   redtop: Barlow, heavy and slanted (a tabloid's)
 static var _fonts := {}
 
 static func _file(path: String) -> FontFile:
@@ -84,6 +86,13 @@ static func font(name: String) -> Font:
 		"news_bold": f = _variable("res://assets/fonts/Newsreader.ttf", {"wght": 640, "opsz": 40})
 		"news_italic": f = _variable("res://assets/fonts/Newsreader-Italic.ttf", {"wght": 420, "opsz": 24})
 		"hand": f = _variable("res://assets/fonts/Caveat.ttf", {"wght": 560})
+		"blackletter": f = _file("res://assets/fonts/ManufacturingConsent.ttf")
+		"redtop":   # a tabloid's nameplate: heavy, leaning forward
+			var rt = FontVariation.new()
+			rt.base_font = _file("res://assets/fonts/BarlowCondensed-SemiBold.ttf")
+			rt.variation_embolden = 0.35
+			rt.variation_transform = Transform2D(Vector2(1, 0), Vector2(-0.2, 1), Vector2.ZERO)
+			f = rt
 		"body": f = _file("res://assets/fonts/Plex-Regular.ttf")
 		"body_bold": f = _file("res://assets/fonts/Plex-SemiBold.ttf")
 		"body_italic": f = _file("res://assets/fonts/Plex-Italic.ttf")

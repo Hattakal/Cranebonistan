@@ -2,13 +2,14 @@
 
 *This file is written by `tools/image_list.py`. Edit the script, not this file; run it again after adding pictures or events.*
 
-The game shows photographs in four places. None is required: a missing picture is simply not shown, so pictures can go in one at a time.
+The game shows photographs in five places. None is required: a missing picture is simply not shown, so pictures can go in one at a time.
 
 | Where it shows | File (in `godot/assets/`) | Shape |
 |---|---|---|
 | An event: on the desk, in the morning paper, and behind the evening news | `events/<event id>.jpg`; if there is none, `events/_<kind>.jpg` is used for every event of that kind | wide, about 16:9 |
 | The leader on the road | `tours/<region id>_<great, good or flat>.jpg`; if there is none, `tours/<great, good or flat>.jpg` | wide, about 3:1 (the middle band of a 16:9 picture is fine) |
 | A leader's face (top bar, the Parties and Country files) | `portraits/<leader's name in small letters with dashes>.jpg`, or `portraits/<party id>.jpg`; Carlos is `portraits/carlos.jpg` | square, face in the upper middle |
+| The lead story of the monthly news | `news/<kind>.jpg` (kinds: vacuum, bad, good, neutral, threat, issue) | wide |
 | A neighbouring country's profile | `places/<country id>.jpg` | wide |
 
 `.jpg`, `.png` and `.webp` all work. About 1600 pixels wide is plenty (500 for a portrait).

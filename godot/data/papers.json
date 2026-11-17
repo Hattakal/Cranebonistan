@@ -1,0 +1,19 @@
+{
+ "_note": "The newspapers as they look on a front page. 'name' must match the name the game uses ({region} stands for a region's name); 'style' is tabloid (red nameplate, shouting headlines), broadsheet (blackletter nameplate, ears, sober headlines) or local (plain capitals between rules). 'motto', 'price' and 'founded' are printed on the nameplate. WEATHER lines appear in a corner of the front page, one per month in turn. All of this is only for show: the rules don't read it.",
+ "PAPERS": [
+  {"id": "post", "name": "The Morning Post", "style": "tabloid", "motto": "The paper that asks what you're all thinking", "price": "₱1.50", "founded": 1988},
+  {"id": "herald", "name": "The Cranebo Herald", "style": "broadsheet", "motto": "Founded 1964. Independent ever since, it says.", "price": "₱3.00", "founded": 1964},
+  {"id": "courier", "name": "The {region} Courier", "style": "local", "motto": "All the news of {region}, twice a week", "price": "₱1.00", "founded": 1971}
+ ],
+ "DEFAULT": {"style": "broadsheet", "motto": "", "price": "₱2.50", "founded": 1990},
+ "WEATHER": [
+  "Cranebo: rain, then more of it.",
+  "Erland: dry. The farmers say too dry.",
+  "Yamlin coast: fog until noon.",
+  "Alinni: clear and cold.",
+  "Fauran: wind, as usual.",
+  "Cranebo: fine. Enjoy it while it lasts.",
+  "The north: first snow on the passes.",
+  "Yamlin: warm for the time of year. Nobody trusts it."
+ ]
+}

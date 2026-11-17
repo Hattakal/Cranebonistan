@@ -684,10 +684,11 @@ const KINDS := {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity
 func _event_header(p: Paper, ev: Dictionary) -> void:
 	var crisis = ""
 	if ev.get("kind", "") == "crisis" and S.crisis: crisis = Game.by_id(G.CRISES, S.crisis.id).name
-	p.masthead(G.date_label(S.week, false), "The Morning Post", ("Crisis · " + crisis) if crisis != "" else KINDS.get(ev.get("kind", ""), "Event"))
+	p.front_page("The Morning Post", G.date_label(S.week, false), ("Crisis · " + crisis) if crisis != "" else KINDS.get(ev.get("kind", ""), "Event"), S.week)
 	p.heading(ev.title, 42)
-	p.photo(Photo.event(ev), 300)
-	p.text(ev.text, 18)
+	p.split()
+	p.photo(Photo.event(ev), 280)
+	p.story(ev.text, G.MAP.capital, 18)
 	if ev.get("government"):
 		var gov = null
 		for x in S.parties:
@@ -712,10 +713,30 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 	if ev.get("echo") and S.record.blamed.size():
 		var b: Dictionary = S.record.blamed[-1]
 		p.quote(b.text, "%s, %s. Your words were quoted at the scene." % [G.player_party(S).leader, G.date_label(b.week, false)])
+	p.aside()
+	_front_aside(p)
+	p.join()
+
+## The narrow column of a front page: the other headlines, and how the country is doing.
+func _front_aside(p: Paper) -> void:
+	if S.log.size():
+		p.side_head("Also today")
+		for i in range(S.log.size() - 1, maxi(-1, S.log.size() - 4), -1): p.brief(S.log[i].text)
+	p.side_head("The country")
+	for ind in G.INDICATORS:
+		var row = HBoxContainer.new()
+		var l = Look.label(ind.label, "body", 13, Look.MUTED)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		row.add_child(Look.label(G.indicator_word(ind.id, S.world[ind.id]), "body_bold", 13, Look.INK))
+		p.add(row)
+	p.rule(1, Look.LINE)
+	p.side_head("Weather")
+	p.add(Look.label(p._weather(S.week), "news_italic", 14, Look.INK, true))
 
 func _event_sheet(front: Dictionary) -> void:
 	var ev: Dictionary = G.event_of(front)
-	var p = _paper()
+	var p = _paper(900)
 	_event_step1(p, ev)
 
 func _event_step1(p: Paper, ev: Dictionary) -> void:
@@ -1050,19 +1071,38 @@ func _poll_sheet(front: Dictionary) -> void:
 
 func _news_sheet(front: Dictionary) -> void:
 	var labels = {"vacuum": "Power vacuum", "bad": "Trouble", "good": "Comeback", "neutral": "Change", "threat": "Threat", "issue": "Hot issue"}
-	var p = _paper(820)
-	p.masthead(G.date_label(S.week, false), "The Cranebo Herald", "Late edition")
+	var p = _paper(900)
+	p.front_page("The Cranebo Herald", G.date_label(S.week, false), "Late edition", S.week)
 	var lead: Dictionary = front.items[0]
 	p.kicker(labels.get(lead.get("kind", ""), "News"))
-	p.heading(lead.title, 40)
-	p.text(lead.text, 18)
+	p.heading(lead.title, 42)
+	p.split()
+	p.photo(Photo.find(["news/" + str(lead.get("kind", ""))]), 240)
+	p.story(lead.text, G.MAP.capital, 18)
+	p.aside()
+	_front_aside(p)
+	p.join()
 	if front.items.size() > 1:
-		p.rule(1)
-		p.add(Look.caps("Also in this edition", 11, Look.MUTED, 2))
-		for it in front.items.slice(1):
-			p.add(Look.caps(labels.get(it.get("kind", ""), "News"), 11, Look.RED, 2))
-			p.add(Look.label(it.title, "news_bold", 20, Look.INK, true))
-			p.text(it.text, 15)
+		p.rule(2)
+		# the rest of the page, in columns under the lead
+		var cols = HBoxContainer.new()
+		cols.add_theme_constant_override("separation", 16)
+		var rest: Array = front.items.slice(1)
+		for i in rest.size():
+			var it: Dictionary = rest[i]
+			if i > 0:
+				var cr = ColorRect.new(); cr.color = Look.INK; cr.custom_minimum_size.x = 1
+				cols.add_child(cr)
+			var col = VBoxContainer.new()
+			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			col.add_theme_constant_override("separation", 6)
+			col.add_child(Look.caps(labels.get(it.get("kind", ""), "News"), 11, Look.RED, 2))
+			col.add_child(Look.label(it.title, "news_bold", 21, Look.INK, true))
+			var body = Look.label(it.text, "news", 15, Look.INK, true)
+			body.horizontal_alignment = HORIZONTAL_ALIGNMENT_FILL
+			col.add_child(body)
+			cols.add_child(col)
+		p.add(cols)
 	p.actions([p.button("Read on", func(): G.dismiss_front(S); _done(p))])
 
 func _debate_sheet() -> void:
@@ -1139,7 +1179,7 @@ func _interview_piece(p: Paper) -> void:
 	p.paper()
 	var iv: Dictionary = S.interview
 	var v: Dictionary = iv.get("verdict", {}) if iv.get("verdict") else {"title": "", "text": ""}
-	p.masthead(G.date_label(S.week), iv.outletName, "The big interview")
+	p.front_page(iv.outletName, G.date_label(S.week, false), "The big interview", S.week)
 	p.kicker("%s meets %s" % [iv.who, G.player_party(S).leader])
 	p.heading(v.title, 40)
 	p.text(v.text, 18, "news_italic")
@@ -1244,7 +1284,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	p.clear()
 	p._paper.custom_minimum_size.x = 860   # the district sheet is narrow; the story gets a full page
 	var r = Game.by_id(G.REGIONS, res.region)
-	p.masthead(G.date_label(S.week), "The %s Courier" % r.name, "On the road")
+	p.front_page("The %s Courier" % r.name, G.date_label(S.week, false), "On the road", S.week, r.name)
 	p.kicker("%s in %s" % [G.player_party(S).leader, res.place])
 	var heads = {"great": "%s packs the halls in %s", "good": "%s makes the rounds in %s", "flat": "A quiet visit to %s for %s"}
 	var head: String = heads.get(res.kind, "%s in %s")
@@ -1256,7 +1296,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	photo.custom_minimum_size = Vector2(0, 260)
 	p.add(photo)
 	if res.caption != "": p.small(res.caption)
-	if res.story != "": p.text(res.story, 18, "news")
+	if res.story != "": p.story(res.story, res.place, 18)
 	var b: int = Game.jround(float(res.before) * 100)
 	var a: int = Game.jround(float(res.after) * 100)
 	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.GOOD if a > b else Look.INK))
@@ -1446,7 +1486,7 @@ func _profile_sheet() -> void:
 	var pr: Dictionary = G.build_profile(S)
 	var you: Dictionary = G.player_party(S)
 	var p = _paper(860, false)
-	p.masthead(G.date_label(S.week, false), "The Cranebo Herald", "Profile")
+	p.front_page("The Cranebo Herald", G.date_label(S.week, false), "Profile", S.week)
 	p.heading(pr.headline, 40)
 	p.text("%s: %s" % [pr.archetype.title, pr.archetype.line], 19, "news_italic")
 	if pr.signature: p.quote(pr.signature.text, "%s, %s" % [you.leader, G.date_label(pr.signature.week, false)])

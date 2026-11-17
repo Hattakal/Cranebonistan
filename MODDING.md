@@ -82,6 +82,9 @@ A working example is in `mods/example-more-cities/` (switched off; set `"enabled
 
 ## Changing pictures, sounds and fonts
 
+The newspapers' front pages (nameplate style, motto, price, weather lines) are in `data/papers.json`; a mod can restyle a paper or add one, matched by the name the game prints.
+
+
 Put a file in your mod's `assets/` folder at the same path as in `godot/assets/`, and it is used instead:
 
 - Photographs (`.jpg`, `.png` or `.webp`; all are shown through the game's one filter): `assets/events/<event id>.jpg` or `assets/events/_<kind>.jpg`, `assets/portraits/<leader-name>.jpg` or `<party id>.jpg`, `assets/tours/<region>_<great|good|flat>.jpg` or `assets/tours/<great|good|flat>.jpg`, `assets/places/<country id>.jpg`. [IMAGES.md](IMAGES.md) has the full list. A mod can add pictures the game doesn't have yet
