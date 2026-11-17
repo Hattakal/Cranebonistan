@@ -12,7 +12,7 @@ func _ready() -> void:
 	visible = false
 	z_index = 40
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var sb = Look.box(Color(0.08, 0.06, 0.04, 0.96), 4, Look.BRASS, 2, 0, 12)
+	var sb = Look.box(Color(Look.N850, 0.97), 3, Look.N500, 1, 0, 12)
 	add_theme_stylebox_override("panel", sb)
 	# pinned to the right edge, under the top bar
 	anchor_left = 1.0; anchor_right = 1.0; anchor_top = 0.0; anchor_bottom = 1.0
@@ -35,7 +35,7 @@ func _unhandled_input(e: InputEvent) -> void:
 
 # ---------- Building the panel ----------
 func _head(t: String) -> void:
-	var l = Look.caps(t, 11, Look.BRASS, 2)
+	var l = Look.caps(t, 11, Look.LAMP, 2)
 	_body.add_child(l)
 
 func _row(buttons: Array) -> void:
