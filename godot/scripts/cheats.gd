@@ -58,6 +58,15 @@ func _build() -> void:
 	_status = Look.label("", "body", 12, Look.CREAM_DIM, true)
 	_status.custom_minimum_size.x = 380
 	_body.add_child(_status)
+	_head("Look (the whole colour scheme; the screen rebuilds)")
+	for pal in Look.PALETTES:
+		var b = Button.new()
+		b.text = ("● " if pal == Look.palette else "") + {"night": "Night: cold, steel", "study": "Study: warm, wood"}.get(pal, pal)
+		b.add_theme_font_size_override("font_size", Look.fs(12))
+		b.pressed.connect(func():
+			Look.save_choice(pal)
+			get_tree().reload_current_scene())
+		_body.add_child(b)
 	_head("Time (decisions on the way get the first answer)")
 	_row([["Next month", func(): _play_months(1)], ["+3 months", func(): _play_months(3)], ["+6 months", func(): _play_months(6)],
 		["+1 year", func(): _play_months(12)]])

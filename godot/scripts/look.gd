@@ -8,46 +8,103 @@ class_name Look
 extends RefCounted
 
 # ---------- Colours ----------
-# the night: backgrounds, from the deepest shadow up to a raised, hovered surface
-const N950 := Color("06080c")
-const N900 := Color("0a0d13")
-const N850 := Color("0f131b")
-const N800 := Color("141923")
-const N700 := Color("1b2230")
-const N600 := Color("273042")
-const N500 := Color("3a465b")
+# Two palettes, the same roles in each; use() picks one before the screens are built.
+#  "night": the campaign office at night: cold blue-black, steel, white paper (the first pass).
+#  "study": the same office in an old building: warm dark wood and leather, a bottle-green
+#           sea on the map, warm white paper. The Knives Out to night's Glass Onion.
+const PALETTES := {
+	"night": {"N950": "06080c", "N900": "0a0d13", "N850": "0f131b", "N800": "141923", "N700": "1b2230", "N600": "273042", "N500": "3a465b", "TXT": "e8ebf1", "DIM": "9aa5b7", "FAINT": "66738a", "LAMP": "f2b866", "LAMP_DIM": "a9844d", "RED": "d2392f", "RED_HI": "ff6a5c", "OXBLOOD": "8f231c", "GOOD": "1f7d55", "GOOD_HI": "5cc79a", "PAPER": "f1f2f3", "PAPER_2": "e4e6e9", "CARD": "fbfbfc", "INK": "14171d", "MUTED": "5b626e", "LINE": "c6cad0", "SEA": "0a0e15", "LAND": "1a212d", "LAND_FOREIGN": "121720", "BORDER": "06080c"},
+	"study": {"N950": "0c0705", "N900": "130b07", "N850": "1a0f0a", "N800": "23150d", "N700": "301d12", "N600": "462b1b", "N500": "6a4630", "TXT": "f3e8d8", "DIM": "c0aa8e", "FAINT": "8a735d", "LAMP": "f2b552", "LAMP_DIM": "ad7d3f", "RED": "c3362a", "RED_HI": "f2735f", "OXBLOOD": "7a1f17", "GOOD": "2b7a4b", "GOOD_HI": "86cc9c", "PAPER": "f4f0e8", "PAPER_2": "e8e1d5", "CARD": "fbf8f2", "INK": "1e1712", "MUTED": "6b5e52", "LINE": "d4cbbc", "SEA": "0b1a15", "LAND": "2b2019", "LAND_FOREIGN": "1a120d", "BORDER": "0c0705"},
+}
+static var palette := "night"
+# the night (backgrounds), from the deepest shadow up to a raised, hovered surface
+static var N950: Color
+static var N900: Color
+static var N850: Color
+static var N800: Color
+static var N700: Color
+static var N600: Color
+static var N500: Color
 # text on the dark
-const TXT := Color("e8ebf1")
-const DIM := Color("9aa5b7")
-const FAINT := Color("66738a")
+static var TXT: Color
+static var DIM: Color
+static var FAINT: Color
 # the one warm light, and the one red
-const LAMP := Color("f2b866")
-const LAMP_DIM := Color("a9844d")
-const RED := Color("d2392f")
-const RED_HI := Color("ff6a5c")     # red text on the dark
-const OXBLOOD := Color("8f231c")
-const GOOD := Color("1f7d55")       # on paper
-const GOOD_HI := Color("5cc79a")    # on the dark
-const AMBER := LAMP
+static var LAMP: Color
+static var LAMP_DIM: Color
+static var RED: Color
+static var RED_HI: Color     # red text on the dark
+static var OXBLOOD: Color
+static var GOOD: Color       # on paper
+static var GOOD_HI: Color    # on the dark
 # paper under the lamp, and ink on it
-const PAPER := Color("f1f2f3")    # clean modern office paper, not old newsprint
-const PAPER_2 := Color("e4e6e9")
-const CARD := Color("fbfbfc")
-const INK := Color("14171d")
-const MUTED := Color("5b626e")
-const LINE := Color("c6cad0")
+static var PAPER: Color
+static var PAPER_2: Color
+static var CARD: Color
+static var INK: Color
+static var MUTED: Color
+static var LINE: Color
 # the map at night
-const SEA := Color("0a0e15")
-const LAND := Color("1a212d")
-const LAND_FOREIGN := Color("121720")
-const BORDER := Color("06080c")
+static var SEA: Color
+static var LAND: Color
+static var LAND_FOREIGN: Color
+static var BORDER: Color
 # older names still used here and there
-const HEAD := TXT
-const CREAM := TXT
-const CREAM_DIM := DIM
-const BRASS := N500
-const BRASS_DIM := N600
-const T900 := N900
+static var HEAD: Color
+static var CREAM: Color
+static var CREAM_DIM: Color
+static var BRASS: Color
+static var BRASS_DIM: Color
+static var T900: Color
+static var AMBER: Color
+
+static func _static_init() -> void:
+	use("night")
+
+## Switch palette. Screens read the colours when they are built, so rebuild after this
+## (the cheat panel reloads the scene).
+static func use(name: String) -> void:
+	if not PALETTES.has(name): name = "night"
+	palette = name
+	var p: Dictionary = PALETTES[name]
+	N950 = Color(p.N950)
+	N900 = Color(p.N900)
+	N850 = Color(p.N850)
+	N800 = Color(p.N800)
+	N700 = Color(p.N700)
+	N600 = Color(p.N600)
+	N500 = Color(p.N500)
+	TXT = Color(p.TXT)
+	DIM = Color(p.DIM)
+	FAINT = Color(p.FAINT)
+	LAMP = Color(p.LAMP)
+	LAMP_DIM = Color(p.LAMP_DIM)
+	RED = Color(p.RED)
+	RED_HI = Color(p.RED_HI)
+	OXBLOOD = Color(p.OXBLOOD)
+	GOOD = Color(p.GOOD)
+	GOOD_HI = Color(p.GOOD_HI)
+	PAPER = Color(p.PAPER)
+	PAPER_2 = Color(p.PAPER_2)
+	CARD = Color(p.CARD)
+	INK = Color(p.INK)
+	MUTED = Color(p.MUTED)
+	LINE = Color(p.LINE)
+	SEA = Color(p.SEA)
+	LAND = Color(p.LAND)
+	LAND_FOREIGN = Color(p.LAND_FOREIGN)
+	BORDER = Color(p.BORDER)
+	HEAD = TXT; CREAM = TXT; CREAM_DIM = DIM; BRASS = N500; BRASS_DIM = N600; T900 = N900; AMBER = LAMP
+
+## The palette chosen last time (user://look.txt), so a switch survives a restart.
+static func load_choice() -> void:
+	if FileAccess.file_exists("user://look.txt"):
+		use(FileAccess.get_file_as_string("user://look.txt").strip_edges())
+
+static func save_choice(name: String) -> void:
+	var f = FileAccess.open("user://look.txt", FileAccess.WRITE)
+	if f: f.store_string(name)
+	use(name)
 
 # ---------- Fonts ----------
 # display: Barlow Condensed (labels, numbers, buttons)     body: IBM Plex Sans Condensed

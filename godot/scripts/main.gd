@@ -23,6 +23,8 @@ var _sheet_layer: Control
 
 func _ready() -> void:
 	G = Game
+	Look.load_choice()   # the colour scheme picked last time (cheat panel: Look)
+	if _args().has("look"): Look.use(_args().look)
 	_build()
 	var args = _args()
 	if args.has("shot"):

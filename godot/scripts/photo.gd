@@ -48,7 +48,7 @@ func _init(tex: Texture2D = null, screen := false, circle := false) -> void:
 	on_screen = screen
 	round = circle
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_mat = Look.material("photo")
+	_mat = Look.material("photo", {"shadow": Look.mix(Look.N950, Look.INK, 0.5), "light": Look.PAPER})
 	material = _mat
 	if on_screen:
 		_mat.set_shader_parameter("light", Color("e6ecf5"))
