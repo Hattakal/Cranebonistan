@@ -21,7 +21,6 @@ var _sheet_mat: ShaderMaterial
 # the colours of whatever is being read: ink on paper, or light on the screen
 var style := ""               # the newspaper being read ("tabloid", "broadsheet", "local"), or "" for any other sheet
 var _root: VBoxContainer      # the sheet's content
-var _print: Control = null    # the newsprint texture laid over a newspaper (see front_page)
 var ink := Look.INK
 var muted := Look.MUTED
 var line := Look.LINE
@@ -52,7 +51,6 @@ func _init(width := 820, can_put_down := false) -> void:
 	_sheet_mat = Look.material("paper")
 	_paper.material = _sheet_mat
 	_paper.add_theme_stylebox_override("panel", _sheet_box(false))
-	_paper.draw.connect(_draw_newsprint)
 	hb.add_child(_paper)
 	v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 14)
@@ -90,8 +88,9 @@ func _sheet_box(screen_on: bool) -> StyleBoxFlat:
 		sb = Look.box(Look.N850, 4, Look.N600, 1, 0, 0)
 		sb.shadow_color = Color(0.35, 0.55, 1.0, 0.1)    # the glow of the set in a dark room
 		sb.shadow_size = 60
-	elif style != "":
-		sb = Look.box(Color(0, 0, 0, 0))   # a newspaper draws its own, curled sheet (_draw_newsprint)
+	elif style != "" and _news == null:
+		sb = Look.box(Color(0, 0, 0, 0))   # the newspaper and the notes under it are their own objects
+		return sb
 	else:
 		sb = Look.box(Look.PAPER, 1, Color.TRANSPARENT, 0, 0, 0)
 		sb.shadow_color = Color(0, 0, 0, 0.6)
@@ -117,8 +116,6 @@ func _ready() -> void:
 func screen() -> void:
 	if on_air: return
 	on_air = true
-	style = ""
-	_set_newsprint(false)
 	ink = Look.TXT; muted = Look.DIM; line = Look.N600; red = Look.RED_HI; good = Look.GOOD_HI
 	_sheet_mat = Look.material("screen", {"sheet": _paper.size})
 	_paper.material = _sheet_mat
@@ -142,9 +139,12 @@ func close() -> void:
 
 func clear() -> void:
 	v = _root
+	_desk = false
 	if style != "":
 		style = ""
-		_set_newsprint(false)
+		_news = null
+		_root.add_theme_constant_override("separation", 14)
+		_down_style(false)
 		if not on_air: _paper.add_theme_stylebox_override("panel", _sheet_box(false))
 	for c in v.get_children():
 		if c != _down_btn: c.queue_free()
@@ -215,8 +215,13 @@ static func paper_info(name: String, region := "") -> Dictionary:
 func front_page(name: String, date: String, section: String, week := 0, region := "") -> void:
 	var info: Dictionary = paper_info(name, region)
 	style = info.style
+	# the sheet itself goes clear: the newspaper (and the notes under it) lie on the desk
 	_paper.add_theme_stylebox_override("panel", _sheet_box(false))
-	_set_newsprint(true)
+	_root.add_theme_constant_override("separation", 24)
+	_down_style(true)
+	_news = Newspaper.new()
+	_root.add_child(_news)
+	v = (_news as Newspaper).content()
 	var year = int(date.right(4)) if date.right(4).is_valid_int() else 2027
 	var issue = "No. %d" % (int(info.get("founded", 1990)) % 97 * 113 + week * 6 + 1)
 	var vol = "Vol. %d" % maxi(1, year - int(info.get("founded", 1990)))
@@ -273,56 +278,116 @@ func front_page(name: String, date: String, section: String, week := 0, region :
 			add(mid)
 			_dateline(vol + " · " + issue, date, section + " · " + info.price)
 
-## A newspaper is cheap paper that has been rolled up and folded: the sheet is drawn with
-## wavy edges and lifted ends, and a texture (shaders/newsprint.gdshader) is multiplied
+## A newspaper is a separate object on the sheet: a folded paper (class Newspaper below).
+## front_page() starts one and everything added goes onto it until end_front().
+var _news: PanelContainer = null
+var _desk := false   # true after end_front(false): what follows sits on the dark desk
+
+## The front page is done. With memo, what follows (your decision) is on a plain sheet of
+## office paper under the newspaper; without, it sits on the desk itself (just buttons).
+func end_front(memo := true) -> void:
+	if _news == null: return
+	if memo:
+		var sheet = PanelContainer.new()
+		sheet.add_theme_stylebox_override("panel", _sheet_box(false))
+		var m = Look.material("paper")
+		sheet.material = m
+		sheet.resized.connect(func(): m.set_shader_parameter("sheet", sheet.size))
+		var box = VBoxContainer.new()
+		box.add_theme_constant_override("separation", 14)
+		sheet.add_child(box)
+		_root.add_child(sheet)
+		v = box
+	else:
+		v = _root
+		_desk = true
+
+func _down_style(dark: bool) -> void:
+	if _down_btn == null: return
+	if dark:
+		Look.dark_button(_down_btn, false, false, 8)
+		_down_btn.add_theme_color_override("icon_normal_color", Look.RED_HI)
+	else:
+		_down_btn.add_theme_color_override("font_color", Look.INK)
+		_down_btn.add_theme_color_override("icon_normal_color", Look.RED)
+		_down_btn.add_theme_stylebox_override("normal", Look.box(Color(1, 1, 1, 0.35), 2, Look.INK, 1, 0, 8))
+		_down_btn.add_theme_stylebox_override("hover", Look.box(Look.INK, 2, Look.INK, 1, 0, 8))
+		_down_btn.add_theme_stylebox_override("pressed", Look.box(Look.INK, 2, Look.INK, 1, 0, 8))
+
+## A newspaper folded in half and put down on the desk: the front page flat and readable,
+## the fold along the bottom edge, the inner pages showing along the top and bulging at
+## the left where they spring open, and newsprint texture (shaders/newsprint.gdshader)
 ## over everything printed on it.
-func _set_newsprint(on: bool) -> void:
-	if on and _print == null:
-		# the sheet lays its content out inside its margins; this holder sits there too,
-		# and the texture inside it reaches back out to the sheet's edges
-		_print = Control.new()
-		_print.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var sb: StyleBox = _paper.get_theme_stylebox("panel")
+class Newspaper extends PanelContainer:
+	const FOLD := 18.0     # height of the rounded fold below the front page
+	var _mat: ShaderMaterial
+	func _init() -> void:
+		var sb = StyleBoxEmpty.new()
+		sb.content_margin_left = 36; sb.content_margin_right = 36
+		sb.content_margin_top = 30; sb.content_margin_bottom = 34
+		add_theme_stylebox_override("panel", sb)
+		_mat = Look.material("paper")
+		material = _mat
+		resized.connect(func(): _mat.set_shader_parameter("sheet", size); queue_redraw())
+		# the texture: a holder laid out inside the margins, reaching back out to the edges
+		var holder = Control.new()
+		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var tex = ColorRect.new()
 		tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tex.set_anchors_preset(Control.PRESET_FULL_RECT)
-		tex.offset_left = -sb.content_margin_left; tex.offset_top = -sb.content_margin_top
-		tex.offset_right = sb.content_margin_right; tex.offset_bottom = sb.content_margin_bottom
+		tex.offset_left = -36; tex.offset_top = -30; tex.offset_right = 36; tex.offset_bottom = 34
 		var m = Look.material("newsprint")
 		tex.material = m
 		tex.resized.connect(func(): m.set_shader_parameter("sheet", tex.size))
-		_print.add_child(tex)
-		_paper.add_child(_print)
-	elif not on and _print != null:
-		_print.queue_free()
-		_print = null
-	_paper.queue_redraw()
-
-func _draw_newsprint() -> void:
-	if _print == null: return
-	var s: Vector2 = _paper.size
-	var pts = PackedVector2Array()
-	# the sides remember the roll: a slow wave; the ends lift, pulling the corners in a little
-	var n = 160
-	for i in n + 1:
-		var t = float(i) / n
-		pts.append(Vector2(1.6 * sin(t * s.y / 260.0) + 3.0 * pow(abs(t * 2 - 1), 4), t * s.y))
-	for i in range(n, -1, -1):
-		var t = float(i) / n
-		pts.append(Vector2(s.x - 1.6 * sin(t * s.y / 260.0 + 1.3) - 3.0 * pow(abs(t * 2 - 1), 4), t * s.y))
-	# the ends bow: the middle of the top and bottom edge sits a few pixels in from the corners
-	for i in pts.size():
-		var t = clampf(pts[i].x / s.x, 0, 1)
-		var bow = 4.0 * (1.0 - pow(t * 2 - 1, 2))
-		if pts[i].y <= 0.5: pts[i].y = bow
-		elif pts[i].y >= s.y - 0.5: pts[i].y = s.y - bow
-	# its shadow on the desk: soft, and further out where the ends lift
-	for k in 6:
-		var grow = 4.0 + k * 6.0
-		var sh = PackedVector2Array()
-		for q in pts: sh.append((q - s / 2) * Vector2(1 + grow / s.x, 1 + grow * 1.6 / s.y) + s / 2 + Vector2(0, 10 + k * 2))
-		_paper.draw_colored_polygon(sh, Color(0, 0, 0, 0.1))
-	_paper.draw_colored_polygon(pts, Look.NEWSPRINT)
+		holder.add_child(tex)
+		add_child(holder)
+	func content() -> VBoxContainer:
+		var box = VBoxContainer.new()
+		box.add_theme_constant_override("separation", 14)
+		add_child(box)
+		move_child(box, 0)   # the texture holder stays last, so it lies over the print
+		return box
+	func _draw() -> void:
+		var s = size
+		var paper = Look.NEWSPRINT
+		var edge = paper.darkened(0.32)
+		# its shadow on the desk
+		for k in 6:
+			var g = 3.0 + k * 5.0
+			draw_rect(Rect2(Vector2(-g * 0.6, 8 - g * 0.2), s + Vector2(g * 1.2, FOLD + g * 0.9)), Color(0, 0, 0, 0.09))
+		# the inner pages, from the innermost: a little wider than the front, showing along the
+		# open top edge, and springing open at the left where the fold doesn't hold them
+		for k in range(4, 0, -1):
+			var c = paper.darkened(0.05 + k * 0.035)
+			var pts = PackedVector2Array()
+			var bulge = 3.0 + k * 3.2
+			var reach = minf(s.y * 0.8, 360.0)
+			pts.append(Vector2(-k * 0.8, -k * 2.4 + (k % 2) * 1.2))
+			pts.append(Vector2(s.x + k * 1.1, -k * 2.0))
+			pts.append(Vector2(s.x + k * 1.1, s.y + FOLD * 0.5))
+			pts.append(Vector2(0, s.y + FOLD * 0.5))
+			for i in range(12, -1, -1):
+				var t = float(i) / 12.0
+				pts.append(Vector2(-k * 0.8 - bulge * sin(t * PI), 18 + t * reach))
+			draw_colored_polygon(pts, c)
+			var outline = pts.duplicate()
+			outline.append(pts[0])
+			draw_polyline(outline, Color(edge, 0.55), 1.0, true)
+		# the fold: the paper turns under along the bottom, a rounded edge going into shadow
+		var f0 = s.y - 10.0
+		for i in 12:
+			var t0 = float(i) / 12.0
+			var t1 = float(i + 1) / 12.0
+			var y0 = f0 + t0 * (10.0 + FOLD)
+			var y1 = f0 + t1 * (10.0 + FOLD)
+			var light = cos(t0 * PI * 0.5)
+			var c = paper.darkened(0.03 + (1.0 - light) * 0.55)
+			if t0 > 0.12 and t0 < 0.3: c = c.lightened(0.22)    # the light catching the curve
+			var inset = 4.0 * pow(t0, 2.0)
+			draw_rect(Rect2(inset, y0, s.x - inset * 2, y1 - y0 + 0.6), c)
+		# the front page itself
+		draw_rect(Rect2(0, 0, s.x, f0), paper)
+		draw_line(Vector2(0, 0.5), Vector2(s.x, 0.5), Color(1, 1, 1, 0.5), 1.0)
 
 ## Between two rules: volume and number, the date, the section.
 func _dateline(left: String, mid: String, right: String) -> void:
@@ -524,7 +589,7 @@ func button(t: String, cb: Callable, primary := true, disabled := false) -> Butt
 	b.disabled = disabled
 	b.add_theme_font_override("font", Look.spaced("display_bold" if primary else "display", 2))
 	b.add_theme_font_size_override("font_size", Look.fs(15))
-	if on_air:
+	if on_air or (_desk and v == _root):
 		Look.dark_button(b, primary, false, 10)
 	else:
 		var bg = Look.RED if primary else Color(1, 1, 1, 0.3)

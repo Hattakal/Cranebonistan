@@ -712,6 +712,7 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 	if ev.get("echo") and S.record.blamed.size():
 		var b: Dictionary = S.record.blamed[-1]
 		p.quote(b.text, "%s, %s. Your words were quoted at the scene." % [G.player_party(S).leader, G.date_label(b.week, false)])
+	p.end_front()   # your decision is on your own notes, under the paper
 
 func _event_sheet(front: Dictionary) -> void:
 	var ev: Dictionary = G.event_of(front)
@@ -1078,6 +1079,7 @@ func _news_sheet(front: Dictionary) -> void:
 			col.add_child(body)
 			cols.add_child(col)
 		p.add(cols)
+	p.end_front(false)
 	p.actions([p.button("Read on", func(): G.dismiss_front(S); _done(p))])
 
 func _debate_sheet() -> void:
@@ -1163,6 +1165,7 @@ func _interview_piece(p: Paper) -> void:
 		if best == null or r.outcome == "viral": best = r
 	if best: p.quote(String(best.quote).trim_prefix("\"").trim_suffix("\""), "%s, %s" % [G.player_party(S).leader, iv.outletName])
 	p.small("Most of the country now knows who %s is. What they think of it is another matter." % G.player_party(S).leader, Look.INK)
+	p.end_front(false)
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 
@@ -1272,6 +1275,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	p.add(photo)
 	if res.caption != "": p.small(res.caption)
 	if res.story != "": p.story(res.story, res.place, 18)
+	p.end_front()
 	var b: int = Game.jround(float(res.before) * 100)
 	var a: int = Game.jround(float(res.after) * 100)
 	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.GOOD if a > b else Look.INK))
