@@ -31,7 +31,7 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 Neo-noir in a present-day setting: a campaign office at night. When adding or changing a screen:
 
 - **Colours and fonts only from `look.gd`**, never a hex code in a screen script. Dark surfaces (the desk, the files, the top bar) use `Look.dlabel`/`dcaps`, `Look.glass()` and `Look.dark_button()`; paper uses `Look.label`/`caps` (ink by default).
-- **Cold and dark around you, paper under a warm lamp in your hands.** `LAMP` (amber) is the only warm light: hover, city lights, Carlos. Party colours are the only strong colours; on the dark, pass them through `Look.lit()`.
+- **Cold and dark around you, clean white paper under the lamp in your hands** (not cream: Ozan found cream read as old newsprint). `LAMP` (amber) is the only warm light: hover, city lights, Carlos. Party colours are the only strong colours; on the dark, pass them through `Look.lit()`.
 - **Red is rationed:** danger, and the one button to press next. Good news is `GOOD`/`GOOD_HI`, never red.
 - **Paper or screen:** what the player reads and decides is a `Paper` sheet; what the country watches (evening news, interview, debate, election night) is the same sheet after `p.screen()`. Build with the sheet's own blocks (`p.text`, `p.card`, `p.chips`...), which recolour themselves on a screen.
 - **An event is a plain event screen, Paradox-style:** `p.source(outlet, kind · date)` at the top (who broke it: `_broke_it()` in main.gd, from `BREAKS` in media.json), then the headline, picture, text and choices on the same sheet. Ozan called off the newspaper experiment (front pages, folded paper): don't bring it back unasked.

@@ -30,12 +30,12 @@ const GOOD := Color("1f7d55")       # on paper
 const GOOD_HI := Color("5cc79a")    # on the dark
 const AMBER := LAMP
 # paper under the lamp, and ink on it
-const PAPER := Color("efebe2")
-const PAPER_2 := Color("e3ded3")
-const CARD := Color("f8f5ee")
+const PAPER := Color("f1f2f3")    # clean modern office paper, not old newsprint
+const PAPER_2 := Color("e4e6e9")
+const CARD := Color("fbfbfc")
 const INK := Color("14171d")
 const MUTED := Color("5b626e")
-const LINE := Color("c8c3b7")
+const LINE := Color("c6cad0")
 # the map at night
 const SEA := Color("0a0e15")
 const LAND := Color("1a212d")
