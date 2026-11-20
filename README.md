@@ -39,7 +39,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/debates.json` | Debate topics, including the ones the economy starts by itself |
 | `godot/data/issues.json` | Minor issues: local stories, each with its own lines |
 | `godot/data/party.json` | Your party's politicians |
-| `godot/data/media.json` | Newspapers, channels and platforms: audience, slant, honesty, what tone plays well |
+| `godot/data/media.json` | Newspapers, channels and platforms: audience, slant, honesty, what tone plays well; which outlet breaks each kind of event |
 | `godot/data/leader_types.json` | The kinds of leader voters want, and who wants which |
 | `godot/data/tours.json` | Short stories from the leader's trips |
 | `godot/data/names.json` | Name pools by background (Cranbia French, Yamlin Italian/Greek, Erland British, Fauran Slavic, Alinni Nordic/Germanic, Norbanian Japanese, Golba Chinese) |
@@ -47,7 +47,6 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/districts.json` | Province overrides: names, seats, local leans |
 | `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
 | `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |
-| `godot/data/papers.json` | How each newspaper's front page looks: style, motto, price |
 | `godot/data/margaret.json` | Margaret's notes and the two ways to answer her |
 | `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Teyl (not yet shown in the Godot version) |
 | `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile). No screen code |
@@ -60,7 +59,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/scripts/advisor.gd` | Carlos in the corner of headquarters, and Margaret's notes |
 | `godot/scripts/look.gd` | The look: colours, fonts and small builders |
 | `godot/scripts/photo.gd`, `face.gd` | A photograph through the game's one filter; a leader's face in a circle |
-| `godot/shaders/` | The photo filter, lamp light on paper, newsprint, the television screen, film grain |
+| `godot/shaders/` | The photo filter, lamp light on paper, the television screen, film grain |
 | `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `voice/carlos/` for Carlos's recordings; `events/`, `portraits/`, `tours/` and `places/` for photographs (see [IMAGES.md](IMAGES.md)) |
 | `godot/tests/` | `parity.gd` plays a whole seeded game as a smoke test; `debates.gd` prints how the national debate develops |
 | `tools/build_map.py` | Builds the map from the Krita file |

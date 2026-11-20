@@ -684,10 +684,10 @@ const KINDS := {"flagship": "Flagship promise", "crisis": "Crisis", "opportunity
 func _event_header(p: Paper, ev: Dictionary) -> void:
 	var crisis = ""
 	if ev.get("kind", "") == "crisis" and S.crisis: crisis = Game.by_id(G.CRISES, S.crisis.id).name
-	p.front_page("The Morning Post", G.date_label(S.week, false), ("Crisis · " + crisis) if crisis != "" else KINDS.get(ev.get("kind", ""), "Event"), S.week)
-	p.heading(ev.title, 42)
-	p.photo(Photo.event(ev), 300)
-	p.story(ev.text, G.MAP.capital, 18)
+	p.source(_broke_it(ev), "%s · %s" % [("Crisis · " + crisis) if crisis != "" else KINDS.get(ev.get("kind", ""), "Event"), G.date_label(S.week, false)])
+	p.heading(ev.title, 38)
+	p.photo(Photo.event(ev), 280)
+	p.text(ev.text, 18)
 	if ev.get("government"):
 		var gov = null
 		for x in S.parties:
@@ -712,11 +712,21 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 	if ev.get("echo") and S.record.blamed.size():
 		var b: Dictionary = S.record.blamed[-1]
 		p.quote(b.text, "%s, %s. Your words were quoted at the scene." % [G.player_party(S).leader, G.date_label(b.week, false)])
-	p.end_front()   # your decision is on your own notes, under the paper
+
+## The outlet that broke an event's news (media.json BREAKS), or your own people for
+## what only you know about.
+func _broke_it(ev: Dictionary) -> String:
+	var id: String = str(ev.get("source", Mods.data("media").get("BREAKS", {}).get(ev.get("kind", ""), "")))
+	var o = G.outlet_by_id(id) if id != "" else null
+	if o == null: return "%s · internal" % G.player_party(S).name
+	if id == "courier" and ev.get("sourceRegion"):
+		var r = Game.by_id(G.REGIONS, ev.sourceRegion)
+		if r: return "The %s Courier" % r.name
+	return o.name
 
 func _event_sheet(front: Dictionary) -> void:
 	var ev: Dictionary = G.event_of(front)
-	var p = _paper(900)
+	var p = _paper(820)
 	_event_step1(p, ev)
 
 func _event_step1(p: Paper, ev: Dictionary) -> void:
@@ -1051,13 +1061,12 @@ func _poll_sheet(front: Dictionary) -> void:
 
 func _news_sheet(front: Dictionary) -> void:
 	var labels = {"vacuum": "Power vacuum", "bad": "Trouble", "good": "Comeback", "neutral": "Change", "threat": "Threat", "issue": "Hot issue"}
-	var p = _paper(900)
-	p.front_page("The Cranebo Herald", G.date_label(S.week, false), "Late edition", S.week)
+	var p = _paper(820)
 	var lead: Dictionary = front.items[0]
-	p.kicker(labels.get(lead.get("kind", ""), "News"))
-	p.heading(lead.title, 42)
+	p.source("The Cranebo Herald", "%s · %s" % [labels.get(lead.get("kind", ""), "News"), G.date_label(S.week, false)])
+	p.heading(lead.title, 38)
 	p.photo(Photo.find(["news/" + str(lead.get("kind", ""))]), 260)
-	p.story(lead.text, G.MAP.capital, 18)
+	p.text(lead.text, 18)
 	if front.items.size() > 1:
 		p.rule(2)
 		# the rest of the page, in columns under the lead
@@ -1079,7 +1088,6 @@ func _news_sheet(front: Dictionary) -> void:
 			col.add_child(body)
 			cols.add_child(col)
 		p.add(cols)
-	p.end_front(false)
 	p.actions([p.button("Read on", func(): G.dismiss_front(S); _done(p))])
 
 func _debate_sheet() -> void:
@@ -1156,7 +1164,7 @@ func _interview_piece(p: Paper) -> void:
 	p.paper()
 	var iv: Dictionary = S.interview
 	var v: Dictionary = iv.get("verdict", {}) if iv.get("verdict") else {"title": "", "text": ""}
-	p.front_page(iv.outletName, G.date_label(S.week, false), "The big interview", S.week)
+	p.source(iv.outletName, "The big interview · %s" % G.date_label(S.week, false))
 	p.kicker("%s meets %s" % [iv.who, G.player_party(S).leader])
 	p.heading(v.title, 40)
 	p.text(v.text, 18, "news_italic")
@@ -1165,7 +1173,6 @@ func _interview_piece(p: Paper) -> void:
 		if best == null or r.outcome == "viral": best = r
 	if best: p.quote(String(best.quote).trim_prefix("\"").trim_suffix("\""), "%s, %s" % [G.player_party(S).leader, iv.outletName])
 	p.small("Most of the country now knows who %s is. What they think of it is another matter." % G.player_party(S).leader, Look.INK)
-	p.end_front(false)
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 
@@ -1262,7 +1269,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	p.clear()
 	p._paper.custom_minimum_size.x = 860   # the district sheet is narrow; the story gets a full page
 	var r = Game.by_id(G.REGIONS, res.region)
-	p.front_page("The %s Courier" % r.name, G.date_label(S.week, false), "On the road", S.week, r.name)
+	p.source("The %s Courier" % r.name, "On the road · %s" % G.date_label(S.week, false))
 	p.kicker("%s in %s" % [G.player_party(S).leader, res.place])
 	var heads = {"great": "%s packs the halls in %s", "good": "%s makes the rounds in %s", "flat": "A quiet visit to %s for %s"}
 	var head: String = heads.get(res.kind, "%s in %s")
@@ -1274,8 +1281,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	photo.custom_minimum_size = Vector2(0, 260)
 	p.add(photo)
 	if res.caption != "": p.small(res.caption)
-	if res.story != "": p.story(res.story, res.place, 18)
-	p.end_front()
+	if res.story != "": p.text(res.story, 18)
 	var b: int = Game.jround(float(res.before) * 100)
 	var a: int = Game.jround(float(res.after) * 100)
 	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.GOOD if a > b else Look.INK))
@@ -1465,7 +1471,7 @@ func _profile_sheet() -> void:
 	var pr: Dictionary = G.build_profile(S)
 	var you: Dictionary = G.player_party(S)
 	var p = _paper(860, false)
-	p.front_page("The Cranebo Herald", G.date_label(S.week, false), "Profile", S.week)
+	p.source("The Cranebo Herald", "Profile · %s" % G.date_label(S.week, false))
 	p.heading(pr.headline, 40)
 	p.text("%s: %s" % [pr.archetype.title, pr.archetype.line], 19, "news_italic")
 	if pr.signature: p.quote(pr.signature.text, "%s, %s" % [you.leader, G.date_label(pr.signature.week, false)])

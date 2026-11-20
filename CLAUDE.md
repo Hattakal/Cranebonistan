@@ -34,11 +34,11 @@ Neo-noir in a present-day setting: a campaign office at night. When adding or ch
 - **Cold and dark around you, paper under a warm lamp in your hands.** `LAMP` (amber) is the only warm light: hover, city lights, Carlos. Party colours are the only strong colours; on the dark, pass them through `Look.lit()`.
 - **Red is rationed:** danger, and the one button to press next. Good news is `GOOD`/`GOOD_HI`, never red.
 - **Paper or screen:** what the player reads and decides is a `Paper` sheet; what the country watches (evening news, interview, debate, election night) is the same sheet after `p.screen()`. Build with the sheet's own blocks (`p.text`, `p.card`, `p.chips`...), which recolour themselves on a screen.
-- **A newspaper is a front page:** `p.front_page(name, date, section, week)` (the paper's look comes from `papers.json`), then `p.heading` and `p.story`, then `p.end_front()` (the decision goes on a plain sheet of notes under the paper) or `p.end_front(false)` (only buttons follow). It is drawn as a folded newspaper lying on the desk; every event uses this one format. Don't add newspaper features (boxes, side columns) unasked: Ozan wanted the texture, not more content. Other paper (budget, district, founding) stays plain.
-- **Tone: grit, but not grim.** Ozan found the first pass slightly too slick and depressing. Keep the dark palette; let lightness come from small dry details (a tabloid that shouts, a coffee ring), never from caricature.
+- **An event is a plain event screen, Paradox-style:** `p.source(outlet, kind · date)` at the top (who broke it: `_broke_it()` in main.gd, from `BREAKS` in media.json), then the headline, picture, text and choices on the same sheet. Ozan called off the newspaper experiment (front pages, folded paper): don't bring it back unasked.
+- **Tone: grit, but not grim.** Ozan found the first pass slightly too slick and depressing. Keep the dark palette; let lightness come from small dry details (a coffee ring), never from caricature.
 - **The numbers stay plain.** The files are a clean briefing; don't dress data up as objects.
 - **Photographs** go through `Photo` (one filter for all, `shaders/photo.gdshader`); faces through `Face`. Never draw a texture straight to the screen. A missing picture shows nothing.
-- Fonts: `display*` Barlow Condensed (labels, numbers, buttons), `news*` Newsreader (headlines, papers, speech), `body*` Plex Sans Condensed, `type` Plex Mono (memos), `hand` Caveat (a margin note from Carlos, rarely), `blackletter` and `redtop` for newspaper nameplates only.
+- Fonts: `display*` Barlow Condensed (labels, numbers, buttons), `news*` Newsreader (headlines, papers, speech), `body*` Plex Sans Condensed, `type` Plex Mono (memos), `hand` Caveat (a margin note from Carlos, rarely).
 
 ## Running and checking
 

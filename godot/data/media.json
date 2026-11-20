@@ -770,5 +770,18 @@
    "text": "A long video from {name}'s former partner has more views than anything {name} ever made.",
    "loss": 0.25
   }
- ]
+ ],
+ "BREAKS": {
+  "_note": "Who broke the news, shown at the top of an event: an outlet id from OUTLETS for each kind of event. An event can name its own with \"source\" (an outlet id), and \"sourceRegion\" (a region id) for the regional Couriers. Only for show: the rules don't read it.",
+  "crisis": "cbc",
+  "violence": "cbc",
+  "foreign": "herald",
+  "opportunity": "herald",
+  "followup": "herald",
+  "regional": "courier",
+  "scandal": "post",
+  "trap": "eagle",
+  "flagship": "",
+  "secret": ""
+ }
 }
