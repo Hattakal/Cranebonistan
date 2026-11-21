@@ -4,8 +4,8 @@
   {"camp": "right", "axis": "nation", "title": "Fire at the Alinni community centre in Arthemta", "text": "Someone set fire to the Alinni community centre in Arthemta overnight. Nobody was hurt; the building is gone. Slogans about 'taking the country back' were painted on the wall next door."},
   {"camp": "right", "axis": "nation", "title": "Masked men 'patrol' the Trueant border", "text": "A group of masked men with hunting rifles have set up roadblocks near the Trueant border, stopping cars and checking papers. The police say they are 'monitoring the situation'."},
   {"camp": "right", "axis": "society", "title": "A journalist beaten outside her flat", "text": "Elke Varn, who writes about Cranebo's far-right groups, was beaten outside her flat by three men who told her to 'write about something else'."},
-  {"camp": "left", "axis": "economy", "title": "A bomb at a bank in Gilopolis", "text": "A bomb went off at night in an empty branch of the Pezo Trust in Gilopolis. A note sent to the papers calls it 'an answer to the evictions'."},
-  {"camp": "left", "axis": "system", "title": "A data centre burned outside Lilapolis", "text": "Saboteurs set fire to a data centre outside Lilapolis that runs half the country's banking apps. A statement online calls it 'unplugging the machine'."},
+  {"camp": "left", "axis": "economy", "title": "A bomb at a bank in Giloford", "text": "A bomb went off at night in an empty branch of the Pezo Trust in Giloford. A note sent to the papers calls it 'an answer to the evictions'."},
+  {"camp": "left", "axis": "system", "title": "A data centre burned outside Lilabourg", "text": "Saboteurs set fire to a data centre outside Lilabourg that runs half the country's banking apps. A statement online calls it 'unplugging the machine'."},
   {"camp": "left", "axis": "economy", "title": "An energy chief shot in Cranebo", "text": "The head of Cranebo's largest energy company was shot and wounded outside his home. The suspect, arrested at the scene, is a former employee who lost his pension. Online, some are calling him a hero."}
  ],
  "SYMPATHY": {"right": {"nation": "<-50"}, "left": {"economy": "<-50"}},

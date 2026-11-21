@@ -1,6 +1,6 @@
-# Cranebonistan
+# Cranbovia
 
-A political election simulator set in the fictional country of Cranebonistan, made in Godot 4.7. You found a new party and have four years to become the largest party in the National Assembly. Money, attention and votes go to whoever plays the game best, and the game never tells you to be a hypocrite; it just makes it pay.
+A political election simulator set in the fictional country of Cranbovia, made in Godot 4.7. You found a new party and have four years to become the largest party in the National Assembly. Money, attention and votes go to whoever plays the game best, and the game never tells you to be a hypocrite; it just makes it pay.
 
 Art, fonts and licences are listed in [CREDITS.md](CREDITS.md). Every design decision, and why it was made, is in [DESIGN.md](DESIGN.md).
 
@@ -44,25 +44,27 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/tours.json` | Short stories from the leader's trips |
 | `godot/data/names.json` | Name pools by background (Cranbia French, Yamlin Italian/Greek, Erland British, Fauran Slavic, Alinni Nordic/Germanic, Norbanian Japanese, Golba Chinese) |
 | `godot/data/scandals.json`, `violence.json`, `interview.json` | Secrets and scandals; political violence and rivals' labels; the year-one interview |
+| `godot/data/coalition.json` | Forming a government: the ministries and what each is worth, how parties bargain, the outcome texts |
 | `godot/data/districts.json` | Province overrides: names, seats, local leans |
 | `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
 | `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |
 | `godot/data/margaret.json` | Margaret's notes and the two ways to answer her |
 | `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Teyl (not yet shown in the Godot version) |
-| `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile). No screen code |
+| `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile), `coalition` (forming a government after the election). No screen code |
 | `godot/scripts/sim.gd` | The end of the chain, the autoload `Game`: loading content, a new game, the monthly update, the clock |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |
 | `godot/scripts/board.gd` | The desk beside the map: what needs you now |
 | `godot/scripts/files.gd` | The planning files along the top bar |
 | `godot/scripts/paper.gd` | Decision sheets: paper under the lamp (front pages, choices, drafts, the ledger) or a television screen (anything broadcast) |
 | `godot/scripts/map_view.gd` | The map |
+| `godot/scripts/coalition_view.gd` | The coalition talks after the election, played back step by step |
 | `godot/scripts/advisor.gd` | Carlos in the corner of headquarters, and Margaret's notes |
 | `godot/scripts/look.gd` | The look: the two colour schemes, fonts and small builders |
 | `godot/scripts/settings.gd` | The player's options (colour scheme, text size, grain, window, volume), saved between runs |
 | `godot/scripts/photo.gd`, `face.gd` | A photograph through the game's one filter; a leader's face in a circle |
 | `godot/shaders/` | The photo filter, lamp light on paper, the television screen, film grain |
 | `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `voice/carlos/` for Carlos's recordings; `events/`, `portraits/`, `tours/` and `places/` for photographs (see [IMAGES.md](IMAGES.md)) |
-| `godot/tests/` | `parity.gd` plays a whole seeded game as a smoke test; `debates.gd` prints how the national debate develops |
+| `godot/tests/` | `parity.gd` plays a whole seeded game as a smoke test; `debates.gd` prints how the national debate develops; `coalition.gd` runs the coalition talks on made-up results, with extra parties |
 | `tools/build_map.py` | Builds the map from the Krita file |
 | `tools/image_list.py` | Writes [IMAGES.md](IMAGES.md): how pictures are used and which are still missing |
 | `tools/voice_script.py` | Writes [VOICE.md](VOICE.md), the recording script for Carlos, from his lines |
@@ -81,7 +83,7 @@ Almost everything is data, and mods change it without touching the game's files:
 
 ## Setting
 
-Cranebonistan has five regions: Cranbia (capital Cranebo, industrial and educated), Yamlin (trade gateway, mixed and tense), Erland (nationalist breadbasket), Alinni (conquered from the Southern Trueants fifty years ago, minority-heavy) and Fauran (the poorest). Its neighbours are the Southern Trueants, the Dillihan Republic, the Bordon Federation and James. Further away are Golba, Norbanistan and Potania. Rivers and mountains are still to be drawn on the new map.
+Cranbovia has five regions: Cranbia (capital Cranebo, industrial and educated), Yamlin (trade gateway, mixed and tense), Erland (nationalist breadbasket), Alinni (conquered from the Southern Trueants fifty years ago, minority-heavy) and Fauran (the poorest). Its neighbours are the Southern Trueants, the Dillihan Republic, the Bordon Federation and James. Further away are Golba, Norbanistan and Potania. Rivers and mountains are still to be drawn on the new map.
 
 ## Updating the map
 
@@ -91,6 +93,6 @@ The map is drawn in Krita (layers: Background, States and Countries, Rivers and 
 python3 tools/build_map.py path/to/map.kra
 ```
 
-The current source is `art/map3.kra` (`python3 tools/build_map.py art/map3.kra`).
+The current source is `art/map4.kra` (`python3 tools/build_map.py art/map4.kra`). Krita moves layers rather than pixels when the canvas grows; the converter reads each layer's offset, but the seed points in `build_map.py` are canvas pixels and must move with the canvas.
 
 This rewrites `godot/data/map.json` and `godot/assets/map-features.png`. It needs Python with numpy, scipy, opencv-python and Pillow. If a border is moved so much that an area no longer contains its seed point, adjust `AREA_SEEDS` at the top of the script.

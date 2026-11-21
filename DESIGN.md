@@ -1,4 +1,4 @@
-# Cranebonistan: design document
+# Cranbovia: design document
 
 This document records what the game is, how it works, and why each decision was made. It is written as a history as well as a reference: when something changed, the old idea and the reason for the change are kept. Status marks what is in the game now (**Built**), what is agreed but waiting (**Planned**), and what was decided against (**Dropped**). Sections 1–7 describe the game as it is now; the dated sections at the end of section 7 log the changes in order, so an older entry there may have been changed again later (it says so where it has).
 
@@ -8,7 +8,7 @@ Designer: Ugur Ozan Denizgünü. Built with Claude.
 
 ## 1. The idea
 
-A political simulator where the only goal is to get elected. The player founds a new party in the fictional Republic of Cranebonistan and has one electoral term to become the largest party in the National Assembly.
+A political simulator where the only goal is to get elected. The player founds a new party in the fictional Republic of Cranbovia and has one electoral term to become the largest party in the National Assembly.
 
 **The point of the game** is to show how parties chase votes rather than represent anyone. **An enjoyable game comes first; the satire is second and stays subtle.** It is better for players to miss the message and enjoy the game than the other way around: no caricature, no lecturing. The game never tells the player to be a hypocrite; it makes hypocrisy pay. Saying what each group wants to hear, blaming whoever is convenient, and taking business money while attacking the elites should be viable and tempting, and scandal risk must not make it pointless. **Playing calm and centrist is possible, just harder.** People vote for personalities first and policies second, so the leader's persona and *how they say things* matter most.
 
@@ -20,7 +20,7 @@ A political simulator where the only goal is to get elected. The player founds a
 
 ## 2. The world
 
-### Cranebonistan
+### Cranbovia
 
 Five regions. The capital is Cranebo, on the northern coast in Cranbia. The north and west are coastline. *Renamed in November 2026 with the new map:* Fauraifai became **Fauran**, the Bourdeaux Federation became the **Bordon Federation**, and the capital Craneapolis became **Cranebo** (the designer's map names it; other cities include Nikecisa, Bayernal, Kravk and Aikütest). The names below are the current ones.
 
@@ -30,7 +30,7 @@ Five regions. The capital is Cranebo, on the northern coast in Cranbia. The nort
 | **Yamlin** | Where international trade with distant countries happens. Mixed and tense: progressives, immigrants, nationalists fed up with immigrants, economic turmoil from the new population, but also the rich who profit from trade and cheap immigrant labour. |
 | **Erland** | The nationalist heartland and breadbasket. |
 | **Alinni** | Conquered from the Southern Trueants fifty years ago. Home to the Alinnian minority, which has never fully settled in. Big tensions. |
-| **Fauran** | Sparse, poorest and least educated. Disputed border with Dillihan. *Its history is being rewritten:* it was first written as nomads and herders, and about 20 places in the content still say so. |
+| **Fauran** | Rural, poorest and least educated: hill farms, cattle country and emptying villages, the heart of the traditional south. The ruins of the kingdom that fell around 1200 are its pride. Disputed border with Dillihan, whose patrols impound Fauran cattle. *History:* first written as nomads and herders (camels, migration routes, mobile schools); rewritten as settled farmers in November 2026 to fit the designer's history (event ids such as `nomad_schools` and `herder_titles` keep the old words). |
 
 Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey than the map shape already suggests.
 
@@ -41,17 +41,21 @@ Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey 
 | **Southern Trueants** | Corrupt, in major economic crisis. Its leader still claims Alinni. | President Gavrel Ostrun |
 | **Dillihan Republic** | The regional powerhouse, economically and militarily. Border disputes around Fauran. | Chancellor Selin Arvadi |
 | **Bordon Federation** | A fragile federation of several nations held together by a charismatic generalissimo. | Generalissimo Hector Valmont |
-| **James** | Refuses to join the Bordon Federation and trusts Cranebonistan to defend it. Cranebonistan holds favourable mining deals for its rare materials. The name is the only nod to the Jordan vs LeBron debate. | Prime Minister Tomas Verin |
+| **James** | Refuses to join the Bordon Federation and trusts Cranbovia to defend it. Cranbovia holds favourable mining deals for its rare materials. The name is the only nod to the Jordan vs LeBron debate. | Prime Minister Tomas Verin |
 
 ### Further away
 
-- **United Federation of Golba:** the biggest power, akin to the US. Cranebonistan's main trading partner.
-- **Norbanistan:** was the second great power before a civil war. Its refugees are fleeing everywhere, including Cranebonistan.
-- **Potania:** major buyer of Cranebonistan's rare materials.
+- **United Federation of Golba:** the biggest power, akin to the US. Cranbovia's main trading partner.
+- **Norbanistan:** was the second great power before a civil war. Its refugees are fleeing everywhere, including Cranbovia.
+- **Potania:** major buyer of Cranbovia's rare materials.
+
+### A new northern neighbour: Salmark (decided November 2026)
+
+**Salmark**, capital **Salbourg**: a small mountain republic to the north. Mountains separate it from Cranbovia, and it is a rich, highly industrialised country (machine tools, chemicals, precision parts). Salt is history: the salt trade once paid for its independence, and the mines are now mostly museums. It keeps to itself through trade. *History:* first described as living off its salt mines; changed by the designer in November 2026. It needs no events or rules: it is a quiet neighbour (relation Neutral) that never causes trouble, unless a later idea wants it to. *History of the name:* first Clovinia (after cloves), changed because it read too close to Cranbovia ("Cranbovian and Clovinian ministers meet"). *Rejected:* making it a banking haven, which read as a Swiss parody. On the map since map4 (a strip along the top, with Salbourg); its flag is a white salt crystal on slate blue.
 
 ### The map
 
-*Redrawn (November 2026, map3):* new borders, all five regions in new places, a lake on the Cranbia–Alinni border, a sea to the south-east, and capitals for the neighbours (Cklue in Bordon, Dillihan, Crumland in the Southern Trueants; James has none). New spellings: Tarropolis, Büllünt, Aikütest (the map's "Cranbero" is a typo: the capital stays **Cranebo**). Rivers and mountains are not drawn yet. The 29 provinces (the voting districts) are drawn on the map and built (6.2); the map is now in its own file, `godot/data/map.json`. Still to come: the election-night broadcast. (The leader's home city is built: see *Founding night* in section 7.) *Planned renames* (the designer's lore pass): Büllünt → Vüllent, Crumland → Crümland, Cranbia's cities lose their -polis endings.
+*Redrawn (November 2026, map3):* new borders, all five regions in new places, a lake on the Cranbia–Alinni border, a sea to the south-east, and capitals for the neighbours (Cklue in Bordon, Dillihan, Crumland in the Southern Trueants; James has none). New spellings: Tarropolis, Büllünt, Aikütest (the map's "Cranbero" is a typo: the capital stays **Cranebo**). Rivers and mountains are not drawn yet. The 29 provinces (the voting districts) are drawn on the map and built (6.2); the map is now in its own file, `godot/data/map.json`. Still to come: the election-night broadcast. (The leader's home city is built: see *Founding night* in section 7.) *Extended (November 2026, map4):* the canvas grew 500 px upward to show the whole country, its northern coast and Salmark. Renames from the designer's lore pass: Büllünt → **Vüllent**, Crumland → **Crümländ** (umlauts made obvious on purpose), Tarropolis → **Tarroport**, Gilopolis → **Giloford**, Lilapolis → **Lilabourg** (Harapolis stays). The sea is the **Hesperian Sea**; the lake on the Cranbia–Alinni border is **Follount Lake** (the same root as Vüllent, as Cranbovians say it). New province **Sisillia** in northern Erland (no city yet; it replaced the unnamed "North Erland"). Province ids are unchanged except that cranbia_1 and cranbia_2 swapped (Northern Cranbia / Tarroport), which nothing refers to.
 
 ---
 
@@ -191,7 +195,7 @@ Money offers: corporate and union donations (public, shift the party's image) an
 
 ### 5.1 Rival parties — Built
 
-National Unity Party (ruling, nationalist), Cranebonian Labour Front, Open Cranebonistan (liberal, pro-business), Alinni People's Voice (minority party).
+National Unity Party (ruling, nationalist), Cranbovian Labour Front, Open Cranbovia (liberal, pro-business), Alinni People's Voice (minority party).
 
 Rivals have leaders, charisma and stability. They suffer scandals and infighting, change leaders (who take them in new directions), recover, and **split** when stability collapses, freeing their core voters: a **power vacuum** the closest party can fill, and a chance to take in defectors. Rivals losing voters to the player copy the player's most popular position. **Rivals also fill empty niches** (*decided November 2026*): now and then the rival best placed to do it takes up a side of an issue that many voters care about and no party speaks for, and moves toward it. *History:* rivals used to sit in their niches unless copying the player.
 
@@ -203,7 +207,7 @@ Rivals also **take a turn of their own** every month: a budget, trips, adverts, 
 
 ### 5.1b Neighbours change with events — Built
 
-The map doesn't change borders, but events and crises are recorded in each neighbouring country's profile ("Lost its mining valleys to Bordon in the ceasefire"), its relationship with Cranebonistan can change ("Ally, weakened", "On the brink of war"), and countries in an active conflict are shown in red on the map. The latest development appears when hovering over a country.
+The map doesn't change borders, but events and crises are recorded in each neighbouring country's profile ("Lost its mining valleys to Bordon in the ceasefire"), its relationship with Cranbovia can change ("Ally, weakened", "On the brink of war"), and countries in an active conflict are shown in red on the map. The latest development appears when hovering over a country.
 
 ### 5.2 Trust in the system — Built
 
@@ -224,10 +228,10 @@ This is deliberately light for now. A fuller economy is future work.
 Every game has **exactly one** major crisis, in the second year, drawn from a pool of five:
 
 1. **Alinni insurgency:** the separation movement turns to violence.
-2. **Bordon attacks James:** Cranebonistan can only send supplies.
-3. **Global economic crisis** reaches Cranebonistan.
+2. **Bordon attacks James:** Cranbovia can only send supplies.
+3. **Global economic crisis** reaches Cranbovia.
 4. **Ultranationalist terror** against minority groups.
-5. **Expansion:** Cranebonistan postures militarily toward the Southern Trueants.
+5. **Expansion:** Cranbovia postures militarily toward the Southern Trueants.
 
 **Weighting:** each crisis starts at 20%. Choices carry a hidden pressure toward particular crises (blaming a minority pushes toward the insurgency and the ultranationalist terror; talking up borders pushes toward expansion; boycotts push toward the economic crisis; calls for talks push away). Every choice the player makes nudges the odds a little, scaled by the party's popularity. The player's campaign can at most **double** a crisis's chance, to 40%. If the crisis that happens had more than 30% odds, the crisis event says the party's campaigning played a part.
 
@@ -277,7 +281,7 @@ Not a list of events, but **a profile of the leader written by a hostile newspap
 | Flags | Built | Original designs. *History:* first shown on the map, where some didn't line up. Moved into country profiles: clicking a neighbour shows its flag, leader and summary. |
 | Event pictures | Built, pictures to come | A photograph per event, or one per kind of event, shown on the desk, in the morning paper and behind the evening news. Public-domain and CC0 photos only, never generative AI. Every picture goes through one filter, the "night print" (7.1). The designer finds the pictures; [IMAGES.md](IMAGES.md) lists what is needed. *History:* drawn scenes in the browser prototype. |
 | Monthly news as a newspaper front page | Built | |
-| The designer's map | Built | Drawn in Krita by the designer (`art/map3.kra`) and converted by `tools/build_map.py` into `godot/data/map.json`: regions and countries come from the border lines (rivers and mountains are decoration, never borders), cities from the dots and a text layer, provinces from the Provinces layer. *Decided:* Inkscape was tried for drawing and dropped as counter-intuitive; drawing stays in Krita and the converter does the rest. |
+| The designer's map | Built | Drawn in Krita by the designer (`art/map4.kra`) and converted by `tools/build_map.py` into `godot/data/map.json`: regions and countries come from the border lines (rivers and mountains are decoration, never borders), cities from the dots and a text layer, provinces from the Provinces layer. *Decided:* Inkscape was tried for drawing and dropped as counter-intuitive; drawing stays in Krita and the converter does the rest. |
 | Map-centred play | Partly built | Built: provinces in party colours with your share as stripes, clicking a province to tour it or open an office, W A S D to move. Planned: events pinned to places, election night district by district. |
 
 ### 7.1 The campaign at night (the visual direction) — Built, first pass
@@ -319,7 +323,7 @@ The designer's aims: an enjoyable game first, one that looks like a finished gam
 
 ### Founding night (November 2026)
 
-*Decided:* a new game opens on a founding sheet. The player picks a party template (or builds their own), names the party and the leader, sets the manifesto (one stance per issue) and chooses **the city where the leader was mayor** before walking out of their old party. That city is the head start: its region's voters know and like the leader (Cranebonians there much more than the minority), and the party starts with a level-1 office in the city. A bigger region is a bigger head start: about 4.8% opening poll from Bayernal, 6.5% from Cranebo, against 2.5% with no home. **Alinni's cities can't be chosen**: Alinnians elect their own minority leaders, and the player's leader is from the majority. The end-of-election sheet offers "Found a new party". Carlos's welcome waits until the party exists.
+*Decided:* a new game opens on a founding sheet. The player picks a party template (or builds their own), names the party and the leader, sets the manifesto (one stance per issue) and chooses **the city where the leader was mayor** before walking out of their old party. That city is the head start: its region's voters know and like the leader (Cranbovians there much more than the minority), and the party starts with a level-1 office in the city. A bigger region is a bigger head start: about 4.8% opening poll from Bayernal, 6.5% from Cranebo, against 2.5% with no home. **Alinni's cities can't be chosen**: Alinnians elect their own minority leaders, and the player's leader is from the majority. The end-of-election sheet offers "Found a new party". Carlos's welcome waits until the party exists.
 
 ### Organise, dig, steer (November 2026)
 
@@ -339,14 +343,14 @@ The designer's aims: an enjoyable game first, one that looks like a finished gam
 - **The ending paper says plainly how you contradicted yourself:** for each issue, "On immigration: first nationalist, then multicultural.", then the two quotes side by side (Then / Later, with dates and which side each took). Broken promises use the same layout. (Before: dated quotes under "Said and unsaid", with nothing saying which side each was on.)
 - **Voters live in provinces.** The voter groups (pops) are now one per province × age × class × nationality (where that nationality lives), about 710 instead of 136 by region. A province takes its region's people and views, then its own character: towns are more middle- and upper-class, more mixed and more progressive than the countryside; a city's lean (cities.json) counts for its share of the province; and each game adds a local lean. Trips, offices and the home town still act on one province (and a little on its neighbours, less than before), but now on its own voters, so they show in the polls too, not only in the seat projection. This is the fix for whole regions flipping together after one trip. (Before: pops by region only; a province was its region's voters with a small overlay, so the provinces of a region moved in lockstep.) SAVE_VERSION 26.
 - **Polls ask a sample; the election counts everyone.** A poll picks eight voter groups per province (in proportion to size) and lets each stand for an equal share of it, plus a small extra error. It is fast and wrong the way real polls are: national numbers off by up to about 3 points, and a few close provinces called for the wrong party on the map. The election counts every group exactly. A trip recounts its own province exactly. (Before: polls counted everyone and added random noise.)
-- **Names (decided November 2026).** Familiar-sounding names help with so much new lore. By background: Cranbia (the core) French; Yamlin Italian and Greek; Erland British; Fauran Slavic; the Alinni Nordic and Germanic (with umlauts); the Norbanian-born Japanese; Golba Chinese. Pools in `godot/data/names.json`: people the game creates during play (yes-men, new rival leaders, defectors) get a name from the pool that fits their nationality and region, and a hometown (a city in their region). Abroad: the Southern Trueants Germanic, Dillihan Arabic, Bordon Slavic (like Fauran), Potania Korean, Golba Chinese (`FOREIGN` in names.json). Every name is in the Latin alphabet (accents and umlauts are fine; Japanese, Chinese, Korean and Arabic names are romanised). Hand-written characters have a `hometown` (party.json; rival leaders' `leaderHome` in content.json); it shows in the Party file and on the Parties page. The designer will do a naming pass over the hand-written names and event texts; everything so far is a placeholder. (Before: one shared list of 12 names, no hometowns.)
+- **Names (decided November 2026).** Familiar-sounding names help with so much new lore. By background: Cranbia (the core) French; Yamlin Italian and Greek; Erland British; Fauran Slavic (*confirmed November 2026:* the designer weighed whether making the poorest region Slavic reads as a stereotype and kept it; Fauran is written with dignity, its fallen kingdom is its pride, and Slavic-named characters also appear among the powerful); the Alinni Nordic and Germanic (with umlauts); the Norbanian-born Japanese; Golba Chinese. Pools in `godot/data/names.json`: people the game creates during play (yes-men, new rival leaders, defectors) get a name from the pool that fits their nationality and region, and a hometown (a city in their region). Abroad: the Southern Trueants Germanic, Dillihan Arabic, Bordon Slavic (like Fauran), Potania Korean, Golba Chinese (`FOREIGN` in names.json). Every name is in the Latin alphabet (accents and umlauts are fine; Japanese, Chinese, Korean and Arabic names are romanised). Hand-written characters have a `hometown` (party.json; rival leaders' `leaderHome` in content.json); it shows in the Party file and on the Parties page. The designer will do a naming pass over the hand-written names and event texts; everything so far is a placeholder. (Before: one shared list of 12 names, no hometowns.)
 - **Year one: the big interview.** In month 8 the most trusted outlet (the most honest one with wide reach, usually CBC) gives the leader an hour; the country meets you. Questions (`godot/data/interview.json`): who you are (answered by tone), the boldest line in your manifesto, the issue the country cares most about, your second boldest line, and your record (a U-turn on file, dirty money, or your years as mayor). Issue answers are the existing lines for each side plus a dodge. The interviewer is impartial, so it can't be gamed: a clear answer in line with your manifesto, or owning your record, scores; a dodge, a U-turn against your manifesto, or denying something real costs. The piece the next morning gives a verdict (a real contender / sure of the big things / charming, but what is it for? / evasive; two gaffes make you a loose cannon). Effects: the whole country gets to know you (awareness rises by the outlet's reach), the leader's image moves with the score, and the honest outlets remember. (Before: the year-one moment was planned as an internal party affair.)
 - **Carlos never blocks a button:** his remarks let clicks through and fade while the mouse is over them; only tutorial lines wait for a click.
 
 ### Media (decided November 2026; first slice built)
 
 - **Every outlet has an audience and works on it every month.** Its reach is which voter groups read or watch it (by age, class, region, nationality). Each month it does three things to its audience: pulls their **views** toward its own slant (a few issues of its own), warms them to the party it **favours**, and builds a **shield** for that party: its audience forgives that party's unpopular statements and drifts away more slowly (the "voting resilience" idea).
-- **Honest and partisan media.** An honest outlet reaches many people and moves each one a little; it reports what you actually do (good lines get credit, gaffes get covered). A partisan outlet (the Cranebonian Fox News, or its leftist equivalent) reaches fewer but moves them more and shields more, and spins whatever its party does. Its favour follows how close a party is to its own slant, so a working-class hero with the "wrong" economics is not its man.
+- **Honest and partisan media.** An honest outlet reaches many people and moves each one a little; it reports what you actually do (good lines get credit, gaffes get covered). A partisan outlet (the Cranbovian Fox News, or its leftist equivalent) reaches fewer but moves them more and shields more, and spins whatever its party does. Its favour follows how close a party is to its own slant, so a working-class hero with the "wrong" economics is not its man.
 - **No runaway radicalisation.** Voters' views are pulled back toward where they started (who they are) every month; media moves opinion slowly and it eases back when coverage stops. Outlets shield only on their own terms.
 - **Tone by medium.** Measured and folksy lines play well in traditional media; fiery and provocative ones on social media.
 - **Buying an outlet.** A bought outlet's slant moves slowly toward your party, and it bleeds viewers, who go to other outlets of the same kind.
@@ -407,7 +411,7 @@ The gap between the leader's public image and the real record. Content in `godot
 
 ### The political spectrum (decided November 2026)
 
-Cranebonistan sits on the edge of Western European democracy: closer to Poland or Hungary than to the core, with some American inspiration. Its extremes are illiberal populists, hard nationalists and hard-left populists, not fascists, communists or religious fundamentalists. Keep content inside that range.
+Cranbovia sits on the edge of Western European democracy: its politics are closer to Hungary, Serbia or Poland than to the cleaner Western European examples, with some American inspiration. It is a real, competitive democracy (elections are fair enough that a new party can win them), with rough edges: polarisation, captured and partisan media, patronage, an establishment that bends rules. It is **not** a dictatorship, and the inspiration is the politics, not Central European geography or culture (the country is a mix: see *Names*). **Renamed (decided November 2026): the country becomes Cranbovia** (people: Cranbovians), because -istan suggests a Central Asian autocracy while the "-ovia" ending keeps a sense of small-country messiness without suggesting a dictatorship. *Considered:* keeping Cranebonistan, Cranbistan, Cranebonia and Cranbonia (too neutral), Cranovia, Cranavia. *Applied* with map4: the game title, every text and the documents. Texts in the data no longer spell the name out: they write `{country}`, `{national}` and `{nationals}`, filled in from content.json `COUNTRY` when the data loads, so a future rename (or a mod) changes one line. Internal ids keep the old spelling (the flag `cranebonistan`, the issue `greater_cranebonistan`), since players never see them and mods refer to them; so do the repository and the art files. Its extremes are illiberal populists, hard nationalists and hard-left populists, not fascists, communists or religious fundamentalists. Keep content inside that range.
 
 - **No labels from the narrator.** The game never calls anyone an extremist. Rivals do: when your positions and your reactions put you near an edge, the rival furthest from you calls you names ("fascists in good suits", "communists"). It polarises: their voters go cold, your devoted and fed-up voters dig in. (Ticker only; `godot/data/violence.json` LABELS.)
 - **Dog whistles stay as they are.** Everyone hears them; their purpose is the motte and bailey: say the bold thing, and retreat to the defensible one when challenged. No decoding mechanic.
@@ -484,6 +488,48 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 - Election night district by district; standing aside in districts; forming a government.
 
 ## 11. Directions decided (November 2026), not built yet
+
+### Coalitions after the election (first stage built, November 2026)
+
+*Why:* a one-party majority (151 of 300) almost never happens (the governing party polls about 120 seats, a strong new party about 22%), so the coalition stage will end nearly every game. It also gives the calm centrist a real route to power: fewer votes, but acceptable to everyone.
+
+*Decided so far:*
+- **A short end-game sequence on its own screen.** Everything else is hidden: only the parties, their seats and their leanings. Skipped when a party has a majority on its own.
+- **Allies, neutrals and enemies.** Every party sees every other as one of the three, from political distance and from the relations built during the campaign.
+- **First, the impossible combinations go.** Every combination that reaches a majority is shown, then those that contain enemies are crossed out and fade away.
+- **The largest party tries first** (then the second, then the third). On screen the party forming the government sits on the left; the next candidate slides onto the negotiation spot; if they are enemies an X is drawn over them, the reason is shown, and they slide up and away while the next one slides in. Why a party is not chosen must always be clear.
+- **The currency is ministries**, some worth more than others (the Prime Minister above all, then Interior, Finance and so on), **combined with policy concessions**. A deal can include a manifesto concession but never only that: there is always at least one ministry in it.
+- **When the player is not the largest party,** the roles flip: the player counter-offers to the party forming the government, asking for ministries and policies. The same value calculation, seen from the other side.
+- **No one can form a government:** the party with the worst relations overall is shut out, enemies of others count as neutral, and the largest remaining party tries again.
+
+*Proposed, not decided:*
+- Parties also want **the ministries tied to their own core issues**, on top of the general value. This happens in real coalitions: green parties ask for environment (Germany 2021), liberal parties for finance (Germany's FDP), farmers' parties for agriculture (Finland, Austria), anti-immigration parties for interior or asylum (Italy's Lega in 2018, the Netherlands' PVV in 2024), minority parties for education or regional affairs (Finland's Swedish People's Party). The wants can come from each party's manifesto rather than being written by hand.
+- Red lines said during the campaign ("never with the NUP") count against a deal; breaking one to get into government is hypocrisy, and Margaret notices.
+- Replace the forced third round (the shut-out party joins and is compensated) with a minority government supported from outside, or a repeat election as an ending (and a hook for continuing).
+- The player may refuse to join and stay pure, with its own ending.
+
+*Decided: no single "you win" screen; the ending is a verdict that feels like winning or losing by degrees.*
+
+| Outcome | Feeling of the ending |
+|---|---|
+| A majority alone | The country is yours to shape. |
+| Largest party, leading a coalition | A victory, with the compromises of ruling together ahead. |
+| Prime Minister, but not the largest party | The top job is yours; the party still has a way to go. |
+| Junior partner in government | A cog in the machine, with the chance to prove yourself in office. |
+| Out of government | Look in the mirror and prepare better for the next election. |
+| Largest party, shut out while others formed a government | Robbed: the people's choice overruled by back-room deals and suits. |
+
+*Decided later:* staying out by choice gets the losing ending, with a short note that you chose not to take part. No government at all is a game over for now (a repeat election may come later). Minor parties and a minimum vote share to enter parliament are planned, so not getting into parliament has its own ending. The system must work for any number of parties.
+
+**Built, first stage (November 2026):** `rules/coalition.gd` runs the talks when the result is in and writes them down step by step (`s.result.coalition`); `coalition_view.gd` plays them back on their own screen, opened from election night ("Watch the coalition talks"). Settings, ministries and texts in `data/coalition.json`. How it works now:
+- Relations: with the player, the relation built during the campaign (scars included); between two rivals, how close their positions are. At or below −20 enemies, at or above +20 allies.
+- Every *minimal* majority is listed (no member could leave and keep the majority); those holding enemies are crossed out, one pair of enemies at a time with its reason.
+- Up to three parties try in turn, largest first. Each approaches first the partners of the majority it likes best (the most of it allies, then the fewest seats to share: parties prefer the smallest partner that is enough), then the others. Enemies (of it or of a partner already in) are crossed out with the reason; allies join for their fair share by seats; neutral parties want 8% of the cabinet more, and walk away if the party forming the government would keep less than 60% of its own fair share.
+- The cabinet: the Prime Minister's office stays with the party forming the government unless a partner is bigger (then it is the partner's price) or it can't afford it; the other ministries are picked in turns by share, each party taking the post worth most to it (its weight, more if it serves the party's strongest issues: the proposal above, built as a tie-breaker).
+- No government after three tries: the party with the worst relations overall is shut out, enmities among the rest count as neutral, and the talks start again; if that fails, no government.
+- The outcomes (majority, leads, senior, pm, partner, opposition, robbed, no_seats, deadlock) set the profile's headline and a first-draft line in `coalition.json` OUTCOMES.
+*Not yet:* the player's own offers and counter-offers (for now the player's party bargains like the others), policy concessions, red lines, refusing to join, the real end screens.
+
 
 Agreed after the realism review: the vote itself first, then the people around it.
 

@@ -635,7 +635,7 @@
     },
     {
      "title": "A ports bill they care about",
-     "text": "Dillihan wants Cranebonistan's ports opened to its shipping firms. Your friends ask the party to back the bill.",
+     "text": "Dillihan wants {country}'s ports opened to its shipping firms. Your friends ask the party to back the bill.",
      "comply": {
       "label": "Back the ports bill",
       "effects": {
@@ -695,7 +695,7 @@
    "demands": [
     {
      "title": "About the James mines",
-     "text": "The Potanian mining company thinks Cranebonian firms have had the James concessions too long, and would like the party to call for an open tender.",
+     "text": "The Potanian mining company thinks {national} firms have had the James concessions too long, and would like the party to call for an open tender.",
      "comply": {
       "label": "Call for an open tender",
       "effects": {

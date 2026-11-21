@@ -275,6 +275,9 @@ func build_profile(s: Dictionary) -> Dictionary:
 	elif r.playerWon: headline = "%s BECOMES THE LARGEST PARTY" % P
 	elif r.votes.player < 0.1: headline = "%s FADES INTO THE FOOTNOTES" % P
 	else: headline = "%s'S GAMBLE FALLS SHORT" % L
+	# after the coalition talks, the headline says how it ended (data/coalition.json OUTCOMES)
+	var oc: Dictionary = COALITION.get("OUTCOMES", {}).get(r.get("coalition", {}).get("outcome", ""), {})
+	if oc.has("headline"): headline = String(oc.headline).format({"party": player.name, "leader": player.leader}).to_upper()
 	var quotes: Array = rec.quotes.filter(func(q): return q.title != "The final debate" and q.spoken)
 	var signature = null
 	var best = -1.0

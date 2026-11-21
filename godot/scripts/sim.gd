@@ -1,7 +1,7 @@
-## sim.gd — the rules of Cranebonistan (autoload "Game"): the last link of the chain
+## sim.gd — the rules of Cranbovia (autoload "Game"): the last link of the chain
 ## in scripts/rules/ (see rules/base.gd). Here: loading the content, starting a new
 ## game, the monthly update, the weekly clock and describing effects in words.
-extends "res://scripts/rules/moments.gd"
+extends "res://scripts/rules/coalition.gd"
 
 # ---------- Starting a new game ----------
 func _init() -> void:
@@ -18,7 +18,7 @@ func load_content(_unused := "") -> void:
 	CAMPAIGN = d.CAMPAIGN; EVENTS = d.EVENTS; FUNDING_OFFERS = d.FUNDING_OFFERS; INITIATIVES = d.INITIATIVES
 	CRISES = d.CRISES; INDICATORS = d.INDICATORS; TONES = d.TONES; TONE_RISK = d.TONE_RISK
 	ARCHETYPES = d.ARCHETYPES; ACTIONS = d.ACTIONS; SCRUTINY_STORIES = d.SCRUTINY_STORIES
-	MONTH_NAMES = d.MONTH_NAMES; FLAG_INFO = d.FLAG_INFO; FEEDBACK_GROUPS = d.FEEDBACK_GROUPS
+	MONTH_NAMES = d.MONTH_NAMES; FLAG_INFO = d.FLAG_INFO; COUNTRY = d.COUNTRY; FEEDBACK_GROUPS = d.FEEDBACK_GROUPS
 	MAP = _data("map", d.get("MAP", {}))
 	WEEKS_PER_MONTH = int(C.weeksPerMonth)
 	WEEKS_PER_YEAR = int(C.weeksPerMonth) * int(C.monthsPerYear)
@@ -39,6 +39,7 @@ func load_content(_unused := "") -> void:
 	SCANDALS = _data("scandals", {})
 	INTERVIEW = _data("interview", {})
 	FINAL_DEBATE = _data("final_debate", {})
+	COALITION = _data("coalition", {})
 	var media_data: Dictionary = _data("media", {})
 	OUTLETS = media_data.get("OUTLETS", [])
 	FOREIGN_MONEY = media_data.get("FOREIGN_MONEY", [])

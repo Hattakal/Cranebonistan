@@ -1,0 +1,39 @@
+## The coalition talks on made-up results, and with extra parties, to check the rules
+## work for any number of parties. Prints each step and the outcome.
+##   godot --headless --path godot -s tests/coalition.gd
+extends SceneTree
+
+var G
+
+func _init() -> void:
+	G = load("res://scripts/sim.gd").new()
+	var s: Dictionary = G.new_game({"seed": 3, "partyName": "Test", "manifesto": {"nation": 2, "economy": 2, "society": 2, "foreign": 2, "welfare": 2, "system": 2, "order": 2}})
+	_show(s, "Majority alone", {"player": 20, "nup": 160, "clf": 70, "oc": 30, "apv": 20})
+	_show(s, "Usual hung parliament", {"player": 45, "nup": 110, "clf": 90, "oc": 35, "apv": 20})
+	_show(s, "Player largest", {"player": 95, "nup": 80, "clf": 70, "oc": 35, "apv": 20})
+	_show(s, "Player out of parliament", {"player": 0, "nup": 120, "clf": 110, "oc": 50, "apv": 20})
+	# two more parties, to check nothing assumes four rivals
+	for extra in [["grn", "Greens", -30], ["far", "Hearth Front", 80]]:
+		var p: Dictionary = G.party_of(s, "clf").duplicate(true)
+		p.id = extra[0]; p.name = extra[1]; p.short = extra[0].to_upper()
+		for ax in G.AXES: p.perceived[ax.id] = clampf(float(p.perceived[ax.id]) + extra[2], -100, 100)
+		s.parties.append(p)
+	_show(s, "Seven parties", {"player": 40, "nup": 75, "clf": 60, "oc": 35, "apv": 20, "grn": 40, "far": 30})
+	print("RESULT coalition ok")
+	quit()
+
+func _show(s: Dictionary, title: String, seats: Dictionary) -> void:
+	print("\n== %s ==" % title)
+	var co: Dictionary = G.form_government(s, seats)
+	for st in co.log:
+		match st.t:
+			"combos": print("  combos (round %d): %s" % [st.round, ", ".join(st.list.map(func(c): return "+".join(c)))])
+			"cross": print("  X %s: %s" % ["+".join(st.pair), st.why])
+			"formateur": print("  %s tries" % st.party)
+			"approach": print("    -> %s (%s): %s %s" % [st.p, st.stance, st.verdict, st.why])
+			"fail": print("  fails: %s" % st.why)
+			"shutout": print("  SHUTOUT %s" % st.party)
+			"government": print("  GOVERNMENT %s, PM %s: %s" % ["+".join(st.members), st.pm, ", ".join(st.cabinet.map(func(c): return "%s=%s" % [c.ministry, c.party]))])
+			"majority": print("  majority: %s" % st.party)
+			"deadlock": print("  DEADLOCK")
+	print("  outcome for the player: %s" % co.outcome)

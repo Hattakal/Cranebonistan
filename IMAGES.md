@@ -53,8 +53,8 @@ One picture per kind of event covers every event in the game. Start here:
 |---|---|---|
 |   | `portraits/carlos.jpg` | Carlos Aster, your advisor (until then: a silhouette against the lamp) |
 |   | `portraits/nup.jpg` | The leader of National Unity Party, whoever it is this game |
-|   | `portraits/clf.jpg` | The leader of Cranebonian Labour Front, whoever it is this game |
-|   | `portraits/oc.jpg` | The leader of Open Cranebonistan, whoever it is this game |
+|   | `portraits/clf.jpg` | The leader of {national} Labour Front, whoever it is this game |
+|   | `portraits/oc.jpg` | The leader of Open {country}, whoever it is this game |
 |   | `portraits/apv.jpg` | The leader of Alinni People's Voice, whoever it is this game |
 |   | `portraits/petra-halvin.jpg` | Petra Halvin (woman, 66) |
 |   | `portraits/oskar-trand.jpg` | Oskar Trand (man, 72) |
@@ -84,6 +84,7 @@ A face for a name wins over a face for a party. Your own leader can also be `por
 |   | `places/dillihan.jpg` | Dillihan Republic |
 |   | `places/bourdeaux.jpg` | Bordon Federation |
 |   | `places/james.jpg` | James |
+|   | `places/salmark.jpg` | Salmark |
 
 ## Every event
 
@@ -126,7 +127,7 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/port_automation.jpg` | Robots replace dock workers in Yamlin |
 |   | `events/alinnian_schools.jpg` | Alinnian-language schools bill |
 |   | `events/smog_cranbia.jpg` | Smog chokes Cranbia |
-|   | `events/nomad_schools.jpg` | Mobile schools for Fauran's nomads |
+|   | `events/nomad_schools.jpg` | Travelling teachers for Fauran's villages |
 |   | `events/erland_drought.jpg` | Drought hits the Erland harvest |
 
 ### Foreign affairs
@@ -140,7 +141,7 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/generalissimo.jpg` | Bordon's generalissimo collapses at a parade |
 |   | `events/golba_sanctions.jpg` | Golba asks for sanctions on the Southern Trueants |
 |   | `events/dillihan_pipeline.jpg` | Dillihan proposes a gas pipeline through Fauran |
-|   | `events/james_base.jpg` | James asks for a Cranebonian military base |
+|   | `events/james_base.jpg` | James asks for a {national} military base |
 
 ### Opportunity
 
@@ -148,7 +149,7 @@ For when the short list is done: a picture of its own for one event.
 |---|---|---|
 |   | `events/festival_holiday.jpg` | Make Harvest Day a national holiday? |
 |   | `events/yamlin_flood.jpg` | Floods devastate Yamlin's old town |
-|   | `events/cup_victory.jpg` | Cranebonistan wins the Continental Cup |
+|   | `events/cup_victory.jpg` | {country} wins the Continental Cup |
 |   | `events/tv_debate.jpg` | Invitation to the big TV debate |
 |   | `events/fauraifai_quake.jpg` | Earthquake in Fauran |
 |   | `events/celebrity_endorsement.jpg` | Pop star Lira Vey wants to endorse you |

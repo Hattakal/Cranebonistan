@@ -38,20 +38,22 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCALE = 4          # Krita pixels per game unit (9920 px -> 2480 units)
 WORK = 2           # work at half resolution
 
-# A point inside each area, in Krita pixels. kind: region or foreign.
+# A point inside each area, in Krita pixels (map4: the canvas grew 500 px at the top, so
+# every point drawn on map3 moved 500 down). kind: region or foreign.
 AREA_SEEDS = {
-    "yamlin":    ("region",  (2552, 2011)),
-    "cranbia":   ("region",  (3680, 600)),
-    "alinni":    ("region",  (5934, 726)),
-    "erland":    ("region",  (5334, 2628)),
-    "fauraifai": ("region",  (3088, 4169)),   # shown as "Fauran"
-    "trueants":  ("foreign", (7600, 1485)),
-    "dillihan":  ("foreign", (7424, 4757)),
-    "bourdeaux": ("foreign", (1180, 6313)),   # shown as "Bordon Federation"
-    "james":     ("foreign", (2753, 5494)),
+    "yamlin":    ("region",  (2552, 2511)),
+    "cranbia":   ("region",  (3680, 1100)),
+    "alinni":    ("region",  (5934, 1226)),
+    "erland":    ("region",  (5334, 3128)),
+    "fauraifai": ("region",  (3088, 4669)),   # shown as "Fauran"
+    "trueants":  ("foreign", (7600, 1985)),
+    "dillihan":  ("foreign", (7424, 5257)),
+    "bourdeaux": ("foreign", (1180, 6813)),   # shown as "Bordon Federation"
+    "james":     ("foreign", (2753, 5994)),
+    "salmark":   ("foreign", (5000, 150)),
 }
-# Points in water, for maps whose sea isn't painted blue: the sea, the south-east sea, the lake.
-WATER_SEEDS = [(500, 500), (8000, 6950), (4989, 681)]
+# Points in water, for maps whose sea isn't painted blue: the Hesperian Sea, the south-east sea, Follount Lake.
+WATER_SEEDS = [(500, 1000), (8000, 7450), (4989, 1181)]
 CAPITAL = "Cranebo"
 # Names on the map that the game spells differently.
 NAME_FIX = {"Cranbero": "Cranebo"}
@@ -59,7 +61,7 @@ CITY_TEXT_MAX = 20   # text bigger than this (font size) is an area name, not a 
 # Label text, used only to find room for it (the game has the real names).
 LABELS = {"yamlin": ["Yamlin"], "cranbia": ["Cranbia"], "alinni": ["Alinni"], "erland": ["Erland"],
           "fauraifai": ["Fauran"], "trueants": ["Southern", "Trueants"], "dillihan": ["Dillihan", "Republic"],
-          "bourdeaux": ["Bordon", "Federation"], "james": None}
+          "bourdeaux": ["Bordon", "Federation"], "james": None, "salmark": ["Salmark"]}
 
 
 # ---------- reading .kra layers ----------
@@ -78,7 +80,10 @@ def lzf_decompress(src, outlen):
     return bytes(out)
 
 
-def read_paint_layer(z, path, W, H):
+def read_paint_layer(z, path, W, H, ox=0, oy=0):
+    """A paint layer as an RGBA array of the canvas size. (ox, oy) is the layer's offset in
+    the document: Krita stores tiles relative to the layer, and moves the layer rather than
+    its pixels when the canvas is resized."""
     d = z.read(path); pos = 0
     default = z.read(path + ".defaultpixel")
 
@@ -91,12 +96,14 @@ def read_paint_layer(z, path, W, H):
     tw, th, ps, n = hdr["TILEWIDTH"], hdr["TILEHEIGHT"], hdr["PIXELSIZE"], hdr["DATA"]
     img = np.zeros((H + th, W + tw, 4), np.uint8); img[:] = np.frombuffer(default, np.uint8)
     for _ in range(n):
-        x, y, _c, size = line().split(","); x, y, size = int(x), int(y), int(size)
+        x, y, _c, size = line().split(","); x, y, size = int(x) + ox, int(y) + oy, int(size)
         blob = d[pos:pos + size]; pos += size
-        if x < 0 or y < 0 or x >= W or y >= H: continue
+        if x + tw <= 0 or y + th <= 0 or x >= W or y >= H: continue
         raw = lzf_decompress(blob[1:], tw * th * ps) if blob[0] == 1 else blob[1:]
         p = np.frombuffer(raw, np.uint8).reshape(ps, th, tw)  # planar B, G, R, A
-        img[y:y + th, x:x + tw] = np.stack([p[2], p[1], p[0], p[3]], -1)
+        tile = np.stack([p[2], p[1], p[0], p[3]], -1)
+        cx, cy = max(0, -x), max(0, -y)   # the part of the tile left or above the canvas is cut off
+        img[y + cy:y + th, x + cx:x + tw] = tile[cy:, cx:]
     return img[:H, :W]
 
 
@@ -110,7 +117,7 @@ def load_kra(path):
         attr = dict(re.findall(r'(\w[\w-]*)="([^"]*)"', tag))
         base = f"{imgname}/layers/{attr['filename']}"
         if attr.get("nodetype") == "paintlayer":
-            layers[attr["name"]] = read_paint_layer(z, base, W, H)
+            layers[attr["name"]] = read_paint_layer(z, base, W, H, int(attr.get("x", 0)), int(attr.get("y", 0)))
         elif attr.get("nodetype") == "shapelayer":
             svg = z.read(base + ".shapelayer/content.svg").decode()
             vb = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg)
@@ -301,6 +308,12 @@ def main(path):
     full, order = build_areas(bg, borders)
     out = {"w": W // SCALE, "h": H // SCALE, "regions": {}, "foreign": {}, "cities": [], "capital": CAPITAL}
 
+    # names of seas and lakes are drawn on the water; a neighbour's own name is its label, not a city
+    water_words = {"sea", "lake", "bay", "gulf", "ocean", "strait"}
+    is_water = lambda n: bool(water_words & set(n.lower().split()))
+    country_names = {w.lower() for ls in LABELS.values() if ls for w in ls}
+    out["waters"] = [{"name": n, "x": round(tx / SCALE), "y": round(ty / SCALE)} for n, tx, ty in texts if is_water(n)]
+    texts = [t for t in texts if t[0].lower() not in country_names and not is_water(t[0])]
     # cities: dots matched to the nearest typed name
     cm = cities_l[..., 3] > 100
     lab, n = ndimage.label(cm)

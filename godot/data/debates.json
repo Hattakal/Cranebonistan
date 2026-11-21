@@ -49,7 +49,7 @@
   {
    "id": "real_cranebonian",
    "axis": "nation",
-   "title": "Who is a real Cranebonian?",
+   "title": "Who is a real {national}?",
    "text": "A row over a school textbook has turned into a fight about who belongs here and what the flag means."
   },
   {
@@ -68,7 +68,7 @@
    "id": "arm_up",
    "axis": "foreign",
    "title": "Should we arm up?",
-   "text": "Neighbours are spending on tanks. Cranebonistan is spending on pensions. Which is the mistake?"
+   "text": "Neighbours are spending on tanks. {country} is spending on pensions. Which is the mistake?"
   },
   {
    "id": "queues",

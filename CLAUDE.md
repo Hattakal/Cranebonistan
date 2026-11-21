@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Instructions for Claude Code sessions working on Cranebonistan. Read this first, then [README.md](README.md) (what the game is, file map) and [DESIGN.md](DESIGN.md) (every design decision and why).
+Instructions for Claude Code sessions working on Cranbovia (the repository keeps its old name, Cranebonistan). Read this first, then [README.md](README.md) (what the game is, file map) and [DESIGN.md](DESIGN.md) (every design decision and why).
 
 ## Who decides what
 
@@ -21,7 +21,7 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 
 ## The project
 
-- Godot 4.7, GDScript, project in `godot/`. The rules (no screen code) are a chain of files in `godot/scripts/rules/`, each extending the one before (base → voters → districts → media → party → scandals → rivals → world → moments), ending in `godot/scripts/sim.gd`, the autoload `Game`; see the top of `rules/base.gd`. A file may only call functions in itself or earlier in the chain; a call that must go the other way is declared as a hook at the bottom of `base.gd`. New constants and state variables go in `base.gd`. All content is JSON in `godot/data/`, edited directly. There is no browser version any more (old prototype on the `browser-version` branch; never merge it back).
+- Godot 4.7, GDScript, project in `godot/`. The rules (no screen code) are a chain of files in `godot/scripts/rules/`, each extending the one before (base → voters → districts → media → party → scandals → rivals → world → moments → coalition), ending in `godot/scripts/sim.gd`, the autoload `Game`; see the top of `rules/base.gd`. A file may only call functions in itself or earlier in the chain; a call that must go the other way is declared as a hook at the bottom of `base.gd`. New constants and state variables go in `base.gd`. All content is JSON in `godot/data/`, edited directly. There is no browser version any more (old prototype on the `browser-version` branch; never merge it back).
 - Seven axes: economy (State/Market), welfare (Welfare/Austerity), nation (Nationalist/Multicultural), society (Progressive/Traditional), order (Authority/Liberty), foreign (Hawk/Dove), system (Radical/Establishment). Positions run -100 (left label) to +100 (right label); "L"/"R" sides in keys like `nation:L`.
 - **Keep it moddable.** Every data file is read through `Mods.data("<name>")` (`godot/scripts/mods.gd`), and every picture, sound and font through `Mods.texture/audio/asset_path`. Never read `res://data/` or `res://assets/` directly, and put new content in data files, not code. If the rules start depending on a new id, add it to the list in MODDING.md.
 - `SAVE_VERSION` in sim.gd: bump it whenever the shape of the saved state changes (old saves then start a new game).
@@ -52,6 +52,7 @@ godot --headless --path godot -s tests/debates.gd -- 7     # prints how debates 
 godot --headless --path godot --import                     # needed after adding a new class_name script
 godot --headless --path godot -s tests/scandals.gd -- deny 4   # a game that takes dirty money and answers every scandal one way (deny/own/attack/subject/scapegoat)
 godot --headless --path godot -s tests/rivals.gd            # what the rival parties did over a whole game
+godot --headless --path godot -s tests/coalition.gd         # the coalition talks on made-up results, with extra parties
 godot --headless --path godot -s tests/strong.gd -- populist 2   # a competent player (populist | centrist | left), to measure difficulty; add e.g. nospeak,notrips or trace
 ```
 
@@ -60,6 +61,7 @@ Screenshots of the real game (use these to check any visual change; look at the 
 ```
 godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--leak=1 --open=1] [--clear=1] [--scroll=700]
     [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5] [--found=1] [--title=1 --then=4] [--look=night|study] [--options=1]
+    [--until=election --coalition=6|end] [--seats=player:95,nup:80,clf:70,oc:35,apv:20]   # the coalition talks, 6 seconds in or at the end; --seats makes up a result
 ```
 
 In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd`): skip time, change money, support, trust, the world, rivals, queue any event. `--cheats=N` opens it in a screenshot after skipping N months. `--weeks` plays that many weeks automatically first; `--clear` empties the decision queue so files are usable; the other flags open specific sheets. (On Linux without a display, wrap it in `xvfb-run -a -s "-screen 0 1600x900x24"` and add `--rendering-driver opengl3`.)
@@ -76,18 +78,18 @@ In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd
 
 ## Content and writing
 
-- About 300 written lines live in `debate_lines.json`, `issues.json`, `carlos.json`, `margaret.json`; events and sound bites in `content.json`. Keep Ozan's voice: dry, grounded, specific to the world (Cranebo, Bayernal, Tarropolis, the pezo), never cartoonish.
+- Never write the country's name in data texts: use `{country}`, `{national}`, `{nationals}` (filled in from content.json `COUNTRY` when data loads, in `Mods.data`). In screen code use `G.COUNTRY.name`.
+- About 300 written lines live in `debate_lines.json`, `issues.json`, `carlos.json`, `margaret.json`; events and sound bites in `content.json`. Keep Ozan's voice: dry, grounded, specific to the world (Cranebo, Bayernal, Tarroport, the pezo), never cartoonish.
 - After changing Carlos's lines, run `python3 tools/voice_script.py` to regenerate VOICE.md (the recording script; recordings go in `godot/assets/voice/carlos/<id>.ogg`).
 - After adding events or pictures, run `python3 tools/image_list.py` to regenerate IMAGES.md (where pictures go and which are missing).
-- The map is built from Ozan's Krita file: `python3 tools/build_map.py art/map3.kra` (writes `godot/data/map.json` and the map features image).
+- The map is built from Ozan's Krita file: `python3 tools/build_map.py art/map4.kra` (writes `godot/data/map.json` and the map features image).
 
 ## Open items Ozan knows about
 
-- Fauran is still written as nomads/herders in ~20 places; awaiting his new history.
 - `scenes.json` (back-room intro with Carlos and Margaret) still describes old rules and isn't shown in Godot yet.
 - **Visual direction (decided November 2026, first pass built; Ozan has not reviewed it yet):** neo-noir, "the campaign at night"; see DESIGN.md 7.1 and "The look" above. Still open: the photographs (Ozan is finding them; IMAGES.md is the list, written by `tools/image_list.py`), sound in Godot, time of day, election night province by province, portraits of Carlos and Margaret (might be commissioned). Zero budget: public-domain/CC0 photos, open-licence fonts, CC0 or synthesised sounds; no generative-AI art, ever.
 - **Turnout (draft, not on main):** per-party turnout from trust and drift is on the branch `claude/project-overview-roadmap-3813b2-sjo7ds` (commit "Draft (not on main): per-party turnout…"). Trust works; the drift penalty is far too strong (a competent populist fell from ~23% to ~12%). Open questions for Ozan: drift only against core supporters? measured against the founding or the current manifesto? how far low trust may push turnout down.
-- **Lore and names (Ozan is working on them):** his history of Cranebonistan and the world was discussed (comments: replace the religious split, add recent political history 1964–now, decide what Fauran is today). Planned renames: Büllünt → Vüllent, Crumland → Crümland, Cranbia cities lose -polis for "city" suffixes, Erland modelled on Castile and/or Alberta, possibly the country name itself (Cranebonia keeps "Cranebonian").
+- **Lore and names (Ozan is working on them):** his history of Cranbovia and the world was discussed (comments: replace the religious split, add recent political history 1964–now, Fauran is now written as the rural, traditional south). Done with map4: the city renames (Vüllent, Crümländ, Tarroport, Giloford, Lilabourg), Salmark (capital Salbourg) in the north, the Hesperian Sea and Follount Lake, the new Erland province Sisillia (no city yet). The country is now **Cranbovia** (people: Cranbovians) in the game and docs; ids keep the old spelling. Still to do: Erland modelled on Castile and/or Alberta. See DESIGN.md, *The political spectrum* and *A new northern neighbour*.
 - Planned: personas, continuing after a lost election, event pictures and portraits, sound, exports.
 
 ## Git

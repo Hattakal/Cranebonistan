@@ -56,6 +56,33 @@ static func _roots() -> Array:
 ## version merged on top. A mod may also add a data file the game doesn't have.
 static func data(name: String) -> Variant:
 	if _cache.has(name): return _cache[name].duplicate(true)
+	var out = _names_in(_merged(name), _world_names())
+	_cache[name] = out
+	return out.duplicate(true) if out is Dictionary or out is Array else out
+
+## The world's names, written into texts as {country}, {national} and {nationals}
+## ("Who is a real {national}?"). Set in content.json COUNTRY, so a rename (or a mod)
+## changes one place. Unknown {words} are left alone for the rules to fill in later.
+static var _world = null
+static func _world_names() -> Dictionary:
+	if _world == null:
+		var c = _merged("content")
+		var w: Dictionary = c.get("COUNTRY", {}) if c is Dictionary else {}
+		_world = {"country": str(w.get("name", "")), "national": str(w.get("national", "")), "nationals": str(w.get("nationals", ""))}
+	return _world
+
+static func _names_in(v, names: Dictionary):
+	if v is String:
+		return v.format(names) if v.contains("{") else v
+	if v is Array:
+		var a: Array = v
+		for i in a.size(): a[i] = _names_in(a[i], names)
+	elif v is Dictionary:
+		var d: Dictionary = v
+		for k in d.keys(): d[k] = _names_in(d[k], names)
+	return v
+
+static func _merged(name: String) -> Variant:
 	var path = "res://data/%s.json" % name
 	var out = null
 	if FileAccess.file_exists(path):
@@ -69,8 +96,7 @@ static func data(name: String) -> Variant:
 			push_warning("Mod %s: data/%s.json is not valid JSON; ignored." % [m.name, name])
 			continue
 		out = add if out == null else merge(out, add)
-	_cache[name] = out
-	return out.duplicate(true) if out is Dictionary or out is Array else out
+	return out
 
 ## How a mod's data meets the game's:
 ## - Objects merge key by key. A key set to null is removed. {"_replace": true} in

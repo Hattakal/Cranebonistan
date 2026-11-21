@@ -2,7 +2,7 @@
  "_note": "The final debate, a month before the election. Three rounds: the opening, the strongest rival's attack, the closing. The attack is picked from your record: a contradiction if there is one, else a group you blamed, else dirty money, else the default. Placeholders: {leader} {party} {rival} {rival_party} {first_date} {first} {second_date} {second} {group}. 'react' (optional) on a line: extra goodwill changes for groups. 'hurt': what an attack that lands costs you before you even answer. Drafts: rewrite freely.",
  "OPENING": {"title": "Opening statement", "prompt": "The moderator turns to {leader}: \"Your party didn't exist four years ago. Why should anyone vote for it?\"",
   "lines": [
-   {"tone": "statesman", "text": "\"Because Cranebonistan deserves a government that keeps its word. That is all {party} has ever asked for.\""},
+   {"tone": "statesman", "text": "\"Because {country} deserves a government that keeps its word. That is all {party} has ever asked for.\""},
    {"tone": "fiery", "text": "\"Because for thirty years the people on this stage have robbed you blind, and tonight that ends.\""},
    {"tone": "folksy", "text": "\"I'm not a career politician. I'm someone who got tired of waiting for a bus that never comes.\""},
    {"tone": "provocative", "text": "\"Look at the people next to me. Would you lend any of them your car?\""}
@@ -11,7 +11,7 @@
   "attacks": {
    "contradiction": "\"In {first_date} you said: '{first}' In {second_date} you said: '{second}' Which one do you actually believe?\"",
    "blamed": "\"Your whole campaign has been about blaming {group}. Is that all you have to offer?\"",
-   "money": "\"Where does your party's money come from? Because it isn't from ordinary Cranebonians.\"",
+   "money": "\"Where does your party's money come from? Because it isn't from ordinary {nationals}.\"",
    "default": "\"You have never run anything in your life. Why should anyone trust you with a country?\""
   },
   "hurt": [{"who": {"class": "middle"}, "amt": -0.12}, {"who": {"age": "61+"}, "amt": -0.08}],

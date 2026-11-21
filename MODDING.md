@@ -1,4 +1,4 @@
-# Modding Cranebonistan
+# Modding Cranbovia
 
 Almost everything in the game is data: the country, the parties, every event and line, the media, the map, the names, the balance settings. A mod changes that data, or the pictures and sounds, **without touching the game's own files**. Several mods can run together.
 
@@ -8,7 +8,7 @@ A mod is a folder with a `mod.json` in it. The game looks for mod folders in:
 
 | Where | When |
 |---|---|
-| `user://mods/` (the game's data folder; on Windows `%APPDATA%\Godot\app_userdata\Cranebonistan\mods\`) | always |
+| `user://mods/` (the game's data folder; on Windows `%APPDATA%\Godot\app_userdata\Cranbovia\mods\`) | always |
 | a `mods` folder next to the game's executable | the exported game |
 | `mods/` at the top of this repository | running from the Godot editor |
 
@@ -62,7 +62,7 @@ Examples:
 // data/content.json: a new event, a renamed rival leader, a setting
 {
  "CONFIG": {"actionsPerMonth": 4},
- "PARTIES": [{"id": "oc", "leader": "Camille Fontanel", "leaderHome": "Gilopolis"}],
+ "PARTIES": [{"id": "oc", "leader": "Camille Fontanel", "leaderHome": "Giloford"}],
  "EVENTS": [{"id": "my_ferry_strike", "kind": "regional", "title": "Ferry crews strike in Nikecisa", "text": "...",
    "choices": [{"label": "Back the crews", "effects": {"shift": {"economy": -6}}}]}]
 }
@@ -76,6 +76,15 @@ Examples:
 ```json
 // data/content.json: remove an event
 {"EVENTS": [{"id": "port_automation", "_remove": true}]}
+```
+
+### The country's name
+
+Texts never spell out the country's name: they write `{country}` (Cranbovia), `{national}` (Cranbovian) and `{nationals}` (Cranbovians), filled in when the data loads from `COUNTRY` in content.json. To rename the country, change only that, and write the same words in your own texts:
+
+```json
+// data/content.json
+{"COUNTRY": {"name": "Ostmark", "national": "Ostmarker", "nationals": "Ostmarkers"}}
 ```
 
 A working example is in `mods/example-more-cities/` (switched off; set `"enabled": true` to try it).
@@ -105,6 +114,8 @@ The rules refer to a few things by id. Change their names, numbers and text free
 - **Leader types** `star`, `statesman`, `revolutionary`, `strongman`, `one_of_us`, `clean`, `expert`.
 - **Media kinds** `public`, `paper`, `tabloid`, `business`, `network`, `online`, `regional`, `platform`, `foreign`, `influencer`.
 - **The seven issues** (`economy`, `welfare`, `nation`, `society`, `order`, `foreign`, `system`).
+- **`COUNTRY`** in content.json (`name`, `national`, `nationals`).
+- **Ministry** `pm` (the Prime Minister) in coalition.json; the outcome ids in its `OUTCOMES`.
 
 ## What a mod can't change (yet)
 
