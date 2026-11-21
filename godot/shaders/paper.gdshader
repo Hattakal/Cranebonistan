@@ -24,6 +24,6 @@ void fragment() {
 	vec3 warm = vec3(1.02, 1.015, 1.0);
 	vec3 cool = vec3(0.92, 0.93, 0.95);
 	vec3 light = mix(warm, cool, smoothstep(0.05, 1.0, d));
-	float tooth = (hash(floor(lp)) - 0.5) * 0.022;
+	float tooth = 0.0;   // no paper grain: on screen it read as glitter
 	COLOR.rgb *= mix(vec3(1.0), light + tooth, strength);
 }

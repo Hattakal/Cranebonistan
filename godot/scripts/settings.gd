@@ -7,7 +7,7 @@ extends RefCounted
 const PATH := "user://settings.cfg"
 const DEFAULTS := {
 	"look": "study",       # the colour scheme: Look.PALETTES
-	"grain": true,         # film grain and darker corners over the screen
+	"grain": false,        # film grain and darker corners over the screen (off: it shimmered)
 	"text": "normal",      # normal | large
 	"fullscreen": false,
 	"volume": 0.8,         # 0..1, everything (Carlos's voice for now)
