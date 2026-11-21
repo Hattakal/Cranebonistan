@@ -49,9 +49,9 @@ Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey 
 - **Norbanistan:** was the second great power before a civil war. Its refugees are fleeing everywhere, including Cranebonistan.
 - **Potania:** major buyer of Cranebonistan's rare materials.
 
-### A new northern neighbour (decided November 2026)
+### A new northern neighbour: Salmark (decided November 2026)
 
-**Clovinia**, capital **Clovin**: a small republic to the north, named after cloves. Mountains separate it from Cranbovia, and it keeps to itself through trade. It needs no events or rules: it is a quiet neighbour (relation Neutral) that never causes trouble, unless a later idea wants it to. *Rejected:* making it a banking haven, which read as a Swiss parody. The designer is drawing it on the extended map (the current map cuts off the country's northern border and its northern sea). The name may change if it reads too close to Cranbovia.
+**Salmark**, capital **Salbourg**: a small mountain republic to the north. Mountains separate it from Cranbovia, and its wealth comes from the salt in its own mountains, as with several real Alpine states, which let it stay independent and keep to itself through trade. It needs no events or rules: it is a quiet neighbour (relation Neutral) that never causes trouble, unless a later idea wants it to. *History of the name:* first Clovinia (after cloves), changed because it read too close to Cranbovia ("Cranbovian and Clovinian ministers meet"). *Rejected:* making it a banking haven, which read as a Swiss parody. The designer is drawing it on the extended map (the current map cuts off the country's northern border and its northern sea).
 
 ### The map
 
