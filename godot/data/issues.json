@@ -26,7 +26,7 @@
    "lines": {"L": [{"tone": "statesman", "text": "Kansilia's farmers fed this country. Now the country should help them through the drought."}, {"tone": "folksy", "text": "When a farmer sells his cows to pay for water, the whole village knows it's bad."}],
              "R": [{"tone": "statesman", "text": "Handouts end with the summer. Kansilia needs pipes and reservoirs, built by people who know the land."}, {"tone": "provocative", "text": "Cranebo will send Kansilia a sympathy card and a committee.", "risk": 0.5}]}},
   {"id": "bulunt_language", "region": "alinni", "axis": "nation", "title": "Signs in Vüllent",
-   "text": "The town council in Vüllent has put up street signs in Alinnian alongside Cranbovian. The interior ministry wants them taken down.",
+   "text": "The town council in Vüllent has put up street signs in Alinnian alongside {national}. The interior ministry wants them taken down.",
    "lines": {"L": [{"tone": "statesman", "text": "One country, one official language. That is how a nation holds together."}, {"tone": "provocative", "text": "Today it's the street signs. Tomorrow it's the border posts.", "risk": 0.75, "react": [{"who": {"nationality": "alinnian"}, "amt": -0.3}]}],
              "R": [{"tone": "statesman", "text": "A street sign in two languages hurts nobody. Leave Vüllent alone."}, {"tone": "folksy", "text": "If my grandmother can read the sign to the bakery, the country is stronger, not weaker.", "react": [{"who": {"nationality": "alinnian"}, "amt": 0.1}]}]}},
   {"id": "torun_police", "region": "alinni", "axis": "order", "title": "The Törün checkpoints",

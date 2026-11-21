@@ -41,6 +41,7 @@ var SCRUTINY_STORIES: Array
 var MONTH_NAMES: Array
 var MAP: Dictionary
 var FLAG_INFO: Dictionary
+var COUNTRY: Dictionary      # the country's name: {name, national, nationals}
 var FEEDBACK_GROUPS: Array
 
 var WEEKS_PER_MONTH: int

@@ -78,6 +78,15 @@ Examples:
 {"EVENTS": [{"id": "port_automation", "_remove": true}]}
 ```
 
+### The country's name
+
+Texts never spell out the country's name: they write `{country}` (Cranbovia), `{national}` (Cranbovian) and `{nationals}` (Cranbovians), filled in when the data loads from `COUNTRY` in content.json. To rename the country, change only that, and write the same words in your own texts:
+
+```json
+// data/content.json
+{"COUNTRY": {"name": "Ostmark", "national": "Ostmarker", "nationals": "Ostmarkers"}}
+```
+
 A working example is in `mods/example-more-cities/` (switched off; set `"enabled": true` to try it).
 
 ## Changing pictures, sounds and fonts
@@ -102,6 +111,7 @@ The rules refer to a few things by id. Change their names, numbers and text free
 - **Leader types** `star`, `statesman`, `revolutionary`, `strongman`, `one_of_us`, `clean`, `expert`.
 - **Media kinds** `public`, `paper`, `tabloid`, `business`, `network`, `online`, `regional`, `platform`, `foreign`, `influencer`.
 - **The seven issues** (`economy`, `welfare`, `nation`, `society`, `order`, `foreign`, `system`).
+- **`COUNTRY`** in content.json (`name`, `national`, `nationals`).
 
 ## What a mod can't change (yet)
 

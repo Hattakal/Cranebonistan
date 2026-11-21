@@ -638,7 +638,7 @@ func _event_header(p: Paper, ev: Dictionary) -> void:
 			var col = Look.MUTED if ind.good == null else (Look.RED if bad else Look.GOOD)
 			items.append(["%s %s %d" % [ind.label, "▲" if dv > 0 else "▼", Game.jround(absf(dv))], col])
 		if items.size():
-			p.add(Look.caps("What this does to Cranbovia", 11, Look.MUTED, 2))
+			p.add(Look.caps("What this does to %s" % G.COUNTRY.name, 11, Look.MUTED, 2))
 			p.chips(items)
 	if ev.get("crisisStart") and G.crisis_blames_you(S):
 		p.callout("Your party's campaigning helped bring this about. For months you pushed the country toward exactly this.")
