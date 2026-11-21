@@ -18,8 +18,12 @@
 ## Settings and texts: data/coalition.json.
 extends "res://scripts/rules/moments.gd"
 
-func coalition_text(key: String, fill := {}) -> String:
-	return String(COALITION.get("TEXT", {}).get(key, key)).format(fill)
+## A text from data/coalition.json TEXT. `you`: the player's party is the one it is
+## about, so use the "<key>_you" version when there is one.
+func coalition_text(key: String, fill := {}, you := false) -> String:
+	var t: Dictionary = COALITION.get("TEXT", {})
+	if you and t.has(key + "_you"): key += "_you"
+	return String(t.get(key, key)).format(fill)
 
 func _cset(key: String, default):
 	return COALITION.get(key, default)
@@ -177,12 +181,12 @@ func _try_formateur(s: Dictionary, f: String, in_play: Array, seats: Dictionary,
 		var ent: Dictionary = _entitlements(seats, f, trial)
 		var f_fair: float = float(seats[f]) / float(_seats_of(seats, with_p))
 		if ent[f] < f_fair * (1.0 - give_max):
-			step.verdict = "refuse"; step.why = coalition_text("neutral_refuses", {"f": _short(s, f)})
+			step.verdict = "refuse"; step.why = coalition_text("neutral_refuses", {"f": _short(s, f)}, party_of(s, p).isPlayer)
 			log.append(step); continue
 		premium[p] = extra
 		members.append(p)
 		step.verdict = "join"
-		step.why = coalition_text("ally" if st == "ally" else "neutral_deal")
+		step.why = coalition_text("ally" if st == "ally" else "neutral_deal", {}, party_of(s, p).isPlayer)
 		log.append(step)
 	if _seats_of(seats, members) < need:
 		log.append({"t": "fail", "party": f, "why": coalition_text("short", {"n": _seats_of(seats, members), "need": need})})
@@ -194,7 +198,7 @@ func _try_formateur(s: Dictionary, f: String, in_play: Array, seats: Dictionary,
 	if pm != f:
 		for i in range(log.size() - 1, -1, -1):
 			if log[i].t == "approach" and log[i].p == pm and log[i].verdict == "join":
-				log[i].why = coalition_text("neutral_pm"); break
+				log[i].why = coalition_text("neutral_pm", {}, party_of(s, pm).isPlayer); break
 	return {"members": members, "cabinet": cab, "formateur": f, "shares": ent}
 
 ## The order in which `f` approaches the others: first the partners of the majority it

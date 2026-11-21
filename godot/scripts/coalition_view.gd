@@ -328,7 +328,7 @@ func _show_talks(f: String, steps: Array, fail) -> bool:
 				await _leave_up([c])
 			"join":
 				var s2 = _stamp(c, "Joins", Look.GOOD)
-				_caption.text = "%s: %s" % [_name(st.p), st.why]
+				_caption.text = st.why if _party(st.p).isPlayer else "%s: %s" % [_name(st.p), st.why]
 				members.append(st.p)
 				_set_bar(members)
 				if not await _pause(1.4): return false
