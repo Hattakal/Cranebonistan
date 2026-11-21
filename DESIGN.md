@@ -497,7 +497,19 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 - Red lines said during the campaign ("never with the NUP") count against a deal; breaking one to get into government is hypocrisy, and Margaret notices.
 - Replace the forced third round (the shut-out party joins and is compensated) with a minority government supported from outside, or a repeat election as an ending (and a hook for continuing).
 - The player may refuse to join and stay pure, with its own ending.
-- **What counts as winning** changes from "largest party" to "in government", with Prime Minister the best result. *Needs the designer's decision.*
+
+*Decided: no single "you win" screen; the ending is a verdict that feels like winning or losing by degrees.*
+
+| Outcome | Feeling of the ending |
+|---|---|
+| A majority alone | The country is yours to shape. |
+| Largest party, leading a coalition | A victory, with the compromises of ruling together ahead. |
+| Prime Minister, but not the largest party | The top job is yours; the party still has a way to go. |
+| Junior partner in government | A cog in the machine, with the chance to prove yourself in office. |
+| Out of government | Look in the mirror and prepare better for the next election. |
+| Largest party, shut out while others formed a government | Robbed: the people's choice overruled by back-room deals and suits. |
+
+*Not covered yet:* the largest party that gives the Prime Minister's post to a partner to get a deal; staying out by choice (if refusing is added); no government at all (a repeat election).
 
 
 Agreed after the realism review: the vote itself first, then the people around it.
