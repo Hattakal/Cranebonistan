@@ -67,7 +67,7 @@ func _build() -> void:
 	_head("Your party")
 	_row([["Money +5", func(): main.S.money += 5.0], ["+20", func(): main.S.money += 20.0], ["Money 0", func(): main.S.money = 0.0]])
 	_row([["Actions back to 3", func(): main.S.actionsLeft = int(main.G.C.actionsPerMonth)], ["Trip again", func(): main.S.lastVisit = -99]])
-	_row([["Everyone likes you more", func(): _goodwill(0.3)], ["…less", func(): _goodwill(-0.3)], ["Better known +10%", func(): _aware(0.1)]])
+	_row([["+10 points everywhere", func(): _goodwill(0.10)], ["−10 points everywhere", func(): _goodwill(-0.10)], ["Better known +10%", func(): _aware(0.1)]])
 	_row([["Charisma +10", func(): _charisma(10)], ["Charisma −10", func(): _charisma(-10)]])
 	_head("The country")
 	_row([["Trust +10", func(): main.S.trust = clampf(main.S.trust + 10, 0, 100)], ["Trust −10", func(): main.S.trust = clampf(main.S.trust - 10, 0, 100)]])
@@ -159,8 +159,38 @@ func _play_months(n: int) -> void:
 	var start: int = int(main.S.week / G.WEEKS_PER_MONTH) * G.WEEKS_PER_MONTH
 	_play_to(mini(G.ELECTION_WEEK, start + n * G.WEEKS_PER_MONTH))
 
-func _goodwill(d: float) -> void:
-	for pop in main.S.pops: pop.goodwill.player = clampf(pop.goodwill.player + d, -2, 2)
+## Moves your share by `points` (0.10 = 10 points) in every district: for each one,
+## searches for the change in goodwill there that gets closest. Goodwill has limits,
+## so a district where you are already very popular or very unpopular may move less.
+func _goodwill(points: float) -> void:
+	var G = main.G
+	var S: Dictionary = main.S
+	var ctx = G.score_context(S)
+	for d in G.DISTRICTS:
+		var pops: Array = S.pops.filter(func(p): return p.get("district", "") == d.id)
+		if pops.is_empty(): continue
+		var start = pops.map(func(p): return float(p.goodwill.player))
+		var target: float = clampf(float(G.summarize(S, pops, ctx).support.player) + points, 0.0, 1.0)
+		var lo := -4.0 if points < 0 else 0.0
+		var hi := 0.0 if points < 0 else 4.0
+		for i in 14:
+			var mid: float = (lo + hi) / 2
+			for k in pops.size(): pops[k].goodwill.player = clampf(start[k] + mid, -2, 2)
+			if float(G.summarize(S, pops, ctx).support.player) < target: lo = mid
+			else: hi = mid
+		var best: float = hi if points > 0 else lo
+		for k in pops.size(): pops[k].goodwill.player = clampf(start[k] + best, -2, 2)
+		# still short: people who have never heard of you can't vote for you, so make them hear
+		if points > 0 and float(G.summarize(S, pops, ctx).support.player) < target - 0.005:
+			var aw0 = pops.map(func(p): return float(p.aware.player))
+			var alo := 0.0
+			var ahi := 1.0
+			for i in 14:
+				var am: float = (alo + ahi) / 2
+				for k in pops.size(): pops[k].aware.player = aw0[k] + am * (1 - aw0[k])
+				if float(G.summarize(S, pops, ctx).support.player) < target: alo = am
+				else: ahi = am
+			for k in pops.size(): pops[k].aware.player = aw0[k] + ahi * (1 - aw0[k])
 	_exact_poll()
 
 func _aware(d: float) -> void:
