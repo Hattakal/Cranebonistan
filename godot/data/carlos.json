@@ -3,7 +3,7 @@
  "LINES": {
   "tutorial": [
    {"id": "tut_1", "text": "Boss! Welcome to headquarters. It's not much yet: a desk, a map, a kettle. But it's yours, and I've got a feeling about you."},
-   {"id": "tut_2", "text": "The board on the left is what needs you right now. The map shows who leads where. Everything else is in the files along the top."},
+   {"id": "tut_2", "text": "The desk on the left is what needs you right now. The map shows who leads where. Everything else is in the files along the top."},
    {"id": "tut_3", "text": "The whole country argues about something every month. Open Debates, pick a side, and say it your way. People remember how you said it."},
    {"id": "tut_4", "text": "You get three moves a month. Speak, start your own argument, open an office somewhere, dig into the competition. No wrong answers, boss. Well. Mostly."},
    {"id": "tut_5", "text": "When you're ready, press play and the weeks roll on. I'll be right here. I'm always right here."}
@@ -11,7 +11,7 @@
   "month_start": [
    {"id": "month_1", "text": "New month, boss. Three fresh moves. The country's waiting."},
    {"id": "month_2", "text": "A new month! I've cleared your diary. Well, I've cleared it of things I didn't think you'd enjoy."},
-   {"id": "month_3", "text": "Morning, boss. Coffee's on the desk, the debates are on the board."},
+   {"id": "month_3", "text": "Morning, boss. Coffee's on the desk, and so are the debates."},
    {"id": "month_4", "text": "Another month. You know, I keep a list of everything you get right. I need a bigger notebook."},
    {"id": "month_5", "text": "Three moves this month. Make them count. Not that you'd do anything else."},
    {"id": "month_6", "text": "Fresh month, fresh headlines. Somebody out there is saying something you could answer."}

@@ -2182,7 +2182,7 @@
    }
   },
   {
-   "id": "port_automation",
+   "id": "port_automation", "sourceRegion": "yamlin",
    "kind": "regional",
    "title": "Robots replace dock workers in Yamlin",
    "text": "The Port of Yamlin will automate its container terminal, cutting 6,000 jobs. The owners promise lower prices for everyone.",
@@ -2770,7 +2770,7 @@
    }
   },
   {
-   "id": "alinnian_schools",
+   "id": "alinnian_schools", "sourceRegion": "alinni",
    "kind": "regional",
    "title": "Alinnian-language schools bill",
    "text": "A bill would let schools in Alinni teach in the Alinnian language. Alinnian parents have campaigned for it for decades. Nationalists call it the first step to separation.",
@@ -4928,7 +4928,7 @@
    }
   },
   {
-   "id": "smog_cranbia",
+   "id": "smog_cranbia", "sourceRegion": "cranbia",
    "trust": -2,
    "kind": "regional",
    "title": "Smog chokes Cranbia",
@@ -5023,7 +5023,7 @@
    ]
   },
   {
-   "id": "nomad_schools",
+   "id": "nomad_schools", "sourceRegion": "fauran",
    "kind": "regional",
    "title": "Travelling teachers for Fauran's villages",
    "text": "Only half of the children in Fauran's hill villages finish school: the nearest one is often two hours away by bus. A charity proposes travelling teachers who go from village to village.",
@@ -5111,7 +5111,7 @@
    ]
   },
   {
-   "id": "erland_drought",
+   "id": "erland_drought", "sourceRegion": "erland",
    "trust": -2,
    "kind": "regional",
    "title": "Drought hits the Erland harvest",

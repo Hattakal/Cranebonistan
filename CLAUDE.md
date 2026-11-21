@@ -26,6 +26,20 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 - **Keep it moddable.** Every data file is read through `Mods.data("<name>")` (`godot/scripts/mods.gd`), and every picture, sound and font through `Mods.texture/audio/asset_path`. Never read `res://data/` or `res://assets/` directly, and put new content in data files, not code. If the rules start depending on a new id, add it to the list in MODDING.md.
 - `SAVE_VERSION` in sim.gd: bump it whenever the shape of the saved state changes (old saves then start a new game).
 
+## The look (decided; see DESIGN.md 7.1)
+
+Neo-noir in a present-day setting: a campaign office at night. When adding or changing a screen:
+
+- **Colours and fonts only from `look.gd`**, never a hex code in a screen script. There are two palettes, `study` (warm, the default) and `night` (cold), chosen in Options (`settings.gd`) or with `--look=night` in a screenshot: a colour belongs in both, so add it to `PALETTES`, and check new screens in both. Sizes go through `Look.fs()` so the Options' large text works. Dark surfaces (the desk, the files, the top bar) use `Look.dlabel`/`dcaps`, `Look.glass()` and `Look.dark_button()`; paper uses `Look.label`/`caps` (ink by default).
+- **Cold and dark around you, clean white paper under the lamp in your hands** (not cream: Ozan found cream read as old newsprint). `LAMP` (amber) is the only warm light: hover, city lights, Carlos. Party colours are the only strong colours; on the dark, pass them through `Look.lit()`.
+- **Red is rationed:** danger, and the one button to press next. Good news is `GOOD`/`GOOD_HI`, never red.
+- **Paper or screen:** what the player reads and decides is a `Paper` sheet; what the country watches (evening news, interview, debate, election night) is the same sheet after `p.screen()`. Build with the sheet's own blocks (`p.text`, `p.card`, `p.chips`...), which recolour themselves on a screen.
+- **An event is a plain event screen, Paradox-style:** `p.source(outlet, kind · date)` at the top (who broke it: `_broke_it()` in main.gd, from `BREAKS` in media.json), then the headline, picture, text and choices on the same sheet. Ozan called off the newspaper experiment (front pages, folded paper): don't bring it back unasked.
+- **Tone: grit, but not grim.** Ozan found the first pass slightly too slick and depressing. Keep the dark palette; let lightness come from small dry details (a coffee ring), never from caricature.
+- **The numbers stay plain.** The files are a clean briefing; don't dress data up as objects.
+- **Photographs** go through `Photo` (one filter for all, `shaders/photo.gdshader`); faces through `Face`. Never draw a texture straight to the screen. A missing picture shows nothing.
+- Fonts: `display*` Barlow Condensed (labels, numbers, buttons), `news*` Newsreader (headlines, papers, speech), `body*` Plex Sans Condensed, `type` Plex Mono (memos), `hand` Caveat (a margin note from Carlos, rarely).
+
 ## Running and checking
 
 Find the Godot executable first (it may not be on PATH; ask Ozan where it is if you can't find it). From the repository root:
@@ -46,7 +60,7 @@ Screenshots of the real game (use these to check any visual change; look at the 
 
 ```
 godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--leak=1 --open=1] [--clear=1] [--scroll=700]
-    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5]
+    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5] [--found=1] [--title=1 --then=4] [--look=night|study] [--options=1]
     [--until=election --coalition=6|end] [--seats=player:95,nup:80,clf:70,oc:35,apv:20]   # the coalition talks, 6 seconds in or at the end; --seats makes up a result
 ```
 
@@ -67,12 +81,13 @@ In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd
 - Never write the country's name in data texts: use `{country}`, `{national}`, `{nationals}` (filled in from content.json `COUNTRY` when data loads, in `Mods.data`). In screen code use `G.COUNTRY.name`.
 - About 300 written lines live in `debate_lines.json`, `issues.json`, `carlos.json`, `margaret.json`; events and sound bites in `content.json`. Keep Ozan's voice: dry, grounded, specific to the world (Cranebo, Bayernal, Tarroport, the pezo), never cartoonish.
 - After changing Carlos's lines, run `python3 tools/voice_script.py` to regenerate VOICE.md (the recording script; recordings go in `godot/assets/voice/carlos/<id>.ogg`).
+- After adding events or pictures, run `python3 tools/image_list.py` to regenerate IMAGES.md (where pictures go and which are missing).
 - The map is built from Ozan's Krita file: `python3 tools/build_map.py art/map4.kra` (writes `godot/data/map.json` and the map features image).
 
 ## Open items Ozan knows about
 
 - `scenes.json` (back-room intro with Carlos and Margaret) still describes old rules and isn't shown in Godot yet.
-- **Visual direction (next):** the noir/old-print look clashes with the present-day setting. Options discussed: keep noir; "modern political drama" (dark office, warm desk lamp, cold desaturated halftone photos, colour only for party colours and a red accent; social media shown as printouts pinned to the board; the recommendation); screen-print poster; modern newsroom/TV. Agreed next step: three mock-ups of the same screen to compare. Zero budget: public-domain/CC0 photos given one shared newsprint treatment by a shader, open-licence fonts, CC0 sounds; no generative-AI art, ever; only Carlos's and Margaret's portraits might be commissioned.
+- **Visual direction (decided November 2026, first pass built; Ozan has not reviewed it yet):** neo-noir, "the campaign at night"; see DESIGN.md 7.1 and "The look" above. Still open: the photographs (Ozan is finding them; IMAGES.md is the list, written by `tools/image_list.py`), sound in Godot, time of day, election night province by province, portraits of Carlos and Margaret (might be commissioned). Zero budget: public-domain/CC0 photos, open-licence fonts, CC0 or synthesised sounds; no generative-AI art, ever.
 - **Turnout (draft, not on main):** per-party turnout from trust and drift is on the branch `claude/project-overview-roadmap-3813b2-sjo7ds` (commit "Draft (not on main): per-party turnout…"). Trust works; the drift penalty is far too strong (a competent populist fell from ~23% to ~12%). Open questions for Ozan: drift only against core supporters? measured against the founding or the current manifesto? how far low trust may push turnout down.
 - **Lore and names (Ozan is working on them):** his history of Cranbovia and the world was discussed (comments: replace the religious split, add recent political history 1964–now, Fauran is now written as the rural, traditional south). Done with map4: the city renames (Vüllent, Crümländ, Tarroport, Giloford, Lilabourg), Salmark (capital Salbourg) in the north, the Hesperian Sea and Follount Lake, the new Erland province Sisillia (no city yet). The country is now **Cranbovia** (people: Cranbovians) in the game and docs; ids keep the old spelling. Still to do: Erland modelled on Castile and/or Alberta. See DESIGN.md, *The political spectrum* and *A new northern neighbour*.
 - Planned: personas, continuing after a lost election, event pictures and portraits, sound, exports.

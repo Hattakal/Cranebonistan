@@ -48,8 +48,9 @@ func _ready() -> void:
 			else: say("tip", true))
 	add_child(_portrait)
 	_bubble = PanelContainer.new()
-	var sb = Look.box(Color("fbf6e8"), 10, Color("3b2a12"), 2, 14, 12)
-	sb.shadow_color = Color(0, 0, 0, 0.45); sb.shadow_size = 10
+	var sb = Look.box(Look.N700, 3, Look.N500, 1, 0, 14)
+	sb.border_width_left = 3; sb.border_color = Look.LAMP
+	sb.shadow_color = Color(0, 0, 0, 0.55); sb.shadow_size = 16
 	_bubble.add_theme_stylebox_override("panel", sb)
 	_bubble.mouse_filter = Control.MOUSE_FILTER_STOP
 	_bubble.gui_input.connect(func(e):
@@ -57,14 +58,14 @@ func _ready() -> void:
 	var v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var who = Look.caps("Carlos Aster · advisor", 10, Color("8b6a2b"), 1)
+	var who = Look.caps("Carlos Aster · advisor", 11, Look.LAMP, 2)
 	who.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(who)
-	_text = Look.label("", "body", 16, Look.INK, true)
+	_text = Look.label("", "body", 16, Look.TXT, true)
 	_text.custom_minimum_size.x = 340
 	_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(_text)
-	_hint = Look.label("", "body_italic", 11, Look.MUTED)
+	_hint = Look.label("", "body_italic", 11, Look.FAINT)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(_hint)
@@ -149,14 +150,14 @@ func margaret(trigger: String) -> void:
 	if _note or not M_LINES.LINES.has(trigger): return
 	var text: String = M_LINES.LINES[trigger][randi() % M_LINES.LINES[trigger].size()]
 	_note = PanelContainer.new()
-	var sb = Look.box(Color("f3ead6"), 2, Color("8b1e1e"), 0, 16, 14)
-	sb.border_width_left = 5
-	sb.shadow_color = Color(0, 0, 0, 0.5); sb.shadow_size = 12
+	var sb = Look.box(Look.PAPER, 1, Look.RED, 0, 0, 16)
+	sb.border_width_left = 4
+	sb.shadow_color = Color(0, 0, 0, 0.6); sb.shadow_size = 18
 	_note.add_theme_stylebox_override("panel", sb)
 	var v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 8)
-	v.add_child(Look.caps("Margaret Teyl · party secretary", 10, Color("8b1e1e"), 1))
-	var t = Look.label("“%s”" % text, "type", 16, Look.INK, true)
+	v.add_child(Look.caps("Margaret Teyl · party secretary", 11, Look.RED, 2))
+	var t = Look.label(text, "type", 14, Look.INK, true)
 	t.custom_minimum_size.x = 380
 	v.add_child(t)
 	var row = HBoxContainer.new()
@@ -169,8 +170,10 @@ func margaret(trigger: String) -> void:
 		b.add_theme_font_override("font", Look.font("body_bold"))
 		b.add_theme_font_size_override("font_size", Look.fs(13))
 		b.add_theme_color_override("font_color", Look.INK)
-		b.add_theme_stylebox_override("normal", Look.box(Color(0, 0, 0, 0.06), 3, Color("8b1e1e") if pr[1] else Look.MUTED, 1, 8, 4))
-		b.add_theme_stylebox_override("hover", Look.box(Color(0, 0, 0, 0.12), 3, Color("8b1e1e") if pr[1] else Look.MUTED, 1, 8, 4))
+		b.add_theme_color_override("font_hover_color", Color.WHITE)
+		b.add_theme_stylebox_override("normal", Look.box(Color(1, 1, 1, 0.35), 2, Look.INK if pr[1] else Look.MUTED, 1, 0, 8))
+		b.add_theme_stylebox_override("hover", Look.box(Look.INK, 2, Look.INK, 1, 0, 8))
+		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		var agreed: bool = pr[1]
 		b.pressed.connect(func():
@@ -190,10 +193,21 @@ func margaret(trigger: String) -> void:
 	var tw = _note.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_note, "position:y", size.y - _note.size.y - 70, 0.5)
 
-## A placeholder portrait until the real art arrives: a drawn bust that
-## bobs while he talks.
+## Carlos: his picture (godot/assets/portraits/carlos.jpg) or, until there is one, a man
+## in a dark office with the lamp behind him: a silhouette with a warm edge, which nods
+## while he talks.
 class Portrait extends Control:
 	var _talk := 0.0
+	var _has_photo := false
+	func _ready() -> void:
+		clip_contents = true
+		var tex = Photo.find(["portraits/carlos"])
+		if tex:
+			_has_photo = true
+			var ph = Photo.new(tex, true, true)
+			ph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			ph.show_behind_parent = true
+			add_child(ph)
 	func talk(seconds: float) -> void:
 		_talk = seconds
 	func _process(d: float) -> void:
@@ -202,18 +216,27 @@ class Portrait extends Control:
 			queue_redraw()
 	func _draw() -> void:
 		var c = size / 2
+		var r = size.x / 2
 		var bob = sin(Time.get_ticks_msec() / 90.0) * 1.5 if _talk > 0 else 0.0
-		draw_circle(c, size.x / 2, Color("3b2a12"))
-		draw_circle(c, size.x / 2 - 3, Color("c9a35a"))
-		# shoulders and suit
-		draw_circle(c + Vector2(0, size.y * 0.52), size.x * 0.36, Color("2a3550"))
-		draw_colored_polygon(PackedVector2Array([c + Vector2(-6, 14), c + Vector2(6, 14), c + Vector2(0, 30)]), Color("f3ead6"))
-		draw_colored_polygon(PackedVector2Array([c + Vector2(-2, 16), c + Vector2(2, 16), c + Vector2(0, 28)]), Look.RED)
-		# head
-		var h = c + Vector2(0, -8 + bob)
-		draw_circle(h, size.x * 0.2, Color("e8c39e"))
-		draw_arc(h + Vector2(0, -3), size.x * 0.21, PI * 1.05, PI * 1.95, 16, Color("2b1d12"), 6)
-		draw_circle(h + Vector2(-5, -1), 1.6, Look.INK)
-		draw_circle(h + Vector2(5, -1), 1.6, Look.INK)
-		var mouth = 3.0 + (absf(sin(Time.get_ticks_msec() / 70.0)) * 3.0 if _talk > 0 else 0.0)
-		draw_arc(h + Vector2(0, 6), 4, 0.2, PI - 0.2, 8, Color("7a3020"), mouth * 0.6)
+		if _has_photo:
+			draw_arc(c, r - 1, 0, TAU, 48, Look.LAMP if _talk > 0 else Look.N500, 1.5, true)
+			return
+		draw_circle(c, r - 1, Look.N700)
+		# the lamp somewhere behind his right shoulder
+		var lamp = c + Vector2(r * 0.3, -r * 0.18)
+		draw_circle(lamp, r * 0.64, Color(Look.LAMP, 0.08))
+		draw_circle(lamp, r * 0.46, Color(Look.LAMP, 0.1))
+		draw_circle(lamp, r * 0.28, Color(Look.LAMP, 0.16))
+		var sh = c + Vector2(0, size.y * 0.56)
+		var sr = size.x * 0.4
+		var h = c + Vector2(0, -6 + bob)
+		var hr = size.x * 0.19
+		var rim = Vector2(2.0, -1.0)
+		# the edge the light catches, then the man himself
+		draw_circle(sh + rim, sr, Color(Look.LAMP, 0.85))
+		draw_circle(h + rim, hr, Color(Look.LAMP, 0.85))
+		draw_rect(Rect2(h.x - hr * 0.42 + rim.x, h.y, hr * 0.84, hr * 1.6), Color(Look.LAMP, 0.85))
+		draw_circle(sh, sr, Look.N950)
+		draw_rect(Rect2(h.x - hr * 0.42, h.y, hr * 0.84, hr * 1.6), Look.N950)
+		draw_circle(h, hr, Look.N950)
+		draw_arc(c, r - 1, 0, TAU, 48, Look.LAMP if _talk > 0 else Look.N500, 1.5, true)

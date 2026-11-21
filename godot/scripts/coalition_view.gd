@@ -63,6 +63,9 @@ func _ready() -> void:
 	_skip_btn = Button.new()
 	_skip_btn.text = "Skip to the result"
 	_skip_btn.add_theme_font_size_override("font_size", Look.fs(14))
+	_skip_btn.add_theme_font_override("font", Look.spaced("display", 2))
+	_skip_btn.text = _skip_btn.text.to_upper()
+	Look.dark_button(_skip_btn, false, false, 8)
 	_skip_btn.position = Vector2(_w() - 240, 30)
 	_skip_btn.pressed.connect(_skip)
 	add_child(_skip_btn)
@@ -395,9 +398,9 @@ func _show_end() -> void:
 			var m = Look.label(String(c.name), "news_bold" if c.ministry == "pm" else "news", 19 if c.ministry == "pm" else 17, Look.CREAM)
 			m.custom_minimum_size.x = 260
 			row.add_child(m)
-			row.add_child(Look.label(_name(c.party), "type", 16, Color(_party(c.party).color).lightened(0.25)))
+			row.add_child(Look.label(_name(c.party), "display_bold", 17, Look.lit(Color(_party(c.party).color))))
 			grid.add_child(row)
-		box.add_child(Look.caps("The cabinet", 12, Look.BRASS, 2))
+		box.add_child(Look.caps("The cabinet", 12, Look.LAMP, 2))
 		box.add_child(grid)
 	else:
 		_title.text = "No government"
@@ -413,6 +416,9 @@ func _show_end() -> void:
 	var go = Button.new()
 	go.text = "Read what the papers say"
 	go.add_theme_font_size_override("font_size", Look.fs(16))
+	go.add_theme_font_override("font", Look.spaced("display_bold", 2))
+	go.text = go.text.to_upper()
+	Look.dark_button(go, true, false, 10)
 	go.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	go.pressed.connect(func(): finished.emit())
 	box.add_child(go)
