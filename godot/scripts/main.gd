@@ -23,7 +23,7 @@ var _sheet_layer: Control
 
 func _ready() -> void:
 	G = Game
-	Look.load_choice()   # the colour scheme picked last time (cheat panel: Look)
+	Settings.load_all()   # the player's options: colour scheme, text size, grain, sound
 	if _args().has("look"): Look.use(_args().look)
 	_build()
 	var args = _args()
@@ -41,7 +41,77 @@ func _ready() -> void:
 		S = G.new_game({"partyName": "People's Awakening", "leaderName": "Dorin Vask"})
 		render()
 		_founding_sheet()
-		_title_card()
+		if not Settings.reopen: _title_card()
+	if Settings.reopen:
+		Settings.reopen = false
+		_options_sheet()
+
+## Options: how the game looks and sounds (settings.gd). A change of colour scheme or text
+## size rebuilds the screen; the game itself carries on where it was.
+func _options_sheet() -> void:
+	var p = _paper(640, false)
+	_options_build(p)
+
+func _options_build(p: Paper) -> void:
+	p.clear()
+	p.kicker("Options")
+	p.heading("How the game looks", 34)
+	var rebuild = func(key, val):
+		Settings.set_value(key, val)
+		if S and not _founding: _save()
+		Settings.reopen = true
+		get_tree().reload_current_scene()
+	_option_row(p, "Colour scheme", "The whole screen. Study: an old office, dark wood and leather. Night: cold steel and glass.",
+		[["Study", "study"], ["Night", "night"]], "look", rebuild)
+	_option_row(p, "Text size", "Every word in the game, a little bigger.", [["Normal", "normal"], ["Large", "large"]], "text", rebuild)
+	_option_row(p, "Film grain", "A little grain and darker corners over everything.", [["On", true], ["Off", false]], "grain", func(k, val):
+		Settings.set_value(k, val)
+		_grain.visible = val
+		_options_build(p))
+	_option_row(p, "Window", "", [["Window", false], ["Full screen", true]], "fullscreen", func(k, val):
+		Settings.set_value(k, val)
+		_options_build(p))
+	p.step("Sound", "Volume")
+	var row = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	var sl = HSlider.new()
+	sl.min_value = 0; sl.max_value = 1; sl.step = 0.05
+	sl.value = float(Settings.get_value("volume"))
+	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var pct = Look.label("%d%%" % Game.jround(sl.value * 100), "display_bold", 18, Look.INK)
+	pct.custom_minimum_size.x = 56
+	sl.value_changed.connect(func(x):
+		pct.text = "%d%%" % Game.jround(x * 100)
+		Settings.set_value("volume", x))
+	row.add_child(sl)
+	row.add_child(pct)
+	p.add(row)
+	p.small("For now that is Carlos's voice, when his lines are recorded.")
+	p.actions([p.button("Close", func(): p.close())])
+
+## One option: its name, a line about it, and a button per choice (the current one in red).
+func _option_row(p: Paper, title: String, note: String, choices: Array, key: String, cb: Callable) -> void:
+	p.rule(1, Look.LINE)
+	var h = HBoxContainer.new()
+	h.add_theme_constant_override("separation", 8)
+	var info = VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_theme_constant_override("separation", 0)
+	info.add_child(Look.label(title, "body_bold", 15, Look.INK))
+	if note != "": info.add_child(Look.label(note, "body", 12, Look.MUTED, true))
+	h.add_child(info)
+	for c in choices:
+		var on: bool = Settings.get_value(key) == c[1]
+		var val = c[1]
+		var b = p.button(c[0], func(): if not on: cb.call(key, val), false)
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if on:   # the current choice is filled in ink (red stays for the button to press)
+			for st in ["normal", "hover", "pressed"]: b.add_theme_stylebox_override(st, Look.box(Look.INK, 2, Look.INK, 1, 0, 10))
+			for fc in ["font_color", "font_hover_color", "font_focus_color"]: b.add_theme_color_override(fc, Look.CARD)
+			b.mouse_default_cursor_shape = Control.CURSOR_ARROW
+		h.add_child(b)
+	p.add(h)
 
 ## The title, over the city at night, before a new party is founded. Any click or key moves on.
 func _title_card() -> void:
@@ -171,6 +241,8 @@ func _build() -> void:
 	add_child(_advisor)
 	# over everything: film grain and darker corners
 	var grain = ColorRect.new()
+	grain.visible = Settings.get_value("grain")
+	_grain = grain
 	grain.material = Look.material("grain")
 	grain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	grain.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -238,9 +310,15 @@ func _build_bar() -> Control:
 	var tsec = _section(time, 14)
 	(tsec.get_theme_stylebox("panel") as StyleBoxFlat).border_width_right = 0
 	h.add_child(tsec)
+	var opt = _speed_button("settings", "Options")
+	opt.pressed.connect(func(): _options_sheet())
+	var osec = _section(opt, 6)
+	(osec.get_theme_stylebox("panel") as StyleBoxFlat).border_width_right = 0
+	h.add_child(osec)
 	return _bar
 
 var _cheats   # the cheat panel (cheats.gd)
+var _grain: ColorRect   # film grain over everything (Options can switch it off)
 var _warned_month := -1   # the month we last reminded you about an unused trip or actions
 
 func _time_pressed(to_decision: bool) -> void:
@@ -301,7 +379,7 @@ func _menu_button(icon_name: String, text: String) -> Button:
 	b.add_theme_color_override("icon_hover_color", Look.HEAD)
 	b.add_theme_color_override("icon_pressed_color", Look.HEAD)
 	b.add_theme_color_override("icon_focus_color", Look.DIM)
-	b.custom_minimum_size.x = 78
+	b.custom_minimum_size.x = 70
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	return b
 
@@ -1651,6 +1729,7 @@ func _shot(args: Dictionary) -> void:
 	if args.has("carlos"):
 		_advisor.say(args.carlos, true)
 	if args.has("title"): _title_card()
+	if args.has("options"): _options_sheet()
 	if args.has("build"):
 		for name in ["Cranebo", "Tarropolis", "Bayernal"]:
 			S.actionsLeft = 3; S.money = 9.0

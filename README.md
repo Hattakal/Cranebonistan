@@ -57,7 +57,8 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/scripts/paper.gd` | Decision sheets: paper under the lamp (front pages, choices, drafts, the ledger) or a television screen (anything broadcast) |
 | `godot/scripts/map_view.gd` | The map |
 | `godot/scripts/advisor.gd` | Carlos in the corner of headquarters, and Margaret's notes |
-| `godot/scripts/look.gd` | The look: colours, fonts and small builders |
+| `godot/scripts/look.gd` | The look: the two colour schemes, fonts and small builders |
+| `godot/scripts/settings.gd` | The player's options (colour scheme, text size, grain, window, volume), saved between runs |
 | `godot/scripts/photo.gd`, `face.gd` | A photograph through the game's one filter; a leader's face in a circle |
 | `godot/shaders/` | The photo filter, lamp light on paper, the television screen, film grain |
 | `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `voice/carlos/` for Carlos's recordings; `events/`, `portraits/`, `tours/` and `places/` for photographs (see [IMAGES.md](IMAGES.md)) |

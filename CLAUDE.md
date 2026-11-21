@@ -30,7 +30,7 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 
 Neo-noir in a present-day setting: a campaign office at night. When adding or changing a screen:
 
-- **Colours and fonts only from `look.gd`**, never a hex code in a screen script. There are two palettes (`night`, `study`; switch in the cheat panel or with `--look=study` in a screenshot), still under comparison: a colour belongs in both, so add it to `PALETTES`, and check new screens in both. Dark surfaces (the desk, the files, the top bar) use `Look.dlabel`/`dcaps`, `Look.glass()` and `Look.dark_button()`; paper uses `Look.label`/`caps` (ink by default).
+- **Colours and fonts only from `look.gd`**, never a hex code in a screen script. There are two palettes, `study` (warm, the default) and `night` (cold), chosen in Options (`settings.gd`) or with `--look=night` in a screenshot: a colour belongs in both, so add it to `PALETTES`, and check new screens in both. Sizes go through `Look.fs()` so the Options' large text works. Dark surfaces (the desk, the files, the top bar) use `Look.dlabel`/`dcaps`, `Look.glass()` and `Look.dark_button()`; paper uses `Look.label`/`caps` (ink by default).
 - **Cold and dark around you, clean white paper under the lamp in your hands** (not cream: Ozan found cream read as old newsprint). `LAMP` (amber) is the only warm light: hover, city lights, Carlos. Party colours are the only strong colours; on the dark, pass them through `Look.lit()`.
 - **Red is rationed:** danger, and the one button to press next. Good news is `GOOD`/`GOOD_HI`, never red.
 - **Paper or screen:** what the player reads and decides is a `Paper` sheet; what the country watches (evening news, interview, debate, election night) is the same sheet after `p.screen()`. Build with the sheet's own blocks (`p.text`, `p.card`, `p.chips`...), which recolour themselves on a screen.
@@ -59,7 +59,7 @@ Screenshots of the real game (use these to check any visual change; look at the 
 
 ```
 godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--leak=1 --open=1] [--clear=1] [--scroll=700]
-    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5] [--found=1] [--title=1 --then=4] [--look=night|study]
+    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5] [--found=1] [--title=1 --then=4] [--look=night|study] [--options=1]
 ```
 
 In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd`): skip time, change money, support, trust, the world, rivals, queue any event. `--cheats=N` opens it in a screenshot after skipping N months. `--weeks` plays that many weeks automatically first; `--clear` empties the decision queue so files are usable; the other flags open specific sheets. (On Linux without a display, wrap it in `xvfb-run -a -s "-screen 0 1600x900x24"` and add `--rendering-driver opengl3`.)

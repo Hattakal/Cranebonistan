@@ -8,7 +8,8 @@ class_name Look
 extends RefCounted
 
 # ---------- Colours ----------
-# Two palettes, the same roles in each; use() picks one before the screens are built.
+# Two palettes, the same roles in each; use() picks one before the screens are built
+# (the player chooses in Options; "study" is the default).
 #  "night": the campaign office at night: cold blue-black, steel, white paper (the first pass).
 #  "study": the same office in an old building: warm dark wood and leather, a bottle-green
 #           sea on the map, warm white paper. The Knives Out to night's Glass Onion.
@@ -16,7 +17,7 @@ const PALETTES := {
 	"night": {"N950": "06080c", "N900": "0a0d13", "N850": "0f131b", "N800": "141923", "N700": "1b2230", "N600": "273042", "N500": "3a465b", "TXT": "e8ebf1", "DIM": "9aa5b7", "FAINT": "66738a", "LAMP": "f2b866", "LAMP_DIM": "a9844d", "RED": "d2392f", "RED_HI": "ff6a5c", "OXBLOOD": "8f231c", "GOOD": "1f7d55", "GOOD_HI": "5cc79a", "PAPER": "f1f2f3", "PAPER_2": "e4e6e9", "CARD": "fbfbfc", "INK": "14171d", "MUTED": "5b626e", "LINE": "c6cad0", "SEA": "0a0e15", "LAND": "1a212d", "LAND_FOREIGN": "121720", "BORDER": "06080c"},
 	"study": {"N950": "0c0705", "N900": "130b07", "N850": "1a0f0a", "N800": "23150d", "N700": "301d12", "N600": "462b1b", "N500": "6a4630", "TXT": "f3e8d8", "DIM": "c0aa8e", "FAINT": "8a735d", "LAMP": "f2b552", "LAMP_DIM": "ad7d3f", "RED": "c3362a", "RED_HI": "f2735f", "OXBLOOD": "7a1f17", "GOOD": "2b7a4b", "GOOD_HI": "86cc9c", "PAPER": "f4f0e8", "PAPER_2": "e8e1d5", "CARD": "fbf8f2", "INK": "1e1712", "MUTED": "6b5e52", "LINE": "d4cbbc", "SEA": "0b1a15", "LAND": "2b2019", "LAND_FOREIGN": "1a120d", "BORDER": "0c0705"},
 }
-static var palette := "night"
+static var palette := "study"
 # the night (backgrounds), from the deepest shadow up to a raised, hovered surface
 static var N950: Color
 static var N900: Color
@@ -59,12 +60,12 @@ static var T900: Color
 static var AMBER: Color
 
 static func _static_init() -> void:
-	use("night")
+	use("study")
 
 ## Switch palette. Screens read the colours when they are built, so rebuild after this
-## (the cheat panel reloads the scene).
+## (Options reloads the scene).
 static func use(name: String) -> void:
-	if not PALETTES.has(name): name = "night"
+	if not PALETTES.has(name): name = "study"
 	palette = name
 	var p: Dictionary = PALETTES[name]
 	N950 = Color(p.N950)
@@ -96,15 +97,6 @@ static func use(name: String) -> void:
 	BORDER = Color(p.BORDER)
 	HEAD = TXT; CREAM = TXT; CREAM_DIM = DIM; BRASS = N500; BRASS_DIM = N600; T900 = N900; AMBER = LAMP
 
-## The palette chosen last time (user://look.txt), so a switch survives a restart.
-static func load_choice() -> void:
-	if FileAccess.file_exists("user://look.txt"):
-		use(FileAccess.get_file_as_string("user://look.txt").strip_edges())
-
-static func save_choice(name: String) -> void:
-	var f = FileAccess.open("user://look.txt", FileAccess.WRITE)
-	if f: f.store_string(name)
-	use(name)
 
 # ---------- Fonts ----------
 # display: Barlow Condensed (labels, numbers, buttons)     body: IBM Plex Sans Condensed
@@ -164,10 +156,12 @@ static func spaced(name: String, px: int) -> Font:
 
 # ---------- Builders ----------
 ## Small text reads better a little larger: every font size in the code goes through this.
+static var text_boost := 0   # the Options' "large text": added to every size
+
 static func fs(size: int) -> int:
-	if size <= 13: return size + 2
-	if size <= 16: return size + 1
-	return size
+	if size <= 13: return size + 2 + text_boost
+	if size <= 16: return size + 1 + text_boost
+	return size + text_boost
 
 ## Text on paper (ink by default).
 static func label(text: String, font_name := "body", size := 15, color := INK, wrap := false) -> Label:
