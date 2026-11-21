@@ -21,7 +21,7 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 
 ## The project
 
-- Godot 4.7, GDScript, project in `godot/`. The rules (no screen code) are a chain of files in `godot/scripts/rules/`, each extending the one before (base → voters → districts → media → party → scandals → rivals → world → moments), ending in `godot/scripts/sim.gd`, the autoload `Game`; see the top of `rules/base.gd`. A file may only call functions in itself or earlier in the chain; a call that must go the other way is declared as a hook at the bottom of `base.gd`. New constants and state variables go in `base.gd`. All content is JSON in `godot/data/`, edited directly. There is no browser version any more (old prototype on the `browser-version` branch; never merge it back).
+- Godot 4.7, GDScript, project in `godot/`. The rules (no screen code) are a chain of files in `godot/scripts/rules/`, each extending the one before (base → voters → districts → media → party → scandals → rivals → world → moments → coalition), ending in `godot/scripts/sim.gd`, the autoload `Game`; see the top of `rules/base.gd`. A file may only call functions in itself or earlier in the chain; a call that must go the other way is declared as a hook at the bottom of `base.gd`. New constants and state variables go in `base.gd`. All content is JSON in `godot/data/`, edited directly. There is no browser version any more (old prototype on the `browser-version` branch; never merge it back).
 - Seven axes: economy (State/Market), welfare (Welfare/Austerity), nation (Nationalist/Multicultural), society (Progressive/Traditional), order (Authority/Liberty), foreign (Hawk/Dove), system (Radical/Establishment). Positions run -100 (left label) to +100 (right label); "L"/"R" sides in keys like `nation:L`.
 - **Keep it moddable.** Every data file is read through `Mods.data("<name>")` (`godot/scripts/mods.gd`), and every picture, sound and font through `Mods.texture/audio/asset_path`. Never read `res://data/` or `res://assets/` directly, and put new content in data files, not code. If the rules start depending on a new id, add it to the list in MODDING.md.
 - `SAVE_VERSION` in sim.gd: bump it whenever the shape of the saved state changes (old saves then start a new game).
@@ -38,6 +38,7 @@ godot --headless --path godot -s tests/debates.gd -- 7     # prints how debates 
 godot --headless --path godot --import                     # needed after adding a new class_name script
 godot --headless --path godot -s tests/scandals.gd -- deny 4   # a game that takes dirty money and answers every scandal one way (deny/own/attack/subject/scapegoat)
 godot --headless --path godot -s tests/rivals.gd            # what the rival parties did over a whole game
+godot --headless --path godot -s tests/coalition.gd         # the coalition talks on made-up results, with extra parties
 godot --headless --path godot -s tests/strong.gd -- populist 2   # a competent player (populist | centrist | left), to measure difficulty; add e.g. nospeak,notrips or trace
 ```
 
@@ -46,6 +47,7 @@ Screenshots of the real game (use these to check any visual change; look at the 
 ```
 godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--leak=1 --open=1] [--clear=1] [--scroll=700]
     [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5]
+    [--until=election --coalition=6|end] [--seats=player:95,nup:80,clf:70,oc:35,apv:20]   # the coalition talks, 6 seconds in or at the end; --seats makes up a result
 ```
 
 In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd`): skip time, change money, support, trust, the world, rivals, queue any event. `--cheats=N` opens it in a screenshot after skipping N months. `--weeks` plays that many weeks automatically first; `--clear` empties the decision queue so files are usable; the other flags open specific sheets. (On Linux without a display, wrap it in `xvfb-run -a -s "-screen 0 1600x900x24"` and add `--rendering-driver opengl3`.)

@@ -1,7 +1,7 @@
 ## sim.gd — the rules of Cranbovia (autoload "Game"): the last link of the chain
 ## in scripts/rules/ (see rules/base.gd). Here: loading the content, starting a new
 ## game, the monthly update, the weekly clock and describing effects in words.
-extends "res://scripts/rules/moments.gd"
+extends "res://scripts/rules/coalition.gd"
 
 # ---------- Starting a new game ----------
 func _init() -> void:
@@ -39,6 +39,7 @@ func load_content(_unused := "") -> void:
 	SCANDALS = _data("scandals", {})
 	INTERVIEW = _data("interview", {})
 	FINAL_DEBATE = _data("final_debate", {})
+	COALITION = _data("coalition", {})
 	var media_data: Dictionary = _data("media", {})
 	OUTLETS = media_data.get("OUTLETS", [])
 	FOREIGN_MONEY = media_data.get("FOREIGN_MONEY", [])

@@ -1085,7 +1085,8 @@ func _election_sheet() -> void:
 	p.tv_strap("CBC · Election night", "The results")
 	var you: Dictionary = G.player_party(S)
 	var first = G.party_of(S, r.ranking[0])
-	p.heading("%s wins the election" % first.name if not r.playerWon else ("%s wins a majority" % you.name if r.majority else "%s becomes the largest party" % you.name), 38)
+	var alone: bool = int(r.seats.national[r.ranking[0]]) > int(G.C.seats) / 2
+	p.heading(("%s wins a majority" if alone else "%s is the largest party") % (you.name if r.playerWon else first.name), 38)
 	_bars_into(p, r.votes, null)
 	p.add(Look.caps("Seats (%d to win)" % int(G.C.seats / 2 + 1), 11, Look.MUTED, 2))
 	var seatbar = SeatBar.new(r.ranking.map(func(id): return [Color(G.party_of(S, id).color), r.seats.national[id]]), int(G.C.seats))
@@ -1093,8 +1094,14 @@ func _election_sheet() -> void:
 	p.add(seatbar)
 	for id in r.ranking:
 		p.add(Look.label("%s — %d seats" % [G.party_of(S, id).name, r.seats.national[id]], "type", 15, Look.INK))
+	var talks: bool = r.has("coalition") and not r.coalition.log.any(func(st): return st.t == "majority")
+	var co_out: Dictionary = G.COALITION.get("OUTCOMES", {}).get(r.get("coalition", {}).get("outcome", ""), {})
+	if r.has("coalition") and not talks and co_out.has("line"): p.small(String(co_out.line), Look.INK)
+	elif talks: p.small("No party has a majority of its own. The parties now bargain over who governs.", Look.INK)
 	p.actions([
-		p.button("Read what the papers say", func(): _profile_sheet(), false),
+		p.button("Watch the coalition talks", func():
+			p.close()
+			_coalition_view(), true) if talks else p.button("Read what the papers say", func(): _profile_sheet(), false),
 		p.button("Found a new party", func():
 			p.close()
 			_founding_sheet(), false),
@@ -1102,6 +1109,19 @@ func _election_sheet() -> void:
 			if S.queue.size() and S.queue[0].type == "election": G.dismiss_front(S)
 			_done(p)),
 	])
+
+## The coalition talks, played back on their own screen; afterwards, the papers.
+func _coalition_view() -> CoalitionView:
+	var v = CoalitionView.new()
+	v.setup(G, S)
+	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	_sheet_layer.add_child(v)
+	_advisor.visible = false   # nothing but the parties on this screen
+	v.finished.connect(func():
+		v.queue_free()
+		_advisor.visible = true
+		_profile_sheet())
+	return v
 
 # ---------- A district: who would win it, and the leader's visit ----------
 func _district_sheet(id: String) -> void:
@@ -1536,6 +1556,19 @@ func _shot(args: Dictionary) -> void:
 		S.lastVisit = -99
 		_district_sheet(args.tour)
 		_tour_result(_sheet_layer.get_child(-1), G.act_visit(S, args.tour))
+	if args.has("seats") and S.result:
+		# made-up seats for checking the talks: --seats=player:95,nup:80,clf:70
+		var seats = {}
+		for kv in String(args.seats).split(","):
+			var pr = kv.split(":")
+			seats[pr[0]] = int(pr[1])
+		S.result.seats.national = seats
+		S.result.ranking = Game.ssort(seats.keys(), func(a, b): return seats[b] - seats[a])
+		S.result.coalition = G.form_government(S, seats)
+	if args.has("coalition") and S.result:
+		var cv = _coalition_view()
+		if args.coalition == "end": cv._skip()
+		else: await get_tree().create_timer(float(args.coalition)).timeout
 	if args.has("profile"): _profile_sheet()
 	if args.has("country"): _country_sheet(args.country)
 	if args.has("margaret"):

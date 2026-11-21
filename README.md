@@ -44,22 +44,24 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/tours.json` | Short stories from the leader's trips |
 | `godot/data/names.json` | Name pools by background (Cranbia French, Yamlin Italian/Greek, Erland British, Fauran Slavic, Alinni Nordic/Germanic, Norbanian Japanese, Golba Chinese) |
 | `godot/data/scandals.json`, `violence.json`, `interview.json` | Secrets and scandals; political violence and rivals' labels; the year-one interview |
+| `godot/data/coalition.json` | Forming a government: the ministries and what each is worth, how parties bargain, the outcome texts |
 | `godot/data/districts.json` | Province overrides: names, seats, local leans |
 | `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
 | `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |
 | `godot/data/margaret.json` | Margaret's notes and the two ways to answer her |
 | `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Teyl (not yet shown in the Godot version) |
-| `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile). No screen code |
+| `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile), `coalition` (forming a government after the election). No screen code |
 | `godot/scripts/sim.gd` | The end of the chain, the autoload `Game`: loading content, a new game, the monthly update, the clock |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |
 | `godot/scripts/board.gd` | The evidence board: what needs you now |
 | `godot/scripts/files.gd` | The planning files along the top bar |
 | `godot/scripts/paper.gd` | Decision sheets as paper: front pages, index cards, the ledger |
 | `godot/scripts/map_view.gd` | The map |
+| `godot/scripts/coalition_view.gd` | The coalition talks after the election, played back step by step |
 | `godot/scripts/advisor.gd` | Carlos in the corner of headquarters, and Margaret's notes |
 | `godot/scripts/look.gd` | Colours, fonts and small builders |
 | `godot/assets/` | Fonts, icons, flags, the map's rivers and mountains; `voice/carlos/` for Carlos's recordings; `events/` and `portraits/` for pictures to come |
-| `godot/tests/` | `parity.gd` plays a whole seeded game as a smoke test; `debates.gd` prints how the national debate develops |
+| `godot/tests/` | `parity.gd` plays a whole seeded game as a smoke test; `debates.gd` prints how the national debate develops; `coalition.gd` runs the coalition talks on made-up results, with extra parties |
 | `tools/build_map.py` | Builds the map from the Krita file |
 | `tools/voice_script.py` | Writes [VOICE.md](VOICE.md), the recording script for Carlos, from his lines |
 | `tools/remap_axes.py` | One-off script that moved the content from eight axes to seven |

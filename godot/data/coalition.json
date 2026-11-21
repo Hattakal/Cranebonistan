@@ -1,0 +1,44 @@
+{
+ "_note": "Forming a government after the election (rules/coalition.gd). Works with any number of parties. MINISTRIES: the posts shared out in a coalition; 'weight' is how much each is worth (the Prime Minister most), 'axes' the issues it serves: a party whose manifesto is strong on one of those wants it a little more (it picks it first when its turn comes). STANCE: how one party sees another, from their relation (-100..100): at or below 'enemy' they will never govern together, at or above 'ally' they join without asking for extra. Between the two they are neutral and want a better share. NEUTRAL_PREMIUM: how much more than its fair share (by seats) a neutral party asks for, as a fraction of the cabinet. SHUTOUT_RELAXES: after one party is shut out, the others' enmities count as neutral. MAX_FORMATEURS: how many parties, largest first, get to try in each round. FORMATEUR_GIVES: how much of its own fair share the party forming the government will give up to close a deal (0.4 = up to 40%).",
+ "MINISTRIES": [
+  {"id": "pm", "name": "Prime Minister", "weight": 5},
+  {"id": "interior", "name": "Interior", "weight": 3, "axes": ["nation", "order"]},
+  {"id": "finance", "name": "Finance", "weight": 3, "axes": ["economy", "welfare"]},
+  {"id": "foreign", "name": "Foreign Affairs", "weight": 2, "axes": ["foreign"]},
+  {"id": "defence", "name": "Defence", "weight": 2, "axes": ["foreign", "order"]},
+  {"id": "labour", "name": "Labour and Welfare", "weight": 2, "axes": ["welfare", "economy"]},
+  {"id": "justice", "name": "Justice", "weight": 1.5, "axes": ["order", "system"]},
+  {"id": "education", "name": "Education", "weight": 1.5, "axes": ["society", "nation"]},
+  {"id": "health", "name": "Health", "weight": 1.5, "axes": ["welfare"]},
+  {"id": "agriculture", "name": "Agriculture and Regions", "weight": 1, "axes": ["system", "economy"]}
+ ],
+ "STANCE": {"enemy": -20, "ally": 20},
+ "NEUTRAL_PREMIUM": 0.08,
+ "SHUTOUT_RELAXES": true,
+ "MAX_FORMATEURS": 3,
+ "FORMATEUR_GIVES": 0.4,
+ "OUTCOMES": {
+  "_note": "How the election ended for the player: a headline and the feeling of it. Placeholders: {party}, {leader}. First drafts; the end screens are still to be designed.",
+  "majority": {"headline": "{party} wins a majority", "line": "No partners and no compromises: the country is yours to shape."},
+  "leads": {"headline": "{leader} to lead a coalition", "line": "The largest party and the Prime Minister's office. Now comes governing with partners who want their share of every decision."},
+  "senior": {"headline": "{party} governs, but gives up the top job", "line": "The largest party in the new government, but the Prime Minister's office was the price of the deal."},
+  "pm": {"headline": "{leader} becomes Prime Minister", "line": "The top job is yours, though yours is not the largest party. It still has a long way to go."},
+  "partner": {"headline": "{party} joins the government", "line": "A junior partner: one cog in someone else's machine, with the chance to show what you can do in office."},
+  "opposition": {"headline": "{party} left in opposition", "line": "Others will govern. Time to look in the mirror and prepare better for the next election."},
+  "robbed": {"headline": "{party} wins the vote, loses the country", "line": "The voters made you the largest party. The back rooms decided otherwise."},
+  "no_seats": {"headline": "{party} fails to enter parliament", "line": "Not one seat. The country heard of you; not enough of it voted for you."},
+  "deadlock": {"headline": "No government for {country}", "line": "No one could form a government. The country will have to vote again."}
+ },
+ "TEXT": {
+  "enemies": "{a} and {b} will not sit in the same cabinet.",
+  "enemies_policy": "too far apart on {issues}",
+  "ally": "Allies: joins for a fair share.",
+  "neutral_deal": "Neutral: wants more than its seats are worth, and gets it.",
+  "neutral_pm": "Neutral: the price is the Prime Minister's office.",
+  "neutral_refuses": "Neutral: wants more than {f} can give, and walks away.",
+  "short": "Not enough seats: {n} of {need}.",
+  "no_combination": "{f} finds no partners to make a majority.",
+  "shutout": "No government is possible. {p}, the party the others like least, is left out of the talks.",
+  "deadlock": "No one can form a government."
+ }
+}

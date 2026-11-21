@@ -329,10 +329,12 @@ func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 ## moved by what you do to them. Nothing uses it yet: later, parties standing
 ## aside in each other's districts, and forming a government.
 func relation_base(s: Dictionary, pid: String) -> float:
-	var me: Dictionary = player_party(s).perceived
-	var them: Dictionary = party_of(s, pid).perceived
+	return policy_relation(player_party(s), party_of(s, pid))
+
+## How two parties feel about each other from their positions alone, -40..40.
+func policy_relation(a: Dictionary, b: Dictionary) -> float:
 	var dist = 0.0
-	for ax in AXES: dist += absf(float(me[ax.id]) - float(them[ax.id]))
+	for ax in AXES: dist += absf(float(a.perceived[ax.id]) - float(b.perceived[ax.id]))
 	return clampf2(40.0 - dist / AXES.size() * 1.1, -40, 40)
 
 ## The everyday relationship (it fades back toward the base) plus scars (they don't).

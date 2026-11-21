@@ -1,7 +1,7 @@
 ## rules/base.gd — Shared ground for every rule: the content tables, settings, small helpers, random numbers, the calendar and stances, plus helpers every system uses (news, the diary, the action check).
 ##
 ## The rules are split over a chain of files, each extending the one before:
-## base → voters → districts → media → party → scandals → rivals → world → moments → sim.gd
+## base → voters → districts → media → party → scandals → rivals → world → moments → coalition → sim.gd
 ## sim.gd, at the end, is the autoload "Game": everything is reached as Game.<name>.
 ## A file can call anything in itself or earlier in the chain; the few calls that
 ## must go the other way are declared as hooks at the bottom of this file.
@@ -9,7 +9,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 37
+const SAVE_VERSION := 38
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -41,6 +41,7 @@ var SCRUTINY_STORIES: Array
 var MONTH_NAMES: Array
 var MAP: Dictionary
 var FLAG_INFO: Dictionary
+var COALITION: Dictionary    # data/coalition.json: ministries and how parties bargain
 var COUNTRY: Dictionary      # the country's name: {name, national, nationals}
 var FEEDBACK_GROUPS: Array
 
@@ -488,3 +489,7 @@ func _money_secret(s: Dictionary, fx: Dictionary) -> void:
 
 func _teyl_walkout(s: Dictionary) -> void:
 	pass
+
+## Called when the election result is in (rules/districts.gd), defined in rules/coalition.gd.
+func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
+	return {}

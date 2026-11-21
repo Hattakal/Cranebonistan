@@ -479,7 +479,7 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 
 ## 11. Directions decided (November 2026), not built yet
 
-### Coalitions after the election (being designed, November 2026)
+### Coalitions after the election (first stage built, November 2026)
 
 *Why:* a one-party majority (151 of 300) almost never happens (the governing party polls about 120 seats, a strong new party about 22%), so the coalition stage will end nearly every game. It also gives the calm centrist a real route to power: fewer votes, but acceptable to everyone.
 
@@ -509,7 +509,16 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 | Out of government | Look in the mirror and prepare better for the next election. |
 | Largest party, shut out while others formed a government | Robbed: the people's choice overruled by back-room deals and suits. |
 
-*Not covered yet:* the largest party that gives the Prime Minister's post to a partner to get a deal; staying out by choice (if refusing is added); no government at all (a repeat election).
+*Decided later:* staying out by choice gets the losing ending, with a short note that you chose not to take part. No government at all is a game over for now (a repeat election may come later). Minor parties and a minimum vote share to enter parliament are planned, so not getting into parliament has its own ending. The system must work for any number of parties.
+
+**Built, first stage (November 2026):** `rules/coalition.gd` runs the talks when the result is in and writes them down step by step (`s.result.coalition`); `coalition_view.gd` plays them back on their own screen, opened from election night ("Watch the coalition talks"). Settings, ministries and texts in `data/coalition.json`. How it works now:
+- Relations: with the player, the relation built during the campaign (scars included); between two rivals, how close their positions are. At or below −20 enemies, at or above +20 allies.
+- Every *minimal* majority is listed (no member could leave and keep the majority); those holding enemies are crossed out, one pair of enemies at a time with its reason.
+- Up to three parties try in turn, largest first. Each approaches first the partners of the majority it likes best (the most of it allies, then the fewest seats to share: parties prefer the smallest partner that is enough), then the others. Enemies (of it or of a partner already in) are crossed out with the reason; allies join for their fair share by seats; neutral parties want 8% of the cabinet more, and walk away if the party forming the government would keep less than 60% of its own fair share.
+- The cabinet: the Prime Minister's office stays with the party forming the government unless a partner is bigger (then it is the partner's price) or it can't afford it; the other ministries are picked in turns by share, each party taking the post worth most to it (its weight, more if it serves the party's strongest issues: the proposal above, built as a tie-breaker).
+- No government after three tries: the party with the worst relations overall is shut out, enmities among the rest count as neutral, and the talks start again; if that fails, no government.
+- The outcomes (majority, leads, senior, pm, partner, opposition, robbed, no_seats, deadlock) set the profile's headline and a first-draft line in `coalition.json` OUTCOMES.
+*Not yet:* the player's own offers and counter-offers (for now the player's party bargains like the others), policy concessions, red lines, refusing to join, the real end screens.
 
 
 Agreed after the realism review: the vote itself first, then the people around it.
