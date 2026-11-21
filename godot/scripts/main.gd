@@ -1549,7 +1549,7 @@ func _shot(args: Dictionary) -> void:
 	if args.has("carlos"):
 		_advisor.say(args.carlos, true)
 	if args.has("build"):
-		for name in ["Cranebo", "Tarropolis", "Bayernal"]:
+		for name in ["Cranebo", "Tarroport", "Bayernal"]:
 			S.actionsLeft = 3; S.money = 9.0
 			G.act_community(S, name)
 			if name == "Cranebo": G.act_community(S, name)

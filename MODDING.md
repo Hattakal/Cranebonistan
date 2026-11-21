@@ -62,7 +62,7 @@ Examples:
 // data/content.json: a new event, a renamed rival leader, a setting
 {
  "CONFIG": {"actionsPerMonth": 4},
- "PARTIES": [{"id": "oc", "leader": "Camille Fontanel", "leaderHome": "Gilopolis"}],
+ "PARTIES": [{"id": "oc", "leader": "Camille Fontanel", "leaderHome": "Giloford"}],
  "EVENTS": [{"id": "my_ferry_strike", "kind": "regional", "title": "Ferry crews strike in Nikecisa", "text": "...",
    "choices": [{"label": "Back the crews", "effects": {"shift": {"economy": -6}}}]}]
 }

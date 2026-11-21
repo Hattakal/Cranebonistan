@@ -16,7 +16,7 @@
   {
    "id": "orlik",
    "name": "Teo Orlik",
-   "role": "Union organiser, Tarropolis",
+   "role": "Union organiser, Tarroport",
    "region": "cranbia",
    "axis": "economy",
    "side": "L",
@@ -24,7 +24,7 @@
    "sex": "m",
    "skill": 70,
    "noteOther": "Ran the steelworkers' pension fund for ten years. Thinks the state makes a poor shareholder.",
-   "hometown": "Tarropolis"
+   "hometown": "Tarroport"
   },
   {
    "id": "vanna",

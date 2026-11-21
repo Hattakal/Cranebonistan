@@ -679,7 +679,29 @@
     1366
    ],
    "mapColor": "#c3d2ae"
-  }
+  },
+ {
+  "id": "salmark",
+  "flag": "salmark",
+  "name": [
+   "Salmark"
+  ],
+  "blurb": "A small mountain republic to the north. Neutral, and keeps to itself.",
+  "summary": "A small republic in the northern mountains, rich from the salt mines under them. Salmark trades with everyone and sides with no one; its parliament in Salbourg has turned down every alliance offered to it, Cranbovia's included.",
+  "leader": {
+   "name": "Ansel Morrow",
+   "title": "First Councillor",
+   "sex": "m",
+   "age": 61
+  },
+  "relation": "Neutral",
+  "facts": [
+   "Capital: Salbourg",
+   "Salt mines in the mountains",
+   "Neutral in every dispute"
+  ],
+  "mapColor": "#c9c3b4"
+ }
  ],
  "CAPITAL": {
   "name": "Cranebo",
@@ -833,7 +855,7 @@
     "system": -10,
     "order": 5
    },
-   "leaderHome": "Tarropolis"
+   "leaderHome": "Tarroport"
   },
   {
    "id": "oc",
@@ -10763,6 +10785,7 @@
    "name": "Bordon Federation",
    "note": "One star for each of its five nations, held together by the generalissimo's sabre."
   },
+  "salmark": {"name": "Salmark", "note": "A white salt crystal on the grey-blue of its mountains."},
   "james": {
    "name": "James",
    "note": "Slate for its mountains, a gold seam for the rare ores beneath them."

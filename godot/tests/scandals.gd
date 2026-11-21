@@ -7,7 +7,7 @@ func _init() -> void:
 	var seed_n: int = int(args[1]) if args.size() > 1 else 4
 	var clean: bool = args.size() > 2 and args[2] == "clean"   # refuse business and foreign money
 	var G = load("res://scripts/sim.gd").new()
-	var s: Dictionary = G.new_game({"seed": seed_n, "partyName": "Test", "home": "Tarropolis", "manifesto": {"nation": 1, "economy": 1, "society": 2, "foreign": 2, "welfare": 1, "system": 0, "order": 2}})
+	var s: Dictionary = G.new_game({"seed": seed_n, "partyName": "Test", "home": "Tarroport", "manifesto": {"nation": 1, "economy": 1, "society": 2, "foreign": 2, "welfare": 1, "system": 0, "order": 2}})
 	print("start secrets: ", s.secrets.map(func(x): return "%s (%.1f)" % [x.title, x.size]))
 	var leaks = 0
 	while s.week < G.ELECTION_WEEK - 2:

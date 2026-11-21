@@ -87,6 +87,6 @@ The map is drawn in Krita (layers: Background, States and Countries, Rivers and 
 python3 tools/build_map.py path/to/map.kra
 ```
 
-The current source is `art/map3.kra` (`python3 tools/build_map.py art/map3.kra`).
+The current source is `art/map4.kra` (`python3 tools/build_map.py art/map4.kra`). Krita moves layers rather than pixels when the canvas grows; the converter reads each layer's offset, but the seed points in `build_map.py` are canvas pixels and must move with the canvas.
 
 This rewrites `godot/data/map.json` and `godot/assets/map-features.png`. It needs Python with numpy, scipy, opencv-python and Pillow. If a border is moved so much that an area no longer contains its seed point, adjust `AREA_SEEDS` at the top of the script.

@@ -11,6 +11,7 @@ signal district_clicked(id: String)
 var W = 2480.0
 var H = 1754.0
 var areas: Array = []          # {id, kind, name, polys, label, small}
+var waters: Array = []         # {name, x, y}: seas and lakes
 var districts: Array = []      # {id, region, name, polys, label, seats}
 var cities: Array = []
 var capital = ""
@@ -42,6 +43,7 @@ func setup(game) -> void:
 	W = m.w; H = m.h
 	capital = m.capital
 	cities = m.cities
+	waters = m.get("waters", [])
 	areas.clear()
 	for r in game.REGIONS:
 		areas.append({"id": r.id, "kind": "region", "name": r.name, "polys": _parse(m.regions[r.id].d), "label": m.regions[r.id].label, "small": false})
@@ -388,6 +390,10 @@ func _labels(s: float) -> void:
 		if is_cap:
 			var tw = type_font.get_string_size(c.name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 			_cap_spot = _cap_spot.merge(Rect2(lp - Vector2(tw / 2.0, fs), Vector2(tw, fs * 1.3)))
+	# seas and lakes, as drawn on the Krita map
+	var water_font = Look.font("body_italic")
+	for w in waters:
+		_text(to_screen(Vector2(w.x, w.y)), w.name, water_font, int(maxf(10, 30 * s)), Color("4f6470"))
 	# neighbours
 	for a in areas:
 		if a.kind != "foreign": continue
