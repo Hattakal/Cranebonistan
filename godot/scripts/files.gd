@@ -612,7 +612,7 @@ func _debates() -> void:
 	var hl = VBoxContainer.new()
 	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hl)
-	_eyebrow("What Cranebonistan is arguing about", hl)
+	_eyebrow("What Cranbovia is arguing about", hl)
 	_p("Join a debate by speaking for one side. In a major debate the whole country is watching: your exact words get quoted, and can go viral or become a gaffe. In smaller ones a line mostly shapes how you come across.", hl, Look.INK, 14)
 	var cs = _row(hl, 6)
 	cs.add_child(Look.caps("Your causes (%d of %d)" % [S.signature.size(), int(G.C.maxSignatureIssues)], 11, Look.MUTED, 1))

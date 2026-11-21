@@ -8,7 +8,7 @@ extends "res://scripts/rules/base.gd"
 func home_cities() -> Array:
 	return country_cities().filter(func(c): return c.area != "alinni")
 
-## Cranebonistan's own cities (the map also has the neighbours' capitals).
+## Cranbovia's own cities (the map also has the neighbours' capitals).
 func country_cities() -> Array:
 	return MAP.cities.filter(func(c): return REGIONS.any(func(r): return r.id == c.area))
 

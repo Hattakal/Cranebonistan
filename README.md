@@ -1,6 +1,6 @@
-# Cranebonistan
+# Cranbovia
 
-A political election simulator set in the fictional country of Cranebonistan, made in Godot 4.7. You found a new party and have four years to become the largest party in the National Assembly. Money, attention and votes go to whoever plays the game best, and the game never tells you to be a hypocrite; it just makes it pay.
+A political election simulator set in the fictional country of Cranbovia, made in Godot 4.7. You found a new party and have four years to become the largest party in the National Assembly. Money, attention and votes go to whoever plays the game best, and the game never tells you to be a hypocrite; it just makes it pay.
 
 Art, fonts and licences are listed in [CREDITS.md](CREDITS.md). Every design decision, and why it was made, is in [DESIGN.md](DESIGN.md).
 
@@ -77,7 +77,7 @@ Almost everything is data, and mods change it without touching the game's files:
 
 ## Setting
 
-Cranebonistan has five regions: Cranbia (capital Cranebo, industrial and educated), Yamlin (trade gateway, mixed and tense), Erland (nationalist breadbasket), Alinni (conquered from the Southern Trueants fifty years ago, minority-heavy) and Fauran (the poorest). Its neighbours are the Southern Trueants, the Dillihan Republic, the Bordon Federation and James. Further away are Golba, Norbanistan and Potania. Rivers and mountains are still to be drawn on the new map.
+Cranbovia has five regions: Cranbia (capital Cranebo, industrial and educated), Yamlin (trade gateway, mixed and tense), Erland (nationalist breadbasket), Alinni (conquered from the Southern Trueants fifty years ago, minority-heavy) and Fauran (the poorest). Its neighbours are the Southern Trueants, the Dillihan Republic, the Bordon Federation and James. Further away are Golba, Norbanistan and Potania. Rivers and mountains are still to be drawn on the new map.
 
 ## Updating the map
 

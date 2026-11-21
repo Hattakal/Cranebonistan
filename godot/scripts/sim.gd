@@ -1,4 +1,4 @@
-## sim.gd — the rules of Cranebonistan (autoload "Game"): the last link of the chain
+## sim.gd — the rules of Cranbovia (autoload "Game"): the last link of the chain
 ## in scripts/rules/ (see rules/base.gd). Here: loading the content, starting a new
 ## game, the monthly update, the weekly clock and describing effects in words.
 extends "res://scripts/rules/moments.gd"

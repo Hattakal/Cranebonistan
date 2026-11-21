@@ -1,5 +1,5 @@
 {
- "name": "Example: a tweaked Cranebonistan",
+ "name": "Example: a tweaked Cranbovia",
  "version": "1.0",
  "description": "Shows the main ways to mod the game: change a setting, add an event, rename a rival leader, add names, and change a city's facts. Switched off: set \"enabled\" to true to try it.",
  "enabled": false,

@@ -1,4 +1,4 @@
-# Cranebonistan: design document
+# Cranbovia: design document
 
 This document records what the game is, how it works, and why each decision was made. It is written as a history as well as a reference: when something changed, the old idea and the reason for the change are kept. Status marks what is in the game now (**Built**), what is agreed but waiting (**Planned**), and what was decided against (**Dropped**). Sections 1–7 describe the game as it is now; the dated sections at the end of section 7 log the changes in order, so an older entry there may have been changed again later (it says so where it has).
 
@@ -8,7 +8,7 @@ Designer: Ugur Ozan Denizgünü. Built with Claude.
 
 ## 1. The idea
 
-A political simulator where the only goal is to get elected. The player founds a new party in the fictional Republic of Cranebonistan and has one electoral term to become the largest party in the National Assembly.
+A political simulator where the only goal is to get elected. The player founds a new party in the fictional Republic of Cranbovia and has one electoral term to become the largest party in the National Assembly.
 
 **The point of the game** is to show how parties chase votes rather than represent anyone. **An enjoyable game comes first; the satire is second and stays subtle.** It is better for players to miss the message and enjoy the game than the other way around: no caricature, no lecturing. The game never tells the player to be a hypocrite; it makes hypocrisy pay. Saying what each group wants to hear, blaming whoever is convenient, and taking business money while attacking the elites should be viable and tempting, and scandal risk must not make it pointless. **Playing calm and centrist is possible, just harder.** People vote for personalities first and policies second, so the leader's persona and *how they say things* matter most.
 
@@ -20,7 +20,7 @@ A political simulator where the only goal is to get elected. The player founds a
 
 ## 2. The world
 
-### Cranebonistan
+### Cranbovia
 
 Five regions. The capital is Cranebo, on the northern coast in Cranbia. The north and west are coastline. *Renamed in November 2026 with the new map:* Fauraifai became **Fauran**, the Bourdeaux Federation became the **Bordon Federation**, and the capital Craneapolis became **Cranebo** (the designer's map names it; other cities include Nikecisa, Bayernal, Kravk and Aikütest). The names below are the current ones.
 
@@ -41,13 +41,13 @@ Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey 
 | **Southern Trueants** | Corrupt, in major economic crisis. Its leader still claims Alinni. | President Gavrel Ostrun |
 | **Dillihan Republic** | The regional powerhouse, economically and militarily. Border disputes around Fauran. | Chancellor Selin Arvadi |
 | **Bordon Federation** | A fragile federation of several nations held together by a charismatic generalissimo. | Generalissimo Hector Valmont |
-| **James** | Refuses to join the Bordon Federation and trusts Cranebonistan to defend it. Cranebonistan holds favourable mining deals for its rare materials. The name is the only nod to the Jordan vs LeBron debate. | Prime Minister Tomas Verin |
+| **James** | Refuses to join the Bordon Federation and trusts Cranbovia to defend it. Cranbovia holds favourable mining deals for its rare materials. The name is the only nod to the Jordan vs LeBron debate. | Prime Minister Tomas Verin |
 
 ### Further away
 
-- **United Federation of Golba:** the biggest power, akin to the US. Cranebonistan's main trading partner.
-- **Norbanistan:** was the second great power before a civil war. Its refugees are fleeing everywhere, including Cranebonistan.
-- **Potania:** major buyer of Cranebonistan's rare materials.
+- **United Federation of Golba:** the biggest power, akin to the US. Cranbovia's main trading partner.
+- **Norbanistan:** was the second great power before a civil war. Its refugees are fleeing everywhere, including Cranbovia.
+- **Potania:** major buyer of Cranbovia's rare materials.
 
 ### A new northern neighbour: Salmark (decided November 2026)
 
@@ -195,7 +195,7 @@ Money offers: corporate and union donations (public, shift the party's image) an
 
 ### 5.1 Rival parties — Built
 
-National Unity Party (ruling, nationalist), Cranebonian Labour Front, Open Cranebonistan (liberal, pro-business), Alinni People's Voice (minority party).
+National Unity Party (ruling, nationalist), Cranbovian Labour Front, Open Cranbovia (liberal, pro-business), Alinni People's Voice (minority party).
 
 Rivals have leaders, charisma and stability. They suffer scandals and infighting, change leaders (who take them in new directions), recover, and **split** when stability collapses, freeing their core voters: a **power vacuum** the closest party can fill, and a chance to take in defectors. Rivals losing voters to the player copy the player's most popular position. **Rivals also fill empty niches** (*decided November 2026*): now and then the rival best placed to do it takes up a side of an issue that many voters care about and no party speaks for, and moves toward it. *History:* rivals used to sit in their niches unless copying the player.
 
@@ -207,7 +207,7 @@ Rivals also **take a turn of their own** every month: a budget, trips, adverts, 
 
 ### 5.1b Neighbours change with events — Built
 
-The map doesn't change borders, but events and crises are recorded in each neighbouring country's profile ("Lost its mining valleys to Bordon in the ceasefire"), its relationship with Cranebonistan can change ("Ally, weakened", "On the brink of war"), and countries in an active conflict are shown in red on the map. The latest development appears when hovering over a country.
+The map doesn't change borders, but events and crises are recorded in each neighbouring country's profile ("Lost its mining valleys to Bordon in the ceasefire"), its relationship with Cranbovia can change ("Ally, weakened", "On the brink of war"), and countries in an active conflict are shown in red on the map. The latest development appears when hovering over a country.
 
 ### 5.2 Trust in the system — Built
 
@@ -228,10 +228,10 @@ This is deliberately light for now. A fuller economy is future work.
 Every game has **exactly one** major crisis, in the second year, drawn from a pool of five:
 
 1. **Alinni insurgency:** the separation movement turns to violence.
-2. **Bordon attacks James:** Cranebonistan can only send supplies.
-3. **Global economic crisis** reaches Cranebonistan.
+2. **Bordon attacks James:** Cranbovia can only send supplies.
+3. **Global economic crisis** reaches Cranbovia.
 4. **Ultranationalist terror** against minority groups.
-5. **Expansion:** Cranebonistan postures militarily toward the Southern Trueants.
+5. **Expansion:** Cranbovia postures militarily toward the Southern Trueants.
 
 **Weighting:** each crisis starts at 20%. Choices carry a hidden pressure toward particular crises (blaming a minority pushes toward the insurgency and the ultranationalist terror; talking up borders pushes toward expansion; boycotts push toward the economic crisis; calls for talks push away). Every choice the player makes nudges the odds a little, scaled by the party's popularity. The player's campaign can at most **double** a crisis's chance, to 40%. If the crisis that happens had more than 30% odds, the crisis event says the party's campaigning played a part.
 
@@ -313,7 +313,7 @@ The designer's aims: the game should be enjoyable first, and it should look like
 
 ### Founding night (November 2026)
 
-*Decided:* a new game opens on a founding sheet. The player picks a party template (or builds their own), names the party and the leader, sets the manifesto (one stance per issue) and chooses **the city where the leader was mayor** before walking out of their old party. That city is the head start: its region's voters know and like the leader (Cranebonians there much more than the minority), and the party starts with a level-1 office in the city. A bigger region is a bigger head start: about 4.8% opening poll from Bayernal, 6.5% from Cranebo, against 2.5% with no home. **Alinni's cities can't be chosen**: Alinnians elect their own minority leaders, and the player's leader is from the majority. The end-of-election sheet offers "Found a new party". Carlos's welcome waits until the party exists.
+*Decided:* a new game opens on a founding sheet. The player picks a party template (or builds their own), names the party and the leader, sets the manifesto (one stance per issue) and chooses **the city where the leader was mayor** before walking out of their old party. That city is the head start: its region's voters know and like the leader (Cranbovians there much more than the minority), and the party starts with a level-1 office in the city. A bigger region is a bigger head start: about 4.8% opening poll from Bayernal, 6.5% from Cranebo, against 2.5% with no home. **Alinni's cities can't be chosen**: Alinnians elect their own minority leaders, and the player's leader is from the majority. The end-of-election sheet offers "Found a new party". Carlos's welcome waits until the party exists.
 
 ### Organise, dig, steer (November 2026)
 
@@ -340,7 +340,7 @@ The designer's aims: the game should be enjoyable first, and it should look like
 ### Media (decided November 2026; first slice built)
 
 - **Every outlet has an audience and works on it every month.** Its reach is which voter groups read or watch it (by age, class, region, nationality). Each month it does three things to its audience: pulls their **views** toward its own slant (a few issues of its own), warms them to the party it **favours**, and builds a **shield** for that party: its audience forgives that party's unpopular statements and drifts away more slowly (the "voting resilience" idea).
-- **Honest and partisan media.** An honest outlet reaches many people and moves each one a little; it reports what you actually do (good lines get credit, gaffes get covered). A partisan outlet (the Cranebonian Fox News, or its leftist equivalent) reaches fewer but moves them more and shields more, and spins whatever its party does. Its favour follows how close a party is to its own slant, so a working-class hero with the "wrong" economics is not its man.
+- **Honest and partisan media.** An honest outlet reaches many people and moves each one a little; it reports what you actually do (good lines get credit, gaffes get covered). A partisan outlet (the Cranbovian Fox News, or its leftist equivalent) reaches fewer but moves them more and shields more, and spins whatever its party does. Its favour follows how close a party is to its own slant, so a working-class hero with the "wrong" economics is not its man.
 - **No runaway radicalisation.** Voters' views are pulled back toward where they started (who they are) every month; media moves opinion slowly and it eases back when coverage stops. Outlets shield only on their own terms.
 - **Tone by medium.** Measured and folksy lines play well in traditional media; fiery and provocative ones on social media.
 - **Buying an outlet.** A bought outlet's slant moves slowly toward your party, and it bleeds viewers, who go to other outlets of the same kind.
@@ -401,7 +401,7 @@ The gap between the leader's public image and the real record. Content in `godot
 
 ### The political spectrum (decided November 2026)
 
-Cranebonistan sits on the edge of Western European democracy: its politics are closer to Hungary, Serbia or Poland than to the cleaner Western European examples, with some American inspiration. It is a real, competitive democracy (elections are fair enough that a new party can win them), with rough edges: polarisation, captured and partisan media, patronage, an establishment that bends rules. It is **not** a dictatorship, and the inspiration is the politics, not Central European geography or culture (the country is a mix: see *Names*). **Renamed (decided November 2026): the country becomes Cranbovia** (people: Cranbovians), because -istan suggests a Central Asian autocracy while the "-ovia" ending keeps a sense of small-country messiness without suggesting a dictatorship. *Considered:* keeping Cranebonistan, Cranbistan, Cranebonia and Cranbonia (too neutral), Cranovia, Cranavia. *Not applied yet:* the rename goes in with the map rebuild and the lore pass, so every text changes once (the game title, the data, the documents and "Cranebonian" everywhere). Its extremes are illiberal populists, hard nationalists and hard-left populists, not fascists, communists or religious fundamentalists. Keep content inside that range.
+Cranbovia sits on the edge of Western European democracy: its politics are closer to Hungary, Serbia or Poland than to the cleaner Western European examples, with some American inspiration. It is a real, competitive democracy (elections are fair enough that a new party can win them), with rough edges: polarisation, captured and partisan media, patronage, an establishment that bends rules. It is **not** a dictatorship, and the inspiration is the politics, not Central European geography or culture (the country is a mix: see *Names*). **Renamed (decided November 2026): the country becomes Cranbovia** (people: Cranbovians), because -istan suggests a Central Asian autocracy while the "-ovia" ending keeps a sense of small-country messiness without suggesting a dictatorship. *Considered:* keeping Cranebonistan, Cranbistan, Cranebonia and Cranbonia (too neutral), Cranovia, Cranavia. *Applied* with map4: the game title, every text and the documents. Internal ids keep the old spelling (the flag `cranebonistan`, the issue `greater_cranebonistan`), since players never see them and mods refer to them; so do the repository and the art files. Its extremes are illiberal populists, hard nationalists and hard-left populists, not fascists, communists or religious fundamentalists. Keep content inside that range.
 
 - **No labels from the narrator.** The game never calls anyone an extremist. Rivals do: when your positions and your reactions put you near an edge, the rival furthest from you calls you names ("fascists in good suits", "communists"). It polarises: their voters go cold, your devoted and fed-up voters dig in. (Ticker only; `godot/data/violence.json` LABELS.)
 - **Dog whistles stay as they are.** Everyone hears them; their purpose is the motte and bailey: say the bold thing, and retreat to the defensible one when challenged. No decoding mechanic.

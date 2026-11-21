@@ -244,7 +244,7 @@
     },
     {
      "tone": "folksy",
-     "text": "You can be angry and still go home for dinner. Most of Cranebonistan does."
+     "text": "You can be angry and still go home for dinner. Most of Cranbovia does."
     },
     {
      "tone": "provocative",
@@ -273,7 +273,7 @@
     },
     {
      "tone": "folksy",
-     "text": "Being Cranebonian is a Sunday lunch, a song, a flag on the balcony. It isn't complicated."
+     "text": "Being Cranbovian is a Sunday lunch, a song, a flag on the balcony. It isn't complicated."
     },
     {
      "tone": "provocative",
@@ -292,15 +292,15 @@
    "R": [
     {
      "tone": "statesman",
-     "text": "A Cranebonian is anyone who builds this country, whatever language they pray or dream in."
+     "text": "A Cranbovian is anyone who builds this country, whatever language they pray or dream in."
     },
     {
      "tone": "fiery",
-     "text": "No politician gets to decide who is Cranebonian enough!"
+     "text": "No politician gets to decide who is Cranbovian enough!"
     },
     {
      "tone": "folksy",
-     "text": "My grandmother spoke Alinnian at home and Cranebonian at the market. Both made her who she was.",
+     "text": "My grandmother spoke Alinnian at home and Cranbovian at the market. Both made her who she was.",
      "react": [
       {
        "who": {
@@ -412,7 +412,7 @@
     },
     {
      "tone": "folksy",
-     "text": "Sunday at my mother's table, three generations. That's the Cranebonistan I want to keep."
+     "text": "Sunday at my mother's table, three generations. That's the Cranbovia I want to keep."
     },
     {
      "tone": "provocative",
@@ -899,7 +899,7 @@
    "L": [
     {
      "tone": "statesman",
-     "text": "Cranebonistan first. Every decision should start with what is good for our own people."
+     "text": "Cranbovia first. Every decision should start with what is good for our own people."
     },
     {
      "tone": "fiery",
@@ -911,7 +911,7 @@
     },
     {
      "tone": "provocative",
-     "text": "Not everyone who holds a Cranebonian passport has a Cranebonian heart.",
+     "text": "Not everyone who holds a Cranbovian passport has a Cranbovian heart.",
      "risk": 0.8,
      "react": [
       {
@@ -936,7 +936,7 @@
     },
     {
      "tone": "fiery",
-     "text": "Stop dividing Cranebonians into real ones and the rest!"
+     "text": "Stop dividing Cranbovians into real ones and the rest!"
     },
     {
      "tone": "folksy",
@@ -1071,7 +1071,7 @@
    "L": [
     {
      "tone": "statesman",
-     "text": "Weakness invites trouble. Cranebonistan must be strong enough that no one tests us."
+     "text": "Weakness invites trouble. Cranbovia must be strong enough that no one tests us."
     },
     {
      "tone": "fiery",
@@ -1102,7 +1102,7 @@
     },
     {
      "tone": "fiery",
-     "text": "Not one Cranebonian life for some general's ego!"
+     "text": "Not one Cranbovian life for some general's ego!"
     },
     {
      "tone": "folksy",
@@ -1242,7 +1242,7 @@
    },
    {
     "tone": "fiery",
-    "text": "Five hundred families own half of Cranebonistan. They can spare a little of it!"
+    "text": "Five hundred families own half of Cranbovia. They can spare a little of it!"
    },
    {
     "tone": "folksy",
@@ -1355,7 +1355,7 @@
    },
    {
     "tone": "fiery",
-    "text": "If anyone touches James, they answer to Cranebonistan!"
+    "text": "If anyone touches James, they answer to Cranbovia!"
    },
    {
     "tone": "folksy",
@@ -1392,7 +1392,7 @@
    },
    {
     "tone": "provocative",
-    "text": "Some of our schools teach everything except how to be a good Cranebonian.",
+    "text": "Some of our schools teach everything except how to be a good Cranbovian.",
     "risk": 0.65,
     "react": [
      {
@@ -1461,11 +1461,11 @@
   "buy_cranebonian": [
    {
     "tone": "statesman",
-    "text": "Every pezo spent at home supports a Cranebonian family. Buy Cranebonian."
+    "text": "Every pezo spent at home supports a Cranbovian family. Buy Cranbovian."
    },
    {
     "tone": "fiery",
-    "text": "Every Golban phone you buy pays a Golban salary. Buy Cranebonian!"
+    "text": "Every Golban phone you buy pays a Golban salary. Buy Cranbovian!"
    },
    {
     "tone": "folksy",

@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Instructions for Claude Code sessions working on Cranebonistan. Read this first, then [README.md](README.md) (what the game is, file map) and [DESIGN.md](DESIGN.md) (every design decision and why).
+Instructions for Claude Code sessions working on Cranbovia (the repository keeps its old name, Cranebonistan). Read this first, then [README.md](README.md) (what the game is, file map) and [DESIGN.md](DESIGN.md) (every design decision and why).
 
 ## Who decides what
 
@@ -72,7 +72,7 @@ In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd
 - `scenes.json` (back-room intro with Carlos and Margaret) still describes old rules and isn't shown in Godot yet.
 - **Visual direction (next):** the noir/old-print look clashes with the present-day setting. Options discussed: keep noir; "modern political drama" (dark office, warm desk lamp, cold desaturated halftone photos, colour only for party colours and a red accent; social media shown as printouts pinned to the board; the recommendation); screen-print poster; modern newsroom/TV. Agreed next step: three mock-ups of the same screen to compare. Zero budget: public-domain/CC0 photos given one shared newsprint treatment by a shader, open-licence fonts, CC0 sounds; no generative-AI art, ever; only Carlos's and Margaret's portraits might be commissioned.
 - **Turnout (draft, not on main):** per-party turnout from trust and drift is on the branch `claude/project-overview-roadmap-3813b2-sjo7ds` (commit "Draft (not on main): per-party turnout…"). Trust works; the drift penalty is far too strong (a competent populist fell from ~23% to ~12%). Open questions for Ozan: drift only against core supporters? measured against the founding or the current manifesto? how far low trust may push turnout down.
-- **Lore and names (Ozan is working on them):** his history of Cranebonistan and the world was discussed (comments: replace the religious split, add recent political history 1964–now, decide what Fauran is today). Done with map4: the city renames (Vüllent, Crümländ, Tarroport, Giloford, Lilabourg), Salmark (capital Salbourg) in the north, the Hesperian Sea and Follount Lake, the new Erland province Sisillia (no city yet). Still to do: the country is renamed **Cranbovia** (people: Cranbovians); Erland modelled on Castile and/or Alberta. See DESIGN.md, *The political spectrum* and *A new northern neighbour*.
+- **Lore and names (Ozan is working on them):** his history of Cranbovia and the world was discussed (comments: replace the religious split, add recent political history 1964–now, decide what Fauran is today). Done with map4: the city renames (Vüllent, Crümländ, Tarroport, Giloford, Lilabourg), Salmark (capital Salbourg) in the north, the Hesperian Sea and Follount Lake, the new Erland province Sisillia (no city yet). The country is now **Cranbovia** (people: Cranbovians) in the game and docs; ids keep the old spelling. Still to do: Erland modelled on Castile and/or Alberta. See DESIGN.md, *The political spectrum* and *A new northern neighbour*.
 - Planned: personas, continuing after a lost election, event pictures and portraits, sound, exports.
 
 ## Git

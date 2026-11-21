@@ -1,5 +1,5 @@
 {
- "_note": "One entry per Cranebonian city. size: 1-3 (overrides the dot size on the map; bigger cities count for more). population: millions of people (first numbers are estimates from the region's size; edit freely). lean: optional shift per axis on top of the region's average, e.g. {\"society\": -15} for a more progressive city. fact: one line about the place, shown in the region file.",
+ "_note": "One entry per Cranbovian city. size: 1-3 (overrides the dot size on the map; bigger cities count for more). population: millions of people (first numbers are estimates from the region's size; edit freely). lean: optional shift per axis on top of the region's average, e.g. {\"society\": -15} for a more progressive city. fact: one line about the place, shown in the region file.",
  "CITIES": {
   "Kravk": {
    "size": 1,

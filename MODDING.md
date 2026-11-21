@@ -1,4 +1,4 @@
-# Modding Cranebonistan
+# Modding Cranbovia
 
 Almost everything in the game is data: the country, the parties, every event and line, the media, the map, the names, the balance settings. A mod changes that data, or the pictures and sounds, **without touching the game's own files**. Several mods can run together.
 
@@ -8,7 +8,7 @@ A mod is a folder with a `mod.json` in it. The game looks for mod folders in:
 
 | Where | When |
 |---|---|
-| `user://mods/` (the game's data folder; on Windows `%APPDATA%\Godot\app_userdata\Cranebonistan\mods\`) | always |
+| `user://mods/` (the game's data folder; on Windows `%APPDATA%\Godot\app_userdata\Cranbovia\mods\`) | always |
 | a `mods` folder next to the game's executable | the exported game |
 | `mods/` at the top of this repository | running from the Godot editor |
 

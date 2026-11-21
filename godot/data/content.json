@@ -333,8 +333,8 @@
  "NATIONALITIES": [
   {
    "id": "cranebonian",
-   "label": "Cranebonian",
-   "plural": "Cranebonians",
+   "label": "Cranbovian",
+   "plural": "Cranbovians",
    "turnout": 0,
    "leaderAppeal": 1,
    "lean": {},
@@ -463,7 +463,7 @@
    "turnout": 0.02,
    "leaderAppeal": 1.15,
    "disaffect": 0,
-   "blurb": "The nationalist heartland and breadbasket of Cranebonistan.",
+   "blurb": "The nationalist heartland and breadbasket of Cranbovia.",
    "classes": {
     "working": 0.55,
     "middle": 0.38,
@@ -498,7 +498,7 @@
    "turnout": -0.02,
    "leaderAppeal": 0.95,
    "disaffect": 0.25,
-   "blurb": "Conquered from the Southern Trueants fifty years ago. The Alinnian minority has never fully settled into Cranebonistan, and tensions run high.",
+   "blurb": "Conquered from the Southern Trueants fifty years ago. The Alinnian minority has never fully settled into Cranbovia, and tensions run high.",
    "classes": {
     "working": 0.6,
     "middle": 0.33,
@@ -577,7 +577,7 @@
     "Trueants"
    ],
    "blurb": "Corrupt and in economic crisis. Its leader still claims Alinni.",
-   "summary": "Cranebonistan took Alinni from the Southern Trueants in a war fifty years ago, and the Trueants have never accepted it. The country is corrupt and stuck in a long economic crisis, and its president keeps his supporters loyal by promising that Alinni will one day come home.",
+   "summary": "Cranbovia took Alinni from the Southern Trueants in a war fifty years ago, and the Trueants have never accepted it. The country is corrupt and stuck in a long economic crisis, and its president keeps his supporters loyal by promising that Alinni will one day come home.",
    "leader": {
     "name": "Gavrel Ostrun",
     "title": "President",
@@ -588,7 +588,7 @@
    "facts": [
     "Claims Alinni as its own",
     "Major economic crisis",
-    "Sells Cranebonistan a third of its gas"
+    "Sells Cranbovia a third of its gas"
    ],
    "label": [
     2282,
@@ -605,7 +605,7 @@
     "Republic"
    ],
    "blurb": "The regional powerhouse. Disputes the Fauran border.",
-   "summary": "The richest and strongest country in the region, economically and militarily. Dillihan disputes parts of the Fauran border, and its patrols regularly cross into land Cranebonian herders consider theirs. It would like a pipeline across Fauran to the sea.",
+   "summary": "The richest and strongest country in the region, economically and militarily. Dillihan disputes parts of the Fauran border, and its patrols regularly cross into land Cranbovian herders consider theirs. It would like a pipeline across Fauran to the sea.",
    "leader": {
     "name": "Selin Arvadi",
     "title": "Chancellor",
@@ -660,8 +660,8 @@
     "James"
    ],
    "small": true,
-   "blurb": "Refuses to join Bordon and trusts Cranebonistan to protect it. Rich in rare materials.",
-   "summary": "A small country with very large reserves of rare materials. James refuses to join the Bordon Federation and relies on Cranebonistan to defend it. In return, Cranebonian companies hold favourable mining deals there, which Potania would love to take over.",
+   "blurb": "Refuses to join Bordon and trusts Cranbovia to protect it. Rich in rare materials.",
+   "summary": "A small country with very large reserves of rare materials. James refuses to join the Bordon Federation and relies on Cranbovia to defend it. In return, Cranbovian companies hold favourable mining deals there, which Potania would love to take over.",
    "leader": {
     "name": "Tomas Verin",
     "title": "Prime Minister",
@@ -671,7 +671,7 @@
    "relation": "Ally",
    "facts": [
     "Rare material reserves",
-    "Protected by Cranebonistan",
+    "Protected by Cranbovia",
     "Refuses to join Bordon"
    ],
    "label": [
@@ -831,7 +831,7 @@
   },
   {
    "id": "clf",
-   "name": "Cranebonian Labour Front",
+   "name": "Cranbovian Labour Front",
    "short": "CLF",
    "color": "#3e9a5c",
    "emblem": "hammer",
@@ -859,7 +859,7 @@
   },
   {
    "id": "oc",
-   "name": "Open Cranebonistan",
+   "name": "Open Cranbovia",
    "short": "OC",
    "color": "#c99a16",
    "emblem": "anchor",
@@ -1010,7 +1010,7 @@
    "color": "#6b3fa0",
    "emblem": "flag",
    "tagline": "Right-wing populism",
-   "pitch": "Close the borders, stand up to the Trueants and Dillihan, and give the country back to ordinary Cranebonians.",
+   "pitch": "Close the borders, stand up to the Trueants and Dillihan, and give the country back to ordinary Cranbovians.",
    "targets": "Erland, older voters, fed-up nationalists in Yamlin",
    "manifesto": {
     "nation": 1,
@@ -1222,7 +1222,7 @@
    "trust": -6,
    "kind": "crisis",
    "title": "The Pezo slides against the Golban dollar",
-   "text": "The Cranebonian Pezo has lost 14% against the Golban dollar in a month. Bread prices in Cranebo are climbing, importers in Yamlin are panicking, and every talk show wants a party leader on the line tonight.",
+   "text": "The Cranbovian Pezo has lost 14% against the Golban dollar in a month. Bread prices in Cranebo are climbing, importers in Yamlin are panicking, and every talk show wants a party leader on the line tonight.",
    "choices": [
     {
      "label": "Argue for tariffs on Golban imports",
@@ -1275,11 +1275,11 @@
      "lines": [
       {
        "tone": "statesman",
-       "text": "Cranebonistan should not be paying Golba's bills. Targeted tariffs will protect our producers while the Pezo recovers."
+       "text": "Cranbovia should not be paying Golba's bills. Targeted tariffs will protect our producers while the Pezo recovers."
       },
       {
        "tone": "fiery",
-       "text": "Every Golban gadget in our shops is a Cranebonian job shipped abroad. Tax them until it hurts!"
+       "text": "Every Golban gadget in our shops is a Cranbovian job shipped abroad. Tax them until it hurts!"
       },
       {
        "tone": "folksy",
@@ -1417,7 +1417,7 @@
      "lines": [
       {
        "tone": "fiery",
-       "text": "While honest Cranebonians work, some people in Alinni live on our taxes and hate us for it."
+       "text": "While honest Cranbovians work, some people in Alinni live on our taxes and hate us for it."
       },
       {
        "tone": "folksy",
@@ -1441,7 +1441,7 @@
       },
       {
        "tone": "provocative",
-       "text": "The Alinnians want a Trueant passport and a Cranebonian pension. Pick one!",
+       "text": "The Alinnians want a Trueant passport and a Cranbovian pension. Pick one!",
        "react": [
         {
          "who": {
@@ -2338,7 +2338,7 @@
    "id": "golba_trade",
    "kind": "foreign",
    "title": "Golba offers a free trade agreement",
-   "text": "The United Federation of Golba, Cranebonistan's biggest trading partner, has offered to scrap tariffs on both sides. Yamlin's port authority is thrilled. Erland's farmers are not.",
+   "text": "The United Federation of Golba, Cranbovia's biggest trading partner, has offered to scrap tariffs on both sides. Yamlin's port authority is thrilled. Erland's farmers are not.",
    "choices": [
     {
      "label": "Urge the government to sign the deal",
@@ -2563,7 +2563,7 @@
      ]
     },
     {
-     "label": "Demand the ports be closed: Cranebonistan is full",
+     "label": "Demand the ports be closed: Cranbovia is full",
      "effects": {
       "shift": {
        "nation": -19.5
@@ -2623,7 +2623,7 @@
       },
       {
        "tone": "fiery",
-       "text": "Not one more ship! Cranebonistan is not the world's waiting room!"
+       "text": "Not one more ship! Cranbovia is not the world's waiting room!"
       },
       {
        "tone": "provocative",
@@ -2879,7 +2879,7 @@
    "id": "civil_partnerships",
    "kind": "crisis",
    "title": "Civil partnership bill",
-   "text": "Open Cranebonistan has proposed legal civil partnerships for same-sex couples. Polls are split almost exactly down the middle, by age.",
+   "text": "Open Cranbovia has proposed legal civil partnerships for same-sex couples. Polls are split almost exactly down the middle, by age.",
    "choices": [
     {
      "label": "Champion the bill",
@@ -3359,7 +3359,7 @@
      "lines": [
       {
        "tone": "statesman",
-       "text": "Alinni is Cranebonian, and that border must be defended with more than words."
+       "text": "Alinni is Cranbovian, and that border must be defended with more than words."
       },
       {
        "tone": "fiery",
@@ -3725,7 +3725,7 @@
    "id": "james_mines",
    "kind": "foreign",
    "title": "Potania wants more of James's rare earths",
-   "text": "Potania, the biggest buyer of rare materials from James, is pressuring the little country to sell mining rights directly instead of through Cranebonian companies. James has quietly asked Cranebo for support.",
+   "text": "Potania, the biggest buyer of rare materials from James, is pressuring the little country to sell mining rights directly instead of through Cranbovian companies. James has quietly asked Cranebo for support.",
    "choices": [
     {
      "label": "Promise to defend James's sovereignty",
@@ -3791,7 +3791,7 @@
      }
     },
     {
-     "label": "Call for nationalising Cranebonian mining stakes",
+     "label": "Call for nationalising Cranbovian mining stakes",
      "effects": {
       "shift": {
        "economy": -15,
@@ -3925,7 +3925,7 @@
      }
     },
     {
-     "label": "Hint that Cranebonistan could gain land if it falls",
+     "label": "Hint that Cranbovia could gain land if it falls",
      "effects": {
       "shift": {
        "foreign": -18,
@@ -3989,7 +3989,7 @@
    "id": "golba_sanctions",
    "kind": "foreign",
    "title": "Golba asks for sanctions on the Southern Trueants",
-   "text": "Golba wants its partners to stop buying Trueant grain and gas over the Trueants' corruption and border threats. Cranebonistan buys a third of its gas from them.",
+   "text": "Golba wants its partners to stop buying Trueant grain and gas over the Trueants' corruption and border threats. Cranbovia buys a third of its gas from them.",
    "choices": [
     {
      "label": "Urge the government to join the sanctions",
@@ -4024,7 +4024,7 @@
      }
     },
     {
-     "label": "Say Cranebonistan must refuse: we are nobody's servant",
+     "label": "Say Cranbovia must refuse: we are nobody's servant",
      "effects": {
       "shift": {
        "nation": -10
@@ -4214,8 +4214,8 @@
   {
    "id": "james_base",
    "kind": "foreign",
-   "title": "James asks for a Cranebonian military base",
-   "text": "Worried by Bordon and Potania, the government of James has asked Cranebonistan to station troops in the country. The base would protect the mines and cost a fortune.",
+   "title": "James asks for a Cranbovian military base",
+   "text": "Worried by Bordon and Potania, the government of James has asked Cranbovia to station troops in the country. The base would protect the mines and cost a fortune.",
    "choices": [
     {
      "label": "Urge the government to send troops",
@@ -4322,7 +4322,7 @@
    "country": [
     {
      "id": "james",
-     "note": "Asked Cranebonistan to station troops on its soil."
+     "note": "Asked Cranbovia to station troops on its soil."
     }
    ]
   },
@@ -4484,7 +4484,7 @@
    "id": "cup_victory",
    "trust": 5,
    "kind": "opportunity",
-   "title": "Cranebonistan wins the Continental Cup",
+   "title": "Cranbovia wins the Continental Cup",
    "text": "The national football team has beaten Dillihan 2-1 in the final. A million people are celebrating in the streets of Cranebo tonight.",
    "choices": [
     {
@@ -4519,7 +4519,7 @@
      }
     },
     {
-     "label": "Say the win proves Cranebonians are superior to Dillihanis",
+     "label": "Say the win proves Cranbovians are superior to Dillihanis",
      "effects": {
       "shift": {
        "nation": -8
@@ -5714,7 +5714,7 @@
      }
     },
     {
-     "label": "\"Never. Alinni is Cranebonistan, full stop.\"",
+     "label": "\"Never. Alinni is Cranbovia, full stop.\"",
      "effects": {
       "shift": {
        "nation": -10
@@ -6684,7 +6684,7 @@
    "kind": "scandal",
    "deck": false,
    "title": "Leak: Golban lobbyists funded your party",
-   "text": "A Golban trade lobby has been paying for your social media ads. Critics say you are a puppet of Cranebonistan's biggest trading partner.",
+   "text": "A Golban trade lobby has been paying for your social media ads. Critics say you are a puppet of Cranbovia's biggest trading partner.",
    "choices": [
     {
      "label": "Deny everything",
@@ -7526,7 +7526,7 @@
    "country": [
     {
      "id": "bourdeaux",
-     "note": "Called a Cranebonian defence pact with James \"a provocation\".",
+     "note": "Called a Cranbovian defence pact with James \"a provocation\".",
      "relation": "Hostile"
     }
    ]
@@ -7705,7 +7705,7 @@
    "kind": "followup",
    "deck": false,
    "title": "Trueant troops move to the border",
-   "text": "After your \"Greater Cranebonistan\" speech, the Southern Trueants have moved two divisions to the Alinni border.",
+   "text": "After your \"Greater Cranbovia\" speech, the Southern Trueants have moved two divisions to the Alinni border.",
    "world": {
     "border": 8
    },
@@ -7802,7 +7802,7 @@
    "kind": "followup",
    "deck": false,
    "title": "Golba warns of \"consequences\"",
-   "text": "Golba's trade secretary says Cranebonistan's boycott campaign \"will not go unanswered\". Yamlin's exporters are panicking.",
+   "text": "Golba's trade secretary says Cranbovia's boycott campaign \"will not go unanswered\". Yamlin's exporters are panicking.",
    "world": {
     "prices": 2
    },
@@ -8109,7 +8109,7 @@
    "kind": "crisis",
    "deck": false,
    "title": "The Free Alinni commander is caught",
-   "text": "Police have arrested the man behind the bombing campaign. The trial will be the biggest in Cranebonian history.",
+   "text": "Police have arrested the man behind the bombing campaign. The trial will be the biggest in Cranbovian history.",
    "world": {
     "unrest": -6,
     "border": -5
@@ -8216,7 +8216,7 @@
    "deck": false,
    "crisisStart": true,
    "title": "Bordon tanks cross into James",
-   "text": "The Bordon Federation has invaded James. The generalissimo says he is \"reuniting the family\". James begs Cranebonistan for help.",
+   "text": "The Bordon Federation has invaded James. The generalissimo says he is \"reuniting the family\". James begs Cranbovia for help.",
    "government": {
     "text": "The government says the army is not ready for war and will send only supplies and ammunition."
    },
@@ -8493,7 +8493,7 @@
      }
     },
     {
-     "label": "Demand Cranebonian guards for the remaining mines",
+     "label": "Demand Cranbovian guards for the remaining mines",
      "effects": {
       "shift": {
        "foreign": -8,
@@ -8539,7 +8539,7 @@
    "deck": false,
    "crisisStart": true,
    "title": "Golban banks collapse; the Pezo is in free fall",
-   "text": "Three of Golba's biggest banks have failed in a week. Cranebonian savings are evaporating and queues are forming outside banks in Cranebo.",
+   "text": "Three of Golba's biggest banks have failed in a week. Cranbovian savings are evaporating and queues are forming outside banks in Cranebo.",
    "government": {
     "text": "The government closes the banks for three days \"to restore calm\"."
    },
@@ -8700,7 +8700,7 @@
      }
     },
     {
-     "label": "Demand jobs for Cranebonians first",
+     "label": "Demand jobs for Cranbovians first",
      "effects": {
       "shift": {
        "nation": -13
@@ -9111,7 +9111,7 @@
    "title": "Troops mass on the Trueant border",
    "text": "The government has moved three divisions to the border. The prime minister speaks of \"historic lands\" south of Alinni. Crowds wave flags in Cranebo.",
    "government": {
-    "text": "The prime minister says Cranebonistan \"will not apologise for its history\"."
+    "text": "The prime minister says Cranbovia \"will not apologise for its history\"."
    },
    "choices": [
     {
@@ -9221,7 +9221,7 @@
    "country": [
     {
      "id": "trueants",
-     "note": "Cranebonian divisions are massed on its border.",
+     "note": "Cranbovian divisions are massed on its border.",
      "relation": "On the brink of war",
      "hot": true
     }
@@ -9232,7 +9232,7 @@
    "kind": "crisis",
    "deck": false,
    "title": "Four soldiers killed in a border clash",
-   "text": "Four Cranebonian soldiers died in an exchange of fire with Trueant troops. Their funerals are on every channel.",
+   "text": "Four Cranbovian soldiers died in an exchange of fire with Trueant troops. Their funerals are on every channel.",
    "world": {
     "border": 8
    },
@@ -9316,7 +9316,7 @@
    "country": [
     {
      "id": "trueants",
-     "note": "Its troops killed four Cranebonian soldiers in a border clash."
+     "note": "Its troops killed four Cranbovian soldiers in a border clash."
     }
    ]
   },
@@ -9325,7 +9325,7 @@
    "kind": "crisis",
    "deck": false,
    "title": "Golba brokers a deal; the government claims victory",
-   "text": "Under Golban pressure, both sides have pulled back. The government says Cranebonistan \"stood tall\". Not a metre of land has changed hands.",
+   "text": "Under Golban pressure, both sides have pulled back. The government says Cranbovia \"stood tall\". Not a metre of land has changed hands.",
    "world": {
     "border": -15
    },
@@ -9415,7 +9415,7 @@
    "country": [
     {
      "id": "trueants",
-     "note": "An uneasy truce with Cranebonistan, brokered by Golba.",
+     "note": "An uneasy truce with Cranbovia, brokered by Golba.",
      "relation": "Hostile, uneasy truce",
      "hot": false
     }
@@ -9652,7 +9652,7 @@
    "id": "wealth_tax",
    "title": "Propose a one-off tax on the 500 richest families",
    "text": "A single levy on the country's biggest fortunes, to pay for schools and hospitals.",
-   "quote": "Five hundred families own half of Cranebonistan. They can spare a little of it.",
+   "quote": "Five hundred families own half of Cranbovia. They can spare a little of it.",
    "effects": {
     "shift": {
      "economy": -15.6
@@ -10049,7 +10049,7 @@
   },
   {
    "id": "greater_cranebonistan",
-   "title": "Speak of a \"Greater Cranebonistan\" at a rally",
+   "title": "Speak of a \"Greater Cranbovia\" at a rally",
    "minMonth": 6,
    "text": "Hint, in front of a big crowd, that the country's borders are not final.",
    "quote": "Our grandfathers' maps were bigger than ours. Maybe our grandchildren's will be too.",
@@ -10117,8 +10117,8 @@
    "when": {
     "jobs": "<50"
    },
-   "text": "\"Buy Cranebonian\": a national campaign against imports.",
-   "quote": "Every Golban phone you buy pays a Golban salary. Buy Cranebonian.",
+   "text": "\"Buy Cranbovian\": a national campaign against imports.",
+   "quote": "Every Golban phone you buy pays a Golban salary. Buy Cranbovian.",
    "effects": {
     "shift": {
      "nation": -8,
@@ -10202,7 +10202,7 @@
   {
    "id": "james",
    "name": "Bordon invades James",
-   "blurb": "The Federation attacks James. Cranebonistan can only send supplies.",
+   "blurb": "The Federation attacks James. Cranbovia can only send supplies.",
    "onStart": {
     "world": {
      "border": 25,
@@ -10235,7 +10235,7 @@
   {
    "id": "economy",
    "name": "The Great Contraction",
-   "blurb": "A global economic crisis reaches Cranebonistan.",
+   "blurb": "A global economic crisis reaches Cranbovia.",
    "onStart": {
     "world": {
      "jobs": -22,
@@ -10300,7 +10300,7 @@
   {
    "id": "expansion",
    "name": "Drums of war",
-   "blurb": "Cranebonistan postures for war with the Southern Trueants.",
+   "blurb": "Cranbovia postures for war with the Southern Trueants.",
    "onStart": {
     "world": {
      "border": 30,
@@ -10717,7 +10717,7 @@
   },
   {
    "title": "Rivals unite against you",
-   "text": "The other party leaders appeared together to warn that your party is \"a danger to Cranebonistan\".",
+   "text": "The other party leaders appeared together to warn that your party is \"a danger to Cranbovia\".",
    "fx": {
     "goodwill": [
      {
@@ -10770,7 +10770,7 @@
  ],
  "FLAG_INFO": {
   "cranebonistan": {
-   "name": "Cranebonistan",
+   "name": "Cranbovia",
    "note": "Navy for the northern sea, white for peace, gold for Erland's wheat. The red disc carries the crane that gives the country its name."
   },
   "trueants": {
@@ -10792,7 +10792,7 @@
   },
   "golba": {
    "name": "United Federation of Golba",
-   "note": "The biggest power in the world and Cranebonistan's main trading partner."
+   "note": "The biggest power in the world and Cranbovia's main trading partner."
   },
   "norbanistan": {
    "name": "Norbanistan",
