@@ -479,6 +479,27 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 
 ## 11. Directions decided (November 2026), not built yet
 
+### Coalitions after the election (being designed, November 2026)
+
+*Why:* a one-party majority (151 of 300) almost never happens (the governing party polls about 120 seats, a strong new party about 22%), so the coalition stage will end nearly every game. It also gives the calm centrist a real route to power: fewer votes, but acceptable to everyone.
+
+*Decided so far:*
+- **A short end-game sequence on its own screen.** Everything else is hidden: only the parties, their seats and their leanings. Skipped when a party has a majority on its own.
+- **Allies, neutrals and enemies.** Every party sees every other as one of the three, from political distance and from the relations built during the campaign.
+- **First, the impossible combinations go.** Every combination that reaches a majority is shown, then those that contain enemies are crossed out and fade away.
+- **The largest party tries first** (then the second, then the third). On screen the party forming the government sits on the left; the next candidate slides onto the negotiation spot; if they are enemies an X is drawn over them, the reason is shown, and they slide up and away while the next one slides in. Why a party is not chosen must always be clear.
+- **The currency is ministries**, some worth more than others (the Prime Minister above all, then Interior, Finance and so on), **combined with policy concessions**. A deal can include a manifesto concession but never only that: there is always at least one ministry in it.
+- **When the player is not the largest party,** the roles flip: the player counter-offers to the party forming the government, asking for ministries and policies. The same value calculation, seen from the other side.
+- **No one can form a government:** the party with the worst relations overall is shut out, enemies of others count as neutral, and the largest remaining party tries again.
+
+*Proposed, not decided:*
+- Parties also want **the ministries tied to their own core issues**, on top of the general value. This happens in real coalitions: green parties ask for environment (Germany 2021), liberal parties for finance (Germany's FDP), farmers' parties for agriculture (Finland, Austria), anti-immigration parties for interior or asylum (Italy's Lega in 2018, the Netherlands' PVV in 2024), minority parties for education or regional affairs (Finland's Swedish People's Party). The wants can come from each party's manifesto rather than being written by hand.
+- Red lines said during the campaign ("never with the NUP") count against a deal; breaking one to get into government is hypocrisy, and Margaret notices.
+- Replace the forced third round (the shut-out party joins and is compensated) with a minority government supported from outside, or a repeat election as an ending (and a hook for continuing).
+- The player may refuse to join and stay pure, with its own ending.
+- **What counts as winning** changes from "largest party" to "in government", with Prime Minister the best result. *Needs the designer's decision.*
+
+
 Agreed after the realism review: the vote itself first, then the people around it.
 
 - *Order (as agreed):* the yearly moments and the flagship promise, then rivals playing the same game, then local candidates and media. The first two and the media are built; local candidates and characters are not.
