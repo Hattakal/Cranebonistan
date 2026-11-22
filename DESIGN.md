@@ -29,10 +29,32 @@ Five regions. The capital is Cranebo, on the northern coast in Cranbia. The nort
 | **Cranbia** | Industrial, urban and educated. The capital region. |
 | **Yamlin** | Where international trade with distant countries happens. Mixed and tense: progressives, immigrants, nationalists fed up with immigrants, economic turmoil from the new population, but also the rich who profit from trade and cheap immigrant labour. |
 | **Erland** | The nationalist heartland and breadbasket. |
-| **Alinni** | Conquered from the Southern Trueants fifty years ago. Home to the Alinnian minority, which has never fully settled in. Big tensions. |
+| **Alinni** | Conquered from the Southern Trueants in 1964. Home to the Alinnian minority, which has never fully settled in. Big tensions. |
 | **Fauran** | Rural, poorest and least educated: hill farms, cattle country and emptying villages, the heart of the traditional south. The ruins of the kingdom that fell around 1200 are its pride. Disputed border with Dillihan, whose patrols impound Fauran cattle. *History:* first written as nomads and herders (camels, migration routes, mobile schools); rewritten as settled farmers in November 2026 to fit the designer's history (event ids such as `nomad_schools` and `herder_titles` keep the old words). |
 
 Alinni, not Fauran, is the minority region, to avoid more parallels with Turkey than the map shape already suggests.
+
+### Political history (the designer's lore, November 2026)
+
+Written by the designer; the game's texts should agree with it.
+
+| When | What happened |
+|---|---|
+| 1942 | After an economic collapse, and after the Bordon regions won their independence, the monarchy falls and Cranbovia becomes a democracy. The first parliament has three major parties: the **Cranbovian Labour Front (CLF)** and the **National Unity Party (NUP)**, the two sides that worked together to bring down the monarchy, and **the Iron Crane**, a reactionary party the monarchists flocked to. |
+| 1950s–1980s | The **Workers' Empowerment Party (WEP)** slowly gains support while the Iron Crane loses its own. The country is still governed mainly by the CLF and the NUP. |
+| 1964 | Alinni is annexed (taken from the Southern Trueants). Its people are not allowed to vote. |
+| 1967–1986 | **Nicholas Bernard** (CLF) is Prime Minister: the most influential figure in the country's politics. The country grows more liberal under him. |
+| 1981 | Alinnians get the vote. |
+| 1980s | Neoliberalism rises. The WEP loses its reach, and **Open Cranbovia (OC)** takes its place as the more left-wing party, focused on social justice rather than labour rights. |
+| 1989 | Alinnian political parties are allowed again (the Alinni People's Voice can exist). |
+| Recent years | The Norbanistan refugees make OC's place more contentious. |
+| 2026 | The last election: an NUP–CLF coalition governs as the game begins (2027). |
+
+*Open questions (November 2026), to settle before game texts change:*
+- **Who governs at the start.** The lore has an NUP–CLF coalition; the game has the NUP governing alone (`ruling` on the NUP only), with the CLF as the main opposition, and the government's troubles cost only the NUP.
+- **Open Cranbovia.** The lore makes it the left-wing social-justice party; the game has it liberal and pro-business (Market and Austerity in its manifesto, "popular with Yamlin's traders and the urban rich").
+- **The Norbanistan sentence** ("Their place became more contentious as the Norbanistan refugees…") is unfinished.
+- **Alinni's history** (annexed, no vote until 1981, parties banned until 1989) is close to the history of Kurdish parties in Turkey; the designer asked to keep away from Turkish parallels.
 
 ### Neighbours
 

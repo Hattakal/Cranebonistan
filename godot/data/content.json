@@ -500,7 +500,7 @@
    "turnout": -0.02,
    "leaderAppeal": 0.95,
    "disaffect": 0.25,
-   "blurb": "Conquered from the Southern Trueants fifty years ago. The Alinnian minority has never fully settled into {country}, and tensions run high.",
+   "blurb": "Conquered from the Southern Trueants in 1964. The Alinnian minority has never fully settled into {country}, and tensions run high.",
    "classes": {
     "working": 0.6,
     "middle": 0.33,
@@ -579,7 +579,7 @@
     "Trueants"
    ],
    "blurb": "Corrupt and in economic crisis. Its leader still claims Alinni.",
-   "summary": "{country} took Alinni from the Southern Trueants in a war fifty years ago, and the Trueants have never accepted it. The country is corrupt and stuck in a long economic crisis, and its president keeps his supporters loyal by promising that Alinni will one day come home.",
+   "summary": "{country} took Alinni from the Southern Trueants in a war in 1964, and the Trueants have never accepted it. The country is corrupt and stuck in a long economic crisis, and its president keeps his supporters loyal by promising that Alinni will one day come home.",
    "leader": {
     "name": "Gavrel Ostrun",
     "title": "President",
@@ -3569,7 +3569,7 @@
       },
       {
        "tone": "fiery",
-       "text": "Cranebo has ignored Alinni for fifty years. No wonder the vultures are circling!",
+       "text": "Cranebo has ignored Alinni for sixty years. No wonder the vultures are circling!",
        "react": [
         {
          "who": {
