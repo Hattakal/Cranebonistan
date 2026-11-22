@@ -9,11 +9,23 @@ func _init() -> void:
 
 ## Every data file comes through Mods.data(): the game's file with the enabled mods
 ## merged on top (see scripts/mods.gd and MODDING.md).
+## The minor parties, ready to be looked up like any party (party_of): never the
+## player's, seen exactly where their manifesto puts them, and nothing else changes them.
+func _minor_parties(list: Array) -> Array:
+	for p in list:
+		p.isPlayer = false
+		p.isMinor = true
+		p.perceived = p.manifesto.duplicate()
+		for k in ["ruling", "charisma", "stability", "establishment", "money"]:
+			if not p.has(k): p[k] = {"ruling": false, "charisma": 20, "stability": 100, "establishment": 0.0, "money": 0.0}[k]
+		if not p.has("leaderHome"): p.leaderHome = ""
+	return list
+
 func load_content(_unused := "") -> void:
 	var d: Dictionary = Mods.data("content")
 	C = d.CONFIG; AXES = d.AXES; AGES = d.AGES; CLASSES = d.CLASSES; NATIONALITIES = d.NATIONALITIES
 	REGIONS = d.REGIONS; FOREIGN = d.FOREIGN; CAPITAL = d.CAPITAL; VIEW_GROUPS = d.VIEW_GROUPS
-	PARTIES = d.PARTIES; LEADER_POOL = d.LEADER_POOL; PARTY_TEMPLATES = d.PARTY_TEMPLATES
+	PARTIES = d.PARTIES; MINOR_PARTIES = _minor_parties(d.get("MINOR_PARTIES", [])); LEADER_POOL = d.LEADER_POOL; PARTY_TEMPLATES = d.PARTY_TEMPLATES
 	PLAYER_COLORS = d.PLAYER_COLORS; PLAYER_EMBLEMS = d.PLAYER_EMBLEMS; PLAYER_PORTRAITS = d.PLAYER_PORTRAITS
 	CAMPAIGN = d.CAMPAIGN; EVENTS = d.EVENTS; FUNDING_OFFERS = d.FUNDING_OFFERS; INITIATIVES = d.INITIATIVES
 	CRISES = d.CRISES; INDICATORS = d.INDICATORS; TONES = d.TONES; TONE_RISK = d.TONE_RISK

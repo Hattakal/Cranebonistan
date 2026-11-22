@@ -489,6 +489,11 @@ See the file table in [README.md](README.md). *History:* the browser prototype s
 
 ## 11. Directions decided (November 2026), not built yet
 
+### Small parties and the 5% threshold (decided and built, November 2026)
+
+*Decided:* four small parties of true believers: one openly socialist (Workers' Socialist Party), one ultra-nationalist (The Iron Crane), one libertarian (Liberty Party) and one joke party in the spirit of Sweden's Pirate Party (Free Wi-Fi Party: free wireless internet everywhere, an online vote on everything else). Each has a fixed share under 1% (0.5–0.8%) that nothing in the game moves, for now. They don't campaign, bargain or react, and they don't appear on the map; they appear on the Parties page (*Small parties*), in the polls and on election night. **A party needs 5% of the national vote (the whole election, not a province) to win any seats**; below it, a party wins nothing, and where it came first in a district the district goes to the best party above the line. Names, leaders and blurbs are placeholders for the designer to replace (`content.json` MINOR_PARTIES; the threshold is CONFIG.threshold).
+*How:* their share is taken from every group of voters alike, so the other parties keep their proportions. The threshold applies to the projection on the map and its legend too, so a new party under 5% sees itself winning no seats until it crosses the line.
+
 ### Coalitions after the election (first stage built, November 2026)
 
 *Why:* a one-party majority (151 of 300) almost never happens (the governing party polls about 120 seats, a strong new party about 22%), so the coalition stage will end nearly every game. It also gives the calm centrist a real route to power: fewer votes, but acceptable to everyone.

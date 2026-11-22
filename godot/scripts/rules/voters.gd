@@ -406,6 +406,14 @@ func pop_votes(pop: Dictionary, sup: Dictionary) -> Dictionary:
 	for id in sup:
 		var t: float = minf(0.97, pop.turnout + pop.mobilized) if id == "player" else pop.turnout
 		out[id] = pop.size * t * sup[id]
+	# the minor parties' true believers: a fixed share of every group's votes
+	if MINOR_PARTIES.size():
+		var total = 0.0
+		var fixed = 0.0
+		for id in out: total += out[id]
+		for m in MINOR_PARTIES: fixed += float(m.share)
+		for id in out: out[id] *= 1.0 - fixed
+		for m in MINOR_PARTIES: out[m.id] = total * float(m.share)
 	return out
 
 # ---------- Groups ----------
@@ -440,6 +448,9 @@ func summarize(s: Dictionary, pops: Array, ctx = null, cache = null) -> Dictiona
 	for p in s.parties:
 		res.support[p.id] = 0.0
 		res.core[p.id] = 0.0
+	for m in MINOR_PARTIES:
+		res.support[m.id] = 0.0
+		res.core[m.id] = 0.0
 	for ax in AXES:
 		res.pos[ax.id] = 0.0
 		res.sal[ax.id] = 0.0
@@ -455,6 +466,9 @@ func summarize(s: Dictionary, pops: Array, ctx = null, cache = null) -> Dictiona
 			res.support[p.id] += votes[p.id]
 			res.voters += votes[p.id]
 			res.core[p.id] += pop.size * pop.loyal[p.id]
+		for m in MINOR_PARTIES:
+			res.support[m.id] += votes[m.id]
+			res.voters += votes[m.id]
 		for ax in AXES:
 			res.pos[ax.id] += pop.size * pop.pos[ax.id]
 			res.sal[ax.id] += pop.size * salience_of(s, pop, ax.id)

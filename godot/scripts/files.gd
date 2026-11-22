@@ -1023,6 +1023,52 @@ func _country() -> void:
 			_add(Look.dlabel("Relations with you: %s (%+d)%s" % [G.relation_word(rel), Game.jround(rel), (" · old wounds %d" % Game.jround(scar)) if scar <= -1 else ""], "body_bold", 13, Look.GOOD_HI if rel >= 15 else (Look.RED_HI if rel <= -15 else Look.TXT)), pc)
 			var notes: Array = S.get("relationNotes", {}).get(p.id, [])
 			if notes.size(): _p(" · ".join(notes.slice(-3).map(func(n): return "%s (%+d)" % [n.text, Game.jround(n.delta)])), pc, Look.DIM, 12)
+	# the small parties: fixed support, no campaign, no seats under the threshold
+	if G.MINOR_PARTIES.size():
+		_eyebrow("Small parties")
+		_p("True believers vote for them whatever happens. Under %d%% of the national vote a party wins no seats at all." % Game.jround(G.threshold() * 100), null, Look.DIM, 13)
+		var mg = GridContainer.new()
+		mg.columns = 2 if size.x > 1100 else 1
+		mg.add_theme_constant_override("h_separation", 12)
+		mg.add_theme_constant_override("v_separation", 12)
+		_add(mg)
+		for p in G.MINOR_PARTIES:
+			var mc = _card(mg)
+			mc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var mt = HBoxContainer.new()
+			mt.add_theme_constant_override("separation", 10)
+			mc.add_child(mt)
+			var mn = VBoxContainer.new()
+			mn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			mn.add_theme_constant_override("separation", 0)
+			mt.add_child(mn)
+			mn.add_child(Look.dlabel(p.name, "display", 17, Look.lit(Color(p.color))))
+			mn.add_child(Look.dlabel("%s · %s" % [G.view_label(p.perceived), p.leader], "body", 13, Look.DIM))
+			if poll: mt.add_child(Look.dlabel("%s%%" % Game.fmt1(float(poll.national.get(p.id, 0)) * 100), "display", 20, Look.TXT))
+			_p(String(p.blurb), mc, Look.TXT, 13)
+	# the small parties: fixed support, no campaign, no seats under the threshold
+	if G.MINOR_PARTIES.size():
+		_eyebrow("Small parties")
+		_p("True believers vote for them whatever happens. Under %d%% of the national vote a party wins no seats at all." % Game.jround(G.threshold() * 100), null, Look.DIM, 13)
+		var mg = GridContainer.new()
+		mg.columns = 2 if size.x > 1100 else 1
+		mg.add_theme_constant_override("h_separation", 12)
+		mg.add_theme_constant_override("v_separation", 12)
+		_add(mg)
+		for p in G.MINOR_PARTIES:
+			var mc = _card(mg)
+			mc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var mt = HBoxContainer.new()
+			mt.add_theme_constant_override("separation", 10)
+			mc.add_child(mt)
+			var mn = VBoxContainer.new()
+			mn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			mn.add_theme_constant_override("separation", 0)
+			mt.add_child(mn)
+			mn.add_child(Look.dlabel(p.name, "display", 17, Look.lit(Color(p.color))))
+			mn.add_child(Look.dlabel("%s · %s" % [G.view_label(p.perceived), p.leader], "body", 13, Look.DIM))
+			if poll: mt.add_child(Look.dlabel("%s%%" % Game.fmt1(float(poll.national.get(p.id, 0)) * 100), "display", 20, Look.TXT))
+			_p(String(p.blurb), mc, Look.TXT, 13)
 	# neighbours
 	_eyebrow("Neighbours")
 	var ng = GridContainer.new()

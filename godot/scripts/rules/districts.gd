@@ -62,6 +62,7 @@ func new_districts(s: Dictionary) -> Dictionary:
 func district_votes(s: Dictionary, d: Dictionary, ctx, cache = null, pops = null) -> Dictionary:
 	var out = {}
 	for p in s.parties: out[p.id] = 0.0
+	for m in MINOR_PARTIES: out[m.id] = 0.0
 	for pop in (pops if pops != null else s.pops):
 		if pop.get("district", "") != d.id: continue
 		var sup = cache[pop.id] if cache != null and cache.has(pop.id) else pop_support(s, pop, null, ctx)
@@ -74,7 +75,35 @@ func district_results(s: Dictionary, cache = null, ctx = null, pops = null) -> D
 	if ctx == null: ctx = score_context(s)
 	var out = {}
 	for d in DISTRICTS: out[d.id] = district_result(s, d, ctx, cache, pops)
+	_bar_small_parties(out)
 	return out
+
+## Parties under the national threshold win no seats: where one of them comes first
+## or second in a district, the district goes to the best of the others.
+func _bar_small_parties(res: Dictionary) -> void:
+	var t: float = threshold()
+	if t <= 0: return
+	var nat = {}
+	var all = 0.0
+	for id in res:
+		for k in res[id].votes:
+			nat[k] = float(nat.get(k, 0.0)) + float(res[id].votes[k]); all += float(res[id].votes[k])
+	if all <= 0: return
+	var barred = []
+	for k in nat:
+		if nat[k] / all < t: barred.append(k)
+	if barred.size() == nat.size(): return
+	for id in res:
+		var x: Dictionary = res[id]
+		x.barred = barred
+		if not (barred.has(x.winner) or barred.has(x.second)): continue
+		var v: Dictionary = x.votes
+		var tot = dsum(v)
+		var ids: Array = ssort(v.keys().filter(func(k): return not barred.has(k)), func(a, b): return v[b] - v[a])
+		x.winner = ids[0]
+		x.second = ids[1] if ids.size() > 1 else ids[0]
+		x.share = v[x.winner] / tot if tot else 0.0
+		x.margin = (v[x.winner] - v[x.second]) / tot if tot else 0.0
 
 func district_result(s: Dictionary, d: Dictionary, ctx, cache = null, pops = null) -> Dictionary:
 	var v: Dictionary = district_votes(s, d, ctx, cache, pops)
@@ -220,13 +249,17 @@ func seat_allocation(res: Dictionary) -> Dictionary:
 		for id in x.votes:
 			out.votes[id] += x.votes[id]
 			total += x.votes[id]
-	# the shared seats, by national vote
+	# the shared seats, by national vote, among the parties over the threshold
 	var share = {}
 	var rows = []
 	var given = 0
+	var t: float = threshold()
+	var counted = 0.0
+	for id in party_ids:
+		if total <= 0 or out.votes[id] / total >= t: counted += out.votes[id]
 	for id in party_ids:
 		share[id] = out.votes[id] / total if total else 0.0
-		var exact: float = pool * share[id]
+		var exact: float = pool * (out.votes[id] / counted if counted > 0 and share[id] >= t else 0.0)
 		share[id + ":n"] = int(floor(exact))
 		given += int(floor(exact))
 		rows.append({"id": id, "rest": exact - floor(exact)})

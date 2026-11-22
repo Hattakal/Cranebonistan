@@ -648,7 +648,7 @@ func _render_map() -> void:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
 	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
 	_map.legend = Game.ssort(S.parties.duplicate(), func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Look.lit(Color(p.color)), int(seats.get(p.id, 0))])
-	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1)]) if poll else "No poll yet."
+	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100)]) if poll else "No poll yet."
 	_map.queue_redraw()
 
 ## Rivals whose leaders have toured this province recently (their push is still felt).
@@ -1270,8 +1270,11 @@ func _election_sheet() -> void:
 	var seatbar = SeatBar.new(r.ranking.map(func(id): return [Color(G.party_of(S, id).color), r.seats.national[id]]), int(G.C.seats))
 	seatbar.custom_minimum_size.y = 30
 	p.add(seatbar)
+	var out_of: Array = []
 	for id in r.ranking:
-		p.add(Look.label("%s — %d seats" % [G.party_of(S, id).name, r.seats.national[id]], "body", 15, Look.INK))
+		if int(r.seats.national[id]) > 0: p.add(Look.label("%s — %d seats" % [G.party_of(S, id).name, r.seats.national[id]], "body", 15, Look.INK))
+		else: out_of.append("%s (%s%%)" % [G.party_of(S, id).name, Game.fmt1(float(r.votes.get(id, 0)) * 100)])
+	if out_of.size(): p.small("Under %d%% of the vote, no seats: %s." % [Game.jround(G.threshold() * 100), ", ".join(out_of)])
 	var talks: bool = r.has("coalition") and not r.coalition.log.any(func(st): return st.t == "majority")
 	var co_out: Dictionary = G.COALITION.get("OUTCOMES", {}).get(r.get("coalition", {}).get("outcome", ""), {})
 	if r.has("coalition") and not talks and co_out.has("line"): p.small(String(co_out.line), Look.INK)

@@ -115,6 +115,7 @@ The rules refer to a few things by id. Change their names, numbers and text free
 - **Media kinds** `public`, `paper`, `tabloid`, `business`, `network`, `online`, `regional`, `platform`, `foreign`, `influencer`.
 - **The seven issues** (`economy`, `welfare`, `nation`, `society`, `order`, `foreign`, `system`).
 - **`COUNTRY`** in content.json (`name`, `national`, `nationals`).
+- `MINOR_PARTIES` in content.json (merged by id, like `PARTIES`) and `CONFIG.threshold` (the share of the vote needed for seats; 0 turns it off).
 - **Ministry** `pm` (the Prime Minister) in coalition.json; the outcome ids in its `OUTCOMES`.
 
 ## What a mod can't change (yet)

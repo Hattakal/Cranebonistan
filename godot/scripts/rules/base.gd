@@ -9,7 +9,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 38
+const SAVE_VERSION := 39
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -22,6 +22,7 @@ var FOREIGN: Array
 var CAPITAL: Dictionary
 var VIEW_GROUPS: Array
 var PARTIES: Array
+var MINOR_PARTIES: Array    # small parties with a fixed share of the vote (content.json MINOR_PARTIES)
 var LEADER_POOL: Array
 var PARTY_TEMPLATES: Array
 var PLAYER_COLORS: Array
@@ -85,7 +86,13 @@ func player_party(s: Dictionary) -> Dictionary:
 func party_of(s: Dictionary, id) -> Variant:
 	for p in s.parties:
 		if p.id == id: return p
+	for p in MINOR_PARTIES:
+		if p.id == id: return p
 	return null
+
+## The share of the vote below which a party wins no seats (CONFIG.threshold).
+func threshold() -> float:
+	return float(C.get("threshold", 0.0))
 
 func rivals(s: Dictionary) -> Array:
 	return s.parties.filter(func(p): return not p.isPlayer)

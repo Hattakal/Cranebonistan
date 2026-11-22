@@ -6,6 +6,7 @@
   "monthsPerYear": 12,
   "electionYears": 4,
   "seats": 300,
+  "threshold": 0.05,
   "incomeBase": 1.5,
   "incomePerShare": 25,
   "businessBase": 4,
@@ -789,6 +790,81 @@
     "lean": {
      "system": "<-25"
     }
+   }
+  }
+ ],
+ "MINOR_PARTIES_NOTE": "Small parties of true believers. Their share of the vote is fixed (share: 0.008 = 0.8%) and taken from every group of voters alike; nothing in the game moves it, for now. They never campaign or bargain. Below CONFIG.threshold of the national vote (5%) a party wins no seats at all.",
+ "MINOR_PARTIES": [
+  {
+   "id": "wsp",
+   "name": "Workers' Socialist Party",
+   "short": "WSP",
+   "color": "#9e1b32",
+   "leader": "Vera Lunn",
+   "share": 0.008,
+   "blurb": "Openly socialist: nationalise the banks, the ports and the land. Has never won a seat and does not expect to.",
+   "manifesto": {
+    "nation": 10,
+    "economy": -95,
+    "society": -40,
+    "foreign": 40,
+    "welfare": -95,
+    "system": -85,
+    "order": 30
+   }
+  },
+  {
+   "id": "iron",
+   "name": "The Iron Crane",
+   "short": "IRON",
+   "color": "#4b4b4b",
+   "leader": "Garin Holt",
+   "share": 0.007,
+   "blurb": "Ultra-nationalist: one people, one language, closed borders. Its rallies are small, loud and well photographed.",
+   "manifesto": {
+    "nation": -95,
+    "economy": -10,
+    "society": 80,
+    "foreign": -90,
+    "welfare": 0,
+    "system": -70,
+    "order": -90
+   }
+  },
+  {
+   "id": "lib",
+   "name": "Liberty Party",
+   "short": "LIB",
+   "color": "#d9a400",
+   "leader": "Felix Amber",
+   "share": 0.005,
+   "blurb": "Libertarian: abolish most of the state, starting with income tax. Holds its congress in a hotel bar.",
+   "manifesto": {
+    "nation": 20,
+    "economy": 95,
+    "society": -30,
+    "foreign": 30,
+    "welfare": 95,
+    "system": -60,
+    "order": 85
+   }
+  },
+  {
+   "id": "wifi",
+   "name": "Free Wi-Fi Party",
+   "short": "WIFI",
+   "color": "#7a52a8",
+   "leader": "Tobi Rask",
+   "share": 0.006,
+   "blurb": "Free wireless internet in every square, bus and village in {country}. On everything else, it holds an online vote.",
+   "manifesto": {
+    "nation": 30,
+    "economy": 0,
+    "society": -50,
+    "foreign": 40,
+    "welfare": -20,
+    "system": -50,
+    "order": 60
    }
   }
  ],
