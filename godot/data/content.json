@@ -797,8 +797,8 @@
  "MINOR_PARTIES": [
   {
    "id": "wsp",
-   "name": "Workers' Socialist Party",
-   "short": "WSP",
+   "name": "Worker's Empowerment Party",
+   "short": "WEP",
    "color": "#9e1b32",
    "leader": "Vera Lunn",
    "share": 0.008,
@@ -833,8 +833,8 @@
   },
   {
    "id": "lib",
-   "name": "Liberty Party",
-   "short": "LIB",
+   "name": "Liberal Democrats",
+   "short": "LD",
    "color": "#d9a400",
    "leader": "Felix Amber",
    "share": 0.005,
@@ -851,12 +851,12 @@
   },
   {
    "id": "wifi",
-   "name": "Free Wi-Fi Party",
-   "short": "WIFI",
+   "name": "Rents Are High Party",
+   "short": "RENT",
    "color": "#7a52a8",
    "leader": "Tobi Rask",
    "share": 0.006,
-   "blurb": "Free wireless internet in every square, bus and village in {country}. On everything else, it holds an online vote.",
+   "blurb": "One issue: the rent is too high. Asked about anything else, its leader explains that the rent is too high.",
    "manifesto": {
     "nation": 30,
     "economy": 0,
@@ -868,6 +868,7 @@
    }
   }
  ],
+
  "PARTIES": [
   {
    "id": "player",
