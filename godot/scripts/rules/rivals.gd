@@ -173,6 +173,7 @@ func rivals_monthly(s: Dictionary, now_support: Dictionary) -> void:
 		var trend: float = now_support[p.id] - s.lastSupport[p.id] if s.lastSupport else 0.0
 		var d: float = (60 - p.stability) * 0.08 + rand_normal(s) * 3 + clampf2(trend * 120, -4, 4)
 		if p.ruling: d -= 0.8 + maxf(0, 35 - s.trust) * 0.05
+		elif p.get("partner", false): d -= 0.4 + maxf(0, 35 - s.trust) * 0.025
 		p.stability = clampf2(p.stability + d, 0, 100)
 	if rand(s) < C.rivalEventChance: rival_happening(s)
 	if rand(s) < NICHE_CHANCE: rivals_fill_niche(s)

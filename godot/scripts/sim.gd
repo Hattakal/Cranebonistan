@@ -111,6 +111,7 @@ func new_game(opts := {}) -> Dictionary:
 			"portraitSeed": pp.seed if me else null,
 			"isPlayer": me,
 			"ruling": p.get("ruling", false),
+			"partner": p.get("partner", false),   # a junior partner in the government
 			"manifesto": full_vector(player_point if me else p.manifesto),
 			"perceived": full_vector(player_point if me else p.manifesto),
 		})

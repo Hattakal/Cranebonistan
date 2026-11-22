@@ -930,19 +930,22 @@ func _country() -> void:
 	two.add_theme_constant_override("separation", 12)
 	_add(two)
 	var gov = null
+	var partners = []
 	for p in S.parties:
 		if p.ruling: gov = p
+		elif p.get("partner", false): partners.append(p.short)
 	var gc = _card(two)
 	gc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("The government", gc)
 	if gov:
 		gc.add_child(Look.dlabel("%s · %s" % [gov.name, gov.leader], "display", 22, Look.lit(Color(gov.color)), true))
+		if partners.size(): gc.add_child(Look.dlabel("In coalition with the %s, the junior partner" % " and the ".join(partners), "body", 14, Look.DIM))
 		var troubles = []
 		if w.jobs < 42: troubles.append("jobs")
 		if w.prices > 60: troubles.append("prices")
 		if w.unrest > 60: troubles.append("the public mood")
 		_facts([["Hold on power", stability_word(gov.stability)], ["Blamed for", ", ".join(troubles).capitalize() if troubles.size() else "Nothing in particular"], ["Border crisis", "Rallies people behind it" if w.border > 65 else "No effect"]], gc)
-		_p("A government in trouble loses voters to whoever looks ready to replace it, and its own party gets restless.", gc)
+		_p("A government in trouble loses voters to whoever looks ready to replace it, and its parties get restless (a junior partner half as much).", gc)
 	var tc = _card(two)
 	tc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Trust in politics", tc)
@@ -1009,7 +1012,7 @@ func _country() -> void:
 		nm.add_theme_constant_override("separation", 0)
 		top.add_child(nm)
 		nm.add_child(Look.dlabel(p.name, "display", 19, Look.lit(Color(p.color))))
-		nm.add_child(Look.dlabel("%s · %s%s" % [G.view_label(p.perceived), p.leader, " · governing" if p.ruling else ""], "body", 13, Look.DIM))
+		nm.add_child(Look.dlabel("%s · %s%s" % [G.view_label(p.perceived), p.leader, " · governing" if p.ruling else (" · junior partner in government" if p.get("partner", false) else "")], "body", 13, Look.DIM))
 		if poll: top.add_child(Look.dlabel("%s%%" % Game.fmt1(poll.national[p.id] * 100), "display", 22, Look.TXT))
 		var est: float = p.establishment
 		var meta = "%s leader · %s · %sM core voters" % [charisma_word(p.charisma), "The establishment" if est >= 0.8 else ("Mainstream" if est >= 0.55 else ("Semi-outsider" if est >= 0.3 else "Outsider")), "%.2f" % (nation.core[p.id] / 1e6)]

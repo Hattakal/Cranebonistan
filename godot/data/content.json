@@ -891,7 +891,7 @@
    "charisma": 52,
    "stability": 55,
    "establishment": 1,
-   "blurb": "The ruling party. Nationalist, traditional, strongest in Erland.",
+   "blurb": "Leads the government, with the CLF as its junior partner. Nationalist, traditional, strongest in Erland.",
    "owns": {
     "nation:L": 0.6,
     "society:R": 0.4
@@ -919,7 +919,8 @@
    "charisma": 46,
    "stability": 60,
    "establishment": 0.75,
-   "blurb": "The old left. Unions, factories, public services.",
+   "partner": true,
+   "blurb": "The old left. Unions, factories, public services. The junior partner in the NUP's government.",
    "owns": {
     "economy:L": 0.7,
     "welfare:L": 0.45
@@ -947,7 +948,7 @@
    "charisma": 55,
    "stability": 62,
    "establishment": 0.6,
-   "blurb": "Liberal and pro-business. Popular with Yamlin's traders and the urban rich.",
+   "blurb": "Socially liberal and pro-business. Popular with Yamlin's traders and the urban rich.",
    "owns": {
     "economy:R": 0.6,
     "society:L": 0.4,

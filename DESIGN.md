@@ -47,14 +47,13 @@ Written by the designer; the game's texts should agree with it.
 | 1981 | Alinnians get the vote. |
 | 1980s | Neoliberalism rises. The WEP loses its reach, and **Open Cranbovia (OC)** takes its place as the more left-wing party, focused on social justice rather than labour rights. |
 | 1989 | Alinnian political parties are allowed again (the Alinni People's Voice can exist). |
-| Recent years | The Norbanistan refugees make OC's place more contentious. |
-| 2026 | The last election: an NUP–CLF coalition governs as the game begins (2027). |
+| Recent years | OC's place becomes more contentious as refugees from Norbanistan flock to the country. |
+| 2026 | The last election. The NUP leads the government and its leader is Prime Minister; the CLF is its junior partner. So it stands as the game begins (2027). |
 
-*Open questions (November 2026), to settle before game texts change:*
-- **Who governs at the start.** The lore has an NUP–CLF coalition; the game has the NUP governing alone (`ruling` on the NUP only), with the CLF as the main opposition, and the government's troubles cost only the NUP.
-- **Open Cranbovia.** The lore makes it the left-wing social-justice party; the game has it liberal and pro-business (Market and Austerity in its manifesto, "popular with Yamlin's traders and the urban rich").
-- **The Norbanistan sentence** ("Their place became more contentious as the Norbanistan refugees…") is unfinished.
-- **Alinni's history** (annexed, no vote until 1981, parties banned until 1989) is close to the history of Kurdish parties in Turkey; the designer asked to keep away from Turkish parallels.
+*Decided with it (November 2026):*
+- **The government at the start is a coalition: the NUP leads, the CLF is the junior partner — built.** The CLF is marked `partner` in content.json. Hard times wear a junior partner down half as much as the party leading the government, a border crisis rallies it half as much, and it gets restless half as much. The Country file shows "In coalition with the CLF, the junior partner"; the Parties file marks it. *History:* the NUP governed alone and the CLF was simply the main opposition.
+- **Open Cranbovia is socially left but free-market:** the left of the 1980s onwards, on social justice rather than labour rights. This is what its manifesto already was; its blurb now says "socially liberal and pro-business".
+- **Alinni's history stays as written.** Claude pointed out that a minority region denied the vote and its parties banned is close to Turkey's Kurdish parties; the designer's answer: that is the case with most minorities in countries like these, so it is not a Turkish parallel in particular.
 
 ### Neighbours
 

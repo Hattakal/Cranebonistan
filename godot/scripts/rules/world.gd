@@ -221,11 +221,13 @@ func world_monthly(s: Dictionary) -> void:
 	w.unrest += (32 + anger - w.unrest) * 0.12 + rand_normal(s) * 1.5
 	for k in w: w[k] = clampf2(w[k], 0, 100)
 	if w.jobs < 42 or w.prices > 60: change_trust(s, -0.8)
-	var ruling = null
+	# hard times wear the government down, a border crisis rallies people behind it;
+	# a junior partner in the government feels half of either
 	for p in s.parties:
-		if p.ruling: ruling = p; break
-	if ruling and (w.jobs < 42 or w.prices > 60 or w.unrest > 60): ruling.stability = clampf2(ruling.stability - 1.5, 0, 100)
-	if ruling and w.border > 65: ruling.stability = clampf2(ruling.stability + 1, 0, 100)
+		var k: float = 1.0 if p.ruling else (0.5 if p.get("partner", false) else 0.0)
+		if k == 0.0: continue
+		if w.jobs < 42 or w.prices > 60 or w.unrest > 60: p.stability = clampf2(p.stability - 1.5 * k, 0, 100)
+		if w.border > 65: p.stability = clampf2(p.stability + 1 * k, 0, 100)
 	update_climate(s)
 	s.worldPrev = prev
 	if not s.has("worldHistory"): s.worldHistory = []
