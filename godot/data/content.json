@@ -837,7 +837,7 @@
    "short": "LD",
    "color": "#d9a400",
    "leader": "Felix Amber",
-   "share": 0.005,
+   "share": 0.001,
    "blurb": "Libertarian: abolish most of the state, starting with income tax. Holds its congress in a hotel bar.",
    "manifesto": {
     "nation": 20,
@@ -855,7 +855,7 @@
    "short": "RENT",
    "color": "#7a52a8",
    "leader": "Tobi Rask",
-   "share": 0.006,
+   "share": 0.002,
    "blurb": "One issue: the rent is too high. Asked about anything else, its leader explains that the rent is too high.",
    "manifesto": {
     "nation": 30,
