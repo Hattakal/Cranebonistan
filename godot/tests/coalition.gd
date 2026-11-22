@@ -11,6 +11,7 @@ func _init() -> void:
 	_show(s, "Majority alone", {"player": 20, "nup": 160, "clf": 70, "oc": 30, "apv": 20})
 	_show(s, "Usual hung parliament", {"player": 45, "nup": 110, "clf": 90, "oc": 35, "apv": 20})
 	_show(s, "Player largest", {"player": 95, "nup": 80, "clf": 70, "oc": 35, "apv": 20})
+	_show(s, "Even split: talks break down, then a compromise", {"player": 62, "nup": 67, "clf": 57, "oc": 58, "apv": 56})
 	_show(s, "Player out of parliament", {"player": 0, "nup": 120, "clf": 110, "oc": 50, "apv": 20})
 	# two more parties, to check nothing assumes four rivals
 	for extra in [["grn", "Greens", -30], ["far", "Hearth Front", 80]]:
@@ -35,5 +36,6 @@ func _show(s: Dictionary, title: String, seats: Dictionary) -> void:
 			"shutout": print("  SHUTOUT %s" % st.party)
 			"government": print("  GOVERNMENT %s, PM %s: %s" % ["+".join(st.members), st.pm, ", ".join(st.cabinet.map(func(c): return "%s=%s" % [c.ministry, c.party]))])
 			"majority": print("  majority: %s" % st.party)
+			"compromise": print("  COMPROMISE %s: %s" % ["+".join(st.members), st.why])
 			"deadlock": print("  DEADLOCK")
 	print("  outcome for the player: %s" % co.outcome)

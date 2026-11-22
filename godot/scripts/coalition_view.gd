@@ -215,6 +215,8 @@ func _play() -> void:
 				continue
 			"shutout":
 				if not await _show_shutout(st): return
+			"compromise":
+				if not await _show_compromise(st): return
 			"government", "deadlock":
 				break
 		i += 1
@@ -323,7 +325,7 @@ func _show_talks(f: String, steps: Array, fail) -> bool:
 				if not await _pause(1.5): return false
 				await _leave_up([c, s1])
 			"skip":
-				_caption.text = "%s is not needed: no majority without enemies has room for it with these partners." % _name(st.p)
+				_caption.text = ("You are not needed: no majority without enemies has room for you with these partners." if _party(st.p).isPlayer else "%s is not needed: no majority without enemies has room for it with these partners." % _name(st.p))
 				if not await _pause(0.8): return false
 				await _leave_up([c])
 			"join":
@@ -339,7 +341,7 @@ func _show_talks(f: String, steps: Array, fail) -> bool:
 				stack_y += 92
 				if not await _pause(0.6): return false
 	if fail:
-		_caption.text = "%s gives up. %s" % [_name(f), fail.why]
+		_caption.text = ("You give up. %s" if _party(f).isPlayer else _name(f) + " gives up. %s") % fail.why
 		if not await _pause(2.0): return false
 		await _leave_up(_stage.get_children())
 	return true
@@ -360,6 +362,27 @@ func _show_shutout(st: Dictionary) -> bool:
 	_caption.text = st.why
 	if not await _pause(2.6): return false
 	await _leave_up(_stage.get_children())
+	return true
+
+## Every try failed on the price, not on enemies: the parties of one majority settle.
+func _show_compromise(st: Dictionary) -> bool:
+	_clear()
+	_sub.text = "Back to the table."
+	var members: Array = st.members
+	var gap = 24.0
+	var big: bool = members.size() * (BIG_W + gap) < _w() - 120
+	var cw: float = BIG_W if big else CARD_W
+	var x0: float = (_w() - members.size() * (cw + gap) + gap) / 2.0
+	for k in members.size():
+		var c = _card(members[k], big)
+		c.position = Vector2(x0 + k * (cw + gap), 230)
+	_set_bar(members)
+	var stamp = Look.label("Compromise", "display_bold", 26, Look.GOOD)
+	stamp.rotation = -0.06
+	stamp.position = Vector2(_w() / 2.0 - 80, 190)
+	_stage.add_child(stamp)
+	_caption.text = st.why
+	if not await _pause(3.0): return false
 	return true
 
 # ---------- The result ----------

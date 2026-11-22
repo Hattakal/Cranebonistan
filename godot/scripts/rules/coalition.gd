@@ -111,12 +111,14 @@ func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
 	var excluded = []
 	var relaxed = false
 	var rounds = 0
+	var alive = []
+	var in_play: Array = ids
 	while gov == null and rounds < 2:
 		rounds += 1
-		var in_play: Array = ids.filter(func(id): return not excluded.has(id))
+		in_play = ids.filter(func(id): return not excluded.has(id))
 		var combos: Array = minimal_majorities(seats, in_play, need)
 		log.append({"t": "combos", "list": combos, "round": rounds})
-		var alive = []
+		alive = []
 		for i in combos.size():
 			var pair: Array = _enemy_pair(s, combos[i], relaxed)
 			if pair.size(): log.append({"t": "cross", "i": i, "pair": pair, "why": enemy_reason(s, pair[0], pair[1])})
@@ -137,11 +139,40 @@ func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
 			relaxed = bool(_cset("SHUTOUT_RELAXES", true))
 			log.append({"t": "shutout", "party": worst, "why": coalition_text("shutout", {"p": party_of(s, worst).get("name", _short(s, worst))})})
 		elif gov == null: break
+	# talks broke down only because partners asked too much, though a majority without
+	# enemies is there: they settle, each for what its seats are worth
+	if gov == null and bool(_cset("COMPROMISE", true)) and alive.size():
+		gov = _compromise(s, in_play, seats, alive, relaxed, log)
 	if gov == null: log.append({"t": "deadlock", "why": coalition_text("deadlock")})
 	else: log.append({"t": "government", "members": gov.members, "cabinet": gov.cabinet, "pm": _pm_of(gov.cabinet)})
 	var out = {"log": log, "government": gov, "excluded": excluded}
 	out.outcome = coalition_outcome(s, out, seats, ids)
 	return out
+
+## The fallback when every party forming a government failed but a majority without
+## enemies exists: the largest party that is part of one takes the majority it likes
+## best, and every member gets its fair share by seats, nothing on top.
+func _compromise(s: Dictionary, in_play: Array, seats: Dictionary, alive: Array, relaxed: bool, log: Array):
+	for f in in_play:
+		var mine: Array = alive.filter(func(c): return c.has(f))
+		if mine.is_empty(): continue
+		var ranked: Array = ssort(mine, func(a, b):
+			var d: float = _comfort(s, f, b, seats, relaxed) - _comfort(s, f, a, seats, relaxed)
+			if absf(d) > 0.001: return d
+			return _seats_of(seats, a) - _seats_of(seats, b))
+		var members: Array = [f]
+		for p in in_play:
+			if p != f and ranked[0].has(p): members.append(p)
+		var premium = {}
+		for p in members:
+			if p != f: premium[p] = 0.0
+		var ent: Dictionary = _entitlements(seats, f, premium)
+		var cab: Array = _share_cabinet(s, ent, _pm_holder(seats, f, ent))
+		var names: Array = members.map(func(m): return "you" if party_of(s, m).isPlayer else _short(s, m))
+		log.append({"t": "compromise", "party": f, "members": members,
+			"why": coalition_text("compromise", {"parties": ", ".join(names.slice(0, -1)) + " and " + String(names[-1])})})
+		return {"members": members, "cabinet": cab, "formateur": f, "shares": ent, "compromise": true}
+	return null
 
 func _pm_of(cabinet: Array) -> String:
 	for c in cabinet:
@@ -153,7 +184,7 @@ func _try_formateur(s: Dictionary, f: String, in_play: Array, seats: Dictionary,
 	log.append({"t": "formateur", "party": f})
 	var mine: Array = alive.filter(func(c): return c.has(f))
 	if mine.is_empty():
-		log.append({"t": "fail", "party": f, "why": coalition_text("no_combination", {"f": _short(s, f)})})
+		log.append({"t": "fail", "party": f, "why": coalition_text("no_combination", {"f": _short(s, f)}, party_of(s, f).isPlayer)})
 		return null
 	var give_max: float = float(_cset("FORMATEUR_GIVES", 0.4))
 	var members = [f]
@@ -181,7 +212,7 @@ func _try_formateur(s: Dictionary, f: String, in_play: Array, seats: Dictionary,
 		var ent: Dictionary = _entitlements(seats, f, trial)
 		var f_fair: float = float(seats[f]) / float(_seats_of(seats, with_p))
 		if ent[f] < f_fair * (1.0 - give_max):
-			step.verdict = "refuse"; step.why = coalition_text("neutral_refuses", {"f": _short(s, f)}, party_of(s, p).isPlayer)
+			step.verdict = "refuse"; step.why = coalition_text("neutral_refuses", {"f": "you" if party_of(s, f).isPlayer else _short(s, f)}, party_of(s, p).isPlayer)
 			log.append(step); continue
 		premium[p] = extra
 		members.append(p)
