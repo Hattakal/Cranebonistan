@@ -1,5 +1,5 @@
 ## map_view.gd — the designer's map, seen at night: the country lit in party colours,
-## its neighbours in the dark, cities as points of light, rivers and mountains. Shapes come from content.json (built from the Krita file).
+## its neighbours each in a muted colour of their own on a blue sea, cities as points of light, rivers and mountains. Shapes come from content.json (built from the Krita file).
 ## Scroll to zoom, drag to move, click a region or a neighbour.
 class_name MapView
 extends Control
@@ -49,7 +49,7 @@ func setup(game) -> void:
 		areas.append({"id": r.id, "kind": "region", "name": r.name, "polys": _parse(m.regions[r.id].d), "label": m.regions[r.id].label, "small": false})
 	for f in game.FOREIGN:
 		areas.append({"id": f.id, "kind": "foreign", "name": f.name, "polys": _parse(m.foreign[f.id].d), "label": m.foreign[f.id].label, "small": f.get("small", false),
-			"color": Look.mix(Look.LAND_FOREIGN, Color(f.get("mapColor", "#cdbe9c")), 0.07)})
+			"color": Look.mix(Look.LAND_FOREIGN, Color(f.get("mapColor", "#cdbe9c")), 0.3)})
 	districts.clear()
 	for d in game.DISTRICTS:
 		districts.append({"id": d.id, "region": d.region, "name": d.name, "polys": _parse(d.d), "label": d.label, "seats": int(d.seats), "area": float(d.get("area", 1.0))})
@@ -198,7 +198,7 @@ func _draw() -> void:
 	var s = _scale()
 	var o = _origin()
 	var map_rect = Rect2(o, Vector2(W, H) * s)
-	# the sea is the dark itself: no frame, only a faint grid, as on a situation-room wall
+	# the sea is a deep night blue: no frame, only a faint grid, as on a situation-room wall
 	draw_rect(Rect2(Vector2.ZERO, size), Look.SEA)
 	var grid = Color(Look.N700, 0.55)
 	var step = 155.0
@@ -407,7 +407,11 @@ func _labels(s: float) -> void:
 	# seas and lakes, as drawn on the Krita map
 	var water_font = Look.font("body_italic")
 	for w in waters:
-		_text(to_screen(Vector2(w.x, w.y)), w.name, water_font, int(maxf(10, 30 * s)), Color("4f6470"))
+		# one word to a line, so a small lake's name stays on the water
+		var words: PackedStringArray = String(w.name).split(" ", false)
+		var wfs = int(maxf(10, 30 * s))
+		for i in words.size():
+			_text(to_screen(Vector2(w.x, w.y)) + Vector2(0, (i - (words.size() - 1) / 2.0) * wfs * 1.05), words[i], water_font, wfs, Look.WATER_TXT)
 	# neighbours
 	for a in areas:
 		if a.kind != "foreign": continue

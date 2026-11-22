@@ -597,7 +597,7 @@
     198,
     1
    ],
-   "mapColor": "#d6c58e"
+   "mapColor": "#c9a35a"
   },
   {
    "id": "dillihan",
@@ -625,7 +625,7 @@
     1024,
     0.8
    ],
-   "mapColor": "#d1a99a"
+   "mapColor": "#b0607a"
   },
   {
    "id": "bourdeaux",
@@ -653,7 +653,7 @@
     1554,
     1
    ],
-   "mapColor": "#adb6cc"
+   "mapColor": "#8a7cc0"
   },
   {
    "id": "james",
@@ -680,7 +680,7 @@
     1822,
     1366
    ],
-   "mapColor": "#c3d2ae"
+   "mapColor": "#8fb070"
   },
  {
   "id": "salmark",
@@ -702,7 +702,7 @@
    "Rich and heavily industrialised",
    "Neutral in every dispute"
   ],
-  "mapColor": "#c9c3b4"
+  "mapColor": "#b98a5e"
  }
  ],
  "CAPITAL": {

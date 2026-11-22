@@ -11,11 +11,11 @@ extends RefCounted
 # Two palettes, the same roles in each; use() picks one before the screens are built
 # (the player chooses in Options; "study" is the default).
 #  "night": the campaign office at night: cold blue-black, steel, white paper (the first pass).
-#  "study": the same office in an old building: warm dark wood and leather, a bottle-green
+#  "study": the same office in an old building: warm dark wood and leather, a blue
 #           sea on the map, warm white paper. The Knives Out to night's Glass Onion.
 const PALETTES := {
-	"night": {"N950": "06080c", "N900": "0a0d13", "N850": "0f131b", "N800": "141923", "N700": "1b2230", "N600": "273042", "N500": "3a465b", "TXT": "e8ebf1", "DIM": "9aa5b7", "FAINT": "66738a", "LAMP": "f2b866", "LAMP_DIM": "a9844d", "RED": "d2392f", "RED_HI": "ff6a5c", "OXBLOOD": "8f231c", "GOOD": "1f7d55", "GOOD_HI": "5cc79a", "PAPER": "f1f2f3", "PAPER_2": "e4e6e9", "CARD": "fbfbfc", "INK": "14171d", "MUTED": "5b626e", "LINE": "c6cad0", "SEA": "0a0e15", "LAND": "1a212d", "LAND_FOREIGN": "121720", "BORDER": "06080c"},
-	"study": {"N950": "0c0705", "N900": "130b07", "N850": "1a0f0a", "N800": "23150d", "N700": "301d12", "N600": "462b1b", "N500": "6a4630", "TXT": "f3e8d8", "DIM": "c0aa8e", "FAINT": "8a735d", "LAMP": "f2b552", "LAMP_DIM": "ad7d3f", "RED": "c3362a", "RED_HI": "f2735f", "OXBLOOD": "7a1f17", "GOOD": "2b7a4b", "GOOD_HI": "86cc9c", "PAPER": "f4f0e8", "PAPER_2": "e8e1d5", "CARD": "fbf8f2", "INK": "1e1712", "MUTED": "6b5e52", "LINE": "d4cbbc", "SEA": "0b1a15", "LAND": "2b2019", "LAND_FOREIGN": "1a120d", "BORDER": "0c0705"},
+	"night": {"N950": "06080c", "N900": "0a0d13", "N850": "0f131b", "N800": "141923", "N700": "1b2230", "N600": "273042", "N500": "3a465b", "TXT": "e8ebf1", "DIM": "9aa5b7", "FAINT": "66738a", "LAMP": "f2b866", "LAMP_DIM": "a9844d", "RED": "d2392f", "RED_HI": "ff6a5c", "OXBLOOD": "8f231c", "GOOD": "1f7d55", "GOOD_HI": "5cc79a", "PAPER": "f1f2f3", "PAPER_2": "e4e6e9", "CARD": "fbfbfc", "INK": "14171d", "MUTED": "5b626e", "LINE": "c6cad0", "SEA": "10273d", "WATER_TXT": "7d9cbb", "LAND": "1a212d", "LAND_FOREIGN": "121720", "BORDER": "06080c"},
+	"study": {"N950": "0c0705", "N900": "130b07", "N850": "1a0f0a", "N800": "23150d", "N700": "301d12", "N600": "462b1b", "N500": "6a4630", "TXT": "f3e8d8", "DIM": "c0aa8e", "FAINT": "8a735d", "LAMP": "f2b552", "LAMP_DIM": "ad7d3f", "RED": "c3362a", "RED_HI": "f2735f", "OXBLOOD": "7a1f17", "GOOD": "2b7a4b", "GOOD_HI": "86cc9c", "PAPER": "f4f0e8", "PAPER_2": "e8e1d5", "CARD": "fbf8f2", "INK": "1e1712", "MUTED": "6b5e52", "LINE": "d4cbbc", "SEA": "12283a", "WATER_TXT": "86a3bd", "LAND": "2b2019", "LAND_FOREIGN": "1a120d", "BORDER": "0c0705"},
 }
 static var palette := "study"
 # the night (backgrounds), from the deepest shadow up to a raised, hovered surface
@@ -47,6 +47,7 @@ static var MUTED: Color
 static var LINE: Color
 # the map at night
 static var SEA: Color
+static var WATER_TXT: Color   # names of seas and lakes on the map
 static var LAND: Color
 static var LAND_FOREIGN: Color
 static var BORDER: Color
@@ -92,6 +93,7 @@ static func use(name: String) -> void:
 	MUTED = Color(p.MUTED)
 	LINE = Color(p.LINE)
 	SEA = Color(p.SEA)
+	WATER_TXT = Color(p.WATER_TXT)
 	LAND = Color(p.LAND)
 	LAND_FOREIGN = Color(p.LAND_FOREIGN)
 	BORDER = Color(p.BORDER)

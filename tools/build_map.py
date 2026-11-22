@@ -313,6 +313,22 @@ def main(path):
     is_water = lambda n: bool(water_words & set(n.lower().split()))
     country_names = {w.lower() for ls in LABELS.values() if ls for w in ls}
     out["waters"] = [{"name": n, "x": round(tx / SCALE), "y": round(ty / SCALE)} for n, tx, ty in texts if is_water(n)]
+    # a lake's name goes in the middle of the lake (a small lake can't hold it where it was typed);
+    # seas touch the edge of the map and keep their names where they were drawn
+    wl, wn = ndimage.label(full == 0)
+    edge = set(np.unique(np.concatenate([wl[0], wl[-1], wl[:, 0], wl[:, -1]])))
+    for wt in out["waters"]:
+        if "lake" not in wt["name"].lower().split(): continue
+        gx, gy = wt["x"] * SCALE // WORK, wt["y"] * SCALE // WORK
+        best, bd = 0, None
+        for L in range(1, wn + 1):
+            if L in edge: continue
+            ys, xs = np.nonzero(wl == L)
+            d = ((xs - gx) ** 2 + (ys - gy) ** 2).min()
+            if bd is None or d < bd: best, bd = L, d
+        if best:
+            cy, cx = ndimage.center_of_mass(wl == best)
+            wt["x"], wt["y"] = round(cx * WORK / SCALE), round(cy * WORK / SCALE)
     texts = [t for t in texts if t[0].lower() not in country_names and not is_water(t[0])]
     # cities: dots matched to the nearest typed name
     cm = cities_l[..., 3] > 100
