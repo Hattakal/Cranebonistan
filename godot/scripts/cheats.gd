@@ -191,18 +191,17 @@ func _goodwill(points: float) -> void:
 				if float(G.summarize(S, pops, ctx).support.player) < target: alo = am
 				else: ahi = am
 			for k in pops.size(): pops[k].aware.player = aw0[k] + ahi * (1 - aw0[k])
-	_exact_poll()
+	_cheat_poll()
 
 func _aware(d: float) -> void:
 	for pop in main.S.pops: pop.aware.player = clampf(pop.aware.player + d * (1 - pop.aware.player), 0, 1)
-	_exact_poll()
+	_cheat_poll()
 
-## A poll without sampling error, so a cheat shows its real effect (a normal poll's
-## error is about as big as one press).
-func _exact_poll() -> void:
+## A fresh poll after a cheat, with the usual sampling error: the change is real
+## behind the scenes even when one poll doesn't show it clearly.
+func _cheat_poll() -> void:
 	main.S.lastSupport = main.G.summarize(main.S, main.S.pops).support
 	main.G.take_poll(main.S, "Cheat poll", true)
-	main.S.polls[-1].national = main.S.lastSupport.duplicate()
 
 func _charisma(d: float) -> void:
 	var p: Dictionary = main.G.player_party(main.S)
