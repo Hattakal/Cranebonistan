@@ -172,6 +172,11 @@ func visit_power(s: Dictionary, id: String) -> Dictionary:
 	if bonus > 0:
 		k *= 1.0 + bonus
 		why.append("you spoke up for %s, and they noticed" % topic)
+	# you spoke up about a story from this very province
+	var ls = s.get("localSpoke", {}).get(id)
+	if ls and s.week - int(ls.week) <= LOCAL_STORY_MONTHS * WEEKS_PER_MONTH:
+		k *= 1.0 + LOCAL_STORY_BONUS
+		why.append("you spoke up about %s, and they remember" % ls.title)
 	return {"k": k, "money": m, "why": why}
 
 func act_visit(s: Dictionary, id: String) -> Dictionary:
@@ -291,6 +296,57 @@ func seat_allocation(res: Dictionary) -> Dictionary:
 	return out
 
 ## Seats each party would win if the election were today.
+# ---------- Local stories: where they happen ----------
+## Picks the province a story happens in, from its "where" (data/issues.json): one named
+## province, or any province of the listed regions ("city": true for one with a town).
+func place_story(s: Dictionary, it: Dictionary) -> Dictionary:
+	var w: Dictionary = it.get("where", {})
+	var pool: Array = []
+	if w.has("province"): pool = DISTRICTS.filter(func(d): return d.id == String(w.province))
+	elif w.has("regions"):
+		var regs: Array = w.regions
+		var need_city: bool = bool(w.get("city", false))
+		pool = DISTRICTS.filter(func(d): return regs.has(d.region) and (not need_city or d.cities.size() > 0))
+	if pool.is_empty(): pool = DISTRICTS.filter(func(d): return d.region == String(it.get("region", "")))
+	if pool.is_empty(): return {}
+	var d: Dictionary = pick(s, pool)
+	var city: String = String(d.cities[int(floor(rand(s) * d.cities.size()))]) if d.cities.size() else String(d.name)
+	return {"district": d.id, "city": city, "province": String(d.name), "region": String(d.region)}
+
+## A local story as it happened this time: title, text and lines with its place filled in.
+func story(s: Dictionary, id: String) -> Dictionary:
+	var it: Dictionary = by_id(ISSUES, id).duplicate(true)
+	if it.is_empty(): return it
+	var pl: Dictionary = s.get("storyPlace", {}).get(id, {})
+	var reg = by_id(REGIONS, String(pl.get("region", it.get("region", ""))))
+	var names = {"city": pl.get("city", reg.name if reg else ""), "province": pl.get("province", reg.name if reg else ""), "region": reg.name if reg else ""}
+	it.title = String(it.title).format(names)
+	it.text = String(it.text).format(names)
+	for side in it.get("lines", {}):
+		for l in it.lines[side]: l.text = String(l.text).format(names)
+	if pl.size():
+		it.region = pl.region
+		it.district = pl.district
+		it.province = pl.province
+	return it
+
+## A story turns up: where it happens is decided now and kept (its debate may outlive it).
+func story_turns_up(s: Dictionary, id: String) -> Dictionary:
+	if not s.has("storyPlace"): s.storyPlace = {}
+	s.storyPlace[id] = place_story(s, by_id(ISSUES, id))
+	s.issues.append({"id": id, "week": s.week, "district": s.storyPlace[id].get("district", "")})
+	return story(s, id)
+
+## You spoke up about a local story: its province hears you, and remembers for a trip.
+func heard_locally(s: Dictionary, id: String) -> void:
+	var it: Dictionary = story(s, id)
+	var did: String = String(it.get("district", ""))
+	if did == "": return
+	if not s.has("localSpoke"): s.localSpoke = {}
+	var t: String = String(it.title)
+	s.localSpoke[did] = {"week": s.week, "title": t.substr(0, 1).to_lower() + t.substr(1)}
+	district_boost(s, did, LOCAL_STORY_AWARE, LOCAL_STORY_GOODWILL)
+
 ## The last election (2026): the country as it stands at the start, without your party,
 ## which didn't exist yet. Stored once, when the game begins.
 func past_election(s: Dictionary) -> Dictionary:

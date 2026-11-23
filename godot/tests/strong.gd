@@ -94,7 +94,7 @@ func _init() -> void:
 				for d in ds:
 					var side = side_for(s, d.axis)
 					if d.has("you") or side == "": continue
-					var lines: Array = G.debate_lines(d, side)
+					var lines: Array = G.debate_lines(s, d, side)
 					if lines.is_empty(): continue
 					var r = G.act_speak(s, d.id, side, line_of(lines))
 					if r.ok:
@@ -105,7 +105,7 @@ func _init() -> void:
 					for opt in G.raise_options(s):
 						var side = side_for(s, opt.axis) if str(opt.get("side", "")) == "" else str(opt.side)
 						if side == "" or side != G.manifesto_side(s, opt.axis): continue
-						var lines: Array = G.raise_lines(opt, side)
+						var lines: Array = G.raise_lines(s, opt, side)
 						if lines.is_empty(): continue
 						var r = G.act_raise(s, opt, side, line_of(lines))
 						if r.ok: did = true; break

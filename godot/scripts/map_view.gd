@@ -7,6 +7,7 @@ extends Control
 signal region_clicked(id: String)
 signal foreign_clicked(id: String)
 signal district_clicked(id: String)
+signal pin_clicked(id: String)
 
 var W = 2480.0
 var H = 1754.0
@@ -20,6 +21,8 @@ var stripes = {}              # district id -> [Color, 0..1]: your colour stripe
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
 var communities = {}          # city name -> level of your party's community
+var pins: Array = []          # local stories: [{id, district, title}], drawn as pins
+var _pin_rects = {}           # story id -> Rect2 (screen)
 var party_color := Look.RED
 var _shown = {}               # colours on screen, easing towards fills
 var _flash = {}               # region id -> 1..0, after it changes hands
@@ -165,6 +168,8 @@ func _notification(what: int) -> void:
 		_clamp_offset()
 
 func _hit(screen: Vector2) -> Dictionary:
+	for id in _pin_rects:
+		if _pin_rects[id].has_point(screen): return {"id": id, "kind": "pin"}
 	for id in _plates:
 		if _plates[id].has_point(screen): return {"id": id, "kind": "foreign"}
 	if capital_district != "" and _cap_spot.has_point(screen): return {"id": capital_district, "kind": "district"}
@@ -189,7 +194,8 @@ func _update_hover(pos: Vector2) -> void:
 func _click(pos: Vector2) -> void:
 	var h = _hit(pos)
 	if h.is_empty(): return
-	if h.kind == "district": district_clicked.emit(h.id)
+	if h.kind == "pin": pin_clicked.emit(h.id)
+	elif h.kind == "district": district_clicked.emit(h.id)
 	elif h.kind == "region": region_clicked.emit(h.id)
 	else: foreign_clicked.emit(h.id)
 
@@ -313,6 +319,7 @@ func _draw() -> void:
 	_plates.clear()
 	if zoom >= 1.5: _seat_badges(s)   # seat numbers only when zoomed in; the tooltip always has them
 	_labels(s)
+	_pins(s)
 	_legend()
 	if hover != "" and tip_provider.is_valid(): _tooltip()
 
@@ -451,6 +458,31 @@ func _labels(s: float) -> void:
 		if sh != "":
 			_text(to_screen(Vector2(a.label[0], a.label[1] + 44 * k)), sh, Look.font("display"), int(maxf(12, 34 * maxf(k, 0.75) * s)), Color(Look.TXT, 0.8), halo)
 
+## Local stories: a pin on the province, with the story's title beside it.
+func _pins(s: float) -> void:
+	_pin_rects.clear()
+	var per = {}
+	var f = Look.font("body_bold")
+	var fs = int(maxf(11, 24 * s))
+	var halo = Color(Look.N950, 0.85)
+	for p in pins:
+		var d = null
+		for x in districts:
+			if x.id == p.district: d = x
+		if d == null: continue
+		var n: int = int(per.get(p.district, 0))
+		per[p.district] = n + 1
+		var c = to_screen(Vector2(d.label[0], d.label[1] - 30)) + Vector2(0, n * fs * 1.6)
+		var r = maxf(6.0, 12 * s)
+		var on: bool = hover == p.id
+		draw_circle(c, r + 3, Color(Look.N950, 0.7))
+		draw_circle(c, r, Look.LAMP if not on else Color.WHITE)
+		_text(c + Vector2(0, r * 0.45), "!", Look.font("display_bold"), int(r * 1.4), Look.N950)
+		var t: String = p.title
+		var tw = f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		_text(c + Vector2(r + 6, fs * 0.36), t, f, fs, Look.TXT if not on else Look.LAMP, halo, HORIZONTAL_ALIGNMENT_LEFT)
+		_pin_rects[p.id] = Rect2(c - Vector2(r, r), Vector2(r * 2 + 6 + tw, r * 2))
+
 ## Each district's number of seats, small, on its quietest spot.
 func _seat_badges(s: float) -> void:
 	var f = Look.font("display_bold")
@@ -484,6 +516,17 @@ func _tooltip() -> void:
 	if lines.is_empty(): return
 	var title_font = Look.font("display_bold")
 	var body = Look.font("body")
+	# long lines wrap at 300 pixels
+	var wrapped = [lines[0]]
+	for i in range(1, lines.size()):
+		var cur = ""
+		for word in String(lines[i]).split(" ", false):
+			var t = word if cur == "" else cur + " " + word
+			if cur != "" and body.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x > 300:
+				wrapped.append(cur); cur = word
+			else: cur = t
+		wrapped.append(cur)
+	lines = wrapped
 	var w = 0.0
 	for i in lines.size():
 		var f = title_font if i == 0 else body

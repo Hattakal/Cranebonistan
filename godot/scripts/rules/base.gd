@@ -9,7 +9,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 41
+const SAVE_VERSION := 42
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -427,6 +427,11 @@ func district_boost(s: Dictionary, id: String, aware: float, goodwill: float) ->
 ## place keeps helping, but less each time. Local goodwill fades slowly.
 const VISIT_AWARE := 0.12
 const VISIT_GOODWILL := 0.16
+# a local story you spoke up about: that province hears you more, and a trip there goes better
+const LOCAL_STORY_BONUS := 0.35      # the trip is this much bigger
+const LOCAL_STORY_MONTHS := 3        # for this long after you spoke
+const LOCAL_STORY_AWARE := 0.04      # the province hears you right away
+const LOCAL_STORY_GOODWILL := 0.03
 
 ## Seats each party would win if the election were today.
 ## The district's winner takes two-thirds of its seats (rounded up); the rest

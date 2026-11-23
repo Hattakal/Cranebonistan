@@ -1,11 +1,12 @@
 {
- "_note": "The map's modes (buttons on the map). MODES: id (the rules know vote, known, issues, fed, distress, past), name (the button), title (over the legend), note (under it), low/high (the two ends of the colour scale, where there is one). LEVELS: words for a level from 0 to 1, lowest first, evenly spaced. DISTRESS: how distress is worked out per province: 'hardship' (how hard each class feels hard times; 'base' is the share felt even in good times) and 'distrust' (how much being fed up with the system counts, made worse by low national trust); 'weights' mixes the two.",
+ "_note": "The map's modes (buttons on the map). MODES: id (the rules know vote, known, issues, fed, distress, local, past), name (the button), title (over the legend), note (under it), low/high (the two ends of the colour scale, where there is one). LEVELS: words for a level from 0 to 1, lowest first, evenly spaced. DISTRESS: how distress is worked out per province: 'hardship' (how hard each class feels hard times; 'base' is the share felt even in good times) and 'distrust' (how much being fed up with the system counts, made worse by low national trust); 'weights' mixes the two.",
  "MODES": [
   {"id": "vote", "name": "Vote", "title": "IF THE ELECTION WERE TODAY"},
   {"id": "known", "name": "Known", "title": "WHO KNOWS YOUR NAME", "note": "The share of adults in each province who have heard of your party.", "low": "Nobody", "high": "Everyone"},
   {"id": "issues", "name": "Issues", "title": "WHAT EACH PROVINCE CARES MOST ABOUT", "note": "The issue that matters most to the voters there, this month."},
   {"id": "fed", "name": "Fed up", "title": "FED UP WITH THE SYSTEM", "note": "How tired voters are of politicians and parties as they are. Fed-up voters listen to outsiders.", "low": "Content", "high": "Fed up"},
   {"id": "distress", "name": "Distress", "title": "DISTRESS", "note": "Hard times and distrust of the system together. It rises when jobs go, prices climb and trust falls.", "low": "Calm", "high": "Distressed"},
+  {"id": "local", "name": "Local", "title": "LOCAL STORIES", "note": "What the local papers are writing about. Click a pin to raise it; speak up, and a trip there goes better."},
   {"id": "past", "name": "2026", "title": "THE 2026 ELECTION", "note": "Who won each province last time. The NUP and the CLF came out nearly level and govern together, under the NUP's leader."}
  ],
  "LEVELS": ["Hardly", "Somewhat", "Quite", "Very"],

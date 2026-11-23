@@ -223,6 +223,7 @@ func _build() -> void:
 	_map.region_clicked.connect(func(id): _files.S = S; _files.open_region(id); _sync_menu())
 	_map.foreign_clicked.connect(func(id): _country_sheet(id))
 	_map.district_clicked.connect(func(id): _district_sheet(id))
+	_map.pin_clicked.connect(func(id): _story_clicked(id))
 	right.add_child(_map)
 	_build_map_modes()
 	_ticker = Ticker.new()
@@ -663,6 +664,7 @@ func _render_map() -> void:
 	_map.shares = {}
 	_map.hot = {}
 	_map.legend_ramp = []
+	_map.pins = []
 	_map.communities = S.communities
 	_map.party_color = Color(G.player_party(S).color)
 	for f in G.FOREIGN:
@@ -670,6 +672,10 @@ func _render_map() -> void:
 	_profiles = G.district_profiles(S)
 	var info: Dictionary = _mode_info()
 	_map.legend_title = String(info.get("title", "IF THE ELECTION WERE TODAY"))
+	if _map_mode == "local":
+		_paint_local(info)
+		_map.queue_redraw()
+		return
 	if _map_mode != "vote" and _map_mode != "past":
 		_paint_profile_mode(info)
 		_map.queue_redraw()
@@ -712,6 +718,35 @@ func _paint_result(proj: Dictionary, live: bool) -> void:
 func _seat_legend(seats: Dictionary) -> Array:
 	var ps: Array = S.parties.filter(func(p): return int(seats.get(p.id, 0)) > 0 or p.isPlayer and _map_mode == "vote")
 	return Game.ssort(ps, func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Look.lit(Color(p.color)), int(seats.get(p.id, 0))])
+
+## Local stories: their provinces lit, a pin on each; the rest of the country dim.
+func _paint_local(info: Dictionary) -> void:
+	var dim := Look.mix(Look.LAND, Look.N500, 0.25)
+	for d in G.DISTRICTS: _map.fills[d.id] = dim
+	var n = 0
+	for opt in G.raise_options(S):
+		if opt.kind != "issue" or String(opt.get("district", "")) == "": continue
+		_map.fills[opt.district] = Look.mix(Look.LAND, Look.LAMP, 0.45 if opt.fresh else 0.3)
+		_map.pins.append({"id": opt.ref, "district": opt.district, "title": opt.title})
+		n += 1
+	var heard: Dictionary = S.get("localSpoke", {})
+	for did in heard:
+		if S.week - int(heard[did].week) <= G.LOCAL_STORY_MONTHS * G.WEEKS_PER_MONTH and not _map.pins.any(func(p): return p.district == did):
+			_map.fills[did] = Look.mix(Look.LAND, Look.lit(Color(G.player_party(S).color)), 0.4)
+	_map.legend = [["In the news", Look.mix(Look.LAND, Look.LAMP, 0.6)], ["You spoke up here lately", Look.mix(Look.LAND, Look.lit(Color(G.player_party(S).color)), 0.6)]]
+	_map.legend_note = String(info.get("note", "")) if n else "A quiet month in the local papers."
+
+## A pin clicked: the story, ready to raise as a national debate.
+func _story_clicked(id: String) -> void:
+	var opt = null
+	for o in G.raise_options(S):
+		if o.kind == "issue" and o.ref == id: opt = o
+	if opt == null: return
+	if S.queue.size() > 0: _toast("Finish the decision on your desk first."); return
+	if S.result != null: return
+	if S.agenda.done: _toast("You've already tried to start a debate this month."); return
+	if S.actionsLeft <= 0: _toast("No actions left this month."); return
+	_raise_sheet(opt)
 
 ## The modes that colour each province by what it is like: known, issues, fed up, distress.
 func _paint_profile_mode(info: Dictionary) -> void:
@@ -757,6 +792,13 @@ func _mode_level(x: Dictionary) -> float:
 
 ## The current mode's line in a province's tooltip.
 func _mode_tip(id: String) -> Array:
+	if _map_mode == "local":
+		var out = []
+		for o in G.raise_options(S):
+			if o.kind == "issue" and o.get("district", "") == id: out.append("In the news: " + o.title)
+		var h = S.get("localSpoke", {}).get(id)
+		if h and S.week - int(h.week) <= G.LOCAL_STORY_MONTHS * G.WEEKS_PER_MONTH: out.append("You spoke up about %s: a trip here goes better" % h.title)
+		return out
 	var x: Dictionary = _profiles.get(id, {})
 	if x.is_empty(): return []
 	match _map_mode:
@@ -780,6 +822,9 @@ func _rivals_here(id: String) -> Array:
 	return out
 
 func _tip(id: String, kind: String) -> Array:
+	if kind == "pin":
+		var st: Dictionary = G.story(S, id)
+		return [String(st.get("title", "")), String(st.get("text", "")), "Click to raise it as a national debate"]
 	if kind == "district":
 		var d = G.district_by_id(id)
 		var w: int = G.winner_seats(int(d.seats))
@@ -1012,7 +1057,7 @@ func _speak_sheet(id: String, side: String) -> void:
 	p.step("Speaking for", (ax.left if side == "L" else ax.right))
 	if major: p.scribble("The whole country is watching. Your exact words will be quoted: they can go viral, or become a gaffe that helps the other side.  — C.")
 	else: p.small("A smaller argument. Your line mostly shapes how people hear you; it won't make the evening news.")
-	var lines: Array = G.debate_lines(d, side)
+	var lines: Array = G.debate_lines(S, d, side)
 	for j in lines.size():
 		var line: Dictionary = lines[j]
 		p.card("slip", func(box):
@@ -1070,7 +1115,7 @@ func _raise_words(p: Paper, opt: Dictionary, side: String) -> void:
 	var ax: Dictionary = Game.by_id(G.AXES, opt.axis)
 	p.step("Step 2 of 2" if opt.side == "" else "Your words", "How do you put it to the country?")
 	p.small("Arguing for %s. Whether it catches on depends on your reach and on how you say it. Bold lines catch more easily, and blow up more easily." % (ax.left if side == "L" else ax.right).to_lower())
-	var lines: Array = G.raise_lines(opt, side)
+	var lines: Array = G.raise_lines(S, opt, side)
 	for j in lines.size():
 		var line: Dictionary = lines[j]
 		p.card("slip", func(box):
@@ -1816,7 +1861,7 @@ func _shot(args: Dictionary) -> void:
 			_: G.dismiss_front(S)
 	render()
 	for i in 20: await get_tree().process_frame
-	if args.has("hover"): _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
+	if args.has("hover"): _map.hover_kind = String(args.get("hoverkind", "")); _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
 	if args.has("flagship"):
 		S.queue.push_front({"type": "event", "event": G.flagship_event(S)})
 	if args.has("violence"):

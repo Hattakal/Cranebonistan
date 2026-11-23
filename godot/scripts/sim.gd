@@ -143,7 +143,7 @@ func new_game(opts := {}) -> Dictionary:
 		open_debate(s, t.id, t.axis, t.title, t.text, "news", 28.0 + rand(s) * 20, (rand(s) - 0.5) * 40)
 	for i in 2:
 		var it: Dictionary = pick(s, ISSUES.filter(func(x): return not s.issues.any(func(y): return y.id == x.id)))
-		s.issues.append({"id": it.id, "week": s.week})
+		story_turns_up(s, it.id)
 		s.issueCooldown[it.id] = s.week
 	s.lastSupport = summarize(s, s.pops).support
 	s.pastElection = past_election(s)   # the 2026 result: the starting map without your party

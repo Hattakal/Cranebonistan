@@ -875,7 +875,7 @@ func _country_issues() -> void:
 		var tv = VBoxContainer.new()
 		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tv.add_theme_constant_override("separation", 0)
-		tv.add_child(Look.dcaps("%s · %s" % [Game.by_id(G.REGIONS, opt.region).name, "in the headlines" if opt.fresh else "fading"], 10, Look.RED_HI if opt.fresh else Look.DIM, 1))
+		tv.add_child(Look.dcaps("%s · %s" % [opt.province if String(opt.get("province", "")) != "" else Game.by_id(G.REGIONS, opt.region).name, "in the headlines" if opt.fresh else "fading"], 10, Look.RED_HI if opt.fresh else Look.DIM, 1))
 		tv.add_child(Look.dlabel(opt.title, "body_bold", 15, Look.TXT, true))
 		var tx = Look.dlabel(opt.text, "body", 12, Look.DIM, true)
 		tv.add_child(tx)

@@ -384,10 +384,10 @@ func is_major(d: Dictionary) -> bool:
 	return d.heat >= 55 or d.source == "economy" or d.get("major", false)
 
 ## What the leader can say on one side of a debate.
-func debate_lines(d: Dictionary, side: String) -> Array:
+func debate_lines(s: Dictionary, d: Dictionary, side: String) -> Array:
 	var t = LINES.TOPIC_LINES.get(d.get("topic", d.id))
 	if t: return t[side]
-	if d.id.begins_with("issue:"): return issue_by_id(d.id.trim_prefix("issue:")).lines[side]
+	if d.id.begins_with("issue:"): return story(s, d.id.trim_prefix("issue:")).lines[side]
 	var pid: String = d.id.trim_prefix("ini:")
 	if d.id.begins_with("ini:") and LINES.PROPOSAL_LINES.has(pid):
 		var ini = by_id(INITIATIVES, pid)
@@ -403,7 +403,7 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 	if d == null: return {"ok": false, "text": "That debate is over."}
 	if d.has("you"): return {"ok": false, "text": "You've already had your say on this one."}
 	var major = is_major(d)
-	var line: Dictionary = debate_lines(d, side)[line_index]
+	var line: Dictionary = debate_lines(s, d, side)[line_index]
 	spend_action(s, 0)
 	d.you = {"side": side, "week": s.week, "quote": line.text}
 	var pv = fan_preview(s, d, side)
@@ -432,6 +432,7 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 		elif ownership_of(s, rp.id, key) > 0.05: change_relation(s, rp.id, 1.5 if major else 0.75, "you backed their line on %s" % by_id(AXES, d.axis).issue.to_lower())
 	s.spoke[key] = s.week
 	figures_heard(s, d.axis, side)
+	if d.id.begins_with("issue:"): heard_locally(s, d.id.trim_prefix("issue:"))   # a local story: its province hears you
 	# people have heard it: the same cause, again and again, wins less each time (fades over months)
 	if not s.has("heard"): s.heard = {}
 	var k = (1.0 if major else 0.6) / (1.0 + 0.35 * float(s.heard.get(key, 0)))
@@ -494,9 +495,9 @@ func issues_monthly(s: Dictionary) -> void:
 	for i in pool.size():
 		r -= weights[i]
 		if r <= 0 or i == pool.size() - 1:
-			s.issues.append({"id": pool[i].id, "week": s.week})
+			var st: Dictionary = story_turns_up(s, pool[i].id)
 			s.issueCooldown[pool[i].id] = s.week
-			push_news(s, {"kind": "issue", "quiet": true, "title": "In the news: " + pool[i].title, "text": pool[i].text})
+			push_news(s, {"kind": "issue", "quiet": true, "title": "In the news: " + st.title, "text": st.text})
 			return
 
 func issue_by_id(id: String) -> Dictionary:
@@ -506,10 +507,10 @@ func issue_by_id(id: String) -> Dictionary:
 func raise_options(s: Dictionary) -> Array:
 	var out = []
 	for x in s.issues:
-		var it = issue_by_id(x.id)
+		var it = story(s, x.id)
 		var fresh = s.week - int(x.week) < WEEKS_PER_MONTH * 2
 		out.append({"kind": "issue", "ref": it.id, "title": it.title, "text": it.text, "axis": it.axis, "side": "",
-			"region": it.region, "fresh": fresh, "chance": 0.75 if fresh else 0.5})
+			"region": it.region, "district": it.get("district", ""), "province": it.get("province", ""), "fresh": fresh, "chance": 0.75 if fresh else 0.5})
 	for ind in METRIC_TOPIC:
 		var t = by_id(TOPICS, METRIC_TOPIC[ind])
 		if debate_by_id(s, t.id) != null: continue
@@ -538,9 +539,9 @@ func raise_chance(s: Dictionary, opt: Dictionary, line: Dictionary) -> float:
 	var tone_k = {"statesman": 0.85, "folksy": 1.0, "fiery": 1.1, "provocative": 1.25}.get(line.tone, 1.0)
 	return clampf2(opt.chance * (0.6 + 0.5 * debate_reach(s)) * tone_k, 0.1, 0.95)
 
-func raise_lines(opt: Dictionary, side: String) -> Array:
+func raise_lines(s: Dictionary, opt: Dictionary, side: String) -> Array:
 	if opt.kind == "topic" or opt.kind == "metric": return LINES.TOPIC_LINES[opt.ref][side]
-	if opt.kind == "issue": return issue_by_id(opt.ref).lines[side]
+	if opt.kind == "issue": return story(s, opt.ref).lines[side]
 	if opt.kind == "proposal" and LINES.PROPOSAL_LINES.has(opt.ref): return LINES.PROPOSAL_LINES[opt.ref]
 	return LINES.AXIS_LINES[opt.axis][side]
 
@@ -551,7 +552,7 @@ func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) ->
 	if err: return {"ok": false, "text": err}
 	spend_action(s, 0)
 	s.agenda.done = true
-	var line: Dictionary = raise_lines(opt, side)[line_index]
+	var line: Dictionary = raise_lines(s, opt, side)[line_index]
 	var before = snapshot_groups(s)
 	var perceived_before: Dictionary = player_party(s).perceived.duplicate()
 	var flips_before: int = s.flips.size()
@@ -564,6 +565,7 @@ func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) ->
 	shift_perceived(s, {opt.axis: sign * 4})
 	s.spoke[side_key(opt.axis, side)] = s.week
 	figures_heard(s, opt.axis, side)
+	if opt.kind == "issue": heard_locally(s, opt.ref)
 	record_statement(s, {"text": line.text, "title": opt.title, "effects": {"shift": {opt.axis: sign * 4}}, "tone": line.tone, "spoken": true})
 	var text = ""
 	if caught:
