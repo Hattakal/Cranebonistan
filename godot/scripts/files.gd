@@ -940,6 +940,8 @@ func _country() -> void:
 	if gov:
 		gc.add_child(Look.dlabel("%s · %s" % [gov.name, gov.leader], "display", 22, Look.lit(Color(gov.color)), true))
 		if partners.size(): gc.add_child(Look.dlabel("In coalition with the %s, the junior partner" % " and the ".join(partners), "body", 14, Look.DIM))
+		var unsolved: Array = S.issues.filter(func(x): return x.get("back", false)).map(func(x): return String(G.story(S, x.id).title))
+		if unsolved.size(): gc.add_child(Look.dlabel("Still unsolved: " + "; ".join(unsolved), "body", 14, Look.TXT, true))
 		var troubles = []
 		if w.jobs < 42: troubles.append("jobs")
 		if w.prices > 60: troubles.append("prices")

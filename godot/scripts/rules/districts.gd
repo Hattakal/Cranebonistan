@@ -320,6 +320,9 @@ func story(s: Dictionary, id: String) -> Dictionary:
 	var pl: Dictionary = s.get("storyPlace", {}).get(id, {})
 	var reg = by_id(REGIONS, String(pl.get("region", it.get("region", ""))))
 	var names = {"city": pl.get("city", reg.name if reg else ""), "province": pl.get("province", reg.name if reg else ""), "region": reg.name if reg else ""}
+	if pl.get("back", false) and it.has("returns"):   # it came back, still unsolved
+		it.title = it.returns.title
+		it.text = it.returns.text
 	it.title = String(it.title).format(names)
 	it.text = String(it.text).format(names)
 	for side in it.get("lines", {}):

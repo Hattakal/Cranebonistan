@@ -474,6 +474,7 @@ func act_claim(s: Dictionary, axis: String, side: String) -> Dictionary:
 
 ## Minor issues: local stories that sit in the news for a few months.
 func issues_monthly(s: Dictionary) -> void:
+	_stories_come_back(s)
 	s.issues = s.issues.filter(func(x): return s.week - int(x.week) < 5 * WEEKS_PER_MONTH)
 	if s.issues.size() >= 5 or rand(s) > 0.5: return
 	var pool = []
@@ -499,6 +500,35 @@ func issues_monthly(s: Dictionary) -> void:
 			s.issueCooldown[pool[i].id] = s.week
 			push_news(s, {"kind": "issue", "quiet": true, "title": "In the news: " + st.title, "text": st.text})
 			return
+
+## Stories that leave the news without ever becoming a debate were never solved: each
+## comes back once, a few months later, in the same place, and costs a little trust.
+func _stories_come_back(s: Dictionary) -> void:
+	if not s.has("storyReturns"): s.storyReturns = []
+	var places: Dictionary = s.get("storyPlace", {})
+	for x in s.issues:
+		if s.week - int(x.week) < 5 * WEEKS_PER_MONTH: continue
+		var pl: Dictionary = places.get(x.id, {})
+		if pl.get("back", false) or not issue_by_id(x.id).has("returns"): continue
+		if debate_by_id(s, "issue:" + x.id) != null: continue
+		if rand(s) > STORY_RETURN_CHANCE: continue
+		var lo: int = STORY_RETURN_MONTHS[0]
+		var hi: int = STORY_RETURN_MONTHS[1]
+		s.storyReturns.append({"id": x.id, "week": s.week + (lo + int(floor(rand(s) * (hi - lo + 1)))) * WEEKS_PER_MONTH})
+	var later = []
+	for r in s.storyReturns:
+		if int(r.week) > s.week: later.append(r); continue
+		if s.issues.any(func(y): return y.id == r.id and s.week - int(y.week) < 5 * WEEKS_PER_MONTH): continue
+		if debate_by_id(s, "issue:" + r.id) != null: continue
+		var pl: Dictionary = places.get(r.id, {})
+		if pl.is_empty(): continue
+		pl.back = true
+		s.issues = s.issues.filter(func(y): return y.id != r.id)
+		s.issues.append({"id": r.id, "week": s.week, "district": pl.get("district", ""), "back": true})
+		change_trust(s, -STORY_RETURN_TRUST)
+		var st: Dictionary = story(s, r.id)
+		push_news(s, {"kind": "issue", "quiet": true, "title": "Still not fixed: " + st.title, "text": st.text})
+	s.storyReturns = later
 
 func issue_by_id(id: String) -> Dictionary:
 	return by_id(ISSUES, id)
