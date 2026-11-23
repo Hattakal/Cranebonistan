@@ -588,4 +588,6 @@ Agreed after the realism review: the vote itself first, then the people around i
 - **Trips have small vignettes now and then:** flavour, with little effect. *Built (November 2026):* about one trip in four has an aside under "Also on the road" on the trip page (a beekeeper's honey, a radio host who gets the leader's name wrong, a tractor ride in Fauran because the bus stopped running). Sixteen drafts in `tours.json` (VIGNETTES), some only in certain regions, each at most once a game; effects are tiny (a little goodwill or awareness in that province, a point of charisma either way, a hotel bill of ₱50,000).
 - **Local elections wait** until there are local candidates: they depend on local people more than on the national party.
 
+**Roadmap (decided November 2026):** next, the official campaign in the last three months; after that, polish towards a working, presentable game, before new systems.
+
 *Leaning, not decided:* **an official campaign in the last three months**, played week by week with three actions a week and campaign-only actions (a country-wide convoy among them), while issues, debates and voter drift stay monthly. It would make holding back dirt a real decision (a dossier released in the campaign hits harder, with no time to fade). Pacts to stand aside, tactical voting and red lines would belong to it.
