@@ -590,4 +590,11 @@ Agreed after the realism review: the vote itself first, then the people around i
 
 **Roadmap (decided November 2026):** next, the official campaign in the last three months; after that, polish towards a working, presentable game, before new systems.
 
-*Leaning, not decided:* **an official campaign in the last three months**, played week by week with three actions a week and campaign-only actions (a country-wide convoy among them), while issues, debates and voter drift stay monthly. It would make holding back dirt a real decision (a dossier released in the campaign hits harder, with no time to fade). Pacts to stand aside, tactical voting and red lines would belong to it.
+**The official campaign (decided November 2026, not built yet):**
+- The last three months are **12 weekly turns**, three actions each; debates, local stories and voter drift stay monthly.
+- No building or steering in the campaign (offices, communities, steering the party); poaching a rival's branch stays.
+- **The convoy:** a route of 12 provinces, one a week, set in advance. Rival parties run their own convoys too.
+- **No undecided pool** for now.
+- **Pacts to stand aside and tactical voting** belong to the campaign: both happen only in the last three months.
+
+*Earlier, leaning (kept for the record):* **an official campaign in the last three months**, played week by week with three actions a week and campaign-only actions (a country-wide convoy among them), while issues, debates and voter drift stay monthly. It would make holding back dirt a real decision (a dossier released in the campaign hits harder, with no time to fade). Pacts to stand aside, tactical voting and red lines would belong to it.
