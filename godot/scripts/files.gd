@@ -924,7 +924,7 @@ func _country() -> void:
 	if S.crisis:
 		var cr = Game.by_id(G.CRISES, S.crisis.id)
 		_p("%s: %s" % [cr.name, cr.blurb], null, Look.RED_HI, 15)
-	_p("Your statements nudge these a little, more as your party grows. Your influence: %s." % G.influence_label(S))
+	_p("Your statements nudge these a little, more the more seriously you are taken. Taken seriously: %d of 100 (%s)." % [Game.jround(G.serious_of(S)), G.influence_label(S).to_lower()])
 	# government and trust
 	var two = HBoxContainer.new()
 	two.add_theme_constant_override("separation", 12)

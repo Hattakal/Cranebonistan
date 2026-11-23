@@ -146,6 +146,7 @@ func new_game(opts := {}) -> Dictionary:
 		story_turns_up(s, it.id)
 		s.issueCooldown[it.id] = s.week
 	s.lastSupport = summarize(s, s.pops).support
+	s.serious = float(C.serious.start)
 	s.pastElection = past_election(s)   # the 2026 result: the starting map without your party
 	s.mods = Mods.enabled().map(func(m): return "%s %s" % [m.name, m.version])   # what this game was started with
 	run_hooks(s)
@@ -175,6 +176,7 @@ func monthly_update(s: Dictionary) -> void:
 	for k in wm: wm[k] = float(wm[k]) * 0.85
 	debates_monthly(s)
 	issues_monthly(s)
+	serious_monthly(s)
 	communities_monthly(s)
 	relations_monthly(s)
 	flagship_monthly(s)

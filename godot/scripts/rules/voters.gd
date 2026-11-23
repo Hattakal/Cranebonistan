@@ -218,7 +218,9 @@ func score_context(s: Dictionary) -> Dictionary:
 	var distrust: float = (50.0 - s.trust) / 50.0
 	var fit = {}
 	for p in s.parties: fit[p.id] = leader_fit(s, p)
-	return {"inc": inc, "own": own, "distrust": distrust, "fit": fit, "clim": leader_climate(s, distrust)}
+	var cs: Dictionary = C.serious
+	var serious: float = float(cs.vote) * (serious_of(s) - float(cs.mid)) / (100.0 - float(cs.mid) if serious_of(s) > float(cs.mid) else float(cs.mid))
+	return {"inc": inc, "own": own, "distrust": distrust, "fit": fit, "clim": leader_climate(s, distrust), "serious": serious}
 
 # ---------- What kind of leader people want ----------
 ## A group's wish for each kind of leader (data/leader_types.json), summing to 1.
@@ -361,7 +363,9 @@ func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Diction
 		else: gw += float(st.rivals.get(party.id, 0)) + float(st.get("rtrip", {}).get(party.id, 0))
 	sc += gw
 	sc += log(maxf(aw, 0.001))
-	if party.isPlayer: sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
+	if party.isPlayer:
+		sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
+		sc += float(ctx.get("serious", 0.0))   # people vote more readily for a party they take seriously
 	else: sc += C.rivalLeaderWeight * ((party.charisma - 50) / 50.0) * pop.leaderPull
 	# the kind of leader they want, against the kind this one is
 	if not pre.lw.is_empty():
@@ -512,16 +516,23 @@ func preview_shift(s: Dictionary, shift) -> Array:
 			"to": stance_of(clampf2(player.perceived[ax] + shift[ax], -100, 100)), "manifesto": stance_of(player.manifesto[ax])})
 	return out
 
+## Taken seriously, 0-100 (CONFIG.serious): how seriously the country takes your party.
+func serious_of(s: Dictionary) -> float:
+	return float(s.get("serious", C.serious.start))
+
+## How far your words carry: grows with how seriously you are taken.
 func influence_of(s: Dictionary) -> float:
-	var share: float = s.lastSupport.player if s.lastSupport else 0.03
-	return clampf2(share / C.influenceAt, C.influenceMin, C.influenceMax)
+	return lerpf(float(C.influenceMin), float(C.influenceMax), clampf2(serious_of(s) / 100.0, 0, 1))
 
 func influence_label(s: Dictionary) -> String:
-	var i = influence_of(s)
-	if i < 0.4: return "Fringe voice"
-	if i < 0.8: return "Getting noticed"
-	if i < 1.2: return "Agenda-setter"
+	var t = serious_of(s)
+	if t < 20: return "Fringe voice"
+	if t < 45: return "Getting noticed"
+	if t < 70: return "Agenda-setter"
 	return "Sets the national debate"
+
+func change_serious(s: Dictionary, d: float) -> void:
+	s.serious = clampf2(serious_of(s) + d, 0, 100)
 
 func apply_effects(s: Dictionary, fx: Dictionary) -> void:
 	var player = player_party(s)

@@ -481,6 +481,18 @@ func act_claim(s: Dictionary, axis: String, side: String) -> Dictionary:
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 
+## Taken seriously moves a little each month toward what your support, your name and
+## your party machine are worth (CONFIG.serious).
+func serious_monthly(s: Dictionary) -> void:
+	var cs: Dictionary = C.serious
+	var w: Dictionary = cs.weights
+	var sup: float = float(s.lastSupport.player) if s.lastSupport else 0.0
+	var machine = 0.0
+	for c in s.communities: machine += float(s.communities[c])
+	var target: float = 100.0 * clampf2(float(w.support) * minf(1.0, sup / float(cs.supportFull)) + float(w.known) * national_awareness(s)
+		+ float(w.machine) * minf(1.0, machine / float(cs.machineFull)), 0, 1)
+	s.serious = clampf2(serious_of(s) + (target - serious_of(s)) * float(cs.rate), 0, 100)
+
 ## Minor issues: local stories that sit in the news for a few months.
 func issues_monthly(s: Dictionary) -> void:
 	_stories_come_back(s)
@@ -780,6 +792,8 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	var qk = 0.4 if quick else 1.0
 	var scaled = reacts.map(func(g): return {"who": g.get("who"), "amt": g.amt * qk * (pos if g.amt > 0 else neg)})
 	apply_effects(s, {"goodwill": scaled, "awareness": 0.06 if outcome == "viral" else (0.035 if outcome == "gaffe" else 0.01)})
+	if outcome == "viral": change_serious(s, float(C.serious.viral))
+	elif outcome == "gaffe": change_serious(s, float(C.serious.gaffe))
 	for g in scaled:
 		for pop in s.pops:
 			if matches(pop, g.who): pop.leader.player = clampf2(pop.leader.player + g.amt * 0.35, -2, 2)

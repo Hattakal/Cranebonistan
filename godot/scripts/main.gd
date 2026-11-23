@@ -550,6 +550,8 @@ func _render_bar() -> void:
 		S.polls[-1].national.player * 100 if S.polls.size() else null, func(x): return "%s%%%s" % [Game.fmt1(x), arrow])
 	_chip("Known by", "%d%%" % Game.jround(G.national_awareness(S) * 100), "Share of adults who have heard of your party.", Color.TRANSPARENT,
 		G.national_awareness(S) * 100, func(x): return "%d%%" % Game.jround(x))
+	_chip("Taken seriously", "%d" % Game.jround(G.serious_of(S)), "How seriously the public, the media and the other parties take your party (0-100): %s. It grows with your support, your name and your party machine, and the higher it is, the further your words carry and the readier people are to vote for you." % G.influence_label(S).to_lower(), Color.TRANSPARENT,
+		G.serious_of(S), func(x): return "%d" % Game.jround(x))
 	_chip("Business", biz, "Business donors are %s. Angry donors give less." % Game.business_word(mood), Look.RED_HI if mood < 0.4 else Color.TRANSPARENT)
 	_chip("Trust in politics", Game.trust_label(S.trust), "How much people trust politicians and the system in general (not your party). Low trust helps outsiders.")
 	_date.text = G.date_label(S.week, false).to_upper()
@@ -569,9 +571,9 @@ func _chip(label: String, value: String, tip: String, warn := Color.TRANSPARENT,
 	if not _chips.has(label):
 		var p = PanelContainer.new()
 		var sb = Look.box(Color(0, 0, 0, 0))
-		sb.content_margin_left = 12; sb.content_margin_right = 12
+		sb.content_margin_left = 8; sb.content_margin_right = 8
 		p.add_theme_stylebox_override("panel", sb)
-		p.custom_minimum_size.x = 78
+		p.custom_minimum_size.x = 60
 		var v = VBoxContainer.new()
 		v.alignment = BoxContainer.ALIGNMENT_CENTER
 		v.add_theme_constant_override("separation", -4)
