@@ -570,3 +570,18 @@ Agreed after the realism review: the vote itself first, then the people around i
 - **Characters** (the media themselves are built; see *Media*). A basic character system, much simpler than Crusader Kings. Politicians get a fuller character screen; media personalities just a few traits (like players and coaches in Football Manager): newspapers and TV channels with owners, big media personalities, social media figures, streamers moving into politics, celebrities who sell their endorsement to the highest bidder. Media are central to the satire.
 - **The economy and the ruling party.** How the economy feels should drive how the government is judged, and both should feed **trust in the system**.
 - **Turnout by party (draft, not in the game).** Each party's supporters turn out at their own rate: low trust keeps establishment voters at home and brings fed-up voters out to protest; a party that drifts from its manifesto, against what a group cares about, loses that group's turnout. A draft is on the branch `claude/project-overview-roadmap-3813b2-sjo7ds`; the trust part works, the drift part was far too strong. Open questions: drift only against core supporters? measured against the founding or the current manifesto? how far low trust may push turnout down.
+
+### Feeling progress, and the shape of the four years (discussed November 2026)
+
+*The problem:* the game naturally snowballs, so once you rise everything rises and no single action seems to have done anything; and in the first two years vote share barely moves. The designer chose four years so that players who enjoy "number goes up" and "my colour spreads on the map" get that feeling, so progress must be visible from the start. Real new parties rarely rise steadily either (Five Star, Law and Justice, AfD, Chega took about four years each, in jumps), so steady growth has to come from other numbers.
+
+*Decided:*
+- **Four years stays.** A one-year game (an outsider out of nowhere, Macron-style) was considered: believable, but it sells a personality surge rather than building a party, and building is the appeal for strategy players.
+- **Map modes.** Besides the vote: **recognition** (how many people know you, province by province: the main sign of progress in the first year), **biggest issues**, **fed up with the system**, **distress**, **the 2026 election** and **local stories**.
+  - *Distress* is economic hardship plus lack of trust in the system, per province.
+  - *The 2026 election* is the starting map without your party's votes.
+- **Local stories carry a province.** No separate action for commenting: events and local stories are tagged with a province and say so ("A bridge in {province} collapsed"), and what you say about them counts for more there, and makes a trip there go better. Today a trip only checks whether you recently spoke for a side the province leans toward.
+- **Trips have small vignettes now and then:** flavour, with little effect.
+- **Local elections wait** until there are local candidates: they depend on local people more than on the national party.
+
+*Leaning, not decided:* **an official campaign in the last three months**, played week by week with three actions a week and campaign-only actions (a country-wide convoy among them), while issues, debates and voter drift stay monthly. It would make holding back dirt a real decision (a dossier released in the campaign hits harder, with no time to fade). Pacts to stand aside, tactical voting and red lines would belong to it.
