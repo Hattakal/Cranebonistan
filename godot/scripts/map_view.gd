@@ -316,26 +316,41 @@ func _draw() -> void:
 	_legend()
 	if hover != "" and tip_provider.is_valid(): _tooltip()
 
-var legend: Array = []   # [[short name and seats, Color, seats], ...]
+var legend: Array = []   # [[short name and seats, Color, seats], ...]; without seats, just a key
 var legend_note := ""
 var legend_title := "IF THE ELECTION WERE TODAY"
+var legend_ramp: Array = []   # a colour scale instead: [low Color, high Color, low word, high word]
 
 func _legend() -> void:
-	if legend.is_empty(): return
+	if legend.is_empty() and legend_ramp.is_empty(): return
 	var head := Look.spaced("display", 2)
 	var body := Look.font("body_bold")
 	var w := 0.0
 	for item in legend: w += 22 + body.get_string_size(item[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	w = maxf(w, Look.font("body").get_string_size(legend_note, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) + 28
+	w = maxf(w, head.get_string_size(legend_title, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 28)
+	if legend_ramp.size(): w = maxf(w, 340)
 	var rect := Rect2(Vector2(14, size.y - 96 - 14), Vector2(w, 96))   # bottom left: open sea on the designer's map
 	draw_rect(rect, Color(Look.N850, 0.92))
 	draw_rect(rect, Look.N600, false, 1.0)
 	draw_string(head, rect.position + Vector2(14, 24), legend_title, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Look.DIM)
+	if legend_ramp.size():
+		# a colour scale, low to high, with a word at each end
+		var rb := Rect2(rect.position + Vector2(14, 36), Vector2(w - 28, 10))
+		var steps := 24
+		for i in steps:
+			var c: Color = Look.mix(legend_ramp[0], legend_ramp[1], float(i) / (steps - 1))
+			draw_rect(Rect2(rb.position.x + rb.size.x * i / steps, rb.position.y, rb.size.x / steps + 1, rb.size.y), c)
+		draw_string(body, rect.position + Vector2(14, 65), String(legend_ramp[2]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Look.CREAM)
+		var hw: float = body.get_string_size(String(legend_ramp[3]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		draw_string(body, Vector2(rect.end.x - 14 - hw, rect.position.y + 65), String(legend_ramp[3]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Look.CREAM)
+		draw_string(Look.font("body"), rect.position + Vector2(14, 85), legend_note, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Look.FAINT)
+		return
 	# the Assembly as one strip, largest party first, with a tick at the majority
 	var total := 0
 	for item in legend: total += int(item[2]) if item.size() > 2 else 0
 	var bar := Rect2(rect.position + Vector2(14, 34), Vector2(w - 28, 7))
-	draw_rect(bar, Look.N600)
+	if total > 0: draw_rect(bar, Look.N600)
 	if total > 0:
 		var bx := bar.position.x
 		for item in legend:

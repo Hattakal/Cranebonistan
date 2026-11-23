@@ -224,6 +224,7 @@ func _build() -> void:
 	_map.foreign_clicked.connect(func(id): _country_sheet(id))
 	_map.district_clicked.connect(func(id): _district_sheet(id))
 	right.add_child(_map)
+	_build_map_modes()
 	_ticker = Ticker.new()
 	_ticker.custom_minimum_size.y = 34
 	right.add_child(_ticker)
@@ -618,38 +619,157 @@ var _leaders = {}       # region id -> leading party, to spot a change of hands
 var _chip_last = {}     # chip label -> last number shown
 var _chips = {}         # chip label -> {panel, val, tw}
 
+# ---------- Map modes (data/mapmodes.json) ----------
+var _map_mode := "vote"
+var _mode_buttons := {}
+var _profiles := {}     # district id -> what it is like now (G.district_profiles), for the modes and tooltips
+
+func _build_map_modes() -> void:
+	var row = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	row.position = Vector2(14, 14)
+	_map.add_child(row)
+	for m in G.MAPMODES.get("MODES", []):
+		var b = Button.new()
+		b.text = String(m.name).to_upper()
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_override("font", Look.spaced("display_bold", 2))
+		b.add_theme_font_size_override("font_size", Look.fs(12))
+		b.tooltip_text = String(m.get("title", m.name)).capitalize()
+		var id: String = m.id
+		b.pressed.connect(func(): _set_map_mode(id))
+		row.add_child(b)
+		_mode_buttons[id] = b
+	_style_mode_buttons()
+
+func _style_mode_buttons() -> void:
+	for id in _mode_buttons: Look.dark_button(_mode_buttons[id], false, id == _map_mode, 5)
+
+func _set_map_mode(id: String) -> void:
+	_map_mode = id
+	_style_mode_buttons()
+	if S: _render_map()
+
+func _mode_info() -> Dictionary:
+	for m in G.MAPMODES.get("MODES", []):
+		if m.id == _map_mode: return m
+	return {}
+
+## Each province by the current mode; the vote mode is the default map.
 func _render_map() -> void:
 	var poll = S.polls[-1] if S.polls.size() else null
 	_map.fills = {}
 	_map.stripes = {}
 	_map.shares = {}
 	_map.hot = {}
+	_map.legend_ramp = []
 	_map.communities = S.communities
 	_map.party_color = Color(G.player_party(S).color)
+	for f in G.FOREIGN:
+		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
+	_profiles = G.district_profiles(S)
+	var info: Dictionary = _mode_info()
+	_map.legend_title = String(info.get("title", "IF THE ELECTION WERE TODAY"))
+	if _map_mode != "vote" and _map_mode != "past":
+		_paint_profile_mode(info)
+		_map.queue_redraw()
+		return
+	if _map_mode == "past":
+		_paint_result(S.get("pastElection", {}), false)
+		var past_seats: Dictionary = G.projected_seats(S.get("pastElection", {})) if S.get("pastElection", {}).size() else {}
+		_map.legend = _seat_legend(past_seats)
+		_map.legend_note = String(info.get("note", ""))
+		_map.queue_redraw()
+		return
 	if poll:
 		for r in G.REGIONS:
 			_map.shares[r.id] = "You %d%%" % Game.jround(poll.regions[r.id].player * 100)
-	# each district in the colour of whoever would win it today: deep when safe, pale when close
 	var proj: Dictionary = S.get("projection", {})
+	_paint_result(proj, true)
+	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
+	_map.legend = _seat_legend(seats)
+	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100)]) if poll else "No poll yet."
+	_map.queue_redraw()
+
+## Each district in the colour of whoever wins it: deep when safe, pale when close. `live`:
+## today's projection (flash on a change of hands, your share as stripes) or a past result.
+func _paint_result(proj: Dictionary, live: bool) -> void:
 	for d in G.DISTRICTS:
 		if not proj.has(d.id): continue
 		var x: Dictionary = proj[d.id]
-		if _leaders.has(d.id) and _leaders[d.id] != x.winner: _map.flash(d.id)
-		_leaders[d.id] = x.winner
+		if live:
+			if _leaders.has(d.id) and _leaders[d.id] != x.winner: _map.flash(d.id)
+			_leaders[d.id] = x.winner
 		# the leader's colour, a little deeper when the lead is safe (a narrow range, so a province
 		# won with 41% and one won with 50% read as the same party at a glance)
 		var strength = clampf(0.66 + float(x.margin) * 0.9, 0.66, 0.85)
 		_map.fills[d.id] = Look.mix(Look.LAND, Look.lit(Color(G.party_of(S, x.winner).color)), strength * 0.8)
 		# not yours yet: stripes in your colour covering your share of the vote there (30% of the
 		# vote, 30% of the province), never more than the leader's own band
-		if x.winner != "player" and float(x.you) >= 0.10:
+		if live and x.winner != "player" and float(x.you) >= 0.10:
 			_map.stripes[d.id] = [Look.mix(Look.LAND, Look.lit(Color(G.player_party(S).color)), 0.8), minf(float(x.you), 0.45)]
-	for f in G.FOREIGN:
-		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
-	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
-	_map.legend = Game.ssort(S.parties.duplicate(), func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Look.lit(Color(p.color)), int(seats.get(p.id, 0))])
-	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100)]) if poll else "No poll yet."
-	_map.queue_redraw()
+
+func _seat_legend(seats: Dictionary) -> Array:
+	var ps: Array = S.parties.filter(func(p): return int(seats.get(p.id, 0)) > 0 or p.isPlayer and _map_mode == "vote")
+	return Game.ssort(ps, func(a, b): return int(seats.get(b.id, 0)) - int(seats.get(a.id, 0))).map(func(p): return ["%s %d" % [p.short, int(seats.get(p.id, 0))], Look.lit(Color(p.color)), int(seats.get(p.id, 0))])
+
+## The modes that colour each province by what it is like: known, issues, fed up, distress.
+func _paint_profile_mode(info: Dictionary) -> void:
+	var low_c := Look.mix(Look.LAND, Look.N500, 0.35)
+	var high_c: Color
+	match _map_mode:
+		"known": high_c = Look.lit(Color(G.player_party(S).color))
+		"fed": high_c = Look.MAP_FED
+		_: high_c = Look.MAP_DISTRESS
+	var used = {}
+	for d in G.DISTRICTS:
+		var x: Dictionary = _profiles.get(d.id, {})
+		if x.is_empty(): continue
+		if _map_mode == "issues":
+			var ax: String = x.top[0]
+			used[ax] = true
+			_map.fills[d.id] = Look.mix(Look.LAND, Look.ISSUE.get(ax, Look.N500), 0.72)
+		else:
+			_map.fills[d.id] = Look.mix(low_c, high_c, _mode_level(x))
+	# a line under each region's name, where it says something
+	for r in G.REGIONS:
+		var n = 0.0
+		var v = 0.0
+		for d in G.DISTRICTS:
+			if d.region != r.id or not _profiles.has(d.id): continue
+			n += _profiles[d.id].size; v += _profiles[d.id].size * _profiles[d.id].known
+		if _map_mode == "known" and n > 0: _map.shares[r.id] = "%d%% know you" % Game.jround(v / n * 100)
+	_map.legend_note = String(info.get("note", ""))
+	if _map_mode == "issues":
+		_map.legend = G.AXES.filter(func(ax): return used.has(ax.id)).map(func(ax): return [String(ax.issue), Look.ISSUE.get(ax.id, Look.N500)])
+	else:
+		_map.legend = []
+		_map.legend_ramp = [low_c, high_c, String(info.get("low", "")), String(info.get("high", ""))]
+
+## Where a province sits on the current mode's colour scale, 0..1. Fixed scales, so a
+## province's colour changes when the country does.
+func _mode_level(x: Dictionary) -> float:
+	match _map_mode:
+		"known": return sqrt(clampf(float(x.known), 0, 1))   # early gains show
+		"fed": return clampf((float(x.fed) - 0.6) / 1.4, 0, 1)
+		"distress": return clampf((float(x.distress) - 0.15) / 0.55, 0, 1)
+	return 0.0
+
+## The current mode's line in a province's tooltip.
+func _mode_tip(id: String) -> Array:
+	var x: Dictionary = _profiles.get(id, {})
+	if x.is_empty(): return []
+	match _map_mode:
+		"known": return ["%d%% here know your party" % Game.jround(float(x.known) * 100)]
+		"issues":
+			var names: Array = x.top.map(func(ax): return String(Game.by_id(G.AXES, ax).issue).to_lower())
+			return ["Cares most about %s, then %s" % names]
+		"fed": return ["Fed up with the system: %s" % G.level_word(_mode_level(x)).to_lower()]
+		"distress": return ["Distress: %s (hard times %s, distrust %s)" % [G.level_word(_mode_level(x)).to_lower(), G.level_word(clampf(float(x.hardship) / 0.7, 0, 1)).to_lower(), G.level_word(clampf(float(x.distrust), 0, 1)).to_lower()]]
+		"past":
+			var r: Dictionary = S.get("pastElection", {}).get(id, {})
+			if r.size(): return ["%s won it in 2026, with %d%%" % [G.party_of(S, r.winner).short if G.party_of(S, r.winner) else r.winner, Game.jround(float(r.share) * 100)]]
+	return []
 
 ## Rivals whose leaders have toured this province recently (their push is still felt).
 func _rivals_here(id: String) -> Array:
@@ -664,6 +784,7 @@ func _tip(id: String, kind: String) -> Array:
 		var d = G.district_by_id(id)
 		var w: int = G.winner_seats(int(d.seats))
 		var lines = ["%s · %d seat%s" % [d.name, d.seats, "" if d.seats == 1 else "s"], Game.by_id(G.REGIONS, d.region).name + (" · the winner takes all" if w == int(d.seats) else " · the winner takes %d, %d shared by national vote" % [w, int(d.seats) - w])]
+		lines.append_array(_mode_tip(id))
 		var x: Dictionary = S.get("projection", {}).get(id, {})
 		if x.size():
 			var who: String = "You" if x.winner == "player" else G.party_of(S, x.winner).short
@@ -1725,6 +1846,7 @@ func _shot(args: Dictionary) -> void:
 	if args.has("result"):
 		var ev2: Dictionary = G.event_of(S.queue[0])
 		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1), ev2)
+	if args.has("mapmode"): _set_map_mode(String(args.mapmode))
 	if args.has("file"):
 		if args.has("clear"): S.queue.clear()
 		_show_file(args.file)

@@ -14,8 +14,8 @@ extends RefCounted
 #  "study": the same office in an old building: warm dark wood and leather, a blue
 #           sea on the map, warm white paper. The Knives Out to night's Glass Onion.
 const PALETTES := {
-	"night": {"N950": "06080c", "N900": "0a0d13", "N850": "0f131b", "N800": "141923", "N700": "1b2230", "N600": "273042", "N500": "3a465b", "TXT": "e8ebf1", "DIM": "9aa5b7", "FAINT": "66738a", "LAMP": "f2b866", "LAMP_DIM": "a9844d", "RED": "d2392f", "RED_HI": "ff6a5c", "OXBLOOD": "8f231c", "GOOD": "1f7d55", "GOOD_HI": "5cc79a", "PAPER": "f1f2f3", "PAPER_2": "e4e6e9", "CARD": "fbfbfc", "INK": "14171d", "MUTED": "5b626e", "LINE": "c6cad0", "SEA": "10273d", "WATER_TXT": "7d9cbb", "LAND": "1a212d", "LAND_FOREIGN": "121720", "BORDER": "06080c"},
-	"study": {"N950": "0c0705", "N900": "130b07", "N850": "1a0f0a", "N800": "23150d", "N700": "301d12", "N600": "462b1b", "N500": "6a4630", "TXT": "f3e8d8", "DIM": "c0aa8e", "FAINT": "8a735d", "LAMP": "f2b552", "LAMP_DIM": "ad7d3f", "RED": "c3362a", "RED_HI": "f2735f", "OXBLOOD": "7a1f17", "GOOD": "2b7a4b", "GOOD_HI": "86cc9c", "PAPER": "f4f0e8", "PAPER_2": "e8e1d5", "CARD": "fbf8f2", "INK": "1e1712", "MUTED": "6b5e52", "LINE": "d4cbbc", "SEA": "12283a", "WATER_TXT": "86a3bd", "LAND": "2b2019", "LAND_FOREIGN": "1a120d", "BORDER": "0c0705"},
+	"night": {"N950": "06080c", "N900": "0a0d13", "N850": "0f131b", "N800": "141923", "N700": "1b2230", "N600": "273042", "N500": "3a465b", "TXT": "e8ebf1", "DIM": "9aa5b7", "FAINT": "66738a", "LAMP": "f2b866", "LAMP_DIM": "a9844d", "RED": "d2392f", "RED_HI": "ff6a5c", "OXBLOOD": "8f231c", "GOOD": "1f7d55", "GOOD_HI": "5cc79a", "PAPER": "f1f2f3", "PAPER_2": "e4e6e9", "CARD": "fbfbfc", "INK": "14171d", "MUTED": "5b626e", "LINE": "c6cad0", "SEA": "10273d", "WATER_TXT": "7d9cbb", "LAND": "1a212d", "LAND_FOREIGN": "121720", "BORDER": "06080c", "MAP_FED": "9a74cc", "MAP_DISTRESS": "d0613f", "ISSUE_ECONOMY": "c9a23f", "ISSUE_WELFARE": "c06784", "ISSUE_NATION": "6f8fd0", "ISSUE_SOCIETY": "9a78c4", "ISSUE_ORDER": "5ea596", "ISSUE_FOREIGN": "c27c4c", "ISSUE_SYSTEM": "9fab5c"},
+	"study": {"N950": "0c0705", "N900": "130b07", "N850": "1a0f0a", "N800": "23150d", "N700": "301d12", "N600": "462b1b", "N500": "6a4630", "TXT": "f3e8d8", "DIM": "c0aa8e", "FAINT": "8a735d", "LAMP": "f2b552", "LAMP_DIM": "ad7d3f", "RED": "c3362a", "RED_HI": "f2735f", "OXBLOOD": "7a1f17", "GOOD": "2b7a4b", "GOOD_HI": "86cc9c", "PAPER": "f4f0e8", "PAPER_2": "e8e1d5", "CARD": "fbf8f2", "INK": "1e1712", "MUTED": "6b5e52", "LINE": "d4cbbc", "SEA": "12283a", "WATER_TXT": "86a3bd", "LAND": "2b2019", "LAND_FOREIGN": "1a120d", "BORDER": "0c0705", "MAP_FED": "9c73c4", "MAP_DISTRESS": "d06a3a", "ISSUE_ECONOMY": "c9a23f", "ISSUE_WELFARE": "bf6680", "ISSUE_NATION": "7290c8", "ISSUE_SOCIETY": "9a7ac0", "ISSUE_ORDER": "62a391", "ISSUE_FOREIGN": "c47f4a", "ISSUE_SYSTEM": "a2ac5c"},
 }
 static var palette := "study"
 # the night (backgrounds), from the deepest shadow up to a raised, hovered surface
@@ -51,6 +51,10 @@ static var WATER_TXT: Color   # names of seas and lakes on the map
 static var LAND: Color
 static var LAND_FOREIGN: Color
 static var BORDER: Color
+# the map's modes: fed up with the system, distress, and one colour per issue (ISSUE["economy"]...)
+static var MAP_FED: Color
+static var MAP_DISTRESS: Color
+static var ISSUE := {}
 # older names still used here and there
 static var HEAD: Color
 static var CREAM: Color
@@ -97,6 +101,11 @@ static func use(name: String) -> void:
 	LAND = Color(p.LAND)
 	LAND_FOREIGN = Color(p.LAND_FOREIGN)
 	BORDER = Color(p.BORDER)
+	MAP_FED = Color(p.MAP_FED)
+	MAP_DISTRESS = Color(p.MAP_DISTRESS)
+	ISSUE = {}
+	for k in p:
+		if String(k).begins_with("ISSUE_"): ISSUE[String(k).substr(6).to_lower()] = Color(p[k])
 	HEAD = TXT; CREAM = TXT; CREAM_DIM = DIM; BRASS = N500; BRASS_DIM = N600; T900 = N900; AMBER = LAMP
 
 

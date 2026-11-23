@@ -9,7 +9,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 40
+const SAVE_VERSION := 41
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -58,6 +58,7 @@ var FIGURES: Array = []       # your party's politicians (data/party.json)
 var CITY_INFO: Dictionary = {} # population, lean and a line per city (data/cities.json)
 var FLAGSHIP: Array = []       # the year-three flagship promise (data/flagship.json)
 var TOURS: Dictionary = {}     # short stories from the leader's trips (data/tours.json)
+var MAPMODES: Dictionary = {}  # the map's modes and how distress is worked out (data/mapmodes.json)
 var FINAL_DEBATE: Dictionary = {}  # the final debate's questions and answers (data/final_debate.json)
 var LEADER_TYPES: Array = []   # the kinds of leader voters want (data/leader_types.json)
 var OUTLETS: Array = []        # newspapers, channels and platforms (data/media.json)

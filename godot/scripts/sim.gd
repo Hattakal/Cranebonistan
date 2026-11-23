@@ -58,6 +58,7 @@ func load_content(_unused := "") -> void:
 	INFLUENCER_SCANDALS = media_data.get("INFLUENCER_SCANDALS", [])
 	LEADER_TYPES = _data("leader_types", {}).get("TYPES", [])
 	TOURS = _data("tours", {})
+	MAPMODES = _data("mapmodes", {})
 	_load_districts()
 	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
 		if CITY_INFO.get(c.name, {}).has("size"): c.size = int(CITY_INFO[c.name].size)
@@ -145,6 +146,7 @@ func new_game(opts := {}) -> Dictionary:
 		s.issues.append({"id": it.id, "week": s.week})
 		s.issueCooldown[it.id] = s.week
 	s.lastSupport = summarize(s, s.pops).support
+	s.pastElection = past_election(s)   # the 2026 result: the starting map without your party
 	s.mods = Mods.enabled().map(func(m): return "%s %s" % [m.name, m.version])   # what this game was started with
 	run_hooks(s)
 	return s

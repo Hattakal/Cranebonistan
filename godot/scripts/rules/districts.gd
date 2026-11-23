@@ -291,6 +291,69 @@ func seat_allocation(res: Dictionary) -> Dictionary:
 	return out
 
 ## Seats each party would win if the election were today.
+## The last election (2026): the country as it stands at the start, without your party,
+## which didn't exist yet. Stored once, when the game begins.
+func past_election(s: Dictionary) -> Dictionary:
+	var out = {}
+	for d in DISTRICTS:
+		var v: Dictionary = district_votes(s, d, score_context(s)).duplicate()
+		v.erase("player")
+		var tot = dsum(v)
+		var ids: Array = ssort(v.keys(), func(a, b): return v[b] - v[a])
+		out[d.id] = {"votes": v, "winner": ids[0], "second": ids[1], "seats": int(d.seats),
+			"share": v[ids[0]] / tot if tot else 0.0, "margin": (v[ids[0]] - v[ids[1]]) / tot if tot else 0.0, "you": 0.0}
+	_bar_small_parties(out)
+	return out
+
+## What each province is like right now, for the map's modes: how many know your party,
+## the issues it cares about most, how fed up it is with the system, and its distress
+## (hard times and distrust together; settings in data/mapmodes.json). One pass over the voters.
+func district_profiles(s: Dictionary) -> Dictionary:
+	var dcfg: Dictionary = MAPMODES.get("DISTRESS", {})
+	var hcfg: Dictionary = dcfg.get("hardship", {})
+	var acc = {}
+	for pop in s.pops:
+		var id: String = String(pop.get("district", ""))
+		if not acc.has(id):
+			acc[id] = {"size": 0.0, "known": 0.0, "fed": 0.0, "hard": 0.0, "sal": {}}
+			for ax in AXES: acc[id].sal[ax.id] = 0.0
+		var a: Dictionary = acc[id]
+		var n: float = pop.size
+		var aw: float = pop.aware.player
+		var st = s.districts.get(id, null)
+		if st: aw = aw + float(st.aware) * (1 - aw)
+		a.size += n
+		a.known += n * aw
+		a.fed += n * float(pop.disaffection)
+		a.hard += n * float(hcfg.get(pop["class"], 0.5))
+		for ax in AXES: a.sal[ax.id] += n * salience_of(s, pop, ax.id)
+	# hard times now (0..1), and how far trust has fallen (0..1)
+	var bad: float = clampf2(0.5 * metric_badness(s, "jobs") + 0.5 * metric_badness(s, "prices"), 0, 1)
+	var distrust: float = clampf2((60.0 - s.trust) / 60.0, 0, 1)
+	var hb: float = float(hcfg.get("base", 0.4))
+	var tb: float = float(dcfg.get("distrust", {}).get("base", 0.4))
+	var wh: float = float(dcfg.get("weights", {}).get("hardship", 0.5))
+	var wt: float = float(dcfg.get("weights", {}).get("distrust", 0.5))
+	var out = {}
+	for id in acc:
+		var a: Dictionary = acc[id]
+		if a.size <= 0: continue
+		var sal = {}
+		for ax in AXES: sal[ax.id] = a.sal[ax.id] / a.size
+		var top: Array = ssort(sal.keys(), func(x, y): return sal[y] - sal[x])
+		var fed: float = a.fed / a.size                                 # about 0.3..2, 1 is ordinary
+		var hardship: float = (a.hard / a.size) * (hb + (1 - hb) * bad)
+		var distrusting: float = clampf2(fed / 2.0, 0, 1) * (tb + (1 - tb) * distrust)
+		out[id] = {"known": a.known / a.size, "fed": fed, "sal": sal, "top": top.slice(0, 2),
+			"hardship": hardship, "distrust": distrusting,
+			"distress": clampf2((wh * hardship + wt * distrusting) / maxf(0.01, wh + wt), 0, 1), "size": a.size}
+	return out
+
+## A level from 0 to 1 in words (data/mapmodes.json LEVELS: "Hardly" ... "Very").
+func level_word(v: float) -> String:
+	var words: Array = MAPMODES.get("LEVELS", ["Low", "Medium", "High"])
+	return String(words[clampi(int(v * words.size()), 0, words.size() - 1)])
+
 func projected_seats(proj: Dictionary) -> Dictionary:
 	return seat_allocation(proj).national
 

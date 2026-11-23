@@ -45,6 +45,7 @@ Put a file in your mod's `data/` folder with the **same name** as the game's fil
 | `names.json` | Name pools by background |
 | `tours.json` | Stories from the leader's trips |
 | `carlos.json`, `margaret.json` | What Carlos and Margaret say |
+| `mapmodes.json` | The map's modes (names, legends) and how distress is worked out |
 
 Every game file starts with a `_note` explaining its fields.
 
@@ -117,6 +118,7 @@ The rules refer to a few things by id. Change their names, numbers and text free
 - **`COUNTRY`** in content.json (`name`, `national`, `nationals`).
 - `MINOR_PARTIES` in content.json (merged by id, like `PARTIES`) and `CONFIG.threshold` (the share of the vote needed for seats; 0 turns it off).
 - **Ministry** `pm` (the Prime Minister) in coalition.json; the outcome ids in its `OUTCOMES`.
+- **Map modes** `vote`, `known`, `issues`, `fed`, `distress`, `past` in mapmodes.json (rename, reorder or drop them; a new id shows nothing).
 
 ## What a mod can't change (yet)
 

@@ -577,7 +577,7 @@ Agreed after the realism review: the vote itself first, then the people around i
 
 *Decided:*
 - **Four years stays.** A one-year game (an outsider out of nowhere, Macron-style) was considered: believable, but it sells a personality surge rather than building a party, and building is the appeal for strategy players.
-- **Map modes.** Besides the vote: **recognition** (how many people know you, province by province: the main sign of progress in the first year), **biggest issues**, **fed up with the system**, **distress**, **the 2026 election** and **local stories**.
+- **Map modes — built (November 2026).** Buttons over the map's top-left corner (Vote, Known, Issues, Fed up, Distress, 2026); each mode has its own legend and a line in every province's tooltip; names, notes and the distress settings are in `godot/data/mapmodes.json`. Colours are on fixed scales, so a province changes colour when the country does. Besides the vote: **recognition** (how many people know you, province by province: the main sign of progress in the first year), **biggest issues**, **fed up with the system**, **distress**, **the 2026 election** and **local stories**.
   - *Distress* is economic hardship plus lack of trust in the system, per province.
   - *The 2026 election* is the starting map without your party's votes.
 - **Local stories carry a province.** No separate action for commenting: events and local stories are tagged with a province and say so ("A bridge in {province} collapsed"), and what you say about them counts for more there, and makes a trip there go better. Today a trip only checks whether you recently spoke for a side the province leans toward.
