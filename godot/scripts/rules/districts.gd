@@ -129,6 +129,7 @@ func _with_share(res: Dictionary, d: Dictionary, pid: String, share: float) -> D
 
 func visit_block(s: Dictionary) -> String:
 	if s.result: return "The election is over."
+	if in_campaign(s): return "%s is on the campaign convoy now." % player_party(s).leader
 	if int(s.get("lastVisit", -99)) / WEEKS_PER_MONTH == s.week / WEEKS_PER_MONTH: return "%s has already been on the road this month." % player_party(s).leader
 	return ""
 
@@ -182,27 +183,37 @@ func visit_power(s: Dictionary, id: String) -> Dictionary:
 func act_visit(s: Dictionary, id: String) -> Dictionary:
 	var block = visit_block(s)
 	if block: return {"ok": false, "text": block}
+	s.lastVisit = s.week
+	return tour(s, id)
+
+## The leader in a province: a monthly trip, or (rally = true) the campaign convoy's stop,
+## `mult` times as strong; a trip warms the rest of the region a little, a rally the
+## provinces close by (CONFIG.campaign).
+func tour(s: Dictionary, id: String, mult := 1.0, rally := false) -> Dictionary:
 	var d = district_by_id(id)
 	var st: Dictionary = s.districts[id]
 	var exact_before: float = float(district_result(s, d, score_context(s)).you)
 	# the number the player sees on the map is the poll's; the trip moves it by what really changed
 	var before: float = float(s.projection.get(id, {}).get("you", exact_before))
 	var pw: Dictionary = visit_power(s, id)
-	var k: float = pw.k
+	var k: float = pw.k * mult
 	st.visits = int(st.visits) + 1
 	s.roadFund = maxf(0, float(s.get("roadFund", 0)) - pw.money)
 	district_boost(s, id, VISIT_AWARE * k, VISIT_GOODWILL * k)
 	for o in DISTRICTS:
-		if o.region == d.region and o.id != id: district_boost(s, o.id, VISIT_AWARE * k * 0.1, VISIT_GOODWILL * k * 0.06)
-	s.lastVisit = s.week
+		if o.id == id: continue
+		if rally:
+			if district_centre(o).distance_to(district_centre(d)) <= float(C.campaign.nearReach):
+				district_boost(s, o.id, VISIT_AWARE * k * float(C.campaign.near), VISIT_GOODWILL * k * float(C.campaign.near))
+		elif o.region == d.region: district_boost(s, o.id, VISIT_AWARE * k * 0.1, VISIT_GOODWILL * k * 0.06)
 	var real: Dictionary = district_result(s, d, score_context(s))
 	var after: float = clampf2(before + (float(real.you) - exact_before), 0.0, 0.95)
 	s.projection[id] = _with_share(s.projection.get(id, real), d, "player", after)
-	var text = "%s spent the month in %s: town halls, a market walkabout, a local radio phone-in. Your vote there: %d%% → %d%%." % [player_party(s).leader, d.name, jround(before * 100), jround(after * 100)]
+	var text = ("The convoy stopped in %s: a rally, a market walkabout, a local radio phone-in. Your vote there: %d%% → %d%%." % [d.name, jround(before * 100), jround(after * 100)]) if rally else ("%s spent the month in %s: town halls, a market walkabout, a local radio phone-in. Your vote there: %d%% → %d%%." % [player_party(s).leader, d.name, jround(before * 100), jround(after * 100)])
 	if pw.why.size():
 		var w: String = ", ".join(pw.why)
 		text += " " + w.substr(0, 1).to_upper() + w.substr(1) + "."
-	_log(s, "action", "Toured %s." % d.name)
+	_log(s, "action", ("The convoy stopped in %s." if rally else "Toured %s.") % d.name)
 	# a short story from the trip, by how well it went
 	var gain: float = (after - before) * 100
 	var kind = "great" if gain >= 4 else ("good" if gain >= 1.5 else "flat")
@@ -215,7 +226,7 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	var pool: Array = TOURS.get(kind, [])
 	if pool.size(): story = pick(s, pool)
 	var fill = {"leader": player_party(s).leader, "place": d.name, "town": town}
-	return {"ok": true, "text": text, "kind": kind, "place": d.name, "region": d.region, "before": before, "after": after,
+	return {"ok": true, "text": text, "kind": kind, "place": d.name, "region": d.region, "before": before, "after": after, "rally": rally, "district": id,
 		"why": pw.why, "story": String(story.text).format(fill), "caption": String(story.caption).format(fill),
 		"vignette": _trip_vignette(s, d, fill)}
 
@@ -315,6 +326,12 @@ func seat_allocation(res: Dictionary) -> Dictionary:
 	return out
 
 ## Seats each party would win if the election were today.
+## Where a province is on the map: its biggest town, or the middle of it when it has none.
+func district_centre(d: Dictionary) -> Vector2:
+	for c in MAP.get("cities", []):
+		if d.cities.size() and c.name == d.cities[0]: return Vector2(float(c.x), float(c.y))
+	return Vector2(float(d.label[0]), float(d.label[1]))
+
 # ---------- Local stories: where they happen ----------
 ## Picks the province a story happens in, from its "where" (data/issues.json): one named
 ## province, or any province of the listed regions ("city": true for one with a town).

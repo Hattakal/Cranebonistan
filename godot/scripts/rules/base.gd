@@ -1,15 +1,16 @@
 ## rules/base.gd — Shared ground for every rule: the content tables, settings, small helpers, random numbers, the calendar and stances, plus helpers every system uses (news, the diary, the action check).
 ##
 ## The rules are split over a chain of files, each extending the one before:
-## base → voters → districts → media → party → scandals → rivals → world → moments → coalition → sim.gd
+## base → voters → districts → media → party → scandals → rivals → world → moments → campaign → coalition → sim.gd
 ## sim.gd, at the end, is the autoload "Game": everything is reached as Game.<name>.
 ## A file can call anything in itself or earlier in the chain; the few calls that
 ## must go the other way are declared as hooks at the bottom of this file.
+## (campaign.gd, between moments and coalition: the official campaign of the last weeks.)
 ## No drawing and no buttons here: the rules read the content in data/*.json and
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 46
+const SAVE_VERSION := 47
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -320,9 +321,17 @@ const SPONSOR_LEAK := 0.03    # monthly chance a sponsorship comes out
 const INFLUENCER_SCANDAL := 0.025   # monthly chance, each
 
 # ---------- Shared helpers (every system uses these) ----------
+## The official campaign: the last weeks before the election, played week by week.
+func in_campaign(s: Dictionary) -> bool:
+	return s.week >= ELECTION_WEEK - int(C.campaign.weeks)
+
+## "this month", or "this week" during the campaign (actions come weekly then).
+func period_word(s: Dictionary) -> String:
+	return "this week" if in_campaign(s) else "this month"
+
 func can_act(s: Dictionary, cost := 0.0) -> String:
 	if s.result: return "The election is over."
-	if s.actionsLeft <= 0: return "No actions left this month."
+	if s.actionsLeft <= 0: return "No actions left %s." % period_word(s)
 	if s.money < cost: return "Needs ₱%sM." % str(cost)
 	return ""
 

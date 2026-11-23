@@ -13,6 +13,7 @@ func drop_signature(s: Dictionary, key: String) -> void:
 
 # ---------- Communities ----------
 func act_community(s: Dictionary, city: String) -> Dictionary:
+	if in_campaign(s): return {"ok": false, "text": "No time to build during the campaign."}
 	var lvl = community_level(s, city)
 	if lvl >= COMMUNITY_MAX: return {"ok": false, "text": "Your community in %s is as big as it gets." % city}
 	var cost: float = COMMUNITY_COST[lvl]
@@ -133,6 +134,7 @@ func _replace_figure(s: Dictionary, gone: Dictionary) -> void:
 
 # ---------- Steering the party ----------
 func steer_block(s: Dictionary, axis: String, dir: int) -> String:
+	if in_campaign(s): return "No time to steer the party during the campaign."
 	if s.steer: return "You are already steering the party on %s." % by_id(AXES, s.steer.axis).issue.to_lower()
 	var st = stance_of(player_party(s).manifesto[axis])
 	if st + dir < 0 or st + dir > 4: return "The manifesto can't go further that way."

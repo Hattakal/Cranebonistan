@@ -21,6 +21,7 @@ var stripes = {}              # district id -> [Color, 0..1]: your colour stripe
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
 var communities = {}          # city name -> level of your party's community
+var route_stops: Array = []   # the convoy: [{pos (map), n, done}], drawn as a numbered line
 var rival_tags: Array = []    # rivals campaigning: [{district, short, color, fresh}], small tags on the vote map
 var pins: Array = []          # local stories and events: [{id, district, region, title}]; no district: the whole region
 var _pin_rects = {}           # story id -> Rect2 (screen)
@@ -320,6 +321,7 @@ func _draw() -> void:
 	_plates.clear()
 	if zoom >= 1.5: _seat_badges(s)   # seat numbers only when zoomed in; the tooltip always has them
 	_labels(s)
+	_route(s)
 	_rival_tags(s)
 	_pins(s)
 	_legend()
@@ -459,6 +461,28 @@ func _labels(s: float) -> void:
 		var sh: String = shares.get(a.id, "")
 		if sh != "":
 			_text(to_screen(Vector2(a.label[0], a.label[1] + 44 * k)), sh, Look.font("display"), int(maxf(12, 34 * maxf(k, 0.75) * s)), Color(Look.TXT, 0.8), halo)
+
+## The convoy's route: a line through its stops, each numbered by week; the ones already
+## made are faint, the next one ringed.
+func _route(s: float) -> void:
+	if route_stops.is_empty(): return
+	var col: Color = Look.lit(party_color)
+	var pts = route_stops.map(func(r): return to_screen(r.pos))
+	for i in range(1, pts.size()):
+		var done: bool = route_stops[i].done
+		draw_line(pts[i - 1], pts[i], Color(Look.N950, 0.8), maxf(4.0, 7 * s), true)
+		draw_line(pts[i - 1], pts[i], Color(col, 0.45 if done else 0.95), maxf(2.0, 3.5 * s), true)
+	var f = Look.font("display_bold")
+	var r = maxf(9.0, 17 * s)
+	var next_shown = false
+	for i in pts.size():
+		var st: Dictionary = route_stops[i]
+		draw_circle(pts[i], r + 2, Look.N950)
+		draw_circle(pts[i], r, Color(col, 0.5) if st.done else col)
+		if not st.done and not next_shown:
+			draw_arc(pts[i], r + 5, 0, TAU, 32, Look.LAMP, 2.0, true)
+			next_shown = true
+		_text(pts[i] + Vector2(0, r * 0.45), str(st.n), f, int(r * 1.2), Look.N950)
 
 ## Rival parties campaigning in a province lately: a small pennant in their colour, solid
 ## when they were there this month, faint the month after (the tooltip names them).

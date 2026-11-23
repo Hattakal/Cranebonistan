@@ -370,6 +370,10 @@ func _front_summary(s: Dictionary, front) -> Dictionary:
 			return {"kicker": "Year one", "title": "The big interview", "text": "An hour on %s with %s. The country is about to meet you." % [s.interview.outletName, s.interview.who], "stamp": "On air"}
 		"debate":
 			return {"kicker": "Live on CBC", "title": "The final debate", "text": "Seven million people are watching. Your rivals have been reading your old quotes.", "stamp": "Tonight"}
+		"convoy":
+			return {"kicker": "The campaign", "title": "Plan the convoy", "text": "%d weeks to go. Where does the convoy stop each week?" % int(game.C.campaign.weeks), "stamp": "Plan it"}
+		"rally":
+			return {"kicker": "On the road", "title": "The convoy in %s" % front.res.place, "text": "Your vote there: %s%% → %s%%." % [Game.fmt1(float(front.res.before) * 100), Game.fmt1(float(front.res.after) * 100)], "stamp": "Read it"}
 		"election":
 			return {"kicker": "Election night", "title": "The results are in", "text": "", "stamp": "Open"}
 	return {}
@@ -385,6 +389,7 @@ func _pim_note(s: Dictionary) -> String:
 	if game.visit_block(s) == "" and s.week < 8: return "First things first, boss: pick a district on the map and go and shake some hands. Once a month, and it costs us nothing."
 	if n > 0 and hottest and hottest.heat >= 50: return "Everyone's talking about %s. %d action%s left. Whatever you say about it, I'm sure it'll be the right thing." % [hottest.title.to_lower(), n, "" if n == 1 else "s"]
 	if n > 0 and agenda: return "%d action%s left this month, and nobody has started this month's argument yet. Could be you, boss." % [n, "" if n == 1 else "s"]
+	if n > 0 and game.in_campaign(s): return "%d action%s left this week. The convoy rolls on either way, boss." % [n, "" if n == 1 else "s"]
 	if n > 0: return "%d action%s left this month. Whenever you're ready." % [n, "" if n == 1 else "s"]
 	if s.money > 6 and nb >= 0: return "We're sitting on ₱%sM. Next budget in %s. I've kept the donors happy." % [Game.fmt1(s.money), game.date_label(nb, false)]
 	return "Quiet week. I've moved the bad news to Monday."

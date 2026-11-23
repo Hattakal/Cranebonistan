@@ -16,7 +16,7 @@
 ##    enmities count as neutral, and the talks start again. If that fails too, there
 ##    is no government.
 ## Settings and texts: data/coalition.json.
-extends "res://scripts/rules/moments.gd"
+extends "res://scripts/rules/campaign.gd"
 
 ## A text from data/coalition.json TEXT. `you`: the player's party is the one it is
 ## about, so use the "<key>_you" version when there is one.

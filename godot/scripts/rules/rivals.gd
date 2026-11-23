@@ -200,7 +200,7 @@ func rivals_turn(s: Dictionary, now: Dictionary) -> void:
 	for p in rivals(s):
 		if not p.has("money"): p.money = 5.0 + 6.0 * float(p.get("establishment", 0.5))
 		if quarter: p.money = float(p.money) + rival_income(s, p, float(now.get(p.id, 0)))
-		_rival_trip(s, p, proj)
+		if not in_campaign(s): _rival_trip(s, p, proj)   # in the campaign they tour on their convoy (campaign.gd)
 		_rival_ads(s, p)
 		_rival_media(s, p)
 		_rival_dig(s, p, now)
@@ -222,10 +222,14 @@ func _rival_trip(s: Dictionary, p: Dictionary, proj: Dictionary) -> void:
 		var v: float = float(d.seats) * (0.13 - gap) * (0.7 + rand(s) * 0.6)
 		if v > best_v: best_v = v; best = d
 	if best == null: return
+	rival_visit(s, p, best)
+
+## A rival's leader in a province: a monthly trip, or a stop of its campaign convoy.
+func rival_visit(s: Dictionary, p: Dictionary, best: Dictionary, mult := 1.0) -> void:
 	var st: Dictionary = s.districts[best.id]
 	if not st.has("rtrip"): st.rtrip = {}
 	var had: float = float(st.rtrip.get(p.id, 0))
-	st.rtrip[p.id] = minf(0.8, had + VISIT_GOODWILL * RIVAL_EDGE * sqrt(float(p.charisma) / 50.0) / (1.0 + 2.0 * had))
+	st.rtrip[p.id] = minf(0.8, had + mult * VISIT_GOODWILL * RIVAL_EDGE * sqrt(float(p.charisma) / 50.0) / (1.0 + 2.0 * had))
 	if not st.has("rtripWeek"): st.rtripWeek = {}
 	st.rtripWeek[p.id] = s.week   # shown on the map: who has been campaigning where
 	rival_move(s, p, "%s toured %s." % [p.leader, best.name])

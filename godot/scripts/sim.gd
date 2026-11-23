@@ -252,6 +252,9 @@ func run_hooks(s: Dictionary) -> void:
 	if INTERVIEW.size() and c.week == interview_week(): start_interview(s)
 	if c.week == flagship_week() and FLAGSHIP.size(): s.queue.append({"type": "event", "event": flagship_event(s)})
 	if c.isMonthStart: monthly_event(s)
+	# the official campaign: the plan the week before, then a convoy stop every week
+	if c.week == campaign_start_week() - 1: campaign_start(s)
+	if in_campaign(s): campaign_weekly(s)
 	if c.weekOfMonth == 2 and not c.isYearEnd: take_poll(s, "Tracking poll", true)
 	if c.isYearEnd: take_poll(s, "Annual poll %d" % calendar(s.week).year)
 	flush_news(s)

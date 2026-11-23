@@ -222,7 +222,7 @@ func _build() -> void:
 	_map.tip_provider = _tip
 	_map.region_clicked.connect(func(id): _files.S = S; _files.open_region(id); _sync_menu())
 	_map.foreign_clicked.connect(func(id): _country_sheet(id))
-	_map.district_clicked.connect(func(id): _district_sheet(id))
+	_map.district_clicked.connect(func(id): _route_pick(id) if _route_edit else _district_sheet(id))
 	_map.pin_clicked.connect(func(id): _story_clicked(id))
 	right.add_child(_map)
 	_build_map_modes()
@@ -627,11 +627,45 @@ var _map_mode := "vote"
 var _mode_buttons := {}
 var _profiles := {}     # district id -> what it is like now (G.district_profiles), for the modes and tooltips
 
+var _convoy_btn: Button
+var _route_bar: HBoxContainer
+var _route_note: Label
+
 func _build_map_modes() -> void:
 	var row = HBoxContainer.new()
 	row.add_theme_constant_override("separation", 4)
 	row.position = Vector2(14, 14)
 	_map.add_child(row)
+	# the campaign convoy: its plan, and the bar shown while choosing stops on the map
+	_convoy_btn = Button.new()
+	_convoy_btn.text = "THE CAMPAIGN"
+	_convoy_btn.focus_mode = Control.FOCUS_NONE
+	_convoy_btn.add_theme_font_override("font", Look.spaced("display_bold", 2))
+	_convoy_btn.add_theme_font_size_override("font_size", Look.fs(12))
+	Look.dark_button(_convoy_btn, false, false, 5)
+	_convoy_btn.pressed.connect(func(): _convoy_sheet(false))
+	_convoy_btn.visible = false
+	row.add_child(_convoy_btn)
+	_route_bar = HBoxContainer.new()
+	_route_bar.add_theme_constant_override("separation", 8)
+	_route_bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	_route_bar.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_route_bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_route_bar.position -= Vector2(14, 14)
+	_route_bar.visible = false
+	_map.add_child(_route_bar)
+	_route_note = Look.dlabel("", "display_bold", 15, Look.TXT)
+	_route_note.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_route_bar.add_child(_route_note)
+	for spec in [["Undo", _route_undo, false], ["Cancel", func(): _route_finish(false), false], ["Done", func(): _route_finish(true), true]]:
+		var b = Button.new()
+		b.text = String(spec[0]).to_upper()
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_override("font", Look.spaced("display_bold", 2))
+		b.add_theme_font_size_override("font_size", Look.fs(13))
+		Look.dark_button(b, spec[2], false, 7)
+		b.pressed.connect(spec[1])
+		_route_bar.add_child(b)
 	for m in G.MAPMODES.get("MODES", []):
 		var b = Button.new()
 		b.text = String(m.name).to_upper()
@@ -666,6 +700,7 @@ func _render_map() -> void:
 	_map.shares = {}
 	_map.hot = {}
 	_map.legend_ramp = []
+	_map.route_stops = []
 	_map.pins = []
 	_map.rival_tags = []
 	_map.communities = S.communities
@@ -673,6 +708,12 @@ func _render_map() -> void:
 	for f in G.FOREIGN:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
 	_profiles = G.district_profiles(S)
+	_convoy_btn.visible = S.has("convoy") and not S.result
+	_route_bar.visible = _route_edit
+	if _route_edit:
+		_paint_route_edit()
+		_map.queue_redraw()
+		return
 	var info: Dictionary = _mode_info()
 	_map.legend_title = String(info.get("title", "IF THE ELECTION WERE TODAY"))
 	if _map_mode == "local":
@@ -695,6 +736,7 @@ func _render_map() -> void:
 			_map.shares[r.id] = "You %d%%" % Game.jround(poll.regions[r.id].player * 100)
 	var proj: Dictionary = S.get("projection", {})
 	_paint_result(proj, true)
+	if S.has("convoy") and not S.result: _map.route_stops = _route_marks(S.convoy.route, _route_open_from())
 	# where the other parties have been campaigning
 	for d in G.DISTRICTS:
 		var st: Dictionary = S.districts.get(d.id, {})
@@ -709,6 +751,25 @@ func _render_map() -> void:
 	_map.legend = _seat_legend(seats)
 	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none. Flags: other parties on tour lately." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100)]) if poll else "No poll yet."
 	_map.queue_redraw()
+
+func _route_marks(route: Array, open_from: int) -> Array:
+	var out = []
+	for i in route.size(): out.append({"pos": G.district_centre(G.district_by_id(route[i])), "n": i + 1, "done": i < open_from})
+	return out
+
+## Choosing the convoy's stops: the provinces within a week's reach of the last stop lit,
+## the rest dark, and the route so far drawn over them.
+func _paint_route_edit() -> void:
+	var prev: String = _route_draft[-1] if _route_draft.size() else ""
+	for d in G.DISTRICTS:
+		var ok: bool = not _route_draft.has(d.id) and G.convoy_reaches(prev, d.id)
+		_map.fills[d.id] = Look.mix(Look.LAND, Look.LAMP, 0.45) if ok else Look.mix(Look.LAND, Look.N500, 0.2)
+	_map.route_stops = _route_marks(_route_draft, _route_from)
+	_route_note.text = "STOP %d OF %d · PICK A LIT PROVINCE" % [mini(_route_draft.size() + 1, int(G.C.campaign.stops)), int(G.C.campaign.stops)]
+	_map.legend = []
+	_map.legend_title = "PLANNING THE CONVOY"
+	_map.legend_note = "Lit: within a week's reach of the last stop. Done fills the rest of the route for you."
+	_map.legend_ramp = []
 
 ## Each district in the colour of whoever wins it: deep when safe, pale when close. `live`:
 ## today's projection (flash on a change of hands, your share as stripes) or a past result.
@@ -940,6 +1001,8 @@ func _open_front() -> void:
 		"debate": _debate_sheet()
 		"interview": _interview_sheet()
 		"election": _election_sheet()
+		"convoy": _convoy_sheet(true)
+		"rally": _rally_sheet(front)
 
 func _done(p: Paper) -> void:
 	p.close()
@@ -1570,13 +1633,14 @@ func _district_sheet(id: String) -> void:
 		_files.S = S; _files.open_region(d.region); _sync_menu(), false), p.button("Close", func(): p.close(), false), go])
 
 ## The trip, as the local paper ran it: a photo, a short story, and what it did to the vote.
-func _tour_result(p: Paper, res: Dictionary) -> void:
+func _tour_result(p: Paper, res: Dictionary, from_desk := false) -> void:
 	p.clear()
 	p._paper.custom_minimum_size.x = 860   # the district sheet is narrow; the story gets a full page
 	var r = Game.by_id(G.REGIONS, res.region)
-	p.source("The %s Courier" % r.name, "On the road · %s" % G.date_label(S.week, false))
-	p.kicker("%s in %s" % [G.player_party(S).leader, res.place])
-	var heads = {"great": "%s packs the halls in %s", "good": "%s makes the rounds in %s", "flat": "A quiet visit to %s for %s"}
+	var rally: bool = res.get("rally", false)
+	p.source("The %s Courier" % r.name, "%s · %s" % ["The campaign" if rally else "On the road", G.date_label(S.week, false)])
+	p.kicker(("The convoy in %s · week %d of %d" % [res.place, G.campaign_stop_index(S) + 1, int(G.C.campaign.weeks)]) if rally else ("%s in %s" % [G.player_party(S).leader, res.place]))
+	var heads = {"great": "%s packs the square in %s", "good": "%s rallies %s", "flat": "A thin crowd in %s for %s"} if rally else {"great": "%s packs the halls in %s", "good": "%s makes the rounds in %s", "flat": "A quiet visit to %s for %s"}
 	var head: String = heads.get(res.kind, "%s in %s")
 	p.heading(head % ([G.player_party(S).leader, res.place] if res.kind != "flat" else [res.place, G.player_party(S).leader]), 34)
 	var photo = TourPhoto.new()
@@ -1590,13 +1654,109 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	if String(res.get("vignette", "")) != "": p.boxed("Also on the road", res.vignette)
 	var b: int = Game.jround(float(res.before) * 100)
 	var a: int = Game.jround(float(res.after) * 100)
-	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.GOOD if a > b else Look.INK))
+	# small moves in big provinces: one decimal, so a real gain doesn't read as nothing
+	var bt: String = ("%d%%" % b) if a != b else "%s%%" % Game.fmt1(float(res.before) * 100)
+	var at: String = ("%d%%" % a) if a != b else "%s%%" % Game.fmt1(float(res.after) * 100)
+	p.add(Look.label("Your vote in %s: %s → %s" % [res.place, bt, at], "news_bold", 24, Look.GOOD if float(res.after) > float(res.before) + 0.0005 else Look.INK))
 	if res.why.size():
 		var w: String = ", ".join(res.why)
 		p.small(w.substr(0, 1).to_upper() + w.substr(1) + ".", Look.INK)
-	p.small("The rest of %s heard about it too, a little." % r.name)
-	p.actions([p.button("Back to work", func(): _done(p))])
+	p.small(("The provinces close by heard about it too, a little.") if rally else ("The rest of %s heard about it too, a little." % r.name))
+	p.actions([p.button("Back to work", func():
+		if from_desk and S.queue.size() and S.queue[0].type == "rally": G.dismiss_front(S)
+		_done(p))])
 	p.top()
+
+## This week's convoy stop, as the local paper ran it.
+func _rally_sheet(front: Dictionary) -> void:
+	var p = _paper(860)
+	_tour_result(p, front.res, true)
+
+# ---------- The campaign convoy ----------
+var _route_edit := false     # choosing stops on the map
+var _route_from := 0         # the first stop being chosen
+var _route_draft: Array = [] # the route as it stands while choosing
+
+## The first stop that can still be changed (the ones before it have happened).
+func _route_open_from() -> int:
+	return maxi(0, G.campaign_stop_index(S) + 1) if G.in_campaign(S) else 0
+
+## The convoy's route: where it has been and where it goes next.
+func _convoy_sheet(from_desk := false) -> void:
+	var p = _paper(720)
+	var weeks: int = int(G.C.campaign.weeks)
+	p.source("Campaign headquarters", "The campaign · %s" % G.date_label(S.week, false))
+	p.heading("The convoy", 34)
+	p.text("One rally a week, in a different province each time. The convoy can only travel so far in a week, so the route runs from neighbour to neighbour. The rest of the country hears a little about each stop; the provinces close by a little more.", 15)
+	var route: Array = S.get("convoy", {}).get("route", [])
+	var open_from: int = _route_open_from()
+	var lines = []
+	for i in route.size():
+		var d = G.district_by_id(route[i])
+		var mark: String = "✓ " if i < open_from else ""
+		lines.append("%sWeek %d · %s · %d seat%s" % [mark, i + 1, d.name, int(d.seats), "" if int(d.seats) == 1 else "s"])
+	p.text("\n".join(lines), 15)
+	if S.get("rivalConvoys", {}).size():
+		var rl = []
+		for pid in S.rivalConvoys:
+			var pr = G.party_of(S, pid)
+			var nx: Array = S.rivalConvoys[pid].slice(open_from, open_from + 3).map(func(id): return G.district_by_id(id).name)
+			if pr and nx.size(): rl.append("%s: %s" % [pr.short, ", ".join(nx)])
+		if rl.size(): p.small("Next on the rivals' convoys: " + "; ".join(rl) + ".")
+	if G.in_campaign(S):
+		p.rule(2)
+		p.heading("Adverts", 24)
+		p.text("A national advert campaign: every channel, every phone, for a week. Everyone sees it; each one after the first does a little less. Uses one of this week's actions.", 15)
+		var cost: float = float(G.C.campaign.adCost)
+		var blocked: String = G.can_act(S, cost)
+		if S.queue.size() and not from_desk: blocked = "Finish the decision on your desk first."
+		var ad = p.button("Run a national advert campaign · ₱%sM" % Game.fmt1(cost), func():
+			var r: Dictionary = G.act_ad_campaign(S)
+			_toast(r.text)
+			p.close()
+			_after_change(), false)
+		ad.disabled = blocked != ""
+		ad.tooltip_text = blocked
+		p.add(ad)
+	var acts = []
+	if open_from < weeks:
+		acts.append(p.button("Change the route", func():
+			p.close()
+			_route_edit = true
+			_route_from = open_from
+			_route_draft = route.slice(0, open_from)
+			_toast("Click the provinces in order. Lit ones are within a week's reach.")
+			_render_map(), false))
+	acts.append(p.button("Keep this route", func():
+		if from_desk and S.queue.size() and S.queue[0].type == "convoy": G.dismiss_front(S)
+		_done(p)))
+	p.actions(acts)
+
+func _route_undo() -> void:
+	if _route_draft.size() > _route_from: _route_draft.pop_back()
+	_render_map()
+
+## A province clicked while choosing the route.
+func _route_pick(id: String) -> void:
+	if _route_draft.has(id): _toast("The convoy goes to each province once."); return
+	var prev: String = _route_draft[-1] if _route_draft.size() else ""
+	if not G.convoy_reaches(prev, id): _toast("Too far from %s for one week on the road." % G.district_by_id(prev).name); return
+	_route_draft.append(id)
+	if _route_draft.size() >= int(G.C.campaign.stops): _route_finish(true)
+	else: _render_map()
+
+## Done choosing (or cancelled): stops not chosen are planned to follow on.
+func _route_finish(keep: bool) -> void:
+	if keep and _route_draft.size() > _route_from:
+		var tail: Array = _route_draft.slice(_route_from)
+		var n_left: int = int(G.C.campaign.stops) - _route_draft.size()
+		if n_left > 0: tail.append_array(G.plan_route(S, "player", n_left, _route_draft[-1], _route_draft))
+		var err: String = G.set_route(S, _route_from, tail)
+		if err != "": _toast(err)
+		else: _save()
+	_route_edit = false
+	_render_map()
+	_after_change()
 
 ## The picture with the story: godot/assets/tours/<region>_<kind>.jpg, or tours/<kind>.jpg
 ## (kind: great, good, flat). Until those exist, a drawn stand-in in the same two inks:
@@ -1932,6 +2092,8 @@ func _shot(args: Dictionary) -> void:
 		for id in String(args.queue).split(",", false): G.queue_event(S, id)
 		render()
 	if args.has("mapmode"): _set_map_mode(String(args.mapmode))
+	if args.has("routeedit") and S.has("convoy"):   # choosing the convoy's stops, three picked
+		_route_edit = true; _route_from = 0; _route_draft = S.convoy.route.slice(0, int(args.routeedit)); _render_map()
 	if args.has("file"):
 		if args.has("clear"): S.queue.clear()
 		_show_file(args.file)
