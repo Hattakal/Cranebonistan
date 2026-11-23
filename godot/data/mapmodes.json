@@ -6,7 +6,7 @@
   {"id": "issues", "name": "Issues", "title": "WHAT EACH PROVINCE CARES MOST ABOUT", "note": "The issue that matters most to the voters there, this month."},
   {"id": "fed", "name": "Fed up", "title": "FED UP WITH THE SYSTEM", "note": "How tired voters are of politicians and parties as they are. Fed-up voters listen to outsiders.", "low": "Content", "high": "Fed up"},
   {"id": "distress", "name": "Distress", "title": "DISTRESS", "note": "Hard times and distrust of the system together. It rises when jobs go, prices climb and trust falls.", "low": "Calm", "high": "Distressed"},
-  {"id": "past", "name": "2026", "title": "THE 2026 ELECTION", "note": "Who won each province last time. The NUP and the CLF formed the government."}
+  {"id": "past", "name": "2026", "title": "THE 2026 ELECTION", "note": "Who won each province last time. The NUP and the CLF came out nearly level and govern together, under the NUP's leader."}
  ],
  "LEVELS": ["Hardly", "Somewhat", "Quite", "Very"],
  "DISTRESS": {
