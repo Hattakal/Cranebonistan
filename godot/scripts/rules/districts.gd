@@ -320,6 +320,10 @@ func seat_allocation(res: Dictionary) -> Dictionary:
 ## province, or any province of the listed regions ("city": true for one with a town).
 func place_story(s: Dictionary, it: Dictionary) -> Dictionary:
 	var w: Dictionary = it.get("where", {})
+	if w.has("region"):   # the whole region, no one province
+		var r = by_id(REGIONS, String(w.region))
+		if r == null: return {}
+		return {"district": "", "city": String(r.name), "province": String(r.name), "region": String(r.id), "whole": true}
 	var pool: Array = []
 	if w.has("province"): pool = DISTRICTS.filter(func(d): return d.id == String(w.province))
 	elif w.has("regions"):
@@ -362,12 +366,39 @@ func story_turns_up(s: Dictionary, id: String) -> Dictionary:
 ## You spoke up about a local story: its province hears you, and remembers for a trip.
 func heard_locally(s: Dictionary, id: String) -> void:
 	var it: Dictionary = story(s, id)
-	var did: String = String(it.get("district", ""))
-	if did == "": return
+	heard_in(s, {"district": it.get("district", "")}, String(it.title))
+
+## You spoke up about something that happened in a place: a province (or every province
+## of a region, each half as much) hears you, and remembers it for a trip there.
+func heard_in(s: Dictionary, place: Dictionary, title: String) -> void:
+	var ids: Array = []
+	var k = 1.0
+	if String(place.get("district", "")) != "": ids = [String(place.district)]
+	elif place.get("whole", false):
+		ids = DISTRICTS.filter(func(d): return d.region == String(place.get("region", ""))).map(func(d): return d.id)
+		k = LOCAL_REGION_SHARE
+	if ids.is_empty(): return
 	if not s.has("localSpoke"): s.localSpoke = {}
-	var t: String = String(it.title)
-	s.localSpoke[did] = {"week": s.week, "title": t.substr(0, 1).to_lower() + t.substr(1)}
-	district_boost(s, did, LOCAL_STORY_AWARE, LOCAL_STORY_GOODWILL)
+	for did in ids:
+		s.localSpoke[did] = {"week": s.week, "title": title.substr(0, 1).to_lower() + title.substr(1)}
+		district_boost(s, did, LOCAL_STORY_AWARE * k, LOCAL_STORY_GOODWILL * k)
+
+## An event that happens somewhere ("where" in content.json EVENTS): its place is picked
+## now, and a copy with the names filled in goes on the desk.
+func placed_event(s: Dictionary, ev: Dictionary) -> Dictionary:
+	var out: Dictionary = ev.duplicate(true)
+	var pl: Dictionary = place_story(s, ev)
+	if pl.is_empty(): return out
+	out.place = pl
+	var reg = by_id(REGIONS, String(pl.region))
+	var names = {"city": pl.city, "province": pl.province, "region": reg.name if reg else ""}
+	out.title = String(out.title).format(names)
+	out.text = String(out.text).format(names)
+	if out.get("government"): out.government.text = String(out.government.text).format(names)
+	for ch in out.get("choices", []):
+		ch.label = String(ch.label).format(names)
+		for l in ch.get("lines", []): l.text = String(l.text).format(names)
+	return out
 
 ## The last election (2026): the country as it stands at the start, without your party,
 ## which didn't exist yet. Stored once, when the game begins.

@@ -76,6 +76,14 @@ func queue_event(s: Dictionary, id) -> void:
 	var ev = event_by_id(id)
 	if ev == null: return
 	event_news(s, ev)
+	if ev.has("where"):   # it happens somewhere: pin it on the map
+		var placed: Dictionary = placed_event(s, ev)
+		s.queue.append({"type": "event", "id": id, "event": placed})
+		if placed.has("place"):
+			if not s.has("eventPins"): s.eventPins = []
+			s.eventPins = s.eventPins.filter(func(e): return s.week - int(e.week) <= EVENT_PIN_MONTHS * WEEKS_PER_MONTH)
+			s.eventPins.append({"id": str(id), "title": placed.title, "week": s.week, "district": placed.place.district, "region": placed.place.region})
+		return
 	s.queue.append({"type": "event", "id": id})
 
 ## choice_index: what you say. line_index: how you say it (-1 = no sound bite).
@@ -105,6 +113,7 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 		delivery = deliver_line(s, line)
 		quote = line.text
 		tone = line.tone
+	if ev.get("place"): heard_in(s, ev.place, String(ev.title))   # it happened there: they heard what you said
 	var statement: bool = not fx.has("defect") and not str(ev.id).begins_with("defectors_") and ev.get("kind", "") != "secret"
 	record_statement(s, {"text": quote if quote else choice.label, "title": ev.title, "effects": fx, "tone": tone, "spoken": quote != null, "statement": statement})
 	s.flags["seen:" + str(ev.id)] = s.week

@@ -9,7 +9,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 44
+const SAVE_VERSION := 45
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -436,6 +436,8 @@ const LOCAL_STORY_GOODWILL := 0.03
 const STORY_RETURN_MONTHS := [2, 4]  # this many months after it left the news
 const STORY_RETURN_TRUST := 1.0      # trust in politics lost when it does
 const STORY_RETURN_CHANCE := 0.6     # not every unsolved problem makes the news again
+const LOCAL_REGION_SHARE := 0.5      # a region-wide event: each of its provinces hears you half as much
+const EVENT_PIN_MONTHS := 2          # how long an event stays pinned on the Local map
 
 ## Seats each party would win if the election were today.
 ## The district's winner takes two-thirds of its seats (rounded up); the rest

@@ -21,7 +21,7 @@ var stripes = {}              # district id -> [Color, 0..1]: your colour stripe
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
 var communities = {}          # city name -> level of your party's community
-var pins: Array = []          # local stories: [{id, district, title}], drawn as pins
+var pins: Array = []          # local stories and events: [{id, district, region, title}]; no district: the whole region
 var _pin_rects = {}           # story id -> Rect2 (screen)
 var party_color := Look.RED
 var _shown = {}               # colours on screen, easing towards fills
@@ -466,13 +466,19 @@ func _pins(s: float) -> void:
 	var fs = int(maxf(11, 24 * s))
 	var halo = Color(Look.N950, 0.85)
 	for p in pins:
-		var d = null
-		for x in districts:
-			if x.id == p.district: d = x
-		if d == null: continue
-		var n: int = int(per.get(p.district, 0))
-		per[p.district] = n + 1
-		var c = to_screen(Vector2(d.label[0], d.label[1] - 30)) + Vector2(0, n * fs * 1.6)
+		var spot = null   # where the pin goes: the province's label, or the region's (under its name)
+		var key: String = String(p.get("district", ""))
+		if key != "":
+			for x in districts:
+				if x.id == key: spot = Vector2(x.label[0], x.label[1] - 30)
+		else:
+			key = String(p.get("region", ""))
+			for a in areas:
+				if a.kind == "region" and a.id == key: spot = Vector2(a.label[0], a.label[1] + 40)
+		if spot == null: continue
+		var n: int = int(per.get(key, 0))
+		per[key] = n + 1
+		var c = to_screen(spot) + Vector2(0, n * fs * 1.6)
 		var r = maxf(6.0, 12 * s)
 		var on: bool = hover == p.id
 		draw_circle(c, r + 3, Color(Look.N950, 0.7))

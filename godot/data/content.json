@@ -1295,6 +1295,7 @@
    "leader": 0.03
   }
  },
+ "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}.",
  "EVENTS": [
   {
    "id": "pezo_slide",
@@ -1700,7 +1701,7 @@
    }
   },
   {
-   "id": "rent_crisis",
+   "id": "rent_crisis", "where": {"province": "cranbia_3"},
    "trust": -3,
    "kind": "crisis",
    "title": "Rents in Cranebo double in three years",
@@ -2260,10 +2261,10 @@
    }
   },
   {
-   "id": "port_automation", "sourceRegion": "yamlin",
+   "id": "port_automation", "where": {"regions": ["yamlin"], "city": true}, "sourceRegion": "yamlin",
    "kind": "regional",
-   "title": "Robots replace dock workers in Yamlin",
-   "text": "The Port of Yamlin will automate its container terminal, cutting 6,000 jobs. The owners promise lower prices for everyone.",
+   "title": "Robots replace dock workers in {city}",
+   "text": "The port of {city} will automate its container terminal, cutting 6,000 jobs. The owners promise lower prices for everyone.",
    "choices": [
     {
      "label": "Demand a ban on port automation",
@@ -2558,9 +2559,9 @@
    }
   },
   {
-   "id": "norbanian_boats",
+   "id": "norbanian_boats", "where": {"regions": ["yamlin"], "city": true},
    "kind": "crisis",
-   "title": "Refugee ships dock in Yamlin",
+   "title": "Refugee ships dock in {city}",
    "text": "Three overcrowded ships from war-torn Norbanistan arrived overnight. Two thousand people are waiting on the quay. Dock workers are blocking the gates, and the shipping companies want them let in.",
    "choices": [
     {
@@ -2848,7 +2849,7 @@
    }
   },
   {
-   "id": "alinnian_schools", "sourceRegion": "alinni",
+   "id": "alinnian_schools", "where": {"region": "alinni"}, "sourceRegion": "alinni",
    "kind": "regional",
    "title": "Alinnian-language schools bill",
    "text": "A bill would let schools in Alinni teach in the Alinnian language. Alinnian parents have campaigned for it for decades. Nationalists call it the first step to separation.",
@@ -3043,7 +3044,7 @@
    ]
   },
   {
-   "id": "festival_holiday",
+   "id": "festival_holiday", "where": {"region": "erland"},
    "kind": "opportunity",
    "title": "Make Harvest Day a national holiday?",
    "text": "Erland's ancient Harvest Day festival is hugely popular, and a petition to make it a national holiday has a million signatures. Business groups grumble about lost working days.",
@@ -3148,7 +3149,7 @@
    ]
   },
   {
-   "id": "crime_wave",
+   "id": "crime_wave", "where": {"province": "cranbia_3"},
    "trust": -3,
    "kind": "crisis",
    "title": "Robberies surge in Cranebo",
@@ -3672,10 +3673,10 @@
    ]
   },
   {
-   "id": "dillihan_border",
+   "id": "dillihan_border", "where": {"regions": ["fauraifai"]},
    "kind": "foreign",
    "title": "Dillihan patrol enters Fauran pastures",
-   "text": "A Dillihan border patrol crossed into grazing land claimed by Fauran farmers and impounded two hundred head of cattle. The government has issued a \"strongly worded note\". The farmers say nobody in Cranebo cares about them.",
+   "text": "A Dillihan border patrol crossed into grazing land in {province} claimed by Fauran farmers and impounded two hundred head of cattle. The government has issued a \"strongly worded note\". The farmers say nobody in Cranebo cares about them.",
    "choices": [
     {
      "label": "Demand a firm military response",
@@ -4177,7 +4178,7 @@
    ]
   },
   {
-   "id": "dillihan_pipeline",
+   "id": "dillihan_pipeline", "where": {"region": "fauraifai"},
    "kind": "foreign",
    "title": "Dillihan proposes a gas pipeline through Fauran",
    "text": "Dillihan wants to build a pipeline across Fauran to the port of Yamlin. It would bring jobs and transit fees, but Fauran's farmers say it will cut through fields their families have worked for centuries.",
@@ -4406,11 +4407,11 @@
    ]
   },
   {
-   "id": "yamlin_flood",
+   "id": "yamlin_flood", "where": {"regions": ["yamlin"], "city": true},
    "trust": -4,
    "kind": "opportunity",
-   "title": "Floods devastate Yamlin's old town",
-   "text": "Three days of storms have flooded Yamlin's old town. Thousands have lost their homes. The prime minister is on holiday and has not commented yet.",
+   "title": "Floods devastate {city}'s old town",
+   "text": "Three days of storms have flooded {city}'s old town. Thousands have lost their homes. The prime minister is on holiday and has not commented yet.",
    "choices": [
     {
      "label": "Go there today and fill sandbags with volunteers",
@@ -4757,10 +4758,10 @@
    ]
   },
   {
-   "id": "fauraifai_quake",
+   "id": "fauraifai_quake", "where": {"regions": ["fauraifai"]},
    "kind": "opportunity",
-   "title": "Earthquake in Fauran",
-   "text": "A strong earthquake has hit the hills of Fauran. Whole villages are cut off and the roads are broken. Aid is slow to arrive from Cranebo.",
+   "title": "Earthquake in {province}",
+   "text": "A strong earthquake has hit the hills of {province}, in Fauran. Whole villages are cut off and the roads are broken. Aid is slow to arrive from Cranebo.",
    "choices": [
     {
      "label": "Organise a party aid convoy",
@@ -5006,7 +5007,7 @@
    }
   },
   {
-   "id": "smog_cranbia", "sourceRegion": "cranbia",
+   "id": "smog_cranbia", "where": {"region": "cranbia"}, "sourceRegion": "cranbia",
    "trust": -2,
    "kind": "regional",
    "title": "Smog chokes Cranbia",
@@ -5101,7 +5102,7 @@
    ]
   },
   {
-   "id": "nomad_schools", "sourceRegion": "fauran",
+   "id": "nomad_schools", "where": {"region": "fauraifai"}, "sourceRegion": "fauran",
    "kind": "regional",
    "title": "Travelling teachers for Fauran's villages",
    "text": "Only half of the children in Fauran's hill villages finish school: the nearest one is often two hours away by bus. A charity proposes travelling teachers who go from village to village.",
@@ -5189,7 +5190,7 @@
    ]
   },
   {
-   "id": "erland_drought", "sourceRegion": "erland",
+   "id": "erland_drought", "where": {"region": "erland"}, "sourceRegion": "erland",
    "trust": -2,
    "kind": "regional",
    "title": "Drought hits the Erland harvest",
@@ -5428,7 +5429,7 @@
    }
   },
   {
-   "id": "cranbia_strike",
+   "id": "cranbia_strike", "where": {"region": "cranbia"},
    "kind": "crisis",
    "title": "Metalworkers strike in Cranbia",
    "text": "Forty thousand metalworkers have walked out across Cranbia's industrial belt over wages eaten by inflation. Factory owners say they cannot pay more without closing plants.",
@@ -6305,7 +6306,7 @@
    ]
   },
   {
-   "id": "alinni_protests",
+   "id": "alinni_protests", "where": {"region": "alinni"},
    "kind": "followup",
    "deck": false,
    "title": "Mass protests in Alinni over your remarks",
@@ -7020,7 +7021,7 @@
    ]
   },
   {
-   "id": "dock_raids",
+   "id": "dock_raids", "where": {"region": "yamlin"},
    "kind": "followup",
    "deck": false,
    "title": "Police raids empty Yamlin's docks",
@@ -7611,7 +7612,7 @@
    ]
   },
   {
-   "id": "teachers_march",
+   "id": "teachers_march", "where": {"province": "cranbia_3"},
    "kind": "followup",
    "deck": false,
    "title": "Teachers march against your curriculum plans",
@@ -7964,7 +7965,7 @@
    ]
   },
   {
-   "id": "crisis_insurgency_1",
+   "id": "crisis_insurgency_1", "where": {"region": "alinni"},
    "kind": "crisis",
    "deck": false,
    "crisisStart": true,
@@ -8081,7 +8082,7 @@
    ]
   },
   {
-   "id": "crisis_insurgency_2",
+   "id": "crisis_insurgency_2", "where": {"region": "alinni"},
    "kind": "crisis",
    "deck": false,
    "title": "Curfew and mass arrests in Alinni",
@@ -8401,7 +8402,7 @@
    ]
   },
   {
-   "id": "crisis_james_2",
+   "id": "crisis_james_2", "where": {"region": "erland"},
    "kind": "crisis",
    "deck": false,
    "title": "Refugees from James reach Erland",
@@ -8722,7 +8723,7 @@
    ]
   },
   {
-   "id": "crisis_economy_2",
+   "id": "crisis_economy_2", "where": {"region": "cranbia"},
    "kind": "crisis",
    "deck": false,
    "title": "Factories close across Cranbia",
@@ -8814,7 +8815,7 @@
    ]
   },
   {
-   "id": "crisis_economy_3",
+   "id": "crisis_economy_3", "where": {"region": "yamlin"},
    "kind": "crisis",
    "deck": false,
    "title": "Bread riots in Yamlin",
@@ -8905,13 +8906,13 @@
    ]
   },
   {
-   "id": "crisis_terror_1",
+   "id": "crisis_terror_1", "where": {"regions": ["cranbia"], "city": true},
    "kind": "crisis",
    "deck": false,
    "crisisStart": true,
    "echo": true,
    "title": "Arson attack on an Alinnian community centre",
-   "text": "Six people died when a group calling itself the Black Wheat set fire to an Alinnian community centre in Cranbia. Nationalist slogans were painted on the walls.",
+   "text": "Six people died when a group calling itself the Black Wheat set fire to an Alinnian community centre in {city}, Cranbia. Nationalist slogans were painted on the walls.",
    "government": {
     "text": "The prime minister calls it \"a tragedy\" but avoids the word terrorism."
    },
@@ -9010,11 +9011,11 @@
    ]
   },
   {
-   "id": "crisis_terror_2",
+   "id": "crisis_terror_2", "where": {"regions": ["yamlin"], "city": true},
    "kind": "crisis",
    "deck": false,
    "title": "The Black Wheat attacks a Norbanian shelter",
-   "text": "A shelter for Norbanian refugees in Yamlin was firebombed overnight. Nobody died, but the message is clear.",
+   "text": "A shelter for Norbanian refugees in {city} was firebombed overnight. Nobody died, but the message is clear.",
    "world": {
     "unrest": 5
    },

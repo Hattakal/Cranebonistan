@@ -729,6 +729,15 @@ func _paint_local(info: Dictionary) -> void:
 		_map.fills[opt.district] = Look.mix(Look.LAND, Look.LAMP, 0.45 if opt.fresh else 0.3)
 		_map.pins.append({"id": opt.ref, "district": opt.district, "title": opt.title})
 		n += 1
+	# events that happened somewhere, lately
+	for e in S.get("eventPins", []):
+		if S.week - int(e.week) > G.EVENT_PIN_MONTHS * G.WEEKS_PER_MONTH: continue
+		if String(e.district) != "": _map.fills[e.district] = Look.mix(Look.LAND, Look.LAMP, 0.45)
+		else:
+			for d in G.DISTRICTS:
+				if d.region == e.region and _map.fills.get(d.id) == dim: _map.fills[d.id] = Look.mix(Look.LAND, Look.LAMP, 0.22)
+		_map.pins.append({"id": "ev:" + String(e.id), "district": e.district, "region": e.region, "title": e.title})
+		n += 1
 	var heard: Dictionary = S.get("localSpoke", {})
 	for did in heard:
 		if S.week - int(heard[did].week) <= G.LOCAL_STORY_MONTHS * G.WEEKS_PER_MONTH and not _map.pins.any(func(p): return p.district == did):
@@ -738,6 +747,12 @@ func _paint_local(info: Dictionary) -> void:
 
 ## A pin clicked: the story, ready to raise as a national debate.
 func _story_clicked(id: String) -> void:
+	if id.begins_with("ev:"):   # an event: on the desk if it is still waiting, otherwise the debates
+		var eid: String = id.trim_prefix("ev:")
+		if S.queue.size() and String(S.queue[0].get("id", "")) == eid: _open_front()
+		elif S.queue.any(func(q): return String(q.get("id", "")) == eid): _toast("Finish the decision on your desk first.")
+		else: _show_file("debates")
+		return
 	var opt = null
 	for o in G.raise_options(S):
 		if o.kind == "issue" and o.ref == id: opt = o
@@ -822,6 +837,14 @@ func _rivals_here(id: String) -> Array:
 	return out
 
 func _tip(id: String, kind: String) -> Array:
+	if kind == "pin" and id.begins_with("ev:"):
+		var eid: String = id.trim_prefix("ev:")
+		for e in S.get("eventPins", []):
+			if String(e.id) != eid: continue
+			var waiting: bool = S.queue.any(func(q): return String(q.get("id", "")) == eid)
+			var where: String = G.district_by_id(e.district).name if String(e.district) != "" else Game.by_id(G.REGIONS, e.region).name
+			return [String(e.title), "Happened in %s, %s" % [where, G.date_label(int(e.week), false)], "On your desk: what you say counts for more here" if waiting else "Click for the debate it started"]
+		return []
 	if kind == "pin":
 		var st: Dictionary = G.story(S, id)
 		return [String(st.get("title", "")), String(st.get("text", "")), "Click to raise it as a national debate"]
@@ -1892,6 +1915,9 @@ func _shot(args: Dictionary) -> void:
 	if args.has("result"):
 		var ev2: Dictionary = G.event_of(S.queue[0])
 		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1), ev2)
+	if args.has("queue"):   # fire these events now: --queue=norbanian_boats,smog_cranbia
+		for id in String(args.queue).split(",", false): G.queue_event(S, id)
+		render()
 	if args.has("mapmode"): _set_map_mode(String(args.mapmode))
 	if args.has("file"):
 		if args.has("clear"): S.queue.clear()
