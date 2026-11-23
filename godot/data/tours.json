@@ -1,5 +1,5 @@
 {
- "_note": "Short stories from the leader's monthly trip, picked by how well it went. {leader} is the leader, {place} the province, {town} its biggest town (or the province again). 'caption' goes under the photo. Pictures, when they exist: godot/assets/tours/<kind>.png (great, good, flat). Drafts: rewrite freely.",
+ "_note": "Short stories from the leader's monthly trip, picked by how well it went. {leader} is the leader, {place} the province, {town} its biggest town (or the province again). 'caption' goes under the photo. Pictures, when they exist: godot/assets/tours/<kind>.png (great, good, flat). Drafts: rewrite freely. VIGNETTES: a small aside on some trips (VIGNETTE_CHANCE of them), each at most once a game: 'regions' limits where it can happen; 'effects' are tiny: goodwill and aware (in that province), charisma (points), money (millions).",
  "great": [
   {"text": "The hall in {town} held four hundred. Six hundred came. {leader} gave the second speech from the car park, standing on a bread crate the bakery next door lent for the evening, and the bakery has since put it in the window.", "caption": "The overflow crowd outside the hall in {town}."},
   {"text": "A local radio phone-in was meant to last twenty minutes. It ran for two hours, and by the end callers were answering each other. The station manager asked if {leader} could come back in spring.", "caption": "{leader} in the studio in {town}, past the scheduled hour."},
@@ -20,5 +20,24 @@
   {"text": "The local paper sent a trainee, who spelled {leader}'s name two different ways in the same article. The article was on page nine, under the tide tables.", "caption": "Page nine of the {place} paper."},
   {"text": "{leader} arrived in {town} on the same day as a cattle auction. The auction won. A handful of people came by afterwards, mostly to ask whether the party had a position on cattle.", "caption": "Auction day in {town}."},
   {"text": "A polite reception, a polite speech, polite applause. {place} has seen a lot of politicians. It will need to see this one again before it decides anything.", "caption": "A polite evening in {town}."}
+ ],
+ "VIGNETTE_CHANCE": 0.25,
+ "VIGNETTES": [
+  {"id": "honey", "text": "A beekeeper outside {town} pressed a jar of honey into {leader}'s hands and would not take money for it. It is on the office shelf now, next to a jar from the last party that came through.", "effects": {"goodwill": 0.02}},
+  {"id": "wrong_name", "text": "The breakfast host on {town}'s radio introduced {leader} by the name of another party's leader. Twice. The correction drew more listeners than the interview.", "effects": {"aware": 0.02}},
+  {"id": "dog", "text": "A dog followed the walkabout from the station to the town hall and sat in the front row for the speech. The photo of the dog did better online than the speech.", "effects": {"charisma": 1}},
+  {"id": "deficit", "text": "A boy of about ten asked {leader} what a deficit was. The answer took four minutes. He said thank you and asked if there would be cake."},
+  {"id": "heckler", "text": "An old man heckled every sentence of the speech in {town}, then shook {leader}'s hand at the door and said he would think about it.", "effects": {"goodwill": 0.01}},
+  {"id": "tractor", "regions": ["fauraifai"], "text": "The bus between two villages near {town} stopped running in March, so a farmer drove {leader} there in his tractor. He talked about the bus the whole way.", "effects": {"goodwill": 0.02}},
+  {"id": "heifer", "regions": ["erland", "fauraifai"], "text": "At the {town} cattle market {leader} was asked to judge the heifers, and picked the wrong one. The owner of the right one has not forgiven the party.", "effects": {"goodwill": -0.01}},
+  {"id": "fish_paper", "regions": ["yamlin"], "text": "A fishmonger in {town} wrapped {leader}'s order in yesterday's paper, the page with a story about the party on it. He said it was the best use he'd found for it."},
+  {"id": "menu", "regions": ["alinni"], "text": "A café in {town} wrote its menu out in both languages for the visit and asked {leader} to read the Alinnian side aloud. It went better than anyone expected.", "effects": {"goodwill": 0.02}},
+  {"id": "tram", "regions": ["cranbia"], "text": "The tram broke down between two stops, and {leader} walked the rest of the way with forty commuters, most of whom had views on the tram.", "effects": {"aware": 0.02}},
+  {"id": "cobbler", "text": "{leader}'s shoes did not survive the mud at the {town} fair. A cobbler fixed them in ten minutes and would not take money, only a promise about small-business rates.", "effects": {"goodwill": 0.01}},
+  {"id": "farmyard", "text": "The campaign bus took a wrong turn and arrived in {town} through a farmyard. The farmer waved. In {town} it is already a story people tell.", "effects": {"aware": 0.01}},
+  {"id": "hotel", "text": "The hotel in {town} charged the party twice for every room. The refund will take six to eight weeks.", "effects": {"money": -0.05}},
+  {"id": "moustache", "text": "Someone in {town} had drawn a moustache on {leader}'s poster. It was, everyone agreed, a good moustache."},
+  {"id": "banner", "text": "{leader} spoke in a hall where a rival party had held a rally the night before. Their banner was still up behind the stage; nobody could find a ladder.", "effects": {"charisma": -1}},
+  {"id": "coffee_ring", "text": "A volunteer in {town} kept {leader}'s speech notes, coffee ring and all, and asked for them to be signed. They are pinned up in the town's library now.", "effects": {"goodwill": 0.01}}
  ]
 }

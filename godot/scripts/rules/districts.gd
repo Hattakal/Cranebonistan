@@ -216,7 +216,26 @@ func act_visit(s: Dictionary, id: String) -> Dictionary:
 	if pool.size(): story = pick(s, pool)
 	var fill = {"leader": player_party(s).leader, "place": d.name, "town": town}
 	return {"ok": true, "text": text, "kind": kind, "place": d.name, "region": d.region, "before": before, "after": after,
-		"why": pw.why, "story": String(story.text).format(fill), "caption": String(story.caption).format(fill)}
+		"why": pw.why, "story": String(story.text).format(fill), "caption": String(story.caption).format(fill),
+		"vignette": _trip_vignette(s, d, fill)}
+
+## Now and then a trip has a small aside (data/tours.json VIGNETTES): flavour, with at most
+## a tiny effect. Each happens once a game at most.
+func _trip_vignette(s: Dictionary, d: Dictionary, fill: Dictionary) -> String:
+	if rand(s) >= float(TOURS.get("VIGNETTE_CHANCE", 0.25)): return ""
+	if not s.has("vignettesSeen"): s.vignettesSeen = []
+	var pool: Array = TOURS.get("VIGNETTES", []).filter(func(v):
+		return not s.vignettesSeen.has(v.id) and (not v.has("regions") or v.regions.has(d.region)))
+	if pool.is_empty(): return ""
+	var v: Dictionary = pick(s, pool)
+	s.vignettesSeen.append(v.id)
+	var fx: Dictionary = v.get("effects", {})
+	if fx.has("goodwill") or fx.has("aware"): district_boost(s, d.id, float(fx.get("aware", 0)), float(fx.get("goodwill", 0)))
+	if fx.has("charisma"):
+		var me = player_party(s)
+		me.charisma = clampf2(float(me.charisma) + float(fx.charisma), 0, 100)
+	if fx.has("money"): s.money = maxf(0.0, float(s.money) + float(fx.money))
+	return String(v.text).format(fill)
 
 ## Local standing fades a little every month; offices keep their own district warm.
 func districts_monthly(s: Dictionary) -> void:

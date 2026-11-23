@@ -1551,6 +1551,7 @@ func _tour_result(p: Paper, res: Dictionary) -> void:
 	p.add(photo)
 	if res.caption != "": p.small(res.caption)
 	if res.story != "": p.text(res.story, 18)
+	if String(res.get("vignette", "")) != "": p.boxed("Also on the road", res.vignette)
 	var b: int = Game.jround(float(res.before) * 100)
 	var a: int = Game.jround(float(res.after) * 100)
 	p.add(Look.label("Your vote in %s: %d%% → %d%%" % [res.place, b, a], "news_bold", 24, Look.GOOD if a > b else Look.INK))
