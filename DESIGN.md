@@ -581,6 +581,7 @@ Agreed after the realism review: the vote itself first, then the people around i
   - *Distress* is economic hardship plus lack of trust in the system, per province.
   - *The 2026 election* is the starting map without your party's votes.
 - **Local stories carry a province.** No separate action for commenting: events and local stories are tagged with a province and say so ("A bridge in {province} collapsed"), and what you say about them counts for more there, and makes a trip there go better. Today a trip only checks whether you recently spoke for a side the province leans toward.
+  - *Where a story happens (decided):* a story names the regions it can happen in, and the game picks a province there when it fires (`"where": {"regions": ["erland", "fauraifai"]}`: a bridge falls in neglected Erland or Fauran; robots take jobs somewhere in Yamlin or Cranbia). Stories never list provinces, so they survive a redrawn map and mods. A story tied to one place names it (`"where": {"province": ...}`); a story without `where` is national. Randomised texts write `{province}` and `{city}` (a city in that province, or the province's name if it has none) instead of naming a place.
 - **Trips have small vignettes now and then:** flavour, with little effect.
 - **Local elections wait** until there are local candidates: they depend on local people more than on the national party.
 
