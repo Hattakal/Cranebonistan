@@ -226,6 +226,8 @@ func _rival_trip(s: Dictionary, p: Dictionary, proj: Dictionary) -> void:
 	if not st.has("rtrip"): st.rtrip = {}
 	var had: float = float(st.rtrip.get(p.id, 0))
 	st.rtrip[p.id] = minf(0.8, had + VISIT_GOODWILL * RIVAL_EDGE * sqrt(float(p.charisma) / 50.0) / (1.0 + 2.0 * had))
+	if not st.has("rtripWeek"): st.rtripWeek = {}
+	st.rtripWeek[p.id] = s.week   # shown on the map: who has been campaigning where
 	rival_move(s, p, "%s toured %s." % [p.leader, best.name])
 
 ## Adverts: some of the money goes on the groups the party wants most.

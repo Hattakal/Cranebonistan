@@ -21,6 +21,7 @@ var stripes = {}              # district id -> [Color, 0..1]: your colour stripe
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
 var communities = {}          # city name -> level of your party's community
+var rival_tags: Array = []    # rivals campaigning: [{district, short, color, fresh}], small tags on the vote map
 var pins: Array = []          # local stories and events: [{id, district, region, title}]; no district: the whole region
 var _pin_rects = {}           # story id -> Rect2 (screen)
 var party_color := Look.RED
@@ -319,6 +320,7 @@ func _draw() -> void:
 	_plates.clear()
 	if zoom >= 1.5: _seat_badges(s)   # seat numbers only when zoomed in; the tooltip always has them
 	_labels(s)
+	_rival_tags(s)
 	_pins(s)
 	_legend()
 	if hover != "" and tip_provider.is_valid(): _tooltip()
@@ -457,6 +459,27 @@ func _labels(s: float) -> void:
 		var sh: String = shares.get(a.id, "")
 		if sh != "":
 			_text(to_screen(Vector2(a.label[0], a.label[1] + 44 * k)), sh, Look.font("display"), int(maxf(12, 34 * maxf(k, 0.75) * s)), Color(Look.TXT, 0.8), halo)
+
+## Rival parties campaigning in a province lately: a small pennant in their colour, solid
+## when they were there this month, faint the month after (the tooltip names them).
+func _rival_tags(s: float) -> void:
+	var h = maxf(14.0, 34 * s)
+	var per = {}
+	for t in rival_tags:
+		var d = null
+		for x in districts:
+			if x.id == t.district: d = x
+		if d == null: continue
+		var n: int = int(per.get(t.district, 0))
+		per[t.district] = n + 1
+		var base = to_screen(Vector2(d.label[0] + 34, d.label[1] + 30)) + Vector2(n * h * 0.8, 0)
+		var a: float = 1.0 if t.fresh else 0.5
+		var top = base - Vector2(0, h * 1.6)
+		draw_line(base, top, Color(Look.N950, 0.85 * a), maxf(3.0, 5 * s), true)
+		draw_line(base, top, Color(Look.TXT, 0.9 * a), maxf(1.5, 2.5 * s), true)
+		var flag = PackedVector2Array([top, top + Vector2(h * 0.9, h * 0.32), top + Vector2(0, h * 0.64)])
+		draw_polyline(PackedVector2Array([flag[0], flag[1], flag[2], flag[0]]), Color(Look.N950, 0.9 * a), maxf(3.0, 4 * s), true)
+		draw_colored_polygon(flag, Color(t.color.lightened(0.15), a))
 
 ## Local stories: a pin on the province, with the story's title beside it.
 func _pins(s: float) -> void:

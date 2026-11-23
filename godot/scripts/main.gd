@@ -667,6 +667,7 @@ func _render_map() -> void:
 	_map.hot = {}
 	_map.legend_ramp = []
 	_map.pins = []
+	_map.rival_tags = []
 	_map.communities = S.communities
 	_map.party_color = Color(G.player_party(S).color)
 	for f in G.FOREIGN:
@@ -694,9 +695,19 @@ func _render_map() -> void:
 			_map.shares[r.id] = "You %d%%" % Game.jround(poll.regions[r.id].player * 100)
 	var proj: Dictionary = S.get("projection", {})
 	_paint_result(proj, true)
+	# where the other parties have been campaigning
+	for d in G.DISTRICTS:
+		var st: Dictionary = S.districts.get(d.id, {})
+		var rt: Dictionary = st.get("rtrip", {})
+		for pid in rt:
+			var p = G.party_of(S, pid)
+			var since: int = S.week - int(st.get("rtripWeek", {}).get(pid, -999))
+			if p == null or since >= 2 * G.WEEKS_PER_MONTH: continue
+			var fresh: bool = since < G.WEEKS_PER_MONTH
+			_map.rival_tags.append({"district": d.id, "short": p.short, "color": Look.lit(Color(p.color)), "fresh": fresh})
 	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
 	_map.legend = _seat_legend(seats)
-	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100)]) if poll else "No poll yet."
+	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none. Flags: other parties on tour lately." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100)]) if poll else "No poll yet."
 	_map.queue_redraw()
 
 ## Each district in the colour of whoever wins it: deep when safe, pale when close. `live`:
