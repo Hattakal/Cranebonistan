@@ -378,7 +378,7 @@ func _region_cities(region: String, to: Control) -> void:
 		if lvl < G.COMMUNITY_MAX:
 			var cost: float = G.COMMUNITY_COST[lvl]
 			var b = _btn(("Open an office" if lvl == 0 else "Grow it") + " · ₱%sM" % Game.fmt1(cost), func(): _did(G.act_community(S, c.name)),
-				S.result != null or left <= 0 or S.money < cost, lvl == 0)
+				S.result != null or left <= 0 or S.money < cost or G.in_campaign(S), lvl == 0)
 			b.tooltip_text = "Uses one of this month's actions. A community works every month on its own province: it turns your supporters there into core voters and gets them to the polls."
 			row.add_child(b)
 
@@ -425,7 +425,7 @@ func _platform() -> void:
 	var c2 = _card(top)
 	c2.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Party offices", c2)
-	var blocked_o: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
+	var blocked_o: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0 or G.in_campaign(S)
 	_p("Open an office in a city, then grow it (one action, ₱1–2M). It works every month on its own province: supporters there become core voters and turn out, and members pay a little in dues. You can also open one by clicking the province on the map.", c2)
 	for r in G.REGIONS:
 		var line = HFlowContainer.new()

@@ -265,6 +265,17 @@ func advance_week(s: Dictionary) -> bool:
 	run_hooks(s)
 	return true
 
+## On to the next turn: the start of next month, or next week in the campaign (and the
+## week before it, when the convoy is planned); stops early when a decision arrives.
+func advance_to_next_turn(s: Dictionary) -> bool:
+	var moved = false
+	while advance_week(s):
+		moved = true
+		if s.queue.size(): break
+		if in_campaign(s) or s.week == campaign_start_week() - 1: break
+		if calendar(s.week).isMonthStart: break
+	return moved
+
 func advance_to_decision(s: Dictionary) -> bool:
 	var moved = false
 	while advance_week(s):

@@ -396,5 +396,6 @@ func actions(buttons: Array) -> void:
 	var h = HBoxContainer.new()
 	h.alignment = BoxContainer.ALIGNMENT_END
 	h.add_theme_constant_override("separation", 10)
-	for b in buttons: h.add_child(b)
+	for b in buttons:
+		if b != null: h.add_child(b)   # a button left out is null
 	v.add_child(h)

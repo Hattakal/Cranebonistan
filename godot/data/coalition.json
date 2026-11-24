@@ -18,6 +18,7 @@
  "MAX_FORMATEURS": 3,
  "FORMATEUR_GIVES": 0.4,
  "COMPROMISE": true,
+ "COLUMN": {"_note": "The ending is an opinion column about your campaign: who writes it, and where.", "outlet": "The Cranebo Herald", "author": "Ilse Marrow", "role": "political editor"},
  "OUTCOMES": {
   "_note": "How the election ended for the player: a headline and the feeling of it. Placeholders: {party}, {leader}. First drafts; the end screens are still to be designed.",
   "majority": {"headline": "{party} wins a majority", "line": "No partners and no compromises: the country is yours to shape."},

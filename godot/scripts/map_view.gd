@@ -21,6 +21,7 @@ var stripes = {}              # district id -> [Color, 0..1]: your colour stripe
 var shares = {}               # region id -> short text under the name
 var hot = {}                  # foreign id -> bool (in conflict)
 var communities = {}          # city name -> level of your party's community
+var convoys: Array = []       # the campaign convoys this week: [{pos (map), color, short}], small cars
 var route_stops: Array = []   # the convoy: [{pos (map), n, done}], drawn as a numbered line
 var rival_tags: Array = []    # rivals campaigning: [{district, short, color, fresh}], small tags on the vote map
 var pins: Array = []          # local stories and events: [{id, district, region, title}]; no district: the whole region
@@ -322,6 +323,7 @@ func _draw() -> void:
 	if zoom >= 1.5: _seat_badges(s)   # seat numbers only when zoomed in; the tooltip always has them
 	_labels(s)
 	_route(s)
+	_convoy_cars(s)
 	_rival_tags(s)
 	_pins(s)
 	_legend()
@@ -483,6 +485,26 @@ func _route(s: float) -> void:
 			draw_arc(pts[i], r + 5, 0, TAU, 32, Look.LAMP, 2.0, true)
 			next_shown = true
 		_text(pts[i] + Vector2(0, r * 0.45), str(st.n), f, int(r * 1.2), Look.N950)
+
+## This week's rallies: a small car in each party's colour at its stop, side by side where
+## two convoys meet.
+func _convoy_cars(s: float) -> void:
+	var w = maxf(22.0, 44 * s)
+	var h = w * 0.42
+	var at = {}
+	for cv in convoys:
+		var key: String = str(cv.pos)
+		var n: int = int(at.get(key, 0))
+		at[key] = n + 1
+		var c: Vector2 = to_screen(cv.pos) + Vector2(-w * 0.5 + n * (w + 4) - w * 0.9, -h * 2.4)
+		var body = Rect2(c + Vector2(0, h * 0.35), Vector2(w, h * 0.65))
+		var cabin = Rect2(c + Vector2(w * 0.22, 0), Vector2(w * 0.5, h * 0.45))
+		draw_rect(body.grow(2), Color(Look.N950, 0.85))
+		draw_rect(cabin.grow(2), Color(Look.N950, 0.85))
+		draw_rect(body, cv.color)
+		draw_rect(cabin, cv.color.lightened(0.25))
+		for x in [0.22, 0.78]:
+			draw_circle(c + Vector2(w * x, h * 1.02), h * 0.24, Look.N950)
 
 ## Rival parties campaigning in a province lately: a small pennant in their colour, solid
 ## when they were there this month, faint the month after (the tooltip names them).

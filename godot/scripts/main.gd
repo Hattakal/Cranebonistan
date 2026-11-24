@@ -34,7 +34,7 @@ func _ready() -> void:
 	if saved:
 		S = saved
 		render()
-		_auto_open()
+		if not Settings.reopen: _auto_open()   # back from Options: the desk, not the decision
 	else:
 		# no game yet: headquarters sits empty behind the founding sheet
 		_founding = true
@@ -329,14 +329,14 @@ func _time_pressed(to_decision: bool) -> void:
 		_open_front()
 		return
 	if to_decision and _month_unused(): return
-	if (G.advance_to_decision(S) if to_decision else G.advance_week(S)): _after_change()
+	if (G.advance_to_next_turn(S) if to_decision else G.advance_week(S)): _after_change()
 
 ## Before the clock runs past the end of the month: a reminder, once a month, if the
 ## leader hasn't been on the road yet or there are actions left. Press again to move on.
 func _month_unused() -> bool:
 	if S.result: return false
 	var c: Dictionary = G.calendar(S.week)
-	var month: int = c.year * 12 + c.monthIndex
+	var month: int = (c.year * 12 + c.monthIndex) if not G.in_campaign(S) else 100000 + S.week   # in the campaign: each week
 	if month == _warned_month: return false
 	var trip: bool = G.visit_block(S) == ""
 	var left: int = S.actionsLeft
@@ -347,7 +347,7 @@ func _month_unused() -> bool:
 	if left > 0:
 		parts.append("%d action%s left" % [left, "" if left == 1 else "s"])
 		if not trip: _show_file("debates")   # the trip is picked on the map, so keep it in view
-	_toast("%s. Press Next decision again to move on." % "; ".join(parts))
+	_toast("%s. Press %s again to move on." % ["; ".join(parts), "Next week" if G.in_campaign(S) else "Next month"])
 	return true
 
 func _section(inner: Control, pad: int) -> PanelContainer:
@@ -561,9 +561,10 @@ func _render_bar() -> void:
 	var waiting: bool = S.queue.size() > 0
 	_btn_week.disabled = S.result != null and not waiting
 	_btn_skip.disabled = S.result != null and not waiting
-	_btn_skip.text = "OPEN DECISION" if waiting else "NEXT DECISION"
+	var step: String = "next week" if G.in_campaign(S) or G.campaign_stop_index(S) == -1 else "next month"
+	_btn_skip.text = "OPEN DECISION" if waiting else step.to_upper()
 	_btn_week.tooltip_text = "A decision is waiting for you" if waiting else "Next week"
-	_btn_skip.tooltip_text = "A decision is waiting for you" if waiting else "Next decision"
+	_btn_skip.tooltip_text = "A decision is waiting for you" if waiting else "On to the %s (it stops early if something needs a decision)" % step
 
 func _chip(label: String, value: String, tip: String, warn := Color.TRANSPARENT, num = null, fmt := Callable()) -> void:
 	# chips are built once and then updated, so a count in progress survives a refresh
@@ -701,6 +702,7 @@ func _render_map() -> void:
 	_map.hot = {}
 	_map.legend_ramp = []
 	_map.route_stops = []
+	_map.convoys = []
 	_map.pins = []
 	_map.rival_tags = []
 	_map.communities = S.communities
@@ -737,8 +739,17 @@ func _render_map() -> void:
 	var proj: Dictionary = S.get("projection", {})
 	_paint_result(proj, true)
 	if S.has("convoy") and not S.result: _map.route_stops = _route_marks(S.convoy.route, _route_open_from())
-	# where the other parties have been campaigning
-	for d in G.DISTRICTS:
+	# this week's rallies: a car for every party at its stop
+	var wi: int = G.campaign_stop_index(S)
+	if G.in_campaign(S) and not S.result:
+		var r0: Array = S.get("convoy", {}).get("route", [])
+		if wi < r0.size(): _map.convoys.append({"pos": G.district_centre(G.district_by_id(r0[wi])), "color": Look.lit(Color(G.player_party(S).color)), "short": G.player_party(S).short})
+		for pid in S.get("rivalConvoys", {}):
+			var rr: Array = S.rivalConvoys[pid]
+			var pr = G.party_of(S, pid)
+			if pr and wi < rr.size(): _map.convoys.append({"pos": G.district_centre(G.district_by_id(rr[wi])), "color": Look.lit(Color(pr.color)), "short": pr.short})
+	# where the other parties have been campaigning (in the campaign: their convoys instead)
+	for d in (G.DISTRICTS if not G.in_campaign(S) else []):
 		var st: Dictionary = S.districts.get(d.id, {})
 		var rt: Dictionary = st.get("rtrip", {})
 		for pid in rt:
@@ -749,7 +760,7 @@ func _render_map() -> void:
 			_map.rival_tags.append({"district": d.id, "short": p.short, "color": Look.lit(Color(p.color)), "fresh": fresh})
 	var seats: Dictionary = G.projected_seats(proj) if proj.size() else {}
 	_map.legend = _seat_legend(seats)
-	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none. Flags: other parties on tour lately." % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100)]) if poll else "No poll yet."
+	_map.legend_note = ("Seats each party would win, by the %s. %d for a majority; under %d%% of the vote, none. %s" % [str(poll.label).to_lower(), int(G.C.seats / 2 + 1), Game.jround(G.threshold() * 100), "Cars: this week's rallies." if G.in_campaign(S) else "Flags: other parties on tour lately."]) if poll else "No poll yet."
 	_map.queue_redraw()
 
 func _route_marks(route: Array, open_from: int) -> Array:
@@ -1550,7 +1561,7 @@ func _election_sheet() -> void:
 			_coalition_view(), true) if talks else p.button("Read what the papers say", func(): _profile_sheet(), false),
 		p.button("Found a new party", func():
 			p.close()
-			_founding_sheet(), false),
+			_founding_sheet(), false) if (not talks or r.get("talksSeen", false)) else null,
 		p.button("Close", func():
 			if S.queue.size() and S.queue[0].type == "election": G.dismiss_front(S)
 			_done(p)),
@@ -1560,6 +1571,7 @@ func _election_sheet() -> void:
 func _coalition_view() -> CoalitionView:
 	var v = CoalitionView.new()
 	v.setup(G, S)
+	if S.result: S.result.talksSeen = true   # a new party can be founded once the talks have been seen
 	_sheet_layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	_sheet_layer.add_child(v)
 	_advisor.visible = false   # nothing but the parties on this screen
@@ -1616,7 +1628,7 @@ func _district_sheet(id: String) -> void:
 				_toast(res.text)
 				p.close()
 				_after_change()
-				if res.ok: _district_sheet(id), false, G.can_act(S, cost) != "" or S.queue.size() > 0)
+				if res.ok: _district_sheet(id), false, G.can_act(S, cost) != "" or S.queue.size() > 0 or G.in_campaign(S))
 			ob.tooltip_text = "One action. An office works every month on this province: it turns your supporters here into core voters, gets them to the polls and pays a little in dues."
 			row.add_child(ob)
 		p.add(row)
@@ -1933,13 +1945,43 @@ class SeatBar extends Control:
 			x += w
 		draw_rect(Rect2(size.x / 2 - 1.5, -5, 3, size.y + 10), Color.WHITE)   # the majority line
 
+## "a, b and c"
+func _and_list(xs: Array) -> String:
+	if xs.size() <= 1: return "".join(xs)
+	return ", ".join(xs.slice(0, -1)) + " and " + String(xs[-1])
+
+## The ending: an opinion column on the campaign (the columnist: coalition.json COLUMN).
 func _profile_sheet() -> void:
 	var pr: Dictionary = G.build_profile(S)
 	var you: Dictionary = G.player_party(S)
+	var r: Dictionary = S.result
+	var col: Dictionary = G.COALITION.get("COLUMN", {})
+	var oc: Dictionary = G.COALITION.get("OUTCOMES", {}).get(r.get("coalition", {}).get("outcome", ""), {})
+	var fill = {"party": you.name, "leader": you.leader}
 	var p = _paper(860, false)
-	p.source("The Cranebo Herald", "Profile · %s" % G.date_label(S.week, false))
-	p.heading(pr.headline, 40)
-	p.text("%s: %s" % [pr.archetype.title, pr.archetype.line], 19, "news_italic")
+	p.source(String(col.get("outlet", "The Cranebo Herald")), "Opinion · %s" % G.date_label(S.week, false))
+	p.heading(String(oc.get("headline", pr.headline)).format(fill) if oc.has("headline") else String(pr.headline).capitalize(), 40)
+	if oc.has("line"): p.text(String(oc.line).format(fill), 19, "news_italic")
+	if col.has("author"): p.small("By %s, %s" % [col.author, col.get("role", "")], Look.INK)
+	p.rule(1)
+	# the result, and who governs now
+	var tot: float = G.dsum(r.votes)
+	var share: float = float(r.votes.get("player", 0)) / tot * 100 if tot > 0 else 0.0
+	var seats: int = int(r.seats.national.get("player", 0))
+	var rank: int = r.ranking.find("player") + 1
+	var ords = ["", "the largest party", "second", "third", "fourth", "fifth", "sixth", "seventh"]
+	var para: String = "%s took %s%% of the vote and %d of the %d seats%s." % [you.name, Game.fmt1(share), seats, int(G.C.seats), (", " + (ords[rank] if rank == 1 else "%s largest" % ords[mini(rank, ords.size() - 1)])) if seats > 0 else ""]
+	var gov = r.get("coalition", {}).get("government")
+	if gov:
+		var pm = ""
+		for c in gov.cabinet:
+			if c.ministry == "pm": pm = c.party
+		var names: Array = gov.members.map(func(id): return "you" if id == "player" else String(G.party_of(S, id).name))
+		var pmp = G.party_of(S, pm)
+		para += " The new government is %s, with %s as Prime Minister." % [("%s alone" % names[0]) if names.size() == 1 else "a coalition of " + _and_list(names), "you" if pm == "player" else ("%s of the %s" % [pmp.leader, pmp.short]) if pmp else "nobody yet"]
+	elif r.has("coalition"): para += " Nobody could put a government together."
+	p.text(para, 17)
+	p.text("Four years ago almost nobody had heard of %s. This column's verdict: %s. %s" % [you.leader, pr.archetype.title, pr.archetype.line], 17)
 	if pr.signature: p.quote(pr.signature.text, "%s, %s" % [you.leader, G.date_label(pr.signature.week, false)])
 	if pr.contradictions.size():
 		p.rule(1)
@@ -1961,7 +2003,9 @@ func _profile_sheet() -> void:
 	if pr.crisis: p.text("The crisis: %s.%s" % [pr.crisis.name, " Your own campaign helped bring it about." if pr.crisis.blamed else ""], 15)
 	var pl = func(n: int, w: String) -> String: return "%d %s%s" % [n, w, "" if n == 1 else "s"]
 	p.small("Speaking style: %s · %s · %s · %s" % [pr.style, pl.call(pr.statements, "statement"), pl.call(pr.memes, "viral moment"), pl.call(pr.gaffes, "gaffe")], Look.INK)
-	p.actions([p.button("Close", func(): p.close())])
+	p.actions([p.button("Found a new party", func():
+		p.close()
+		_founding_sheet(), false), p.button("Close", func(): p.close())])
 
 ## Two things the leader said, side by side: what came first and what came later.
 func _said_pair(first: Dictionary, second: Dictionary, side_of) -> Control:
