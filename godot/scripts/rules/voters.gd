@@ -531,6 +531,14 @@ func influence_label(s: Dictionary) -> String:
 	if t < 70: return "Agenda-setter"
 	return "Sets the national debate"
 
+## How much the big moments (the flagship promise, the final debate) move voters: a third
+## for a party nobody takes seriously, all of it for one the country does (CONFIG.serious.moments).
+func moment_weight(s: Dictionary) -> float:
+	var m: Dictionary = C.serious.get("moments", {})
+	var lo: float = float(m.get("from", 15))
+	var t: float = clampf2((serious_of(s) - lo) / maxf(1.0, float(m.get("full", 60)) - lo), 0, 1)
+	return lerpf(float(m.get("low", 0.33)), 1.0, t)
+
 func change_serious(s: Dictionary, d: float) -> void:
 	s.serious = clampf2(serious_of(s) + d, 0, 100)
 

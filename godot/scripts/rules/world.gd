@@ -9,6 +9,7 @@ func eligible_events(s: Dictionary) -> Array:
 		if e.get("deck", true) == false: continue
 		if e.get("minYear") and year < e.minYear: continue
 		if e.get("requires") and not s.flags.has(e.requires): continue
+		if e.get("minSerious") and serious_of(s) < float(e.minSerious): continue   # only once the country takes you seriously
 		var seen = s.flags.get("seen:" + e.id)
 		if e.get("once") and seen != null: continue
 		if seen != null and s.week - seen < 18 * WEEKS_PER_MONTH: continue
@@ -91,6 +92,12 @@ func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictio
 	var front: Dictionary = s.queue[0]
 	var ev = event_of(front)
 	var choice: Dictionary = ev.choices[choice_index]
+	if ev.get("kind", "") == "flagship":   # a promise from a party nobody takes seriously moves fewer people
+		choice = choice.duplicate(true)
+		var k: float = moment_weight(s)
+		for g in choice.effects.get("goodwill", []): g.amt = float(g.amt) * k
+		for l in choice.get("lines", []):
+			for g in l.get("react", []): g.amt = float(g.amt) * k
 	var before: Dictionary = player_party(s).perceived.duplicate()
 	var groups_before = snapshot_groups(s)
 	var flips_before: int = s.flips.size()
@@ -208,7 +215,7 @@ func _flagship_made(s: Dictionary, ev: Dictionary, choice: Dictionary, quote) ->
 			axis = ax; sh = float(choice.effects.shift[ax]); break
 	var side = "L" if sh < 0 else "R"
 	s.flagship = {"issue": it.id, "axis": axis, "side": side, "label": choice.label, "quote": quote if quote else choice.label, "week": s.week}
-	add_ownership(s, "player", side_key(axis, side), float(C.get("flagshipOwnership", 0.05)))
+	add_ownership(s, "player", side_key(axis, side), float(C.get("flagshipOwnership", 0.05)) * moment_weight(s))
 	s.salMod[axis] = clampf2(float(s.salMod.get(axis, 0)) + float(C.get("flagshipSalience", 0.05)), -0.5, 1.5)
 
 # ---------- The state of the nation (world.js) ----------

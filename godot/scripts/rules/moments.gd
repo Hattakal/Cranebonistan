@@ -33,8 +33,9 @@ func flagship_monthly(s: Dictionary) -> void:
 	var f = s.get("flagship")
 	if f == null or typeof(f) != TYPE_DICTIONARY or f.is_empty(): return
 	var sg = -1.0 if f.side == "L" else 1.0
+	var k: float = moment_weight(s)
 	for pop in s.pops:
-		if sg * float(pop.pos[f.axis]) > 20: pop.goodwill.player = clampf2(pop.goodwill.player + 0.01 * minf(1.5, pop.sal[f.axis]), -2, 2)
+		if sg * float(pop.pos[f.axis]) > 20: pop.goodwill.player = clampf2(pop.goodwill.player + 0.01 * k * minf(1.5, pop.sal[f.axis]), -2, 2)
 
 # ---------- The final debate ----------
 func debate_rounds(s: Dictionary) -> Array:
@@ -79,6 +80,8 @@ func answer_debate(s: Dictionary, line_index: int) -> Dictionary:
 	if round.get("hurt", []).size(): apply_effects(s, {"goodwill": round.hurt, "awareness": 0})
 	var react: Array = line.get("react", []).duplicate()
 	react.append_array(TONES[line.tone].react)
+	var k: float = moment_weight(s)   # a party nobody takes seriously is heard by fewer people
+	react = react.map(func(g): return merged(g, {"amt": float(g.amt) * k}))
 	var res = deliver_line(s, merged(line, {"react": react}))
 	apply_effects(s, {"awareness": 0.04})
 	var text: String = line.text
