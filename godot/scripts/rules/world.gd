@@ -793,7 +793,7 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	if quick: pass
 	elif r < risk * (0.3 + charm * 0.3): outcome = "viral"     # charm helps, but a risky line stays risky
 	elif r > 1 - risk * (0.5 - charm * 0.2): outcome = "gaffe"
-	var pos = 2.2 if outcome == "viral" else 1.0   # a line that goes viral: its good effects hit hard
+	var pos = 2.0 if outcome == "viral" else 1.0   # a line that goes viral: its good effects hit hard
 	var neg = 1.8 if outcome == "gaffe" else (1.3 if outcome == "viral" else 1.0)
 	var press: float = 1.0 - (float(C.upkeep.get("pressSoften", 0.25)) if s.get("pressOffice", false) else 0.0)   # the press office softens a gaffe
 	if outcome == "gaffe": neg *= press

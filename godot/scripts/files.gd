@@ -1270,6 +1270,15 @@ static func funds_word(m: float) -> String:
 	if m >= 4: return "Getting by"
 	return "Tight"
 
+## A party's three strongest leanings ("Nationalist · Traditional · Authority").
+func _leans(p: Dictionary) -> String:
+	var axes: Array = G.AXES.map(func(ax): return {"id": ax.id, "v": float(p.perceived[ax.id])})
+	axes = Game.ssort(axes, func(a, b): return absf(b.v) - absf(a.v))
+	var out = []
+	for a in axes.slice(0, 3):
+		if absf(a.v) >= 15: out.append(G.stance_name(a.id, G.stance_of(a.v)))
+	return " · ".join(out) if out.size() else "centrist on everything"
+
 func _polls() -> void:
 	if S.polls.is_empty():
 		_p("No polls yet."); return
@@ -1303,6 +1312,17 @@ func _polls() -> void:
 		var lfrom: String = (", from " + lhome) if lhome != "" else ""
 		var fw: String = funds_word(float(S.money) if p.isPlayer else float(p.get("money", 0))).to_lower()
 		_add(Look.dlabel("Leader: %s%s · %d seats if the election were today · funds: %s" % [p.leader, lfrom, int(seats.get(p.id, 0)), fw], "body", 12, Look.DIM, true), c)
+		# where they stand, and who they would and wouldn't govern with
+		_add(Look.dlabel("Leans: " + _leans(p), "body_bold", 13, Look.TXT, true), c)
+		var allies = []
+		var enemies = []
+		for q in S.parties:
+			if q.id == p.id: continue
+			var st: String = G.party_stance(S, p.id, q.id)
+			var nm2: String = "you" if q.isPlayer else String(q.short)
+			if st == "ally": allies.append(nm2)
+			elif st == "enemy": enemies.append(nm2)
+		_add(Look.dlabel("Allies: %s · Enemies: %s" % [", ".join(allies) if allies.size() else "none", ", ".join(enemies) if enemies.size() else "none"], "body", 13, Look.TXT, true), c)
 		if p.isPlayer:
 			_add(Look.dlabel("%d of %d actions left this month." % [S.actionsLeft, int(G.C.actionsPerMonth)], "body", 12, Look.TXT, true), c)
 			for i in S.dossiers.size():
