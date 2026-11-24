@@ -25,6 +25,7 @@ func _ready() -> void:
 	G = Game
 	Settings.load_all()   # the player's options: colour scheme, text size, grain, sound
 	if _args().has("look"): Look.use(_args().look)
+	if _args().has("text"): Look.text_boost = 2 if _args().text == "large" else 0   # --text=large in a screenshot
 	_build()
 	var args = _args()
 	if args.has("shot"):

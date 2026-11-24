@@ -712,8 +712,10 @@ func _option_column(i: int) -> Control:
 	for m in _ministries(): total += float(m.weight)
 	for p in needs:
 		# what they really need stays hidden: you see what they ask for, and decide how far to push
-		var got: float = G.offer_value(S, o.offer, p)
-		var line = "%s (%s): offered %d%% of the cabinet, they ask for %d%% · favourites: %s" % [String(_party(p).short), needs[p].stance, Game.jround(got / total * 100), Game.jround(float(needs[p].ask) / total * 100),
+		var got = 0.0   # the plain share of the cabinet: favourites count double only in their own reckoning
+		for mm in _ministries():
+			if String(o.offer.get(mm.id, "")) == p: got += float(mm.weight)
+		var line = "%s (%s): offered %d%% of the cabinet · favourites: %s" % [String(_party(p).short), needs[p].stance, Game.jround(got / total * 100),
 			", ".join(G.favourite_ministries(S, p).map(func(id): return String(G._ministry(id).get("name", id))))]
 		v.add_child(Look.dlabel(line, "body", 13, Look.TXT, true))
 	v.add_child(HSeparator.new())

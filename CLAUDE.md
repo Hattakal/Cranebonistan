@@ -60,7 +60,7 @@ Screenshots of the real game (use these to check any visual change; look at the 
 
 ```
 godot --path godot --resolution 1600x900 -- --shot=out.png --weeks=60 [--file=debates|electorate|platform|parties|media|polls|diary] [--tour=cranbia_5] [--profile=1] [--cheats=6] [--leak=1 --open=1] [--clear=1] [--scroll=700]
-    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5] [--found=1] [--title=1 --then=4] [--look=night|study] [--options=1] [--mapmode=vote|known|issues|fed|distress|local|past] [--queue=event_id,event_id] [--hover=id --hoverkind=pin|district]
+    [--open=1 --until=event|budget|debate|election --step2=1 --result=1] [--speak=0] [--raise=0] [--country=dillihan] [--carlos=tip] [--margaret=flip] [--build=1] [--then=0.5] [--found=1] [--title=1 --then=4] [--look=night|study] [--text=large] [--options=1] [--mapmode=vote|known|issues|fed|distress|local|past] [--queue=event_id,event_id] [--hover=id --hoverkind=pin|district]
     [--until=election --coalition=6|end] [--seats=player:95,nup:80,clf:70,oc:35,apv:20] [--negstep=1|2]   # the coalition talks, 6 seconds in or at the end; --seats makes up a result; when you are the largest party, --negstep shows their counteroffers (1) or their answers (2)
 ```
 

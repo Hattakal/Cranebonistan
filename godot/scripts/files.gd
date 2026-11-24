@@ -38,6 +38,7 @@ func _ready() -> void:
 	var paper = PanelContainer.new()
 	var psb = Look.box(Look.N850, 0, Look.N600, 0, 0, 0)
 	psb.border_width_top = 1
+	psb.content_margin_bottom = 110   # what you read stops above the corner where Carlos sits
 	paper.add_theme_stylebox_override("panel", psb)
 	_folder.add_child(paper)
 	_scroll = ScrollContainer.new()
@@ -622,7 +623,7 @@ func _debates() -> void:
 	if S.signature.is_empty(): cs.add_child(Look.dlabel("None yet. Speak for a side, then make it yours.", "body", 12, Look.DIM))
 	for key in S.signature:
 		cs.add_child(_btn("★ %s · drop" % G.side_label(key), func(): G.drop_signature(S, key); changed.emit(), blocked))
-	for pr in [["Actions this month", "%d of %d left" % [left, int(G.C.actionsPerMonth)]], ["Your reach", "%s (×%s)" % [G.influence_label(S), Game.fmt1(G.debate_reach(S))]]]:
+	for pr in [["Actions this month", "%d of %d left" % [left, int(G.C.actionsPerMonth)]], ["Taken seriously", "%d · reach ×%s" % [Game.jround(G.serious_of(S)), Game.fmt1(G.debate_reach(S))]]]:
 		var b = VBoxContainer.new()
 		b.add_child(Look.dcaps(pr[0], 10, Look.DIM, 1))
 		b.add_child(Look.dlabel(pr[1], "display", 24, Look.TXT))
