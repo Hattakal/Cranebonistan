@@ -546,7 +546,8 @@ func _render_bar() -> void:
 	_chip("Funds", "₱%sM" % Game.fmt1(S.money), "Campaign money. Income arrives every quarter.", Color.TRANSPARENT,
 		S.money, func(x): return "₱%sM" % Game.fmt1(x))
 	var arrow = _polling().substr(_polling().find("%") + 1)
-	_chip("Polling", _polling(), "Your national vote share in the latest poll.", Color.TRANSPARENT,
+	var paid: bool = S.polls.size() > 0 and S.polls[-1].get("paid", false)
+	_chip("Polling", _polling(), "Your national vote share in the latest poll." + (" A careful, paid-for poll: no random noise." if paid else ""), Color.TRANSPARENT,
 		S.polls[-1].national.player * 100 if S.polls.size() else null, func(x): return "%s%%%s" % [Game.fmt1(x), arrow])
 	_chip("Known by", "%d%%" % Game.jround(G.national_awareness(S) * 100), "Share of adults who have heard of your party.", Color.TRANSPARENT,
 		G.national_awareness(S) * 100, func(x): return "%d%%" % Game.jround(x))
@@ -1288,7 +1289,8 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 	var inc: Dictionary = S.get("lastIncome", {"total": 0.0, "grassroots": 0.0, "business": 0.0, "mood": 0.0})
 	p.kicker("Quarterly budget · Q%d %d" % [c.monthIndex / 3 + 1, c.year])
 	p.heading("Where does the money go?", 38)
-	p.text("This quarter you raised ₱%sM: ₱%sM from members and small donors, who give more as your party grows, and ₱%sM from business, which is %s. %d%% of adults know your party. Whatever you don't spend is saved." % [Game.fmt1(inc.total), Game.fmt1(inc.grassroots), Game.fmt1(inc.business), Game.business_word(inc.mood), Game.jround(pv.all.before * 100)], 16)
+	var rent: float = float(inc.get("upkeep", 0.0))
+	p.text("This quarter you raised ₱%sM: ₱%sM from members and small donors, who give more as your party grows, and ₱%sM from business, which is %s%s. %d%% of adults know your party. Whatever you don't spend is saved." % [Game.fmt1(inc.total), Game.fmt1(inc.grassroots), Game.fmt1(inc.business), Game.business_word(inc.mood), (", less ₱%dk in rent and wages for your offices" % Game.jround(rent * 1000)) if rent > 0 else "", Game.jround(pv.all.before * 100)], 16)
 	var offers: Array = front.get("offers", [])
 	if offers.size():
 		p.add(Look.caps("Money on the table", 11, Look.MUTED, 2))
@@ -1317,6 +1319,8 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 	rows.append(["social", "Social media", "Cheap reach to voters under 46. The reaction is unpredictable.", pv.young])
 	rows.append(["tv", "TV and newspapers", "Reaches voters over 45 across the country.", pv.old])
 	rows.append(["tour", player.leader + "'s national tour", "Builds the leader as a person. Strongest with the young, the working class and Fauran.", pv.all])
+	var pc: float = float(G.C.upkeep.get("pollCost", 1.0))
+	rows.append(["polling", "Better polling", "Pay the pollsters for a careful job: this quarter's polls come without their random noise (they still only ask a sample, so they can still be a little off). ₱%sM a quarter." % Game.fmt1(pc), pv.all])
 	for row in rows:
 		var h = HBoxContainer.new()
 		h.add_theme_constant_override("separation", 12)
@@ -1330,6 +1334,8 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 		if row[0] == "road":
 			var per: float = (float(S.get("roadFund", 0)) + _budget.road) / 3.0
 			known = "Each trip this quarter: %s" % ("×%s as strong" % Game.fmt1(1.0 + 0.6 * sqrt(per)) if per > 0 else "on foot, with a megaphone")
+		elif row[0] == "polling":
+			known = "This quarter: %s" % ("careful polls, no random noise" if _budget.polling >= pc - 0.001 else "the usual polls, give or take a point or two")
 		elif row[0] == "tour":
 			known = "Leader image: %s%s (%s)" % [Files.leader_score(pr.leaderBefore), (" → " + Files.leader_score(pr.leaderAfter)) if pr.leaderAfter - pr.leaderBefore > 0.005 else "", Files.leader_words(pr.leaderAfter)]
 		else:
@@ -1337,16 +1343,18 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 		info.add_child(Look.label(known, "body", 12, Look.INK))
 		h.add_child(info)
 		var k: String = row[0]
+		var step: float = pc if k == "polling" else 0.5   # better polling is on or off
 		h.add_child(p.button("−", func():
-			_budget[k] = maxf(0, _budget[k] - 0.5)
+			_budget[k] = maxf(0, _budget[k] - step)
 			_budget_build(p, front), false, _budget[k] <= 0))
 		var amt = Look.label("₱%sM" % Game.fmt1(_budget[k]), "type", 17, Look.INK)
 		amt.custom_minimum_size.x = 72
 		amt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		h.add_child(amt)
+		var full: bool = k == "polling" and _budget[k] >= pc - 0.001
 		h.add_child(p.button("+", func():
-			if left >= 0.5 - 1e-9: _budget[k] += 0.5
-			_budget_build(p, front), false, left < 0.5 - 1e-9))
+			if left >= step - 1e-9 and not full: _budget[k] += step
+			_budget_build(p, front), false, left < step - 1e-9 or full))
 		p.add(h)
 		p.rule(1, Look.LINE)
 	var foot = HBoxContainer.new()

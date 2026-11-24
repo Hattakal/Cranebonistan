@@ -426,7 +426,18 @@ func _platform() -> void:
 	c2.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Party offices", c2)
 	var blocked_o: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0 or G.in_campaign(S)
-	_p("Open an office in a city, then grow it (one action, ₱1–2M). It works every month on its own province: supporters there become core voters and turn out, and members pay a little in dues. You can also open one by clicking the province on the map.", c2)
+	_p("Open an office in a city, then grow it (one action, ₱1–2M). It works every month on its own province: supporters there become core voters and turn out, and members pay a little in dues; rent is ₱10–20k a quarter. You can also open one by clicking the province on the map.", c2)
+	var up: Dictionary = G.C.upkeep
+	var pr_row = HBoxContainer.new()
+	pr_row.add_theme_constant_override("separation", 10)
+	var pr_txt = Look.dlabel("Press office: %s" % ("open. Gaffes cost you a quarter less." if S.get("pressOffice", false) else "none. One would soften every gaffe by a quarter (rent ₱%dk a quarter)." % Game.jround(float(up.press) * 1000)), "body", 13, Look.TXT, true)
+	pr_txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pr_row.add_child(pr_txt)
+	if not S.get("pressOffice", false):
+		var pb = _btn("Open a press office · ₱%sM" % Game.fmt1(float(up.pressCost)), func(): _did(G.act_press_office(S)), blocked_o or S.money < float(up.pressCost))
+		pb.tooltip_text = "Uses one of this month's actions. It doesn't stop gaffes; it explains them away faster."
+		pr_row.add_child(pb)
+	c2.add_child(pr_row)
 	for r in G.REGIONS:
 		var line = HFlowContainer.new()
 		line.add_theme_constant_override("h_separation", 6)
@@ -1321,7 +1332,7 @@ func _polls() -> void:
 	_rule()
 	_eyebrow("National vote intention · %s · %s" % [poll.label, G.date_label(poll.week, false)])
 	_bars(poll.national, prev.national if prev else null)
-	_p("Expected turnout %d%%. Margin of error about ±%s points." % [Game.jround(poll.turnout * 100), Game.fmt1(G.C.pollError * 200)])
+	_p("Expected turnout %d%%. %s" % [Game.jround(poll.turnout * 100), "A careful poll you paid for: no random noise, only the error of asking a sample." if poll.get("paid", false) else "Margin of error about ±%s points." % Game.fmt1(G.C.pollError * 200)])
 	_eyebrow("Poll history")
 	var ch = Chart.new(G, S)
 	ch.custom_minimum_size.y = 240

@@ -295,6 +295,7 @@ func resolve_budget(s: Dictionary, alloc: Dictionary, offers_taken := []) -> Dic
 	s.roadFund = float(s.get("roadFund", 0)) + float(clean.get("road", 0))
 	s.roadPerTrip = s.roadFund / 3.0   # a quarter has three trips
 	s.lastBudget = clean.duplicate()
+	s.paidPolling = float(clean.get("polling", 0)) >= float(C.upkeep.get("pollCost", 1.0)) - 0.001   # for this quarter
 	_log(s, "budget", "Spent ₱%sM on campaigning%s." % [fmt1(spent), (". Took money from " + ", ".join(notes)) if notes.size() else ""])
 	finish_front(s, "budget")
 	return {"spent": spent, "preview": preview, "socialSwing": swing}
@@ -318,7 +319,31 @@ func quarterly_income(s: Dictionary) -> Dictionary:
 	var grassroots: float = C.incomeBase + share * C.incomePerShare + dues
 	var mood = business_mood(s)
 	var business: float = C.businessBase * mood
-	return {"grassroots": grassroots, "business": business, "mood": mood, "total": grassroots + business}
+	var upkeep: float = running_costs(s)
+	return {"grassroots": grassroots, "business": business, "mood": mood, "upkeep": upkeep, "total": grassroots + business - upkeep}
+
+## Rent and wages each quarter: the party offices by size, and the press office (CONFIG.upkeep).
+func running_costs(s: Dictionary) -> float:
+	var u: Dictionary = C.get("upkeep", {})
+	var rents: Array = u.get("office", [0.01, 0.015, 0.02])
+	var t = 0.0
+	for name in s.get("communities", {}):
+		var lvl: int = int(s.communities[name])
+		if lvl > 0: t += float(rents[mini(lvl, rents.size()) - 1])
+	if s.get("pressOffice", false): t += float(u.get("press", 0.02))
+	return t
+
+## The press office: built once; gaffes cost you less from then on (CONFIG.upkeep).
+func act_press_office(s: Dictionary) -> Dictionary:
+	if s.get("pressOffice", false): return {"ok": false, "text": "You already have a press office."}
+	if in_campaign(s): return {"ok": false, "text": "No time to build during the campaign."}
+	var cost: float = float(C.upkeep.get("pressCost", 1.5))
+	var err = can_act(s, cost)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, cost)
+	s.pressOffice = true
+	_log(s, "action", "Opened a press office.")
+	return {"ok": true, "text": "A press office: three people, a coffee machine and a phone that never stops. The next gaffe will be explained before it trends."}
 
 func draw_offers(s: Dictionary) -> Array:
 	var mood = business_mood(s)

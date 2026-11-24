@@ -182,13 +182,14 @@ func take_poll(s: Dictionary, label: String, silent := false) -> void:
 	var cache = {}
 	var sample: Array = poll_sample(s)
 	var nation = summarize(s, sample, ctx, cache)
-	var poll = {"week": s.week, "label": label, "national": noisy(s, nation.support, C.pollError * 0.5),
+	var err: float = 0.0 if s.get("paidPolling", false) else float(C.pollError)   # paid-for polling: the same sample, no random noise
+	var poll = {"week": s.week, "label": label, "national": noisy(s, nation.support, err * 0.5), "paid": s.get("paidPolling", false),
 		"turnout": nation.turnout, "trust": s.trust, "regions": {}, "groups": {}}
 	for kind in group_kinds():
 		for g in kind.groups:
 			var sm = summarize(s, sample.filter(func(p): return matches(p, g.who)), ctx, cache)
 			if not sm.size: continue
-			var entry = {"support": noisy(s, sm.support, C.pollError), "core": sm.core}
+			var entry = {"support": noisy(s, sm.support, err), "core": sm.core}
 			poll.groups[kind.id + ":" + g.id] = entry
 			if kind.id == "region": poll.regions[g.id] = entry.support
 	poll.tracker = silent
@@ -794,6 +795,8 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	elif r > 1 - risk * (0.5 - charm * 0.2): outcome = "gaffe"
 	var pos = 1.6 if outcome == "viral" else 1.0
 	var neg = 1.8 if outcome == "gaffe" else (1.3 if outcome == "viral" else 1.0)
+	var press: float = 1.0 - (float(C.upkeep.get("pressSoften", 0.25)) if s.get("pressOffice", false) else 0.0)   # the press office softens a gaffe
+	if outcome == "gaffe": neg *= press
 	var reacts: Array = TONES[tone].react.duplicate()
 	reacts.append_array(line.get("react", []))
 	var qk = 0.4 if quick else 1.0
@@ -832,9 +835,9 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 		gain_charisma(player, 1.5)
 	if outcome == "gaffe":
 		s.record.gaffes += 1
-		player.charisma = clampf2(player.charisma - 2.5, 10, 100)
+		player.charisma = clampf2(player.charisma - 2.5 * press, 10, 100)
 		# a gaffe is remembered: everyone thinks a little less of the leader, not only the offended
 		for pop in s.pops:
-			pop.leader.player = clampf2(pop.leader.player - 0.04, -2, 2)
-			pop.goodwill.player = clampf2(pop.goodwill.player - 0.03 * (1 - shield_of(pop, "player")), -2, 2)
+			pop.leader.player = clampf2(pop.leader.player - 0.04 * press, -2, 2)
+			pop.goodwill.player = clampf2(pop.goodwill.player - 0.03 * press * (1 - shield_of(pop, "player")), -2, 2)
 	return {"outcome": outcome, "press": TONES[tone].press[outcome], "styleNote": style_note}
