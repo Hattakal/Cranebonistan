@@ -380,7 +380,7 @@ func _region_cities(region: String, to: Control) -> void:
 			var cost: float = G.COMMUNITY_COST[lvl]
 			var b = _btn(("Open an office" if lvl == 0 else "Grow it") + " · ₱%sM" % Game.fmt1(cost), func(): _did(G.act_community(S, c.name)),
 				S.result != null or left <= 0 or S.money < cost or G.in_campaign(S), lvl == 0)
-			b.tooltip_text = "Uses one of this month's actions. A community works every month on its own province: it turns your supporters there into core voters and gets them to the polls."
+			b.tooltip_text = "Uses one action. A community works every month on its own province: it turns your supporters there into core voters and gets them to the polls."
 			row.add_child(b)
 
 func _people(n: float) -> String:
@@ -436,7 +436,7 @@ func _platform() -> void:
 	pr_row.add_child(pr_txt)
 	if not S.get("pressOffice", false):
 		var pb = _btn("Open a press office · ₱%sM" % Game.fmt1(float(up.pressCost)), func(): _did(G.act_press_office(S)), blocked_o or S.money < float(up.pressCost))
-		pb.tooltip_text = "Uses one of this month's actions. It doesn't stop gaffes; it explains them away faster."
+		pb.tooltip_text = "Uses one action. It doesn't stop gaffes; it explains them away faster."
 		pr_row.add_child(pb)
 	c2.add_child(pr_row)
 	for r in G.REGIONS:
@@ -623,7 +623,7 @@ func _debates() -> void:
 	if S.signature.is_empty(): cs.add_child(Look.dlabel("None yet. Speak for a side, then make it yours.", "body", 12, Look.DIM))
 	for key in S.signature:
 		cs.add_child(_btn("★ %s · drop" % G.side_label(key), func(): G.drop_signature(S, key); changed.emit(), blocked))
-	for pr in [["Actions this month", "%d of %d left" % [left, int(G.C.actionsPerMonth)]], ["Taken seriously", "%d · reach ×%s" % [Game.jround(G.serious_of(S)), Game.fmt1(G.debate_reach(S))]]]:
+	for pr in [["Actions " + G.period_word(S), "%d of %d left" % [left, int(G.C.campaign.actionsPerWeek) if G.in_campaign(S) else int(G.C.actionsPerMonth)]], ["Taken seriously", "%d · reach ×%s" % [Game.jround(G.serious_of(S)), Game.fmt1(G.debate_reach(S))]]]:
 		var b = VBoxContainer.new()
 		b.add_child(Look.dcaps(pr[0], 10, Look.DIM, 1))
 		b.add_child(Look.dlabel(pr[1], "display", 24, Look.TXT))
@@ -1238,7 +1238,7 @@ func _media_row(to: Control, row: Dictionary, blocked: bool) -> void:
 			var res: Dictionary = G.act_buy_outlet(S, o.id)
 			toast.emit(res.text)
 			changed.emit(), blocked or S.money < price)
-		b.tooltip_text = "Uses one of this month's actions. A bought outlet turns your way and shields your voters, but it is believed less and loses readers to the others."
+		b.tooltip_text = "Uses one action. A bought outlet turns your way and shields your voters, but it is believed less and loses readers to the others."
 		b.add_theme_font_size_override("font_size", Look.fs(11))
 		act.add_child(b)
 	if o.kind == "influencer":
@@ -1259,7 +1259,7 @@ func _media_row(to: Control, row: Dictionary, blocked: bool) -> void:
 				var res: Dictionary = G.act_sponsor(S, o.id)
 				toast.emit(res.text)
 				changed.emit(), blocked or S.money < fee)
-			sb.tooltip_text = "Uses one of this month's actions; the fee is paid now and every quarter, and follows their followers. Everyone knows they're paid, so their word counts a little less, but it is no scandal."
+			sb.tooltip_text = "Uses one action; the fee is paid now and every quarter, and follows their followers. Everyone knows they're paid, so their word counts a little less, but it is no scandal."
 			sb.add_theme_font_size_override("font_size", Look.fs(11))
 			act.add_child(sb)
 	to.add_child(panel)
@@ -1325,7 +1325,7 @@ func _polls() -> void:
 			elif st == "enemy": enemies.append(nm2)
 		_add(Look.dlabel("Allies: %s · Enemies: %s" % [", ".join(allies) if allies.size() else "none", ", ".join(enemies) if enemies.size() else "none"], "body", 13, Look.TXT, true), c)
 		if p.isPlayer:
-			_add(Look.dlabel("%d of %d actions left this month." % [S.actionsLeft, int(G.C.actionsPerMonth)], "body", 12, Look.TXT, true), c)
+			_add(Look.dlabel("%d of %d actions left %s." % [S.actionsLeft, int(G.C.campaign.actionsPerWeek) if G.in_campaign(S) else int(G.C.actionsPerMonth), G.period_word(S)], "body", 12, Look.TXT, true), c)
 			for i in S.dossiers.size():
 				var dd: Dictionary = S.dossiers[i]
 				var dl = HBoxContainer.new()
