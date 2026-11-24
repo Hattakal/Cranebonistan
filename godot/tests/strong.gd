@@ -3,7 +3,8 @@ extends SceneTree
 ## to the province where it matters most, every action spent speaking for the manifesto,
 ## a sensible budget. Usage: -- <style> <seed> [flags]
 ##   style: populist | centrist | left | provocative (the populist manifesto, every line
-##   provocative) | switch (provocative for two years, then fiery)
+##   provocative) | switch (provocative for two years, then fiery) | timed (fiery, but
+##   provocative in a hot debate when earlier outrage has worn off)
 ## flags (comma-separated) switch parts off: notrips,nospeak,nobudget,nomoney,nooffices,noclaim;
 ## image: most of the budget on the leader's national tour (the leader's image)
 const STYLES := {
@@ -11,6 +12,7 @@ const STYLES := {
 	"centrist": {"m": {"nation": 2, "system": 3, "society": 2, "order": 2, "economy": 2, "welfare": 2, "foreign": 2}, "tone": "statesman"},
 	"left": {"m": {"nation": 3, "system": 1, "society": 1, "order": 3, "economy": 0, "welfare": 0, "foreign": 3}, "tone": "folksy"},
 	"provocative": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative"},
+	"timed": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "timed": true},
 	"switch": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative", "then": "fiery", "at": 96},
 }
 var G
@@ -104,7 +106,10 @@ func _init() -> void:
 					if d.has("you") or side == "": continue
 					var lines: Array = G.debate_lines(s, d, side)
 					if lines.is_empty(): continue
+					var keep = tone
+					if STYLES[style].has("timed") and d.heat >= 38 and float(s.get("outrage", 0)) < 0.6: tone = "provocative"
 					var r = G.act_speak(s, d.id, side, line_of(lines))
+					tone = keep
 					if r.ok:
 						did = true
 						if not off.has("noclaim") and G.claim_block(s, d.axis, side) == "": G.act_claim(s, d.axis, side)

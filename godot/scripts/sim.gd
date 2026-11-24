@@ -176,6 +176,7 @@ func monthly_update(s: Dictionary) -> void:
 	for k in wm: wm[k] = float(wm[k]) * 0.85
 	debates_monthly(s)
 	issues_monthly(s)
+	s.outrage = float(s.get("outrage", 0.0)) * float(C.serious.get("provocative", {}).get("decay", 0.5))   # outrage wears off
 	serious_monthly(s)
 	communities_monthly(s)
 	relations_monthly(s)

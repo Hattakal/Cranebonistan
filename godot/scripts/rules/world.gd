@@ -801,6 +801,14 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	apply_effects(s, {"goodwill": scaled, "awareness": 0.06 if outcome == "viral" else (0.035 if outcome == "gaffe" else 0.01)})
 	if outcome == "viral": change_serious(s, float(C.serious.viral))
 	elif outcome == "gaffe": change_serious(s, float(C.serious.gaffe))
+	# a provocative line that lands gets you noticed, less so when you have been at it lately
+	if tone == "provocative":
+		var pc: Dictionary = C.serious.get("provocative", {})
+		var fresh: float = 1.0 / (1.0 + float(pc.get("fatigue", 0.6)) * float(s.get("outrage", 0.0)))
+		if outcome != "gaffe":
+			change_serious(s, float(pc.get("serious", 1.5)) * fresh * qk)
+			apply_effects(s, {"awareness": float(pc.get("aware", 0.025)) * fresh * qk})
+		s.outrage = float(s.get("outrage", 0.0)) + 1.0
 	for g in scaled:
 		for pop in s.pops:
 			if matches(pop, g.who): pop.leader.player = clampf2(pop.leader.player + g.amt * 0.35, -2, 2)
