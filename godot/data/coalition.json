@@ -1,5 +1,5 @@
 {
- "_note": "Forming a government after the election (rules/coalition.gd). Works with any number of parties. MINISTRIES: the posts shared out in a coalition; 'weight' is how much each is worth (the Prime Minister most), 'axes' the issues it serves: a party whose manifesto is strong on one of those wants it a little more (it picks it first when its turn comes). STANCE: how one party sees another, from their relation (-100..100): at or below 'enemy' they will never govern together, at or above 'ally' they join without asking for extra. Between the two they are neutral and want a better share. NEUTRAL_PREMIUM: how much more than its fair share (by seats) a neutral party asks for, as a fraction of the cabinet. SHUTOUT_RELAXES: after one party is shut out, the others' enmities count as neutral. MAX_FORMATEURS: how many parties, largest first, get to try in each round. FORMATEUR_GIVES: how much of its own fair share the party forming the government will give up to close a deal (0.4 = up to 40%). OPENING_ASK: when you are the largest party and bargain yourself, partners open by asking this much more than they need (they accept a final offer that gives them what they need). COMPROMISE: when every try fails only because partners asked too much, but a majority without enemies exists, the largest party in one forms it anyway and every member takes its fair share by seats.",
+ "_note": "Forming a government after the election (rules/coalition.gd). Works with any number of parties. MINISTRIES: the posts shared out in a coalition; 'weight' is how much each is worth (the Prime Minister most), 'axes' the issues it serves: a party whose manifesto is strong on one of those wants it a little more (it picks it first when its turn comes). STANCE: how one party sees another, from their relation (-100..100): at or below 'enemy' they will never govern together, at or above 'ally' they join without asking for extra. Between the two they are neutral and want a better share. NEUTRAL_PREMIUM: how much more than its fair share (by seats) a neutral party asks for, as a fraction of the cabinet. SHUTOUT_RELAXES: after one party is shut out, the others' enmities count as neutral. MAX_FORMATEURS: how many parties, largest first, get to try in each round. FORMATEUR_GIVES: how much of its own fair share the party forming the government will give up to close a deal (0.4 = up to 40%). DEMAND_SLACK: when a party asks you to join, it accepts demands worth up to this much of your fair share (more for a neutral partner), without haggling. PM_PRICE: it hands you the Prime Minister's office only when desperate (a coalition with you alone is its only way in, and the others could govern without it), and then only if your other demands come to at most this much of your fair share. FAVOURITE_WORTH: each party has two favourite ministries (content.json PARTIES 'ministries', or the two serving its strongest issues), worth this many times their weight to it. OPENING_ASK: when you are the largest party and bargain yourself, partners open by asking this much more than they need (they accept a final offer that gives them what they need). COMPROMISE: when every try fails only because partners asked too much, but a majority without enemies exists, the largest party in one forms it anyway and every member takes its fair share by seats.",
  "MINISTRIES": [
   {"id": "pm", "name": "Prime Minister", "weight": 5},
   {"id": "interior", "name": "Interior", "weight": 3, "axes": ["nation", "order"]},
@@ -19,6 +19,9 @@
  "FORMATEUR_GIVES": 0.4,
  "COMPROMISE": true,
  "OPENING_ASK": 1.15,
+ "FAVOURITE_WORTH": 2.0,
+ "DEMAND_SLACK": 1.1,
+ "PM_PRICE": 0.5,
  "COLUMN": {"_note": "The ending is an opinion column about your campaign: who writes it, and where.", "outlet": "The Cranebo Herald", "author": "Ilse Marrow", "role": "political editor"},
  "OUTCOMES": {
   "_note": "How the election ended for the player: a headline and the feeling of it. Placeholders: {party}, {leader}. First drafts; the end screens are still to be designed.",
@@ -48,6 +51,11 @@
   "no_combination_you": "You find no partners to make a majority.",
   "compromise": "Weeks without a deal. In the end {parties} settle for a compromise: every party gets what its seats are worth, nothing more.",
   "shutout": "No government is possible. {p}, the party the others like least, is left out of the talks.",
-  "deadlock": "No one can form a government."
+  "deadlock": "No one can form a government.",
+  "you_join": "Your demands are met: you join.",
+  "you_pm": "{f} hands you the Prime Minister's office: it has nowhere else to go.",
+  "you_no_pm": "{f} won't give up the Prime Minister's office.",
+  "you_too_much": "Your demands are too much for {f}.",
+  "you_stay_out": "You turn {f} down and stay out."
  }
 }

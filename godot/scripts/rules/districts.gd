@@ -495,5 +495,5 @@ func run_election(s: Dictionary) -> void:
 	# the largest party without a majority bargains; if that is you, the talks wait for you
 	var ranked: Array = ranking.filter(func(id): return int(seats.national.get(id, 0)) > 0)
 	if ranked.size() and ranked[0] == "player" and int(seats.national.player) < int(C.seats / 2) + 1: s.result.coalition = coalition_open(s, seats.national)
-	else: s.result.coalition = form_government(s, seats.national)
+	else: s.result.coalition = form_government(s, seats.national, {})   # {}: if a party asks you to join, the talks wait for your answer
 	s.queue.append({"type": "election"})

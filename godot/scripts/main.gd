@@ -2167,7 +2167,7 @@ func _shot(args: Dictionary) -> void:
 		S.result.seats.national = seats
 		S.result.ranking = Game.ssort(seats.keys(), func(a, b): return seats[b] - seats[a])
 		var top: Array = S.result.ranking.filter(func(id): return int(seats.get(id, 0)) > 0)
-		S.result.coalition = G.coalition_open(S, seats) if top.size() and top[0] == "player" and int(seats.get("player", 0)) <= int(G.C.seats / 2) else G.form_government(S, seats)
+		S.result.coalition = G.coalition_open(S, seats) if top.size() and top[0] == "player" and int(seats.get("player", 0)) <= int(G.C.seats / 2) else G.form_government(S, seats, {})
 	if args.has("coalition") and S.result:
 		var cv = _coalition_view()
 		if args.coalition == "end":

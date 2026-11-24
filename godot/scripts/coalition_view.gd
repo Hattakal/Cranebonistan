@@ -84,7 +84,7 @@ func _gui_input(e: InputEvent) -> void:
 func _skip() -> void:
 	if _done: return
 	_skipped = true
-	if co.get("pending", false): _negotiate()   # your turn can't be skipped
+	if co.get("pending", false): _your_turn()   # your turn can't be skipped
 	else: _show_end()
 
 ## Waits, unless the talks were skipped; false means stop playing.
@@ -222,7 +222,7 @@ func _play(from := 0) -> void:
 				break
 		i += 1
 	if _skipped: return
-	if co.get("pending", false): _negotiate()
+	if co.get("pending", false): _your_turn()
 	else: _show_end()
 
 func _show_combos(st: Dictionary, crosses: Array) -> bool:
@@ -511,6 +511,91 @@ class XMark extends Control:
 		if b > 0: draw_line(Vector2(size.x, 0), Vector2(size.x, 0).lerp(Vector2(0, size.y), b), Look.RED, w, true)
 
 
+## The talks wait for you: either you lead the bargaining, or a party asks you to join.
+func _your_turn() -> void:
+	if co.has("ask"): _answer_ask()
+	else: _negotiate()
+
+# ---------- A party asks you to join: you name your demands ----------
+var _demands: Array = []
+
+func _answer_ask() -> void:
+	_done = false
+	_skip_btn.visible = false
+	var h = find_child("Hint", false, false)
+	if h: h.visible = false
+	_demands = co.ask.offer.duplicate()
+	_build_ask()
+
+func _build_ask() -> void:
+	_clear()
+	var ask: Dictionary = co.ask
+	var f: Dictionary = _party(ask.f)
+	_title.text = "%s asks you to join" % String(f.name)
+	var seats = 0
+	for p in ask.combo: seats += int(co.seats[p])
+	_sub.text = "They aim at %s: %d seats. Name the ministries you want; they say yes or no, and don't haggle." % [" + ".join(ask.combo.map(func(p): return _name(p))), seats]
+	_set_bar(ask.combo)
+	var root = VBoxContainer.new()
+	root.position = Vector2(60, 170)
+	root.add_theme_constant_override("separation", 12)
+	_stage.add_child(root)
+	var panel = PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.glass())
+	panel.custom_minimum_size.x = 560
+	root.add_child(panel)
+	var v = VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	panel.add_child(v)
+	var total = 0.0
+	var mine = 0.0
+	for m in _ministries():
+		total += float(m.weight)
+		if _demands.has(m.id): mine += float(m.weight)
+	v.add_child(Look.dlabel("You ask for %d%% of the cabinet. Their favourites: %s." % [Game.jround(mine / total * 100), ", ".join(G.favourite_ministries(S, ask.f).map(func(id): return String(G._ministry(id).get("name", id))))], "body", 14, Look.TXT, true))
+	if ask.desperate: v.add_child(Look.dlabel("They have nowhere else to go: they might even give you the Prime Minister's office, if you ask for little else.", "body", 14, Look.LAMP, true))
+	v.add_child(HSeparator.new())
+	for m in _ministries():
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var nm = Look.dlabel(String(m.name), "body", 14, Look.TXT)
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(nm)
+		var yours: bool = _demands.has(m.id)
+		var holder: String = "player" if yours else String(ask.f)
+		var b = Button.new()
+		b.text = "You" if yours else String(f.short)
+		b.custom_minimum_size.x = 90
+		b.add_theme_font_size_override("font_size", Look.fs(13))
+		b.add_theme_font_override("font", Look.font("display_bold"))
+		Look.dark_button(b, false, false, 4)
+		b.add_theme_color_override("font_color", Look.lit(Color(_party(holder).color)))
+		var locked: bool = m.id == "pm" and not ask.desperate
+		b.disabled = locked
+		b.tooltip_text = "They keep the Prime Minister's office." if locked else "Click to ask for it, or to leave it to them."
+		var mid: String = m.id
+		b.pressed.connect(func():
+			if _demands.has(mid): _demands.erase(mid)
+			else: _demands.append(mid)
+			_build_ask())
+		row.add_child(b)
+		v.add_child(row)
+	var foot = HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 12)
+	root.add_child(foot)
+	foot.add_child(_big_button("Stay out", false, func(): _send_answer(null)))
+	foot.add_child(_big_button("Send your demands", true, func(): _send_answer(_demands.duplicate())))
+
+func _send_answer(demands) -> void:
+	var from: int = co.log.size()
+	G.coalition_answer(S, demands)
+	co = S.result.coalition
+	_clear()
+	_title.text = "Forming a government"
+	_skipped = false
+	_skip_btn.visible = true
+	_play(from)
+
 # ---------- Your turn: offers, counteroffers, a final offer ----------
 var _phase := "offer"    # offer -> final -> verdicts
 var _options: Array = [] # [{combo, offer: {ministry: party}, counter, verdict}]
@@ -626,16 +711,17 @@ func _option_column(i: int) -> Control:
 	var total = 0.0
 	for m in _ministries(): total += float(m.weight)
 	for p in needs:
+		# what they really need stays hidden: you see what they ask for, and decide how far to push
 		var got: float = G.offer_value(S, o.offer, p)
-		var want: float = float(needs[p].need if _phase != "offer" else needs[p].ask)
-		var ok: bool = got + 0.001 >= float(needs[p].need)
-		var line = "%s (%s): offered %d%% of the cabinet, %s %d%%" % [String(_party(p).short), needs[p].stance, Game.jround(got / total * 100), "they want" if _phase == "offer" else "they need", Game.jround(want / total * 100)]
-		v.add_child(Look.dlabel(line, "body", 13, Look.GOOD_HI if ok else Look.TXT, true))
+		var line = "%s (%s): offered %d%% of the cabinet, they ask for %d%% · favourites: %s" % [String(_party(p).short), needs[p].stance, Game.jround(got / total * 100), Game.jround(float(needs[p].ask) / total * 100),
+			", ".join(G.favourite_ministries(S, p).map(func(id): return String(G._ministry(id).get("name", id))))]
+		v.add_child(Look.dlabel(line, "body", 13, Look.TXT, true))
 	v.add_child(HSeparator.new())
 	for m in _ministries():
 		var row = HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
-		var nm = Look.dlabel(String(m.name), "body", 14, Look.TXT)
+		var fav: Array = combo.filter(func(p): return p != "player" and G.favourite_ministries(S, p).has(m.id)).map(func(p): return _name(p))
+		var nm = Look.dlabel(String(m.name) + (("  ★ " + ", ".join(fav)) if fav.size() else ""), "body", 14, Look.TXT)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(nm)
 		var holder: String = String(o.offer.get(m.id, "player"))
@@ -657,7 +743,8 @@ func _option_column(i: int) -> Control:
 			_build_negotiation())
 		row.add_child(b)
 		v.add_child(row)
-	if _phase == "final": v.add_child(Look.dlabel("A dot: what they asked for on top of your offer.", "body_italic", 12, Look.DIM, true))
+	if _phase == "final": v.add_child(Look.dlabel("A dot: what they asked for on top of your offer. ★ a party's favourite: worth double to them.", "body_italic", 12, Look.DIM, true))
+	elif _phase == "offer": v.add_child(Look.dlabel("★ a party's favourite ministry: worth double to them.", "body_italic", 12, Look.DIM, true))
 	if _phase == "verdicts":
 		var yes: bool = o.verdict.get("accepted", false)
 		v.add_child(Look.dlabel("They accept." if yes else "They say no: not enough for %s." % ", ".join(o.verdict.get("short", []).map(func(p): return String(_party(p).short))), "display_bold", 18, Look.GOOD_HI if yes else Look.RED_HI, true))

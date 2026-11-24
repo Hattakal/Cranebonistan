@@ -97,8 +97,16 @@ func _cabinet_total() -> float:
 	for m in _cset("MINISTRIES", []): t += float(m.weight)
 	return t
 
+var _asks = null      # your answers when a party asks you to join ("f:round" -> {accept, ministries}); null: the talks run by themselves
+var _round := 1
+var _ask_pause = null # set when the talks stop to ask you
+
 ## Runs the talks and returns {log, government, outcome}. `seats`: party id -> seats.
-func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
+## `asks`: when given, the talks stop the first time a party asks you to join and you
+## haven't answered yet (the result is then {pending: true, ask: {...}}); see coalition_answer.
+func form_government(s: Dictionary, seats: Dictionary = {}, asks = null) -> Dictionary:
+	_asks = asks
+	_ask_pause = null
 	if seats.is_empty(): seats = s.result.seats.national
 	var need: int = int(int(C.seats) / 2) + 1
 	var ids: Array = ssort(seats.keys().filter(func(id): return int(seats[id]) > 0), func(a, b): return int(seats[b]) - int(seats[a]))
@@ -115,6 +123,7 @@ func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
 	var in_play: Array = ids
 	while gov == null and rounds < 2:
 		rounds += 1
+		_round = rounds
 		in_play = ids.filter(func(id): return not excluded.has(id))
 		var combos: Array = minimal_majorities(seats, in_play, need)
 		log.append({"t": "combos", "list": combos, "round": rounds})
@@ -126,6 +135,8 @@ func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
 		var tries: Array = in_play.slice(0, int(_cset("MAX_FORMATEURS", 3)))
 		for f in tries:
 			gov = _try_formateur(s, f, in_play, seats, need, alive, relaxed, log)
+			if _ask_pause != null:   # a party asks you to join: wait for your answer
+				return {"log": log, "government": null, "excluded": excluded, "pending": true, "ask": _ask_pause, "asks": asks, "seats": seats.duplicate()}
 			if gov: break
 		if gov == null and rounds == 1 and in_play.size() > 2:
 			var worst = ""
@@ -207,6 +218,20 @@ func _try_formateur(s: Dictionary, f: String, in_play: Array, seats: Dictionary,
 			step.verdict = "skip"; step.why = ""
 			log.append(step); continue
 		var extra: float = float(_cset("NEUTRAL_PREMIUM", 0.08)) if st == "neutral" else 0.0
+		if party_of(s, p).isPlayer and _asks != null:   # you decide what you ask for
+			var key: String = "%s:%d" % [f, _round]
+			var dec = _asks.get(key)
+			if dec == null:
+				_ask_pause = _make_ask(s, f, members, mine, seats, alive, key)
+				return null
+			if not dec.accept:
+				step.verdict = "refuse"; step.why = String(dec.why)
+				log.append(step); continue
+			premium[p] = extra
+			members.append(p)
+			step.verdict = "join"; step.why = String(dec.why)
+			log.append(step)
+			continue
 		var trial: Dictionary = premium.duplicate()
 		trial[p] = extra
 		var ent: Dictionary = _entitlements(seats, f, trial)
@@ -224,6 +249,15 @@ func _try_formateur(s: Dictionary, f: String, in_play: Array, seats: Dictionary,
 		return null
 	var ent: Dictionary = _entitlements(seats, f, premium)
 	var cab: Array = _share_cabinet(s, ent, _pm_holder(seats, f, ent))
+	var mine_dec = _asks.get("%s:%d" % [f, _round]) if _asks != null else null
+	if members.has("player") and mine_dec != null and mine_dec.accept:   # you got exactly what you asked for
+		var others = {}
+		for k in ent:
+			if k != "player": others[k] = ent[k]
+		cab = []
+		for m in _cset("MINISTRIES", []):
+			if mine_dec.ministries.has(m.id): cab.append({"ministry": m.id, "name": m.name, "party": "player", "weight": float(m.weight)})
+		cab.append_array(_share_cabinet(s, others, "" if mine_dec.ministries.has("pm") else f, mine_dec.ministries))
 	# the Prime Minister's office went to a partner: say so on that partner's step
 	var pm: String = _pm_of(cab)
 	if pm != f:
@@ -286,8 +320,8 @@ func _pm_holder(seats: Dictionary, f: String, ent: Dictionary) -> String:
 
 ## Shares out the ministries by entitlement (party -> share of the cabinet). The
 ## Prime Minister's office goes to `pm_to`; the rest are picked in turns.
-func _share_cabinet(s: Dictionary, ent: Dictionary, pm_to := "") -> Array:
-	var left: Array = _cset("MINISTRIES", []).duplicate(true)
+func _share_cabinet(s: Dictionary, ent: Dictionary, pm_to := "", taken := []) -> Array:
+	var left: Array = _cset("MINISTRIES", []).duplicate(true).filter(func(m): return not taken.has(m.id))
 	var out = []
 	if pm_to == "": pm_to = ent.keys()[0]
 	var picks = {}
@@ -379,9 +413,21 @@ func coalition_options(s: Dictionary) -> Array:
 		if absf(d) > 0.001: return d
 		return _seats_of(co.seats, a) - _seats_of(co.seats, b))
 
-## A ministry as a party sees it: its weight, a little more if it serves that party's issues.
+## A ministry as a party sees it: its weight, twice that for one of its favourites.
 func _ministry_value(s: Dictionary, pid: String, m: Dictionary) -> float:
-	return float(m.weight) * (1.0 + 0.3 * _ministry_want(s, pid, m))
+	return float(m.weight) * (float(_cset("FAVOURITE_WORTH", 2.0)) if favourite_ministries(s, pid).has(m.get("id", "")) else 1.0)
+
+## A party's two favourite ministries: set in content.json (PARTIES "ministries"), or the
+## two (not the Prime Minister's office) that serve its strongest issues.
+func favourite_ministries(s: Dictionary, pid: String) -> Array:
+	var p = by_id(PARTIES, pid)
+	if p and p.has("ministries"): return p.ministries
+	var ms: Array = _cset("MINISTRIES", []).filter(func(m): return m.id != "pm")
+	ms = ssort(ms, func(a, b):
+		var d: float = _ministry_want(s, pid, b) - _ministry_want(s, pid, a)
+		if absf(d) > 0.001: return d
+		return float(b.weight) - float(a.weight))
+	return ms.slice(0, 2).map(func(m): return m.id)
 
 func _ministry(id: String) -> Dictionary:
 	for m in _cset("MINISTRIES", []):
@@ -504,3 +550,49 @@ func _coalition_others(s: Dictionary) -> void:
 	else: co.log.append({"t": "government", "members": gov.members, "cabinet": gov.cabinet, "pm": _pm_of(gov.cabinet)})
 	co.government = gov
 	_coalition_close(s)
+
+
+# ---------- When a party asks you to join ----------
+## What a party forming a government offers you: the majority it aims at, the ministries
+## a fair share by seats would give you, and whether it is desperate enough to hand you
+## the Prime Minister's office (a coalition with you alone is its only way in, and the
+## others could govern without it).
+func _make_ask(s: Dictionary, f: String, members: Array, mine: Array, seats: Dictionary, alive: Array, key: String) -> Dictionary:
+	var with_you: Array = members + ["player"]
+	var aims: Array = mine.filter(func(c): return with_you.all(func(m): return c.has(m)))
+	var combo: Array = aims[0] if aims.size() else with_you
+	var tot: float = float(_seats_of(seats, combo))
+	var ent = {}
+	for p in combo: ent[p] = float(seats[p]) / tot
+	var offer = []
+	for c in _share_cabinet(s, ent, f):
+		if c.party == "player": offer.append(c.ministry)
+	var desperate: bool = mine.size() == 1 and mine[0].size() == 2 and mine[0].has("player") and alive.any(func(c): return not c.has(f))
+	var st: String = party_stance(s, f, "player", false)
+	var need: float = (float(seats.player) / tot + (float(_cset("NEUTRAL_PREMIUM", 0.08)) if st == "neutral" else 0.0)) * _cabinet_total()
+	return {"f": f, "key": key, "combo": combo, "offer": offer, "desperate": desperate, "need": need, "round": _round}
+
+## Would they take your demands (a list of ministry ids)? Up to a little more than your
+## fair share, never the Prime Minister's office unless they are desperate, and then only
+## if you ask for little else. They don't haggle.
+func coalition_ask_verdict(s: Dictionary, ask: Dictionary, demands: Array) -> Dictionary:
+	var v = 0.0
+	for id in demands:
+		if id != "pm": v += float(_ministry(id).get("weight", 0))
+	var f: String = _short(s, ask.f)
+	if demands.has("pm"):
+		if not ask.desperate: return {"accept": false, "why": coalition_text("you_no_pm", {"f": f})}
+		if v > float(ask.need) * float(_cset("PM_PRICE", 0.5)): return {"accept": false, "why": coalition_text("you_too_much", {"f": f})}
+		return {"accept": true, "why": coalition_text("you_pm", {"f": f})}
+	if v > float(ask.need) * float(_cset("DEMAND_SLACK", 1.1)): return {"accept": false, "why": coalition_text("you_too_much", {"f": f})}
+	return {"accept": true, "why": coalition_text("you_join", {"f": f})}
+
+## Your answer: your demands (ministry ids), or null to stay out. The talks then run on.
+func coalition_answer(s: Dictionary, demands) -> void:
+	var co: Dictionary = s.result.coalition
+	var ask: Dictionary = co.ask
+	var asks: Dictionary = co.get("asks", {}).duplicate()
+	var dec: Dictionary = {"accept": false, "ministries": [], "why": coalition_text("you_stay_out", {"f": _short(s, ask.f)})} if demands == null else coalition_ask_verdict(s, ask, demands)
+	dec.ministries = demands if demands != null else []
+	asks[ask.key] = dec
+	s.result.coalition = form_government(s, co.seats, asks)

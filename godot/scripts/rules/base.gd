@@ -519,7 +519,7 @@ func _teyl_walkout(s: Dictionary) -> void:
 	pass
 
 ## Called when the election result is in (rules/districts.gd), defined in rules/coalition.gd.
-func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
+func form_government(s: Dictionary, seats: Dictionary = {}, asks = null) -> Dictionary:
 	return {}
 func coalition_open(s: Dictionary, seats: Dictionary) -> Dictionary:
 	return {}   # defined in coalition.gd

@@ -21,6 +21,8 @@ func _init() -> void:
 		s.parties.append(p)
 	_show(s, "Seven parties", {"player": 40, "nup": 75, "clf": 60, "oc": 35, "apv": 20, "grn": 40, "far": 30})
 	_bargain(s, {"player": 95, "nup": 80, "clf": 70, "oc": 35, "apv": 20})
+	_asked(s, {"player": 45, "nup": 110, "clf": 90, "oc": 35, "apv": 20}, [])
+	_asked(s, {"player": 45, "nup": 110, "clf": 90, "oc": 35, "apv": 20}, ["interior", "finance", "foreign"])
 	print("RESULT coalition ok")
 	quit()
 
@@ -63,3 +65,20 @@ func _bargain(s: Dictionary, seats: Dictionary) -> void:
 		var c2: Array = G.coalition_options(s)[0]
 		G.coalition_form(s, c2, G.coalition_counter(s, c2, G.coalition_default_offer(s, c2)))
 	print("  outcome: %s, government %s" % [co.get("outcome", "?"), "+".join(co.government.members) if co.government else "none"])
+
+
+## A party asks you to join: you answer with demands, and the talks run on.
+func _asked(s: Dictionary, seats: Dictionary, extra: Array) -> void:
+	print("\n== Asked to join (demands: %s) ==" % ("their offer" if extra.is_empty() else "+".join(extra)))
+	s.result = {"seats": {"national": seats}}
+	s.result.coalition = G.form_government(s, seats, {})
+	var co = s.result.coalition
+	if not co.get("pending", false):
+		print("  nobody asked; outcome ", co.get("outcome", "?")); return
+	print("  %s asks; aims at %s; offers you %s; desperate %s" % [co.ask.f, "+".join(co.ask.combo), co.ask.offer, co.ask.desperate])
+	var demands: Array = co.ask.offer if extra.is_empty() else extra
+	print("  verdict: ", G.coalition_ask_verdict(s, co.ask, demands))
+	G.coalition_answer(s, demands)
+	co = s.result.coalition
+	print("  pending %s; outcome %s; government %s" % [co.get("pending", false), co.get("outcome", "?"), "+".join(co.government.members) if co.get("government") else "none"])
+	if co.get("government"): print("  your ministries: ", co.government.cabinet.filter(func(c): return c.party == "player").map(func(c): return c.ministry))
