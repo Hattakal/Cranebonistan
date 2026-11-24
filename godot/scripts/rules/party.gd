@@ -223,19 +223,18 @@ func campaign_impact(s: Dictionary, alloc: Dictionary) -> Dictionary:
 					add.call(i, "goodwill", CAMPAIGN.rally.goodwill * f)
 					add.call(i, "leader", CAMPAIGN.rally.leader * f)
 		elif key == "social" or key == "tv":
+			# recognition, and the leader's image, each for its own audience. The image: each
+			# million buys less, it works better for a party people take seriously, and less on
+			# voters who already like the leader (CAMPAIGN.tour holds those rules)
 			var c: Dictionary = CAMPAIGN[key]
-			for i in pops.size():
-				if c.ages.has(pops[i].age): aware_gain.call(i, c.aware * m)
-		elif key == "tour":
-			# the leader's image: each million buys less, it works better for a party people take
-			# seriously, and less on voters who already like the leader (CAMPAIGN.tour)
 			var t: Dictionary = CAMPAIGN.tour
 			var sc: float = float(t.get("scale", 1.5))
 			var eff: float = sc * log(1.0 + m / sc)
 			var smin: float = float(t.get("seriousMin", 0.5))
 			var k: float = smin + (1.0 - smin) * serious_of(s) / 100.0
 			for i in pops.size():
-				aware_gain.call(i, t.aware * m)
+				if not c.ages.has(pops[i].age): continue
+				aware_gain.call(i, c.aware * m)
 				var full: float = clampf2(float(pops[i].leader.player) / 2.0, 0, 1) * float(t.get("saturate", 0.6))
 				add.call(i, "leader", float(t.leader) * eff * k * (1.0 - full) * pops[i].leaderPull)
 	return impact

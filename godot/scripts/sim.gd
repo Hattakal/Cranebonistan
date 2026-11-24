@@ -37,7 +37,7 @@ func load_content(_unused := "") -> void:
 	ELECTION_WEEK = int(C.electionYears) * WEEKS_PER_YEAR
 	BUDGET_KEYS = []
 	# "road": money for the leader's trips this quarter (it used to be rallies by region)
-	BUDGET_KEYS.append_array(["road", "social", "tv", "tour", "polling"])   # polling: better polls this quarter, on (pollCost) or off
+	BUDGET_KEYS.append_array(["road", "social", "tv", "polling"])   # polling: better polls this quarter, on (pollCost) or off
 	_events_by_id = {}
 	for e in EVENTS: _events_by_id[e.id] = e
 	TOPICS = _data("debates", {}).get("TOPICS", [])

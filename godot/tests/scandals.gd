@@ -33,7 +33,7 @@ func _init() -> void:
 			else: G.resolve_event(s, 0, -1)
 		elif f.type == "budget":
 			var take = [] if clean else f.offers.filter(func(id): return id in ["chamber", "tycoon", "dillihan", "golba"])
-			G.resolve_budget(s, {"road": 1.0, "social": 1.0, "tv": 0.0, "tour": 0.0}, take)
+			G.resolve_budget(s, {"road": 1.0, "social": 1.0, "tv": 0.0}, take)
 		elif f.type == "debate": G.answer_debate(s, 0)
 		elif f.type == "interview": G.answer_interview(s, 0)
 		else: G.dismiss_front(s)

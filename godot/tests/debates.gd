@@ -13,7 +13,7 @@ func _init() -> void:
 			var f = s.queue[0]
 			match f.type:
 				"event": G.resolve_event(s, 0, -1); events += 1
-				"budget": G.resolve_budget(s, {"tour": s.money * 0.6}, [])
+				"budget": G.resolve_budget(s, {"tv": s.money * 0.3, "social": s.money * 0.3}, [])
 				"debate": G.answer_debate(s, 0)
 				"interview": G.answer_interview(s, 0)
 				_: G.dismiss_front(s)

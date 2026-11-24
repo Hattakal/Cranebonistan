@@ -1294,7 +1294,7 @@
    "aware": 0.02
   },
   "tour": {
-   "_note": "The leader's national tour (the leader's image). 'leader' per million, with diminishing returns: m millions work like 'scale' x ln(1 + m / 'scale'); half as well for a party nobody takes seriously as for one taken fully seriously ('seriousMin'); and less on voters who already like the leader ('saturate': at the top of the scale only 1 - saturate of it lands).",
+   "_note": "How money builds the leader's image, through TV (older voters) and social media (younger ones): 'leader' per million on each, with diminishing returns: m millions work like 'scale' x ln(1 + m / 'scale'); half as well for a party nobody takes seriously as for one taken fully seriously ('seriousMin'); and less on voters who already like the leader ('saturate': at the top of the scale only 1 - saturate of it lands).",
    "aware": 0.004,
    "leader": 0.02,
    "scale": 1.5,

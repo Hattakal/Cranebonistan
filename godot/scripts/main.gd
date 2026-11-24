@@ -1316,9 +1316,8 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 	var player: Dictionary = G.player_party(S)
 	var rows = []
 	rows.append(["road", "On the road", "Money for %s's trips this quarter: bigger halls, buses, posters. Each month's trip uses a third of it." % player.leader, pv.all])
-	rows.append(["social", "Social media", "Cheap reach to voters under 46. The reaction is unpredictable.", pv.young])
-	rows.append(["tv", "TV and newspapers", "Reaches voters over 45 across the country.", pv.old])
-	rows.append(["tour", player.leader + "'s national tour", "Builds the leader as a person. Strongest with the young, the working class and Fauran.", pv.all])
+	rows.append(["social", "Social media", "Voters under 46 hear of you and get to know %s. Cheap; the reaction is unpredictable." % player.leader, pv.young])
+	rows.append(["tv", "TV and newspapers", "Voters over 45 across the country hear of you and get to know %s." % player.leader, pv.old])
 	var pc: float = float(G.C.upkeep.get("pollCost", 1.0))
 	rows.append(["polling", "Better polling", "Pay the pollsters for a careful job: this quarter's polls come without their random noise (they still only ask a sample, so they can still be a little off). ₱%sM a quarter." % Game.fmt1(pc), pv.all])
 	for row in rows:
@@ -1336,10 +1335,9 @@ func _budget_build(p: Paper, front: Dictionary) -> void:
 			known = "Each trip this quarter: %s" % ("×%s as strong" % Game.fmt1(1.0 + 0.6 * sqrt(per)) if per > 0 else "on foot, with a megaphone")
 		elif row[0] == "polling":
 			known = "This quarter: %s" % ("careful polls, no random noise" if _budget.polling >= pc - 0.001 else "the usual polls, give or take a point or two")
-		elif row[0] == "tour":
-			known = "Leader image: %s%s (%s)" % [Files.leader_score(pr.leaderBefore), (" → " + Files.leader_score(pr.leaderAfter)) if pr.leaderAfter - pr.leaderBefore > 0.005 else "", Files.leader_words(pr.leaderAfter)]
 		else:
-			known = "Know you: %s%%%s" % [Game.fmt1(pr.before * 100), (" → %s%%" % Game.fmt1(pr.after * 100)) if pr.after - pr.before > 0.0005 else ""]
+			known = "Know you: %s%%%s · Leader image: %s%s" % [Game.fmt1(pr.before * 100), (" → %s%%" % Game.fmt1(pr.after * 100)) if pr.after - pr.before > 0.0005 else "",
+				Files.leader_score(pr.leaderBefore), (" → " + Files.leader_score(pr.leaderAfter)) if pr.leaderAfter - pr.leaderBefore > 0.005 else ""]
 		info.add_child(Look.label(known, "body", 12, Look.INK))
 		h.add_child(info)
 		var k: String = row[0]
@@ -2089,7 +2087,7 @@ func _shot(args: Dictionary) -> void:
 		var f: Dictionary = S.queue[0]
 		match f.type:
 			"event": G.resolve_event(S, 0, 0 if G.event_of(f).choices[0].get("lines", []).size() else -1)
-			"budget": G.resolve_budget(S, {"tour": S.money * 0.5, "road": S.money * 0.3}, [])
+			"budget": G.resolve_budget(S, {"tv": S.money * 0.25, "social": S.money * 0.25, "road": S.money * 0.3}, [])
 			"debate": G.answer_debate(S, 0)
 			"interview": G.answer_interview(S, 0)
 			_: G.dismiss_front(S)
@@ -2104,7 +2102,7 @@ func _shot(args: Dictionary) -> void:
 		var f2: Dictionary = S.queue[0]
 		match f2.type:
 			"event": G.resolve_event(S, 0, -1)
-			"budget": G.resolve_budget(S, {"tour": S.money * 0.5}, [])
+			"budget": G.resolve_budget(S, {"tv": S.money * 0.25, "social": S.money * 0.25}, [])
 			"debate": G.answer_debate(S, 0)
 			"interview": G.answer_interview(S, 0)
 			_: G.dismiss_front(S)
@@ -2209,7 +2207,7 @@ func _shot(args: Dictionary) -> void:
 			if S.queue.is_empty(): G.advance_week(S); continue
 			match S.queue[0].type:
 				"event": G.resolve_event(S, 0, -1)
-				"budget": G.resolve_budget(S, {"tour": S.money * 0.5}, [])
+				"budget": G.resolve_budget(S, {"tv": S.money * 0.25, "social": S.money * 0.25}, [])
 				"debate": G.answer_debate(S, 0)
 				"interview": G.answer_interview(S, 0)
 				_: G.dismiss_front(S)
