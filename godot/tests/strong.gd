@@ -1,12 +1,17 @@
 extends SceneTree
 ## A competent player, to measure difficulty: a fixed manifesto and tone, a trip every month
 ## to the province where it matters most, every action spent speaking for the manifesto,
-## a sensible budget. Usage: -- <style> <seed> [flags]   style: populist | centrist | left
-## flags (comma-separated) switch parts off: notrips,nospeak,nobudget,nomoney,nooffices,noclaim
+## a sensible budget. Usage: -- <style> <seed> [flags]
+##   style: populist | centrist | left | provocative (the populist manifesto, every line
+##   provocative) | switch (provocative for two years, then fiery)
+## flags (comma-separated) switch parts off: notrips,nospeak,nobudget,nomoney,nooffices,noclaim;
+## image: most of the budget on the leader's national tour (the leader's image)
 const STYLES := {
 	"populist": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery"},
 	"centrist": {"m": {"nation": 2, "system": 3, "society": 2, "order": 2, "economy": 2, "welfare": 2, "foreign": 2}, "tone": "statesman"},
 	"left": {"m": {"nation": 3, "system": 1, "society": 1, "order": 3, "economy": 0, "welfare": 0, "foreign": 3}, "tone": "folksy"},
+	"provocative": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative"},
+	"switch": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative", "then": "fiery", "at": 96},
 }
 var G
 var tone = "fiery"
@@ -62,7 +67,9 @@ func _init() -> void:
 					for id in take: extra += float(G.by_id(G.FUNDING_OFFERS, id).effects.get("money", 0))
 					var m: float = (s.money + extra) * 0.75
 					var b5 = G.summarize(s, s.pops).support.player if off.has("trace") else 0.0
-					G.resolve_budget(s, {} if off.has("nobudget") else {"road": m * 0.35, "social": m * 0.3, "tv": m * 0.25, "tour": m * 0.1}, take)
+					var plan = {"road": m * 0.35, "social": m * 0.3, "tv": m * 0.25, "tour": m * 0.1}
+					if off.has("image"): plan = {"road": m * 0.2, "social": m * 0.05, "tv": m * 0.05, "tour": m * 0.7}
+					G.resolve_budget(s, {} if off.has("nobudget") else plan, take)
 					if off.has("trace") and s.week >= 136 and s.week <= 150: print("  BUDGET w%d spent of %.1f, took %s: %.1f -> %.1f" % [s.week, m, str(take), b5 * 100, G.summarize(s, s.pops).support.player * 100])
 				"debate": G.answer_debate(s, line_of(s.debate.rounds[s.debate.step].lines))
 				"interview":
@@ -74,6 +81,7 @@ func _init() -> void:
 				"election": break
 				_: G.dismiss_front(s)
 			continue
+		if STYLES[style].has("then") and s.week >= int(STYLES[style].at): tone = STYLES[style].then
 		# a free month: trip, then actions
 		if not off.has("notrips") and G.visit_block(s) == "" and s.get("projection", {}).size():
 			var best = ""
