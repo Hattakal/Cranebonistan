@@ -1293,8 +1293,12 @@
    "aware": 0.02
   },
   "tour": {
+   "_note": "The leader's national tour (the leader's image). 'leader' per million, with diminishing returns: m millions work like 'scale' x ln(1 + m / 'scale'); half as well for a party nobody takes seriously as for one taken fully seriously ('seriousMin'); and less on voters who already like the leader ('saturate': at the top of the scale only 1 - saturate of it lands).",
    "aware": 0.004,
-   "leader": 0.03
+   "leader": 0.02,
+   "scale": 1.5,
+   "seriousMin": 0.5,
+   "saturate": 0.6
   }
  },
  "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}. 'minSerious': the event only comes once you are taken seriously at least that much (0-100).",
