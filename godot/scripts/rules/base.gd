@@ -10,7 +10,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 49
+const SAVE_VERSION := 50
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -521,3 +521,5 @@ func _teyl_walkout(s: Dictionary) -> void:
 ## Called when the election result is in (rules/districts.gd), defined in rules/coalition.gd.
 func form_government(s: Dictionary, seats: Dictionary = {}) -> Dictionary:
 	return {}
+func coalition_open(s: Dictionary, seats: Dictionary) -> Dictionary:
+	return {}   # defined in coalition.gd

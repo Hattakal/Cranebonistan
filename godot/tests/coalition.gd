@@ -20,6 +20,7 @@ func _init() -> void:
 		for ax in G.AXES: p.perceived[ax.id] = clampf(float(p.perceived[ax.id]) + extra[2], -100, 100)
 		s.parties.append(p)
 	_show(s, "Seven parties", {"player": 40, "nup": 75, "clf": 60, "oc": 35, "apv": 20, "grn": 40, "far": 30})
+	_bargain(s, {"player": 95, "nup": 80, "clf": 70, "oc": 35, "apv": 20})
 	print("RESULT coalition ok")
 	quit()
 
@@ -39,3 +40,26 @@ func _show(s: Dictionary, title: String, seats: Dictionary) -> void:
 			"compromise": print("  COMPROMISE %s: %s" % ["+".join(st.members), st.why])
 			"deadlock": print("  DEADLOCK")
 	print("  outcome for the player: %s" % co.outcome)
+
+
+## You are the largest party: offers, counteroffers, a final offer, then forming or forcing.
+func _bargain(s: Dictionary, seats: Dictionary) -> void:
+	print("\n== You bargain ==")
+	s.result = {"seats": {"national": seats}}
+	s.result.coalition = G.coalition_open(s, seats)
+	var opts: Array = G.coalition_options(s)
+	print("  options: ", opts.map(func(c): return "+".join(c)))
+	for combo in opts:
+		var offer: Dictionary = G.coalition_default_offer(s, combo)
+		var needs: Dictionary = G.coalition_needs(s, combo)
+		var counter: Dictionary = G.coalition_counter(s, combo, offer)
+		for p in needs: print("    %s with %s: needs %.1f asks %.1f; first offer %.1f, counter %.1f" % ["+".join(combo), p, needs[p].need, needs[p].ask, G.offer_value(s, offer, p), G.offer_value(s, counter, p)])
+		print("    verdict on first offer: ", G.coalition_verdict(s, combo, offer), "  on counter: ", G.coalition_verdict(s, combo, counter))
+	print("  least liked: ", G.coalition_least_liked(s))
+	G.coalition_force(s)
+	var co = s.result.coalition
+	print("  after forcing: round %d pending %s options %s" % [co.round, co.pending, G.coalition_options(s).map(func(c): return "+".join(c)) if co.pending else []])
+	if co.pending and G.coalition_options(s).size():
+		var c2: Array = G.coalition_options(s)[0]
+		G.coalition_form(s, c2, G.coalition_counter(s, c2, G.coalition_default_offer(s, c2)))
+	print("  outcome: %s, government %s" % [co.get("outcome", "?"), "+".join(co.government.members) if co.government else "none"])

@@ -338,3 +338,169 @@ func coalition_outcome(s: Dictionary, co: Dictionary, seats: Dictionary, ranking
 		if _pm_of(gov.cabinet) == me: return "leads" if largest else "pm"
 		return "senior" if largest else "partner"
 	return "robbed" if largest else "opposition"
+
+# ---------- When you are the largest party: you negotiate ----------
+## The talks wait for you (s.result.coalition.pending). Each round, every majority without
+## enemies that includes you is an option. You offer ministries to each option's partners
+## at once; they counter (a bloc of partners agrees its shares first, an abstraction);
+## you make a final offer, which each accepts or rejects; then you form one of the
+## governments that accepted, or force the next round, in which the party the others
+## like least is shut out and the rest must get along. If that is you, the others govern.
+
+## Opens the talks for you (instead of form_government): the majorities, crossed-out ones
+## included, as the screen plays them; nothing decided yet.
+func coalition_open(s: Dictionary, seats: Dictionary) -> Dictionary:
+	var need: int = int(int(C.seats) / 2) + 1
+	var ids: Array = ssort(seats.keys().filter(func(id): return int(seats[id]) > 0), func(a, b): return int(seats[b]) - int(seats[a]))
+	var co = {"log": [{"t": "start", "seats": seats.duplicate(), "need": need, "parties": ids.duplicate()}], "government": null,
+		"excluded": [], "pending": true, "round": 1, "relaxed": false, "need": need, "seats": seats.duplicate(), "ids": ids}
+	_coalition_round_log(s, co)
+	return co
+
+func _coalition_in_play(co: Dictionary) -> Array:
+	return co.ids.filter(func(id): return not co.excluded.has(id))
+
+func _coalition_round_log(s: Dictionary, co: Dictionary) -> void:
+	var combos: Array = minimal_majorities(co.seats, _coalition_in_play(co), int(co.need))
+	co.log.append({"t": "combos", "list": combos, "round": int(co.round)})
+	co.alive = []
+	for i in combos.size():
+		var pair: Array = _enemy_pair(s, combos[i], co.relaxed)
+		if pair.size(): co.log.append({"t": "cross", "i": i, "pair": pair, "why": enemy_reason(s, pair[0], pair[1])})
+		else: co.alive.append(combos[i])
+
+## Your options this round: the majorities without enemies that include you, the ones
+## most made of your allies first, then the fewest seats to share.
+func coalition_options(s: Dictionary) -> Array:
+	var co: Dictionary = s.result.coalition
+	var mine: Array = co.get("alive", []).filter(func(c): return c.has("player"))
+	return ssort(mine, func(a, b):
+		var d: float = _comfort(s, "player", b, co.seats, co.relaxed) - _comfort(s, "player", a, co.seats, co.relaxed)
+		if absf(d) > 0.001: return d
+		return _seats_of(co.seats, a) - _seats_of(co.seats, b))
+
+## A ministry as a party sees it: its weight, a little more if it serves that party's issues.
+func _ministry_value(s: Dictionary, pid: String, m: Dictionary) -> float:
+	return float(m.weight) * (1.0 + 0.3 * _ministry_want(s, pid, m))
+
+func _ministry(id: String) -> Dictionary:
+	for m in _cset("MINISTRIES", []):
+		if m.id == id: return m
+	return {}
+
+## What each partner in `combo` needs, as a share of the cabinet's weight: its share of the
+## coalition's seats, and more if it is only neutral toward you. `ask`: what it opens with.
+func coalition_needs(s: Dictionary, combo: Array) -> Dictionary:
+	var co: Dictionary = s.result.coalition
+	var tot: float = float(_seats_of(co.seats, combo))
+	var out = {}
+	for p in combo:
+		if p == "player": continue
+		var fair: float = float(co.seats[p]) / tot
+		var st: String = party_stance(s, "player", p, co.relaxed)
+		var need: float = fair + (float(_cset("NEUTRAL_PREMIUM", 0.08)) if st == "neutral" else 0.0)
+		out[p] = {"need": need * _cabinet_total(), "ask": need * float(_cset("OPENING_ASK", 1.15)) * _cabinet_total(), "stance": st}
+	return out
+
+## What an offer (ministry id -> party id) is worth to party `pid`.
+func offer_value(s: Dictionary, offer: Dictionary, pid: String) -> float:
+	var v = 0.0
+	for mid in offer:
+		if offer[mid] == pid: v += _ministry_value(s, pid, _ministry(mid))
+	return v
+
+## A first offer: every member's fair share by seats, the Prime Minister's office yours.
+func coalition_default_offer(s: Dictionary, combo: Array) -> Dictionary:
+	var co: Dictionary = s.result.coalition
+	var tot: float = float(_seats_of(co.seats, combo))
+	var ent = {}
+	for p in combo: ent[p] = float(co.seats[p]) / tot
+	var out = {}
+	for c in _share_cabinet(s, ent, "player"): out[c.ministry] = c.party
+	return out
+
+## The partners' answer: they keep what you offered and take, from your ministries (never
+## the Prime Minister's office), the ones worth most to them until they have what they ask.
+func coalition_counter(s: Dictionary, combo: Array, offer: Dictionary) -> Dictionary:
+	var counter: Dictionary = offer.duplicate()
+	var needs: Dictionary = coalition_needs(s, combo)
+	for p in ssort(needs.keys(), func(a, b): return int(s.result.coalition.seats[b]) - int(s.result.coalition.seats[a])):
+		var guard = 0
+		while offer_value(s, counter, p) < float(needs[p].ask) and guard < 20:
+			guard += 1
+			var best = ""
+			var bv = -1.0
+			for mid in counter:
+				if counter[mid] != "player" or mid == "pm": continue
+				var v: float = _ministry_value(s, p, _ministry(mid))
+				if v > bv: bv = v; best = mid
+			if best == "": break
+			counter[best] = p
+	return counter
+
+## Your final offer: each partner accepts if it gets at least what it needs.
+func coalition_verdict(s: Dictionary, combo: Array, offer: Dictionary) -> Dictionary:
+	var needs: Dictionary = coalition_needs(s, combo)
+	var short = []
+	for p in needs:
+		if offer_value(s, offer, p) + 0.001 < float(needs[p].need): short.append(p)
+	return {"accepted": short.is_empty(), "short": short}
+
+## You form the government with this option and offer. The talks are over.
+func coalition_form(s: Dictionary, combo: Array, offer: Dictionary) -> void:
+	var co: Dictionary = s.result.coalition
+	var cab = []
+	for m in _cset("MINISTRIES", []):
+		cab.append({"ministry": m.id, "name": m.name, "party": offer.get(m.id, "player"), "weight": float(m.weight)})
+	co.government = {"members": combo.duplicate(), "cabinet": cab, "formateur": "player"}
+	co.log.append({"t": "government", "members": combo.duplicate(), "cabinet": cab, "pm": _pm_of(cab)})
+	_coalition_close(s)
+
+func _coalition_close(s: Dictionary) -> void:
+	var co: Dictionary = s.result.coalition
+	co.pending = false
+	co.outcome = coalition_outcome(s, co, co.seats, co.ids)
+
+## The party the others like least this round (the one a forced round shuts out).
+func coalition_least_liked(s: Dictionary) -> String:
+	var co: Dictionary = s.result.coalition
+	var in_play: Array = _coalition_in_play(co)
+	var worst = ""
+	var low = INF
+	for id in in_play:
+		var tot = 0.0
+		for o in in_play:
+			if o != id: tot += party_relation(s, id, o)
+		if tot < low: low = tot; worst = id
+	return worst
+
+## You reject every option. In the first round, the party the others like least is shut
+## out and the rest must get along: if that is you, the others form a government without
+## you. Otherwise (or in the second round) the others take their turn at forming one.
+func coalition_force(s: Dictionary) -> void:
+	var co: Dictionary = s.result.coalition
+	if int(co.round) == 1 and _coalition_in_play(co).size() > 2:
+		var worst: String = coalition_least_liked(s)
+		co.excluded.append(worst)
+		co.relaxed = bool(_cset("SHUTOUT_RELAXES", true))
+		co.round = 2
+		co.log.append({"t": "shutout", "party": worst, "why": coalition_text("shutout", {"p": party_of(s, worst).get("name", _short(s, worst))})})
+		_coalition_round_log(s, co)
+		if worst == "player": _coalition_others(s)
+		return
+	_coalition_others(s)
+
+## The other parties try, largest first (you may still be asked to join as a partner).
+func _coalition_others(s: Dictionary) -> void:
+	var co: Dictionary = s.result.coalition
+	var in_play: Array = _coalition_in_play(co)
+	var gov = null
+	for f in in_play.filter(func(id): return id != "player").slice(0, int(_cset("MAX_FORMATEURS", 3))):
+		gov = _try_formateur(s, f, in_play, co.seats, int(co.need), co.get("alive", []), co.relaxed, co.log)
+		if gov: break
+	if gov == null and bool(_cset("COMPROMISE", true)) and co.get("alive", []).size():
+		gov = _compromise(s, in_play.filter(func(id): return id != "player"), co.seats, co.alive.filter(func(c): return not c.has("player")), co.relaxed, co.log)
+	if gov == null: co.log.append({"t": "deadlock", "why": coalition_text("deadlock")})
+	else: co.log.append({"t": "government", "members": gov.members, "cabinet": gov.cabinet, "pm": _pm_of(gov.cabinet)})
+	co.government = gov
+	_coalition_close(s)

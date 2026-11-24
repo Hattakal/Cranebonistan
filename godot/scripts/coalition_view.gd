@@ -84,7 +84,8 @@ func _gui_input(e: InputEvent) -> void:
 func _skip() -> void:
 	if _done: return
 	_skipped = true
-	_show_end()
+	if co.get("pending", false): _negotiate()   # your turn can't be skipped
+	else: _show_end()
 
 ## Waits, unless the talks were skipped; false means stop playing.
 func _pause(t: float) -> bool:
@@ -185,10 +186,10 @@ func _leave_up(nodes: Array) -> void:
 		if is_instance_valid(n): n.queue_free()
 
 # ---------- Playing the log ----------
-func _play() -> void:
+func _play(from := 0) -> void:
 	await get_tree().process_frame
 	var log: Array = co.log
-	var i = 0
+	var i = from
 	while i < log.size():
 		if _skipped: return
 		var st: Dictionary = log[i]
@@ -220,7 +221,9 @@ func _play() -> void:
 			"government", "deadlock":
 				break
 		i += 1
-	if not _skipped: _show_end()
+	if _skipped: return
+	if co.get("pending", false): _negotiate()
+	else: _show_end()
 
 func _show_combos(st: Dictionary, crosses: Array) -> bool:
 	_clear()
@@ -506,3 +509,160 @@ class XMark extends Control:
 		var w: float = 5.0
 		if a > 0: draw_line(Vector2.ZERO, size * a, Look.RED, w, true)
 		if b > 0: draw_line(Vector2(size.x, 0), Vector2(size.x, 0).lerp(Vector2(0, size.y), b), Look.RED, w, true)
+
+
+# ---------- Your turn: offers, counteroffers, a final offer ----------
+var _phase := "offer"    # offer -> final -> verdicts
+var _options: Array = [] # [{combo, offer: {ministry: party}, counter, verdict}]
+
+func _negotiate() -> void:
+	_done = false   # (a skipped playback stays stopped: _skipped is left as it is)
+	_clear()
+	_skip_btn.visible = false
+	var h = find_child("Hint", false, false)
+	if h: h.visible = false
+	_phase = "offer"
+	_options = []
+	for combo in G.coalition_options(S).slice(0, 3):
+		_options.append({"combo": combo, "offer": G.coalition_default_offer(S, combo), "counter": {}, "verdict": {}})
+	_build_negotiation()
+
+func _ministries() -> Array:
+	return G.COALITION.get("MINISTRIES", [])
+
+func _build_negotiation() -> void:
+	_clear()
+	var rnd: int = int(co.get("round", 1))
+	_title.text = "Your turn: form a government"
+	_sub.text = {"offer": "Round %d. Offer each possible coalition its ministries; they will answer with what they want." % rnd,
+		"final": "Their counteroffers. Change what you like: this is your final offer, and they take it or leave it.",
+		"verdicts": "Their answers. Form one of the governments that said yes, or reject them all."}[_phase]
+	_set_bar(["player"])
+	var root = VBoxContainer.new()
+	root.position = Vector2(60, 170)
+	root.custom_minimum_size = Vector2(_w() - 120, 0)
+	root.add_theme_constant_override("separation", 14)
+	_stage.add_child(root)
+	if _options.is_empty():
+		root.add_child(Look.dlabel("No majority without enemies has room for you this round.", "news", 22, Look.TXT, true))
+	var cols = HBoxContainer.new()
+	cols.add_theme_constant_override("separation", 18)
+	root.add_child(cols)
+	for i in _options.size(): cols.add_child(_option_column(i))
+	var foot = HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 12)
+	root.add_child(foot)
+	var warn: String = ""
+	if _phase == "verdicts" or _options.is_empty():
+		var least: String = G.coalition_least_liked(S)
+		if rnd == 1 and least == "player": warn = "Careful: the others like you least of all. Force the next round and you are the one shut out, and they govern without you."
+		elif rnd == 1: warn = "Forcing the next round shuts out the party the others like least (%s); the rest must then get along, enemies included." % String(_party(least).name)
+		else: warn = "Reject them all, and the other parties take their turn at forming a government; they may still ask you to join."
+	if warn != "":
+		var wl = Look.dlabel(warn, "body", 15, Look.RED_HI if warn.begins_with("Careful") else Look.DIM, true)
+		wl.custom_minimum_size.x = 700
+		wl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		foot.add_child(wl)
+	else:
+		var sp = Control.new()
+		sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		foot.add_child(sp)
+	if _phase == "offer" and _options.size():
+		foot.add_child(_big_button("Send offers", true, _send_offers))
+	elif _phase == "final":
+		foot.add_child(_big_button("Send final offers", true, _send_finals))
+	if _phase == "verdicts" or _options.is_empty():
+		foot.add_child(_big_button("Reject all: force the next round" if rnd == 1 else "Reject all: let the others try", false, func():
+			var from: int = co.log.size()
+			G.coalition_force(S)
+			_clear()
+			_title.text = "Forming a government"
+			_skipped = false
+			_skip_btn.visible = true
+			_play(from)))
+
+func _send_offers() -> void:
+	for o in _options:
+		o.first = o.offer.duplicate()
+		o.counter = G.coalition_counter(S, o.combo, o.offer)
+		o.offer = o.counter.duplicate()   # your final offer starts from what they asked
+	_phase = "final"
+	_build_negotiation()
+
+func _send_finals() -> void:
+	for o in _options: o.verdict = G.coalition_verdict(S, o.combo, o.offer)
+	_phase = "verdicts"
+	_build_negotiation()
+
+## For screenshots: the next step of the negotiation.
+func step_negotiation() -> void:
+	if _phase == "offer": _send_offers()
+	elif _phase == "final": _send_finals()
+
+func _big_button(text: String, primary: bool, on_press: Callable) -> Button:
+	var b = Button.new()
+	b.text = text.to_upper()
+	b.add_theme_font_size_override("font_size", Look.fs(15))
+	b.add_theme_font_override("font", Look.spaced("display_bold", 2))
+	Look.dark_button(b, primary, false, 10)
+	b.pressed.connect(on_press)
+	return b
+
+## One possible coalition: its ministries, who gets each, and what each partner thinks.
+func _option_column(i: int) -> Control:
+	var o: Dictionary = _options[i]
+	var combo: Array = o.combo
+	var panel = PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.glass())
+	panel.custom_minimum_size.x = minf(430, (_w() - 160) / maxf(1, _options.size()) - 18)
+	var v = VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	panel.add_child(v)
+	var seats: int = 0
+	for p in combo: seats += int(co.seats[p])
+	v.add_child(Look.dlabel(" + ".join(combo.map(func(p): return _name(p))), "display_bold", 22, Look.TXT))
+	v.add_child(Look.dlabel("%d seats · %d needed" % [seats, int(co.need)], "body", 13, Look.DIM))
+	var needs: Dictionary = G.coalition_needs(S, combo)
+	var total = 0.0
+	for m in _ministries(): total += float(m.weight)
+	for p in needs:
+		var got: float = G.offer_value(S, o.offer, p)
+		var want: float = float(needs[p].need if _phase != "offer" else needs[p].ask)
+		var ok: bool = got + 0.001 >= float(needs[p].need)
+		var line = "%s (%s): offered %d%% of the cabinet, %s %d%%" % [String(_party(p).short), needs[p].stance, Game.jround(got / total * 100), "they want" if _phase == "offer" else "they need", Game.jround(want / total * 100)]
+		v.add_child(Look.dlabel(line, "body", 13, Look.GOOD_HI if ok else Look.TXT, true))
+	v.add_child(HSeparator.new())
+	for m in _ministries():
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var nm = Look.dlabel(String(m.name), "body", 14, Look.TXT)
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(nm)
+		var holder: String = String(o.offer.get(m.id, "player"))
+		var asked: bool = _phase == "final" and holder != "player" and holder == String(o.counter.get(m.id, "")) and String(o.get("first", {}).get(m.id, "")) != holder
+		var b = Button.new()
+		b.text = _name(holder) + (" ·" if asked else "")
+		b.custom_minimum_size.x = 90
+		b.add_theme_font_size_override("font_size", Look.fs(13))
+		b.add_theme_font_override("font", Look.font("display_bold"))
+		b.add_theme_color_override("font_color", Look.lit(Color(_party(holder).color)))
+		Look.dark_button(b, false, false, 4)
+		b.add_theme_color_override("font_color", Look.lit(Color(_party(holder).color)))
+		b.tooltip_text = "The Prime Minister's office is yours: you lead." if m.id == "pm" else "Click to give it to another member."
+		b.disabled = m.id == "pm" or _phase == "verdicts"
+		var mid: String = m.id
+		b.pressed.connect(func():
+			var k: int = combo.find(String(o.offer.get(mid, "player")))
+			o.offer[mid] = combo[(k + 1) % combo.size()]
+			_build_negotiation())
+		row.add_child(b)
+		v.add_child(row)
+	if _phase == "final": v.add_child(Look.dlabel("A dot: what they asked for on top of your offer.", "body_italic", 12, Look.DIM, true))
+	if _phase == "verdicts":
+		var yes: bool = o.verdict.get("accepted", false)
+		v.add_child(Look.dlabel("They accept." if yes else "They say no: not enough for %s." % ", ".join(o.verdict.get("short", []).map(func(p): return String(_party(p).short))), "display_bold", 18, Look.GOOD_HI if yes else Look.RED_HI, true))
+		if yes:
+			v.add_child(_big_button("Form this government", true, func():
+				G.coalition_form(S, combo, o.offer)
+				_show_end()))
+	return panel

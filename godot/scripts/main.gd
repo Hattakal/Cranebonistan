@@ -2166,10 +2166,13 @@ func _shot(args: Dictionary) -> void:
 			seats[pr[0]] = int(pr[1])
 		S.result.seats.national = seats
 		S.result.ranking = Game.ssort(seats.keys(), func(a, b): return seats[b] - seats[a])
-		S.result.coalition = G.form_government(S, seats)
+		var top: Array = S.result.ranking.filter(func(id): return int(seats.get(id, 0)) > 0)
+		S.result.coalition = G.coalition_open(S, seats) if top.size() and top[0] == "player" and int(seats.get("player", 0)) <= int(G.C.seats / 2) else G.form_government(S, seats)
 	if args.has("coalition") and S.result:
 		var cv = _coalition_view()
-		if args.coalition == "end": cv._skip()
+		if args.coalition == "end":
+			cv._skip()
+			for k in int(args.get("negstep", "0")): cv.step_negotiation()   # --negstep=1|2: counteroffers, verdicts
 		else: await get_tree().create_timer(float(args.coalition)).timeout
 	if args.has("profile"): _profile_sheet()
 	if args.has("country"): _country_sheet(args.country)

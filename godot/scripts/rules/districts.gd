@@ -492,5 +492,8 @@ func run_election(s: Dictionary) -> void:
 	var ranking = ssort(seats.national.keys(), func(a, b): return seats.national[b] - seats.national[a])
 	s.result = {"votes": national, "seats": seats, "ranking": ranking, "playerWon": ranking[0] == "player",
 		"majority": seats.national.player > C.seats / 2.0}
-	s.result.coalition = form_government(s, seats.national)
+	# the largest party without a majority bargains; if that is you, the talks wait for you
+	var ranked: Array = ranking.filter(func(id): return int(seats.national.get(id, 0)) > 0)
+	if ranked.size() and ranked[0] == "player" and int(seats.national.player) < int(C.seats / 2) + 1: s.result.coalition = coalition_open(s, seats.national)
+	else: s.result.coalition = form_government(s, seats.national)
 	s.queue.append({"type": "election"})
