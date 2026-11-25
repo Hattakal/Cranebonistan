@@ -1,4 +1,4 @@
-## advisor.gd — Carlos Aster in the corner of headquarters, and Margaret
+## advisor.gd — Carlos Martin in the corner of headquarters, and Margaret
 ## Perkins's notes. Carlos talks (with a recording if one exists in
 ## assets/voice/carlos/<id>.ogg or .wav); Margaret only writes, and rarely.
 class_name Advisor
@@ -40,7 +40,7 @@ func _ready() -> void:
 	_portrait = Portrait.new()
 	_portrait.custom_minimum_size = Vector2(86, 86)
 	_portrait.size = Vector2(86, 86)
-	_portrait.tooltip_text = "Carlos Aster, your advisor. Click for a tip."
+	_portrait.tooltip_text = "Carlos Martin, your advisor. Click for a tip."
 	_portrait.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_portrait.gui_input.connect(func(e):
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
@@ -58,7 +58,7 @@ func _ready() -> void:
 	var v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var who = Look.caps("Carlos Aster · advisor", 11, Look.LAMP, 2)
+	var who = Look.caps("Carlos Martin · advisor", 11, Look.LAMP, 2)
 	who.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(who)
 	_text = Look.label("", "body", 16, Look.TXT, true)

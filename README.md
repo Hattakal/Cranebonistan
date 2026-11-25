@@ -27,7 +27,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 - **The state of the nation.** Jobs, prices, migration, border tension and the public mood drift and push each other.
 - **One major crisis** in the second year, from five. Your campaign can make one up to twice as likely.
 - **Living rivals, trust in politics, a leader cult, dirty money.**
-- **Carlos and Margaret.** Carlos Aster, your advisor, talks from the corner of headquarters: the tutorial, polls, the budget, viral clips (and, now and then, praise for a gaffe). Click him for a tip. Margaret Perkins, the party secretary, leaves a note when you cross a line; agree or brush her off, and she remembers.
+- **Carlos and Margaret.** Carlos Martin, your advisor, talks from the corner of headquarters: the tutorial, polls, the budget, viral clips (and, now and then, praise for a gaffe). Click him for a tip. Margaret Perkins, the party secretary, leaves a note when you cross a line; agree or brush her off, and she remembers.
 - **The final debate and the profile.** Rivals quote you against yourself; at the end a hostile newspaper writes your story.
 
 ## Files
@@ -49,7 +49,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/debate_lines.json` | What the leader can say: lines for every topic and side, every proposal, and general lines per axis |
 | `godot/data/carlos.json` | Everything Carlos says, by situation, with ids for voice recordings |
 | `godot/data/margaret.json` | Margaret's notes and the two ways to answer her |
-| `godot/data/scenes.json` | Back-room dialogue with Carlos Aster and Margaret Perkins (not yet shown in the Godot version) |
+| `godot/data/scenes.json` | Back-room dialogue with Carlos Martin and Margaret Perkins (not yet shown in the Godot version) |
 | `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile), `coalition` (forming a government after the election). No screen code |
 | `godot/scripts/sim.gd` | The end of the chain, the autoload `Game`: loading content, a new game, the monthly update, the clock |
 | `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |

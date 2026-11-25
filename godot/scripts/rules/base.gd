@@ -10,7 +10,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 51
+const SAVE_VERSION := 52
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG

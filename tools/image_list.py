@@ -92,7 +92,7 @@ w("## Faces")
 w("")
 w("| Have | File | Who |")
 w("|---|---|---|")
-w(f"| {tick('portraits/carlos')} | `portraits/carlos.jpg` | Carlos Aster, your advisor (until then: a silhouette against the lamp) |")
+w(f"| {tick('portraits/carlos')} | `portraits/carlos.jpg` | Carlos Martin, your advisor (until then: a silhouette against the lamp) |")
 for p in content["PARTIES"]:
     if p.get("isPlayer"): continue
     w(f"| {tick('portraits/' + p['id'])} | `portraits/{p['id']}.jpg` | The leader of {p.get('name', p['id'])}, whoever it is this game |")

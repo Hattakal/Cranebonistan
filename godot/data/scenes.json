@@ -2,7 +2,7 @@
  "_note": "Back-room dialogue scenes with Carlos and Margaret, moved from the browser version. {who} is the leader first name. The intro still describes the old rules (two actions, the agenda slot) and needs rewriting for the debate system.",
  "CAST": {
   "pim": {
-   "name": "Carlos Aster",
+   "name": "Carlos Martin",
    "role": "your advisor",
    "color": "#3b4a6b"
   },

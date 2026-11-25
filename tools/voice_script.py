@@ -28,7 +28,7 @@ DIRECTION = {
  "lost": "Comforting, already spinning.",
  "tip": "Helpful, a bit conspiratorial. The advice is genuinely good, in the short term.",
 }
-out = ["# Carlos Aster: recording script", "",
+out = ["# Carlos Martin: recording script", "",
  "Carlos is the voice of headquarters: the advisor who hypes you up, spins every number, and never quite admits anything went wrong. Think a warm, quick, slightly oily campaign manager. Not a cartoon: he believes most of what he says.",
  "", "**How to save recordings:** one file per line, named by its id, in `godot/assets/voice/carlos/` (for example `pollup_3.ogg`). `.ogg` is best; `.wav` and `.mp3` also work. The game plays a recording automatically when the line comes up; lines without one just show as text. Keep each line short and natural; it doesn't need to match the text word for word, but close is better because the subtitle shows the written line.",
  "", f"{sum(len(v) for v in lines.values())} lines in total.", ""]

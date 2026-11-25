@@ -257,7 +257,7 @@ func render(s: Dictionary) -> void:
 	# 3. a message from Carlos
 	var pim = _card(false, Look.LAMP)
 	var pv = _vbox(pim)
-	pv.add_child(_head("Carlos Aster", Look.LAMP, "message"))
+	pv.add_child(_head("Carlos Martin", Look.LAMP, "message"))
 	pv.add_child(Look.dlabel(_pim_note(s), "body", 15, Look.TXT, true))
 	# speaking is free; the other actions cost money, so a poor party is sent to the debates
 	pim.pressed.connect(func(): open_file.emit("debates"))

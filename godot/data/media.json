@@ -32,7 +32,7 @@
    "id": "herald",
    "name": "The Cranebo Herald",
    "kind": "paper",
-   "owner": "the Vandel family, publishers for four generations",
+   "owner": "the Corbin family, publishers for four generations",
    "blurb": "The broadsheet of the capital. Reads like a university, prices like a bank.",
    "honesty": 0.75,
    "pos": {
@@ -481,7 +481,7 @@
   },
   {
    "id": "pim",
-   "name": "Pim",
+   "name": "Jeremy Hannigan",
    "kind": "influencer",
    "owner": "himself, and a sponsor who makes energy drinks",
    "blurb": "Streams games eight hours a day to a quarter of the country's teenagers. Has never mentioned politics.",
@@ -576,7 +576,7 @@
   },
   {
    "id": "nina",
-   "name": "Nina from Nikecisa",
+   "name": "Barbara Lulli",
    "kind": "influencer",
    "owner": "herself, and the brands she wears",
    "blurb": "Cafés, harbour sunsets and opinions about the trams. Everyone in Yamlin under forty follows her.",

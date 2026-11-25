@@ -1,4 +1,4 @@
-# Carlos Aster: recording script
+# Carlos Martin: recording script
 
 Carlos is the voice of headquarters: the advisor who hypes you up, spins every number, and never quite admits anything went wrong. Think a warm, quick, slightly oily campaign manager. Not a cartoon: he believes most of what he says.
 

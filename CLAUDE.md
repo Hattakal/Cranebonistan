@@ -16,7 +16,7 @@ He tests by playing in the Godot editor (F5) and sends notes. Work in small stag
 - Playing calm and centrist should be possible, just harder.
 - No religion in the game (deliberately). Keep content away from obvious real-country parallels, Turkey in particular (the map is being redrawn for this reason).
 - Names: short words beat accurate phrases. Recognisable, slightly jokey city names are fine; people's names should not read as distinctly Turkish.
-- Carlos Aster (advisor) is the voice of the interface, Knights of Honor style: hypes the player, spins every number but never lies about one, praises a gaffe only occasionally. Will be voice-acted. Margaret Perkins (party secretary) speaks in text only, rarely, when the player crosses a line.
+- Carlos Martin (advisor) is the voice of the interface, Knights of Honor style: hypes the player, spins every number but never lies about one, praises a gaffe only occasionally. Will be voice-acted. Margaret Perkins (party secretary) speaks in text only, rarely, when the player crosses a line.
 - Running the country is out of scope for a long time. The election simulator must work really well first. Continuing after losing an election is a likely future direction.
 
 ## The project

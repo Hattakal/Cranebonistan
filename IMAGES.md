@@ -51,7 +51,7 @@ One picture per kind of event covers every event in the game. Start here:
 
 | Have | File | Who |
 |---|---|---|
-|   | `portraits/carlos.jpg` | Carlos Aster, your advisor (until then: a silhouette against the lamp) |
+|   | `portraits/carlos.jpg` | Carlos Martin, your advisor (until then: a silhouette against the lamp) |
 |   | `portraits/nup.jpg` | The leader of National Unity Party, whoever it is this game |
 |   | `portraits/clf.jpg` | The leader of {national} Labour Front, whoever it is this game |
 |   | `portraits/oc.jpg` | The leader of Open {country}, whoever it is this game |

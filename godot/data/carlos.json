@@ -1,5 +1,5 @@
 {
- "_note": "Carlos Aster, your advisor: the voice of the interface. Each line has an id; a recording saved as godot/assets/voice/carlos/<id>.ogg (or .wav) plays with it. 'tutorial' lines play in order on the first month; the rest are picked at random without repeating until a situation's lines run out. He spins, but never lies about a number: the numbers are always shown next to him.",
+ "_note": "Carlos Martin, your advisor: the voice of the interface. Each line has an id; a recording saved as godot/assets/voice/carlos/<id>.ogg (or .wav) plays with it. 'tutorial' lines play in order on the first month; the rest are picked at random without repeating until a situation's lines run out. He spins, but never lies about a number: the numbers are always shown next to him.",
  "LINES": {
   "tutorial": [
    {"id": "tut_1", "text": "Boss! Welcome to headquarters. It's not much yet: a desk, a map, a kettle. But it's yours, and I've got a feeling about you."},
