@@ -265,7 +265,7 @@ func build_profile(s: Dictionary) -> Dictionary:
 		"clown": (sh.call("folksy") + sh.call("sharp")) * 7 + rec.memes * 1.5 + rec.gaffes * 1.5,
 		"technocrat": sh.call("statesman") * 9 + (1 - ext) * 3,
 		"fixer": dirty.size() * 3 + rec.dossiers * 2,
-		"demagogue": rec.blamed.size() * 3 + rec.outrages * 1.2,
+		"demagogue": demagoguery(s),
 	}
 	var entries = []
 	for k in scores: entries.append([k, scores[k]])

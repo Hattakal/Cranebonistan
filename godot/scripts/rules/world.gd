@@ -10,11 +10,17 @@ func eligible_events(s: Dictionary) -> Array:
 		if e.get("minYear") and year < e.minYear: continue
 		if e.get("requires") and not s.flags.has(e.requires): continue
 		if e.get("minSerious") and serious_of(s) < float(e.minSerious): continue   # only once the country takes you seriously
+		if e.get("minDemagogue") and demagoguery(s) < float(e.minDemagogue): continue   # only once you've been hateful enough to be noticed for it
 		var seen = s.flags.get("seen:" + e.id)
 		if e.get("once") and seen != null: continue
 		if seen != null and s.week - seen < 18 * WEEKS_PER_MONTH: continue
 		out.append(e)
 	return out
+
+## How much of a demagogue you have been: groups you blamed (3 each) and provocations
+## that caused outrage (1.2 each). Events with "minDemagogue" wait for it.
+func demagoguery(s: Dictionary) -> float:
+	return s.record.blamed.size() * 3.0 + float(s.record.outrages) * 1.2
 
 func event_weight(s: Dictionary, e: Dictionary) -> float:
 	var w = float(e.get("weight", 1))
@@ -818,6 +824,7 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 			change_serious(s, float(pc.get("serious", 1.5)) * fresh * qk)
 			apply_effects(s, {"awareness": float(pc.get("aware", 0.025)) * fresh * qk})
 		s.outrage = float(s.get("outrage", 0.0)) + 1.0
+		s.record.outrages = int(s.record.get("outrages", 0)) + 1   # remembered for good: the demagogue, the clean image
 	for g in scaled:
 		for pop in s.pops:
 			if matches(pop, g.who): pop.leader.player = clampf2(pop.leader.player + g.amt * 0.35, -2, 2)

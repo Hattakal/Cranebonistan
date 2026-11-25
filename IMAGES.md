@@ -33,9 +33,9 @@ One picture per kind of event covers every event in the game. Start here:
 
 | Have | File | Used for | Something like |
 |---|---|---|---|
-|   | `events/_crisis.jpg` | Crisis (35 events) | an empty hospital corridor, a queue, a closed factory gate |
-|   | `events/_regional.jpg` | Regional issue (8 events) | a small-town high street, a harbour, a field with pylons |
-|   | `events/_foreign.jpg` | Foreign affairs (8 events) | a border post, flags outside a ministry, a warship on the horizon |
+|   | `events/_crisis.jpg` | Crisis (43 events) | an empty hospital corridor, a queue, a closed factory gate |
+|   | `events/_regional.jpg` | Regional issue (11 events) | a small-town high street, a harbour, a field with pylons |
+|   | `events/_foreign.jpg` | Foreign affairs (11 events) | a border post, flags outside a ministry, a warship on the horizon |
 |   | `events/_opportunity.jpg` | Opportunity (14 events) | a crowd at a rally, a ribbon being cut, a factory floor |
 |   | `events/_trap.jpg` | Tricky moment (3 events) | a television studio, a row of microphones, cameras pointed at one chair |
 |   | `events/_scandal.jpg` | Scandal (11 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
@@ -114,6 +114,14 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/rider_tax.jpg` | Tax bills for forty thousand delivery riders |
 |   | `events/stadium_money.jpg` | 600 million for a stadium in Cranebo |
 |   | `events/anthem_silent.jpg` | National team striker stays silent for the anthem |
+|   | `events/ai_callcentres.jpg` | Banks replace six thousand call-centre jobs with AI |
+|   | `events/lost_girl.jpg` | Missing girl found dead near {city} |
+|   | `events/influencers_turn.jpg` | Influencers turn on you |
+|   | `events/murals.jpg` | A mural of you appears in {city} |
+|   | `events/dillihan_series.jpg` | A Dillihan drama is the most-watched show in {country} |
+|   | `events/school_kitchen.jpg` | Rats in the kitchen that feeds two hundred schools |
+|   | `events/violent_series.jpg` | Calls to ban "Black Harbour" after school knife fights |
+|   | `events/women_killed.jpg` | Three women killed by former partners in one week |
 |   | `events/crisis_insurgency_1.jpg` | Bombing in Alinni |
 |   | `events/crisis_insurgency_2.jpg` | Curfew and mass arrests in Alinni |
 |   | `events/crisis_insurgency_3.jpg` | The Free Alinni commander is caught |
@@ -142,6 +150,9 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/noodle_market.jpg` | Norbanian food takes over {city}'s old market |
 |   | `events/bakeries_close.jpg` | Village bakeries in {province} close as flour doubles |
 |   | `events/campbell_mocks.jpg` | Freddy Campbell calls your party "Cranebo people" |
+|   | `events/data_centre.jpg` | A Golban data centre wants {province}'s water |
+|   | `events/fauran_cheese.jpg` | Cranebo inspectors ban Fauran's raw-milk cheese |
+|   | `events/river_waste.jpg` | The river below {city} runs orange |
 
 ### Foreign affairs
 
@@ -155,6 +166,9 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/golba_sanctions.jpg` | Golba asks for sanctions on the Southern Trueants |
 |   | `events/dillihan_pipeline.jpg` | Dillihan proposes a gas pipeline through Fauran |
 |   | `events/james_base.jpg` | James asks for a {national} military base |
+|   | `events/abroad_golba.jpg` | Three hundred {nationals} deported from Golba overnight |
+|   | `events/abroad_trueants.jpg` | {national} lorries held at the Trueant border for eleven days |
+|   | `events/abroad_norbanistan.jpg` | Four {national} aid workers taken hostage in Norbanistan |
 
 ### Opportunity
 

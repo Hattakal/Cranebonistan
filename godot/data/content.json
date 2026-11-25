@@ -1302,7 +1302,7 @@
    "saturate": 0.6
   }
  },
- "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}. 'minSerious': the event only comes once you are taken seriously at least that much (0-100).",
+ "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}. 'minSerious': the event only comes once you are taken seriously at least that much (0-100). 'minDemagogue': only once you have blamed groups and provoked enough (each group blamed counts 3, each sharp line 1.2).",
  "EVENTS": [
   {
    "id": "pezo_slide",
@@ -1385,7 +1385,8 @@
          "amt": 0.05
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Let's be a country that makes things again, and buys them from itself."}
      ]
     },
     {
@@ -1441,7 +1442,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "One hard year, and your savings mean something again. That's worth it."}
      ]
     },
     {
@@ -1597,7 +1599,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "We've come back from worse. In a year the pezo will be the least of our worries."}
      ]
     }
    ],
@@ -1768,7 +1771,8 @@
       {
        "tone": "folksy",
        "text": "Sixty percent of your salary for one room and a view of the bins? No."
-      }
+      },
+      {"tone": "hopeful", "text": "A flat in Cranebo you can afford on one salary. That should be ordinary again."}
      ]
     },
     {
@@ -1815,7 +1819,8 @@
       {
        "tone": "fiery",
        "text": "A hundred thousand homes, and not one of them for a speculator!"
-      }
+      },
+      {"tone": "hopeful", "text": "Picture a city where your first flat is the start of something, not the end of your savings."}
      ]
     },
     {
@@ -1869,7 +1874,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Let Cranebo grow again. A city full of cranes is a city with room for the young."}
      ]
     },
     {
@@ -2103,7 +2109,8 @@
       {
        "tone": "folksy",
        "text": "Nobody should need an engineering degree to know the way to the airport."
-      }
+      },
+      {"tone": "hopeful", "text": "Every graduate in this country will have work worth the degree. Not one more behind a taxi wheel."}
      ]
     },
     {
@@ -2154,7 +2161,8 @@
          "amt": -0.3
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Those three could build the next great {national} company. Let them try."}
      ]
     },
     {
@@ -2204,7 +2212,8 @@
          "amt": -0.05
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "We made a video about a country where graduates build things. Watch it to the end."}
      ]
     },
     {
@@ -2646,7 +2655,8 @@
          "amt": 0.08
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Some of the children on that quay will be our doctors one day. Let's be the country they remember kindly."}
      ]
     },
     {
@@ -2777,7 +2787,8 @@
          "amt": -0.35
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Yamlin was built by people who arrived with nothing. Let these ones build it too."}
      ]
     },
     {
@@ -2838,7 +2849,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "If the whole region shares this, nobody has to choose between kindness and coping."}
      ]
     }
    ],
@@ -3206,7 +3218,8 @@
       {
        "tone": "folksy",
        "text": "My mother won't take the bus after dark any more. That's not a capital, that's a hostage situation."
-      }
+      },
+      {"tone": "hopeful", "text": "A Cranebo where nobody crosses the street to avoid a shadow. That's what ten thousand officers buy."}
      ]
     },
     {
@@ -3260,7 +3273,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Give every kid in Cranebo somewhere to be at night, and watch the robberies fall."}
      ]
     },
     {
@@ -3375,7 +3389,8 @@
          "amt": -0.12
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "These streets were safe once, and the people who live here will make them safe again."}
      ]
     }
    ],
@@ -3529,7 +3544,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "One day our grandchildren will cross that border without noticing it. Talking is how that day starts."}
      ]
     },
     {
@@ -3587,7 +3603,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Make Alinni the place every young Alinnian wants to stay. That's the answer the Trueants can't argue with."}
      ]
     },
     {
@@ -4458,7 +4475,8 @@
          "amt": -0.1
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "We'll rebuild the old town, stone by stone, better than it was."}
      ]
     },
     {
@@ -4533,7 +4551,7 @@
      "lines": [
       {
        "tone": "folksy", "sharp": true,
-       "text": "Thoughts and prayers to Yamlin from the beautiful Potanian coast!",
+       "text": "All my thoughts are with Yamlin, from the beautiful Potanian coast!",
        "react": [
         {
          "who": {},
@@ -4556,7 +4574,8 @@
          "amt": -0.15
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Every cloud has a silver lining, Yamlin. I can see it from here!", "risk": 0.8}
      ]
     }
    ],
@@ -5257,7 +5276,8 @@
          "amt": -0.08
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "Erland has had bad years before. With a little help, next year's harvest will be the best in a decade."}
      ]
     },
     {
@@ -5364,7 +5384,7 @@
      ]
     },
     {
-     "label": "Pray for rain with farmers at a village shrine",
+     "label": "Join the farmers' rain-day supper in a village square",
      "effects": {
       "shift": {
        "society": 10
@@ -5410,7 +5430,7 @@
       },
       {
        "tone": "statesman",
-       "text": "Faith and hard work have carried Erland through droughts before. They will again."
+       "text": "Patience and hard work have carried Erland through droughts before. They will again."
       },
       {
        "tone": "folksy", "sharp": true,
@@ -5425,7 +5445,8 @@
          "amt": -0.12
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "The rain will come, and Erland will still be here when it does. So will I."}
      ]
     }
    ],
@@ -5498,7 +5519,8 @@
       {
        "tone": "statesman",
        "text": "These workers are asking for wages that keep up with prices. That is not radical. It is fair."
-      }
+      },
+      {"tone": "hopeful", "text": "A fair wage and a factory that lasts. We can have both."}
      ]
     },
     {
@@ -5581,7 +5603,8 @@
       {
        "tone": "fiery",
        "text": "The government is hiding under its desk. Arbitration, now!"
-      }
+      },
+      {"tone": "hopeful", "text": "Every strike ends at a table. Let's get there before anyone loses a month's pay."}
      ]
     },
     {
@@ -6128,7 +6151,8 @@
       {
        "tone": "statesman",
        "text": "This is not one minister's failure. It is a system that rewards it."
-      }
+      },
+      {"tone": "hopeful", "text": "Imagine a government nobody ever needs to photograph. We can build one."}
      ]
     },
     {
@@ -6169,7 +6193,8 @@
       {
        "tone": "fiery",
        "text": "Investigate, prosecute, and let the cameras watch!"
-      }
+      },
+      {"tone": "hopeful", "text": "Let the courts do their work, and let this be the last suitcase."}
      ]
     },
     {
@@ -6463,7 +6488,8 @@
       {
        "tone": "folksy",
        "text": "We wouldn't let a Golban company print our newspapers. Why let it run our news feed?"
-      }
+      },
+      {"tone": "hopeful", "text": "Let's build platforms of our own, where {nationals} talk to each other."}
      ]
     }
    ]
@@ -7104,7 +7130,8 @@
       {
        "tone": "fiery",
        "text": "Speculators are buying the stalls and blaming the noodles!"
-      }
+      },
+      {"tone": "hopeful", "text": "A market where the butcher and the noodle stall both make a living. That's the whole point of a market."}
      ]
     },
     {
@@ -7274,7 +7301,8 @@
       {
        "tone": "folksy",
        "text": "My cousin drives a delivery van. This week he paid to go to work."
-      }
+      },
+      {"tone": "hopeful", "text": "A litre you can afford every week, whatever happens in the world."}
      ]
     },
     {
@@ -7510,7 +7538,8 @@
          "amt": -0.2
         }
        ]
-      }
+      },
+      {"tone": "hopeful", "text": "High prices bring new bakers. In five years Fauran will have better bread than ever.", "risk": 0.6}
      ]
     }
    ]
@@ -7690,7 +7719,8 @@
       {
        "tone": "folksy",
        "text": "If you have to pay a guest to stay, he isn't a guest."
-      }
+      },
+      {"tone": "hopeful", "text": "Let's build our own carmaker. We did once, and the cars were good."}
      ]
     }
    ]
@@ -7782,7 +7812,8 @@
       {
        "tone": "folksy",
        "text": "If my nephew won a hospital contract, my mother would be the first to ask questions."
-      }
+      },
+      {"tone": "hopeful", "text": "Let this be the last contract anyone ever has to investigate."}
      ]
     },
     {
@@ -7919,7 +7950,8 @@
       {
        "tone": "folksy",
        "text": "If a company pays for your holiday, you're not on holiday. You're at work, for them."
-      }
+      },
+      {"tone": "hopeful", "text": "Imagine a parliament nobody can buy, not even with a week at the beach."}
      ]
     },
     {
@@ -8314,7 +8346,8 @@
       {
        "tone": "folksy",
        "text": "We need someone who gives money back. It would be a first in politics."
-      }
+      },
+      {"tone": "hopeful", "text": "We'd be lucky to have him. People like him are why I think this country can do better."}
      ]
     }
    ]
@@ -8425,7 +8458,8 @@
       {
        "tone": "folksy",
        "text": "Ask any nurse how much of a shift is paperwork. Then cut that first."
-      }
+      },
+      {"tone": "hopeful", "text": "Picture a nurse who spends her shift with patients, not with paperwork."}
      ]
     },
     {
@@ -8530,7 +8564,8 @@
       {
        "tone": "folksy",
        "text": "I won't pretend I can drive a tractor. I can bring down the price of diesel."
-      }
+      },
+      {"tone": "hopeful", "text": "Erland could be the best place in the region to farm. Here's how we get there."}
      ]
     },
     {
@@ -8753,7 +8788,8 @@
       {
        "tone": "folksy",
        "text": "Bring your whiteboard, Yvonne. I'll bring my shopping receipts."
-      }
+      },
+      {"tone": "hopeful", "text": "Let's settle it in public. A country that trusts its own numbers can fix almost anything."}
      ]
     }
    ]
@@ -8928,7 +8964,8 @@
       {
        "tone": "folksy",
        "text": "When my budget has a hole, I stop buying things. I don't empty my neighbour's attic."
-      }
+      },
+      {"tone": "hopeful", "text": "A state that lives within its means can keep every promise it makes."}
      ]
     }
    ]
@@ -9032,7 +9069,8 @@
       {
        "tone": "folksy",
        "text": "Better half a loaf in {country} than a whole one in James."
-      }
+      },
+      {"tone": "hopeful", "text": "Bring the money home and build something here with it. We'll make it welcome."}
      ]
     },
     {
@@ -9336,7 +9374,8 @@
       {
        "tone": "statesman",
        "text": "Six hundred million is the city's money. Let the city decide."
-      }
+      },
+      {"tone": "hopeful", "text": "Let Cranebo decide. A city that chooses its own stadium will fill it."}
      ]
     }
    ]
@@ -9484,7 +9523,8 @@
       {
        "tone": "folksy",
        "text": "I'll leave team selection to the manager. I can't even pick a sock."
-      }
+      },
+      {"tone": "hopeful", "text": "One day nobody will ask who sang. They'll only ask who scored."}
      ]
     }
    ]
@@ -9622,6 +9662,2358 @@
       {
        "tone": "folksy",
        "text": "He trained in a barn. Meanwhile the sports minister got a new office."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "abroad_golba",
+   "kind": "foreign",
+   "title": "Three hundred {nationals} deported from Golba overnight",
+   "text": "Golban police rounded up three hundred {national} building workers at a site outside Golba's capital, kept them two days in a sports hall and flew them home overnight. Most had valid papers. One plane landed in Tarroport at four in the morning.",
+   "government": {
+    "text": "The foreign minister has \"asked for clarification\"."
+   },
+   "choices": [
+    {
+     "label": "Demand a public apology from Golba",
+     "effects": {
+      "shift": {
+       "foreign": -6,
+       "nation": -4
+      },
+      "awareness": 0.05,
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Our citizens had papers and were treated like cargo. Golba owes them an apology, and compensation."
+      },
+      {
+       "tone": "fiery",
+       "text": "Our people slept on a gym floor while our government asked for clarification!"
+      },
+      {
+       "tone": "folksy",
+       "text": "They went to Golba to build houses. They came home with a plastic bag."
+      },
+      {
+       "tone": "fiery",
+       "text": "Golba lectures the world about rights. Apparently ours don't count.",
+       "sharp": true,
+       "risk": 0.6
+      }
+     ]
+    },
+    {
+     "label": "Keep it quiet: Golba is our biggest customer",
+     "effects": {
+      "shift": {
+       "foreign": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Shouting won't bring anyone's wages back. Quiet talks with our biggest partner will."
+      },
+      {
+       "tone": "folksy",
+       "text": "You don't slam the door on the shop that buys half your goods."
+      }
+     ]
+    },
+    {
+     "label": "Ask why they had to leave {country} for work",
+     "effects": {
+      "shift": {
+       "economy": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Three hundred skilled builders, and not one could find work at home. That's the real scandal."
+      },
+      {
+       "tone": "fiery",
+       "text": "They were driven out by low wages here and thrown out of Golba. Who speaks for them?"
+      },
+      {
+       "tone": "folksy",
+       "text": "My neighbour's son went to Golba to lay bricks. There are no bricks here to lay."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's build a country these three hundred never have to leave again."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "abroad_trueants",
+   "kind": "foreign",
+   "title": "{national} lorries held at the Trueant border for eleven days",
+   "country": [
+    {
+     "id": "trueants",
+     "note": "Its border officers held forty {national} lorries at Crümländ for eleven days, asking for \"fees\"."
+    }
+   ],
+   "text": "Forty {national} lorries have been stuck at the border post outside Crümländ for eleven days. The drivers sleep in their cabs. Trueant officers say the delay will end when certain \"processing fees\" are paid, in cash.",
+   "choices": [
+    {
+     "label": "Close the border to Trueant lorries until ours are free",
+     "effects": {
+      "shift": {
+       "foreign": -8,
+       "nation": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "foreign": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "region": "alinni"
+        },
+        "amt": -0.1
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every Trueant lorry stays where it is until the last of ours comes home. That's how a border works."
+      },
+      {
+       "tone": "fiery",
+       "text": "They take our drivers hostage for bribes? Shut the border!"
+      },
+      {
+       "tone": "folksy",
+       "text": "If they won't let our lorries out, theirs can wait with ours. Bring a sandwich."
+      }
+     ]
+    },
+    {
+     "label": "Send the consul with food and blankets, and keep talking",
+     "effects": {
+      "shift": {
+       "foreign": 5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "foreign": ">20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Food and blankets today, a deal tomorrow. Nobody pays a bribe on our behalf."
+      },
+      {
+       "tone": "folksy",
+       "text": "First get them a hot meal and a shower. Then argue."
+      },
+      {
+       "tone": "hopeful",
+       "text": "One day that border will be a ten-minute stop. We get there by talking, even now."
+      }
+     ]
+    },
+    {
+     "label": "Blame the government for letting them push us around",
+     "effects": {
+      "shift": {
+       "system": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "loyalTo": "nup"
+        },
+        "amt": -0.1
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "Eleven days! A country that can't get its own drivers home doesn't deserve a foreign ministry!"
+      },
+      {
+       "tone": "folksy",
+       "text": "The minister found time for a holiday this month. Not for forty drivers."
+      },
+      {
+       "tone": "statesman",
+       "text": "The Trueants test us because they know this government won't answer."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "abroad_norbanistan",
+   "kind": "foreign",
+   "title": "Four {national} aid workers taken hostage in Norbanistan",
+   "trust": -2,
+   "text": "A militia in northern Norbanistan has seized four volunteers from a Cranebo medical charity. It wants two million Golban dollars. The families are camped outside the foreign ministry.",
+   "choices": [
+    {
+     "label": "Say {country} never pays ransom",
+     "effects": {
+      "shift": {
+       "order": -6,
+       "foreign": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": -0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Pay once, and every {national} abroad becomes a price tag. We bring them home another way."
+      },
+      {
+       "tone": "fiery",
+       "text": "Not one pezo for gunmen! Find them and bring them back!"
+      },
+      {
+       "tone": "folksy",
+       "text": "If you pay the wolf, he comes back for the rest of the flock."
+      }
+     ]
+    },
+    {
+     "label": "Bring them home, whatever it costs",
+     "effects": {
+      "shift": {
+       "foreign": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "They went to save lives. The least their country can do is save theirs."
+      },
+      {
+       "tone": "folksy",
+       "text": "If it were my daughter, I'd sell the house. They're somebody's daughters."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Four people who went to help strangers. I want to live in the country that brings them home."
+      }
+     ]
+    },
+    {
+     "label": "Say they knew the risks when they went",
+     "effects": {
+      "shift": {
+       "nation": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Our sympathy is with the families, but the state cannot underwrite every private journey into a war zone."
+      },
+      {
+       "tone": "folksy",
+       "text": "There's plenty of people to help in Fauran, and nobody gets kidnapped.",
+       "sharp": true,
+       "risk": 0.75,
+       "react": [
+        {
+         "who": {
+          "class": "middle"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Work quietly with the government, and say nothing",
+     "effects": {
+      "trust": 1,
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.05
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "data_centre",
+   "kind": "regional",
+   "title": "A Golban data centre wants {province}'s water",
+   "where": {
+    "regions": [
+     "erland",
+     "cranbia"
+    ]
+   },
+   "text": "A Golban tech firm plans a huge data centre for its AI models in {province}. It would use as much water as a town of eighty thousand people, during a dry decade. It promises three hundred jobs and a new school.",
+   "choices": [
+    {
+     "label": "Welcome it: {country} can't miss the future",
+     "effects": {
+      "shift": {
+       "economy": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.05
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every country is competing for these centres. Turn this one away, and it goes to Dillihan."
+      },
+      {
+       "tone": "folksy",
+       "text": "Three hundred jobs and a new school. In {province}, that's a lot."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let {country} be where the future gets built, not where it gets downloaded."
+      }
+     ]
+    },
+    {
+     "label": "Allow it only if it recycles its water and pays local prices",
+     "effects": {
+      "shift": {
+       "economy": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": "<-20"
+         }
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Build it, but on our terms: recycled water, full price, and the jobs go to local people."
+      },
+      {
+       "tone": "folksy",
+       "text": "They can have the land. The water, they pay for like the rest of us."
+      },
+      {
+       "tone": "hopeful",
+       "text": "A centre that cools itself and teaches our kids to code. That's a deal worth signing."
+      }
+     ]
+    },
+    {
+     "label": "Say farms need the water more than computers",
+     "effects": {
+      "shift": {
+       "society": 5,
+       "nation": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "In a dry decade, water goes to the people who grow our food. That's not anti-technology, it's arithmetic."
+      },
+      {
+       "tone": "fiery",
+       "text": "They want our water so a Golban computer can write poems!"
+      },
+      {
+       "tone": "folksy",
+       "text": "You can't eat an algorithm. I checked."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ai_callcentres",
+   "kind": "crisis",
+   "title": "Banks replace six thousand call-centre jobs with AI",
+   "when": {
+    "jobs": "<55"
+   },
+   "where": {
+    "province": "cranbia_2"
+   },
+   "text": "The country's three biggest banks will close their call centres in Tarroport by next year and answer customers with AI. Six thousand jobs go, most held by women over forty. Customers say the machine is already more polite.",
+   "choices": [
+    {
+     "label": "Tax companies that replace workers with AI",
+     "effects": {
+      "shift": {
+       "economy": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "If a machine takes a job, it can pay some of the tax the worker paid."
+      },
+      {
+       "tone": "fiery",
+       "text": "Six thousand jobs gone so three banks can save on coffee breaks!"
+      },
+      {
+       "tone": "folksy",
+       "text": "I rang my bank last week. The robot was very nice. It still couldn't find my money."
+      }
+     ]
+    },
+    {
+     "label": "Promise to retrain every one of them",
+     "effects": {
+      "shift": {
+       "welfare": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every worker who loses a job to a machine gets a year's training on full pay."
+      },
+      {
+       "tone": "folksy",
+       "text": "Nobody in Tarroport is too old to learn. My aunt learned to text at seventy."
+      },
+      {
+       "tone": "hopeful",
+       "text": "These six thousand could be running the machines in five years. Let's pay for that."
+      }
+     ]
+    },
+    {
+     "label": "Say it's progress and {country} must keep up",
+     "effects": {
+      "shift": {
+       "economy": 8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The countries that adopt this first will be the rich ones in twenty years."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Machines that answer phones free people to do the work machines can't."
+      },
+      {
+       "tone": "statesman",
+       "text": "We didn't save the switchboard operators either.",
+       "sharp": true,
+       "risk": 0.7,
+       "react": [
+        {
+         "who": {
+          "age": "46-60"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lost_girl",
+   "kind": "crisis",
+   "title": "Missing girl found dead near {city}",
+   "trust": -3,
+   "world": {
+    "unrest": 3
+   },
+   "where": {
+    "regions": [
+     "erland",
+     "fauraifai",
+     "yamlin"
+    ],
+    "city": true
+   },
+   "text": "Mila, eight, went missing on her way home from school in {city} nine days ago. Her body was found this morning in a field outside town. Police have arrested a 41-year-old farmhand. He was born in Norbanistan. The whole country is in mourning.",
+   "choices": [
+    {
+     "label": "Visit the family privately, and say nothing in public",
+     "effects": {
+      "trust": 2,
+      "goodwill": [
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       }
+      ]
+     }
+    },
+    {
+     "label": "Ask why the search took nine days",
+     "effects": {
+      "shift": {
+       "system": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "loyalTo": "nup"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Her family deserves to know why it took nine days. So does every parent in {country}."
+      },
+      {
+       "tone": "fiery",
+       "text": "Nine days! The police found a minister's stolen car in nine hours last year!"
+      },
+      {
+       "tone": "folksy",
+       "text": "I don't want a speech from the police chief. I want to know what happened on day one."
+      }
+     ]
+    },
+    {
+     "label": "Say this is what open borders cost",
+     "effects": {
+      "shift": {
+       "nation": -12
+      },
+      "blame": "Norbanian immigrants",
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.4
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "nationality": "norbanian"
+        },
+        "amt": -0.8
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": ">20"
+         }
+        },
+        "amt": -0.35
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "How many more children before this government finds out who it let in?"
+      },
+      {
+       "tone": "statesman",
+       "text": "We must ask, calmly, how a man with his past came to be living next to a primary school."
+      },
+      {
+       "tone": "fiery",
+       "text": "Mila would be alive if our borders were closed. Every one of you knows it.",
+       "sharp": true,
+       "risk": 0.85,
+       "react": [
+        {
+         "who": {
+          "class": "middle"
+         },
+         "amt": -0.2
+        },
+        {
+         "who": {
+          "age": "30-45"
+         },
+         "amt": -0.1
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Call for calm until the trial",
+     "effects": {
+      "trust": 2,
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "system": ">15"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A man has been arrested. Let the courts judge him, not the crowd."
+      },
+      {
+       "tone": "folksy",
+       "text": "Tonight hold your children, and leave the rest to the court."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "influencers_turn",
+   "kind": "crisis",
+   "title": "Influencers turn on you",
+   "minDemagogue": 8,
+   "text": "Barbara Lulli and Jeremy Hannigan, who never talk politics, posted a joint video: \"We don't do this, but the things that party says about people are hateful, and our followers should know.\" Six million views by lunchtime.",
+   "choices": [
+    {
+     "label": "Admit you went too far, and soften",
+     "effects": {
+      "shift": {
+       "nation": 4
+      },
+      "trust": 2,
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Some of what I said was wrong, and the way I said it was worse. I'll do better."
+      },
+      {
+       "tone": "folksy",
+       "text": "My mother saw the video. Believe me, they're not the hardest critics I've faced today."
+      },
+      {
+       "tone": "hopeful",
+       "text": "I want a country where everyone feels at home, and I haven't always sounded like it. That changes now."
+      }
+     ]
+    },
+    {
+     "label": "Say rich influencers don't know real life",
+     "effects": {
+      "shift": {
+       "system": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "A gamer and a café blogger lecture working families about hate? Spare us!"
+      },
+      {
+       "tone": "statesman",
+       "text": "I respect their right to their views. I don't need their permission to speak for people they never meet."
+      },
+      {
+       "tone": "folksy",
+       "text": "Come to Bayernal on a Tuesday, Jeremy. Bring your headphones, it gets loud.",
+       "sharp": true,
+       "risk": 0.65
+      }
+     ]
+    },
+    {
+     "label": "Ignore it",
+     "effects": {
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.1
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "murals",
+   "kind": "crisis",
+   "title": "A mural of you appears in {city}",
+   "minDemagogue": 6,
+   "minSerious": 25,
+   "where": {
+    "regions": [
+     "cranbia",
+     "yamlin"
+    ],
+    "city": true
+   },
+   "text": "Overnight, artists painted a mural four storeys high on a wall in {city}: you, in a suit, feeding a bonfire with books in every language spoken in {country}. Thousands came to photograph it. Three more appeared by the weekend.",
+   "choices": [
+    {
+     "label": "Go and see it, and laugh it off",
+     "effects": {
+      "awareness": 0.05,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "They got my good side. I didn't know I had one."
+      },
+      {
+       "tone": "statesman",
+       "text": "Art that makes people argue is doing its job. I've come to look, not to complain."
+      },
+      {
+       "tone": "hopeful",
+       "text": "If they paint me differently in a year, I'll come back and take a photo with that one too."
+      }
+     ]
+    },
+    {
+     "label": "Demand the city paint over it",
+     "effects": {
+      "shift": {
+       "order": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "That wall is somebody's property. Defacing it is a crime, whatever it shows."
+      },
+      {
+       "tone": "fiery",
+       "text": "Vandals with paint cans don't get to slander a party of the people!"
+      },
+      {
+       "tone": "folksy",
+       "text": "If I painted my opinion on your house, you'd call the police too."
+      }
+     ]
+    },
+    {
+     "label": "Say it proves the cultural elite fears you",
+     "effects": {
+      "shift": {
+       "system": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "They paint walls. We knock on doors. Let's see who gets the votes."
+      },
+      {
+       "tone": "folksy",
+       "text": "Four storeys, all for me. My mother says it's the nicest thing they've ever done."
+      },
+      {
+       "tone": "statesman",
+       "text": "When the arts world spends this much paint on one party, it tells you who they're afraid of.",
+       "sharp": true,
+       "risk": 0.55
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "dillihan_series",
+   "kind": "crisis",
+   "title": "A Dillihan drama is the most-watched show in {country}",
+   "text": "\"The Orchard Wars\", a Dillihan family drama about feuding fruit farmers, is the most-watched show in the country. Babies are being named after its characters. Fauran farmers point out that the orchards in it look exactly like theirs.",
+   "choices": [
+    {
+     "label": "Say you're watching it too",
+     "effects": {
+      "awareness": 0.04,
+      "leader": [
+       {
+        "who": {
+         "age": "30-45"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "I'm on season two. Don't tell me what happens to the uncle."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Good stories cross borders. One day the whole region will be watching ours."
+      },
+      {
+       "tone": "statesman",
+       "text": "It's a fine series. Our neighbours can make good television; so can we."
+      }
+     ]
+    },
+    {
+     "label": "Fund {national} drama to compete",
+     "effects": {
+      "shift": {
+       "welfare": -4,
+       "nation": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "If Dillihan can make the country's favourite show, so can we, with the right support."
+      },
+      {
+       "tone": "folksy",
+       "text": "We have feuding farmers too. Ours have better jokes."
+      },
+      {
+       "tone": "hopeful",
+       "text": "The next show the whole region watches should be filmed in Fauran. Let's pay for that."
+      }
+     ]
+    },
+    {
+     "label": "Call for quotas on foreign television",
+     "effects": {
+      "shift": {
+       "nation": -7
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Half of what's on our screens should be made here. Plenty of countries do it."
+      },
+      {
+       "tone": "fiery",
+       "text": "Dillihan wants our pastures and our living rooms!"
+      },
+      {
+       "tone": "folksy",
+       "text": "Dillihan patrols take our cattle in the day, and their dramas take our evenings.",
+       "sharp": true,
+       "risk": 0.55
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "school_kitchen",
+   "kind": "crisis",
+   "title": "Rats in the kitchen that feeds two hundred schools",
+   "trust": -3,
+   "where": {
+    "region": "cranbia"
+   },
+   "text": "Inspectors found rat droppings and spoiled meat at the central kitchen that supplies lunches to two hundred schools in Cranbia. It was last inspected four years ago. The number of food inspectors has halved since 2022.",
+   "choices": [
+    {
+     "label": "Promise to hire back the inspectors",
+     "effects": {
+      "shift": {
+       "welfare": -5,
+       "economy": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "30-45"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every kitchen that feeds children gets inspected every year. That means hiring the inspectors back."
+      },
+      {
+       "tone": "fiery",
+       "text": "They cut the inspectors to save money and fed the savings to our children!"
+      },
+      {
+       "tone": "folksy",
+       "text": "My kids eat there. I want an inspector in that kitchen more often than the rats."
+      },
+      {
+       "tone": "hopeful",
+       "text": "School lunch should be the best meal some kids eat all day. Let's make it that."
+      }
+     ]
+    },
+    {
+     "label": "Ban the company and sue its owners",
+     "effects": {
+      "shift": {
+       "order": -4
+      },
+      "awareness": 0.04,
+      "goodwill": [
+       {
+        "who": {
+         "age": "30-45"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The company loses every public contract it holds, and its owners answer in court."
+      },
+      {
+       "tone": "fiery",
+       "text": "Lock the doors and put the owners in front of a judge!"
+      },
+      {
+       "tone": "folksy",
+       "text": "If my restaurant served that, I'd be closed by teatime. Same rules for them."
+      }
+     ]
+    },
+    {
+     "label": "Say parents should pack their children's lunches",
+     "effects": {
+      "shift": {
+       "welfare": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "age": "30-45"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Families know best what their children should eat. The state needn't run a kitchen for every school."
+      },
+      {
+       "tone": "folksy",
+       "text": "My mother packed my lunch for twelve years. Nobody ever found a rat in it.",
+       "sharp": true,
+       "risk": 0.65,
+       "react": [
+        {
+         "who": {
+          "class": "working"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fauran_cheese",
+   "kind": "regional",
+   "title": "Cranebo inspectors ban Fauran's raw-milk cheese",
+   "where": {
+    "region": "fauraifai"
+   },
+   "text": "New hygiene rules from Cranebo ban the sale of cheese made from raw milk. In Fauran, villages have made it the same way for four hundred years. The cheesemakers have been told to buy stainless steel tanks they can't afford.",
+   "choices": [
+    {
+     "label": "Defend the cheesemakers: exempt traditional food",
+     "effects": {
+      "shift": {
+       "society": 5,
+       "system": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.35
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "society": ">20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Traditional food made the traditional way deserves its own rules, written with the people who make it."
+      },
+      {
+       "tone": "fiery",
+       "text": "Four hundred years of cheese, and a clerk in Cranebo knows better!"
+      },
+      {
+       "tone": "folksy",
+       "text": "My grandfather ate that cheese every day and lived to ninety-one. He'd have lived to a hundred if they'd let him."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's make Fauran cheese famous across the region instead of illegal at home."
+      }
+     ]
+    },
+    {
+     "label": "Back the rules: safety comes first",
+     "effects": {
+      "shift": {
+       "order": -4,
+       "society": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "cranbia"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": -0.35
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Raw milk can make children seriously ill. Rules for food safety can't depend on where you live."
+      },
+      {
+       "tone": "folksy",
+       "text": "I like old cheese. I don't like old bacteria.",
+       "sharp": true,
+       "risk": 0.6,
+       "react": [
+        {
+         "who": {
+          "region": "fauraifai"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Offer grants to help them meet the rules",
+     "effects": {
+      "shift": {
+       "welfare": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Keep the rules, and pay for the tanks. Safety shouldn't cost a village its living."
+      },
+      {
+       "tone": "folksy",
+       "text": "If Cranebo wants shiny tanks in Fauran, Cranebo can help buy them."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Same cheese, same villages, cleaner tanks. Fauran can have both."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "river_waste",
+   "kind": "regional",
+   "title": "The river below {city} runs orange",
+   "where": {
+    "regions": [
+     "cranbia",
+     "yamlin",
+     "erland"
+    ],
+    "city": true
+   },
+   "text": "For three days the river below {city} has run orange. Dead fish line the banks for twenty kilometres. A chemical plant upstream admits a \"discharge incident\". It employs 1,800 people in a town of forty thousand.",
+   "choices": [
+    {
+     "label": "Close the plant until it's cleaned up",
+     "effects": {
+      "shift": {
+       "economy": -6,
+       "society": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The plant reopens when it can prove it won't happen again. Not a day before."
+      },
+      {
+       "tone": "fiery",
+       "text": "They poisoned a river and called it an incident. Shut it down!"
+      },
+      {
+       "tone": "folksy",
+       "text": "My kids used to swim there. Now the fish are floating on their backs."
+      },
+      {
+       "tone": "hopeful",
+       "text": "In five years that river can be clean enough to swim in again. It starts with closing the pipe."
+      }
+     ]
+    },
+    {
+     "label": "Fine them heavily, but keep the jobs",
+     "effects": {
+      "shift": {
+       "economy": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A fine big enough to hurt, a clean-up they pay for, and eighteen hundred jobs kept."
+      },
+      {
+       "tone": "folksy",
+       "text": "Make them pay for every fish. And keep the town working."
+      }
+     ]
+    },
+    {
+     "label": "Make the owners personally pay",
+     "effects": {
+      "shift": {
+       "system": -5,
+       "economy": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "The owners live upstream of nothing. Let them pay out of their own pockets!"
+      },
+      {
+       "tone": "statesman",
+       "text": "When a company poisons a river, the people who run it should answer personally, in court."
+      },
+      {
+       "tone": "folksy",
+       "text": "I'd like to see the chairman's garden pond turn orange. Just for a week.",
+       "sharp": true,
+       "risk": 0.55
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "violent_series",
+   "kind": "crisis",
+   "title": "Calls to ban \"Black Harbour\" after school knife fights",
+   "text": "Two pupils were stabbed in school fights in Tarroport this month. Teachers say boys copy the gang drama \"Black Harbour\", the country's most-watched series among teenagers. A group of parents wants it banned.",
+   "choices": [
+    {
+     "label": "Ban it from television and the apps",
+     "effects": {
+      "shift": {
+       "order": -8,
+       "society": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "society": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.35
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Children are copying what they see. Some things don't belong on a screen in every bedroom."
+      },
+      {
+       "tone": "fiery",
+       "text": "They sell knives to our kids as entertainment! Take it off the air!"
+      },
+      {
+       "tone": "folksy",
+       "text": "When my son started talking like a gangster at breakfast, I knew it had gone too far."
+      }
+     ]
+    },
+    {
+     "label": "Defend it: banning a show solves nothing",
+     "effects": {
+      "shift": {
+       "order": 8,
+       "society": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Knife fights existed before television. Banning a series lets us avoid asking why."
+      },
+      {
+       "tone": "folksy",
+       "text": "They banned a comic when I was a boy. We read it under the bed."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Our kids are smarter than we give them credit for. Talk to them, don't switch them off."
+      }
+     ]
+    },
+    {
+     "label": "Say boys need somewhere to go, not a ban",
+     "effects": {
+      "shift": {
+       "welfare": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "30-45"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A boy with a football club on a Tuesday night isn't watching gang dramas for ideas."
+      },
+      {
+       "tone": "folksy",
+       "text": "Bored fifteen-year-olds will copy anything. Give them something better to copy."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Every kid in Tarroport with a coach, a team and somewhere to be. That's what beats Black Harbour."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "women_killed",
+   "kind": "crisis",
+   "title": "Three women killed by former partners in one week",
+   "trust": -3,
+   "text": "Three women were killed by former partners this week, in Cranebo, Nikecisa and Kansilia. All three had gone to the police. Two had restraining orders. Thousands marched in silence last night; the question now is who failed them.",
+   "choices": [
+    {
+     "label": "Blame the police: they were warned and did nothing",
+     "effects": {
+      "shift": {
+       "order": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Three women asked the police for help. Every one of those reports must be investigated, and someone must answer."
+      },
+      {
+       "tone": "fiery",
+       "text": "They went to the police and were sent home! How many warnings does it take?"
+      },
+      {
+       "tone": "folksy",
+       "text": "My sister reported a man once. The officer asked what she'd done to upset him."
+      },
+      {
+       "tone": "hopeful",
+       "text": "A woman who goes to the police should walk out safer than she walked in. We can build that."
+      }
+     ]
+    },
+    {
+     "label": "Blame soft courts: tougher sentences",
+     "effects": {
+      "shift": {
+       "order": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A restraining order means nothing if breaking it costs nothing. Breaking one should mean prison."
+      },
+      {
+       "tone": "fiery",
+       "text": "Two of them had court orders! The courts gave those men a piece of paper and a second chance!"
+      },
+      {
+       "tone": "folksy",
+       "text": "A restraining order is a sheet of paper. Paper never stopped anybody."
+      }
+     ]
+    },
+    {
+     "label": "Blame a culture that treats women as property",
+     "effects": {
+      "shift": {
+       "society": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "society": ">20"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "This doesn't start with a knife. It starts with jokes, with silence, with 'it's a family matter'."
+      },
+      {
+       "tone": "fiery",
+       "text": "Men who think they own women are made, not born. Ask who made them!"
+      },
+      {
+       "tone": "hopeful",
+       "text": "Our daughters can grow up in a country where this is unthinkable. It's up to us, all of us."
+      },
+      {
+       "tone": "statesman",
+       "text": "Listen to the four-hour podcasts our sons are listening to, and you'll understand this week.",
+       "sharp": true,
+       "risk": 0.6,
+       "react": [
+        {
+         "who": {
+          "age": "18-29"
+         },
+         "amt": -0.05
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Blame men from abroad",
+     "effects": {
+      "shift": {
+       "nation": -10
+      },
+      "blame": "immigrants",
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "nationality": "norbanian"
+        },
+        "amt": -0.6
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "Ask where these men came from, and who let them in!"
+      },
+      {
+       "tone": "statesman",
+       "text": "We must ask whether some of the men coming to {country} share our values about women.",
+       "sharp": true,
+       "risk": 0.75,
+       "react": [
+        {
+         "who": {
+          "class": "middle"
+         },
+         "amt": -0.15
+        }
+       ]
       }
      ]
     }
