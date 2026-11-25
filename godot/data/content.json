@@ -6315,6 +6315,3319 @@
    ]
   },
   {
+   "id": "social_id",
+   "kind": "crisis",
+   "title": "Government wants ID checks on social media",
+   "text": "The NUP proposes that every Chatter and Clipr account be tied to a national ID number, to stop anonymous abuse and the bot farms everyone blames for the last election.",
+   "government": {
+    "text": "The government says the details will be \"refined\" before the vote."
+   },
+   "choices": [
+    {
+     "label": "Back ID checks to clean up the internet",
+     "effects": {
+      "shift": {
+       "order": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.4
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Freedom of speech was never freedom to hide. Sign your name, then say what you like."
+      },
+      {
+       "tone": "fiery",
+       "text": "Bot farms are flooding our phones every night. Shut them down!"
+      },
+      {
+       "tone": "folksy",
+       "text": "My mother gets twenty messages a day from people who don't exist."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Imagine an internet where you know the person shouting at you is real. Most of us would shout less."
+      }
+     ]
+    },
+    {
+     "label": "Defend anonymous accounts",
+     "effects": {
+      "shift": {
+       "order": 10
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.4
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Whistleblowers, victims of abuse, people with a boss who reads everything: anonymity protects them first."
+      },
+      {
+       "tone": "fiery",
+       "text": "Today it's your ID number, tomorrow it's your front door!"
+      },
+      {
+       "tone": "hopeful",
+       "text": "The internet should be where the next good idea is born, not where the state takes notes."
+      },
+      {
+       "tone": "fiery",
+       "text": "The ministers want your name because they already have your money.",
+       "sharp": true,
+       "risk": 0.65
+      }
+     ]
+    },
+    {
+     "label": "Say the real problem is foreign platforms",
+     "effects": {
+      "shift": {
+       "nation": -6
+      },
+      "awareness": 0.04,
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Our elections should not depend on algorithms written in Golba."
+      },
+      {
+       "tone": "fiery",
+       "text": "Golban billionaires decide what you see every morning. Enough!"
+      },
+      {
+       "tone": "folksy",
+       "text": "We wouldn't let a Golban company print our newspapers. Why let it run our news feed?"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fake_clip",
+   "kind": "opportunity",
+   "title": "A doctored video of the Labour leader spreads",
+   "text": "A clip of the Labour Front's leader apparently mocking pensioners has been shared two million times. It is fake: the voice was made by a computer. Half the people sharing it don't care.",
+   "choices": [
+    {
+     "label": "Condemn it, though it hurts a rival",
+     "effects": {
+      "trust": 2,
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "system": ">15"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "loyalTo": "clf"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "I disagree with the Labour leader on almost everything. That video is still a lie, and lies in an election hurt all of us."
+      },
+      {
+       "tone": "folksy",
+       "text": "If I want to beat someone, I'll use what they actually said. There's plenty of it."
+      },
+      {
+       "tone": "hopeful",
+       "text": "We can win this election without fakes. I'd like us to be the party that proves it."
+      }
+     ]
+    },
+    {
+     "label": "Share it with a wink: \"Real? Who knows\"",
+     "effects": {
+      "trust": -4,
+      "awareness": 0.06,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "I'm not saying it's real. I'm saying it's funny."
+      },
+      {
+       "tone": "fiery",
+       "text": "Real or fake, it's the most honest thing that party has said all year.",
+       "sharp": true,
+       "risk": 0.7
+      }
+     ]
+    },
+    {
+     "label": "Stay out of it",
+     "effects": {
+      "awareness": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "clip_dance",
+   "kind": "opportunity",
+   "title": "Teenagers are dancing to your speech",
+   "text": "A remix of your last speech is the most-used sound on Clipr this week. Thousands of teenagers are dancing to it. Your party is trending for the first time, mostly as a joke.",
+   "choices": [
+    {
+     "label": "Join in: film your own version",
+     "effects": {
+      "awareness": 0.08,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.3
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.15
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "I've been practising in the kitchen. My family has asked me to stop."
+      },
+      {
+       "tone": "hopeful",
+       "text": "If you're listening for the first time, stay. I'll try to say something worth dancing to."
+      },
+      {
+       "tone": "statesman",
+       "text": "I'm told it's very good. I'll leave the dancing to the professionals."
+      }
+     ]
+    },
+    {
+     "label": "Thank them, and make a serious point",
+     "effects": {
+      "awareness": 0.05,
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Thank you for the dance. Now, about why a flat in Cranebo costs ten years of wages."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Two million of you watched a dance about politics. Imagine what two million votes could do."
+      },
+      {
+       "tone": "folksy",
+       "text": "Lovely moves. Voting is easier, and you only have to do it once."
+      }
+     ]
+    },
+    {
+     "label": "Ignore it",
+     "effects": {
+      "awareness": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "golban_weekend",
+   "kind": "crisis",
+   "title": "Golba's Founders Weekend outsells Harvest Day",
+   "text": "Shops across {country} decked themselves out for Golba's Founders Weekend this year: flags, fireworks, forty percent off. The Harvest Day markets in Erland report their quietest year on record.",
+   "choices": [
+    {
+     "label": "Defend Harvest Day: buy local this year",
+     "effects": {
+      "shift": {
+       "nation": -6,
+       "society": 4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every country borrows customs. Ours deserve not to be crowded out by a sale."
+      },
+      {
+       "tone": "fiery",
+       "text": "We're giving away our own holidays for forty percent off a television!"
+      },
+      {
+       "tone": "folksy",
+       "text": "Golba can keep its fireworks. Our markets have plum cake and a brass band."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's make Harvest Day so good the Golbans start copying us."
+      },
+      {
+       "tone": "fiery",
+       "text": "If you need a Golban holiday to feel festive, Golba is a short flight.",
+       "sharp": true,
+       "risk": 0.7
+      }
+     ]
+    },
+    {
+     "label": "Say people can celebrate what they like",
+     "effects": {
+      "shift": {
+       "society": -4,
+       "nation": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Culture isn't protected by telling people where to shop."
+      },
+      {
+       "tone": "folksy",
+       "text": "My kids like both. They also like two dinners."
+      },
+      {
+       "tone": "hopeful",
+       "text": "A confident country isn't afraid of a few fireworks."
+      },
+      {
+       "tone": "statesman",
+       "text": "Harvest Day lost to a sale. Maybe ask why, before blaming the sale.",
+       "sharp": true,
+       "risk": 0.6
+      }
+     ]
+    },
+    {
+     "label": "Propose a tax on foreign holiday advertising",
+     "effects": {
+      "shift": {
+       "economy": -6,
+       "nation": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Foreign chains spend millions selling us their calendar. Let them pay for the privilege."
+      },
+      {
+       "tone": "folksy",
+       "text": "If Golba wants to throw a party here, it can pay for the hall."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "golban_words",
+   "kind": "crisis",
+   "title": "The Language Academy wants Golban words out of adverts",
+   "text": "A study finds one in three {national} teenagers mixes Golban words into almost every sentence. The Language Academy asks for a ban on Golban words in advertising and on shop signs.",
+   "choices": [
+    {
+     "label": "Back the ban",
+     "effects": {
+      "shift": {
+       "nation": -7,
+       "society": 5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Our language carried us through four hundred years. It can carry an advert."
+      },
+      {
+       "tone": "folksy",
+       "text": "My grandson told me his breakfast was \"next level\". It was toast."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's give our children a language rich enough that they don't need to borrow."
+      },
+      {
+       "tone": "folksy",
+       "text": "If you can't sell a sofa in {national}, it's probably a bad sofa.",
+       "sharp": true,
+       "risk": 0.5
+      }
+     ]
+    },
+    {
+     "label": "Say languages change, and that's fine",
+     "effects": {
+      "shift": {
+       "nation": 6,
+       "society": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every language borrows. Ours borrowed from the Trueants for centuries and survived."
+      },
+      {
+       "tone": "folksy",
+       "text": "They said the same about my generation. We turned out fine. Mostly."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Our kids speak two languages without trying. That's a gift, not a threat."
+      }
+     ]
+    },
+    {
+     "label": "Fund {national} films and music instead",
+     "effects": {
+      "shift": {
+       "welfare": -5,
+       "nation": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Bans don't make a culture. Money for our own artists does."
+      },
+      {
+       "tone": "folksy",
+       "text": "If you want kids to sing in {national}, give them something good to sing."
+      },
+      {
+       "tone": "hopeful",
+       "text": "The next song every teenager hums could be ours. Let's pay for it to be made."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "noodle_market",
+   "kind": "regional",
+   "title": "Norbanian food takes over {city}'s old market",
+   "where": {
+    "regions": [
+     "yamlin"
+    ],
+    "city": true
+   },
+   "text": "Half the stalls in {city}'s old market now sell Norbanian noodles and dumplings. The queues go round the block. The old butchers say rents have tripled and they're being pushed out.",
+   "choices": [
+    {
+     "label": "Celebrate it: the market has never been busier",
+     "effects": {
+      "shift": {
+       "nation": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "nationality": "norbanian"
+        },
+        "amt": 0.4
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A busy market is a living market. New stalls bring customers for everyone."
+      },
+      {
+       "tone": "folksy",
+       "text": "The queue was forty minutes. That's a market doing well."
+      },
+      {
+       "tone": "hopeful",
+       "text": "This is what Yamlin always was: a port where the whole world comes for lunch."
+      },
+      {
+       "tone": "folksy",
+       "text": "I had the noodles. I'm not going back to the old sausage.",
+       "sharp": true,
+       "risk": 0.55,
+       "react": [
+        {
+         "who": {
+          "age": "61+"
+         },
+         "amt": -0.1
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Protect the old traders with a rent cap",
+     "effects": {
+      "shift": {
+       "economy": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "yamlin"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Keep the market open to everyone, and affordable for the families who built it."
+      },
+      {
+       "tone": "folksy",
+       "text": "Three generations of the same butcher. That's worth a rent cap."
+      },
+      {
+       "tone": "fiery",
+       "text": "Speculators are buying the stalls and blaming the noodles!"
+      }
+     ]
+    },
+    {
+     "label": "Say the market is losing its {national} character",
+     "effects": {
+      "shift": {
+       "nation": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "nationality": "norbanian"
+        },
+        "amt": -0.6
+       },
+       {
+        "who": {
+         "region": "yamlin",
+         "class": "middle"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "Walk through {city}'s market and tell me which country you're in!"
+      },
+      {
+       "tone": "folksy",
+       "text": "I went for a sausage and came back with chopsticks."
+      },
+      {
+       "tone": "statesman",
+       "text": "A market should look like the town it serves.",
+       "sharp": true,
+       "risk": 0.55
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fuel_price",
+   "kind": "crisis",
+   "title": "Petrol passes three pezos a litre",
+   "when": {
+    "prices": ">50"
+   },
+   "trust": -2,
+   "text": "Fuel hit a record price this morning. Erland farmers have parked their tractors across the motorway, and delivery drivers say they are now working for free.",
+   "world": {
+    "prices": 3,
+    "unrest": 2
+   },
+   "government": {
+    "text": "The NUP says fuel prices are set on world markets and there is little it can do."
+   },
+   "choices": [
+    {
+     "label": "Demand a cut in fuel tax",
+     "effects": {
+      "shift": {
+       "economy": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Tax is a third of the price. Cut it for a year and let people get to work."
+      },
+      {
+       "tone": "fiery",
+       "text": "The Treasury makes a fortune every time you fill up. Give it back!"
+      },
+      {
+       "tone": "folksy",
+       "text": "Nobody drives to work for fun. Stop taxing people for having a job."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's be the country where you get to work without counting litres."
+      }
+     ]
+    },
+    {
+     "label": "Cap fuel prices by law",
+     "effects": {
+      "shift": {
+       "economy": -10
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.35
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A temporary cap, paid for by a tax on the companies making record profits from this."
+      },
+      {
+       "tone": "fiery",
+       "text": "Three pezos a litre while the oil companies count their money? Cap it!"
+      },
+      {
+       "tone": "folksy",
+       "text": "My cousin drives a delivery van. This week he paid to go to work."
+      }
+     ]
+    },
+    {
+     "label": "Say it's time for trains, buses and electric cars",
+     "effects": {
+      "shift": {
+       "society": -5,
+       "welfare": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "region": "cranbia"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": -0.35
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The cheapest litre of petrol is the one you never need. That means trains and buses that work."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Picture a Cranebo where the bus is faster than the car. That's the way out of this."
+      },
+      {
+       "tone": "statesman",
+       "text": "If you live in the city and drive to work, the price is a hint.",
+       "sharp": true,
+       "risk": 0.7,
+       "react": [
+        {
+         "who": {
+          "region": "erland"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bakeries_close",
+   "kind": "regional",
+   "title": "Village bakeries in {province} close as flour doubles",
+   "when": {
+    "prices": ">55"
+   },
+   "where": {
+    "regions": [
+     "fauraifai",
+     "erland"
+    ]
+   },
+   "text": "Four bakeries in {province} closed this month. Flour costs twice what it did last spring, and the villages now buy their bread from a van that comes twice a week.",
+   "choices": [
+    {
+     "label": "Promise cheaper flour for small bakeries",
+     "effects": {
+      "shift": {
+       "welfare": -6,
+       "economy": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A small subsidy keeps a village alive. It costs less than the van."
+      },
+      {
+       "tone": "folksy",
+       "text": "A village without a bakery is a village waiting to empty."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Fresh bread in every village in the morning. That's not much to ask of a country."
+      }
+     ]
+    },
+    {
+     "label": "Blame the grain speculators",
+     "effects": {
+      "shift": {
+       "economy": -6,
+       "system": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Publish the grain stocks, warehouse by warehouse. Speculation doesn't survive daylight."
+      },
+      {
+       "tone": "fiery",
+       "text": "Somebody is sitting on the grain while your bakery closes!"
+      },
+      {
+       "tone": "fiery",
+       "text": "Find out who's storing the wheat. I'd start with whoever just bought a boat.",
+       "sharp": true,
+       "risk": 0.65
+      }
+     ]
+    },
+    {
+     "label": "Say it's the market correcting itself",
+     "effects": {
+      "shift": {
+       "economy": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": -0.35
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Prices rise, then supply follows. Interfering now only makes the next shortage worse."
+      },
+      {
+       "tone": "folksy",
+       "text": "People buy bread at the supermarket now. The village bakery is a lovely memory.",
+       "sharp": true,
+       "risk": 0.7,
+       "react": [
+        {
+         "who": {
+          "region": "fauraifai"
+         },
+         "amt": -0.2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "golban_carmaker",
+   "kind": "opportunity",
+   "title": "A Golban carmaker wants a factory near {city}",
+   "where": {
+    "regions": [
+     "cranbia",
+     "erland"
+    ],
+    "city": true
+   },
+   "text": "Golba's second-biggest carmaker wants to build a plant employing four thousand people near {city}, if the state pays a third of the cost and guarantees no union for ten years.",
+   "choices": [
+    {
+     "label": "Welcome it on their terms",
+     "effects": {
+      "shift": {
+       "economy": 8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": "<-20"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Four thousand jobs. We can argue about the terms in ten years, with full employment."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Four thousand families with a future in {city}. I'll take that deal."
+      },
+      {
+       "tone": "folksy",
+       "text": "Ask anyone in {city} whether they'd rather have a union or a job.",
+       "sharp": true,
+       "risk": 0.6,
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "economy": "<-20"
+          }
+         },
+         "amt": -0.1
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Welcome it, but not without unions",
+     "effects": {
+      "shift": {
+       "economy": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "We want the plant, and we want it built under our laws."
+      },
+      {
+       "tone": "fiery",
+       "text": "No company buys our workers' rights. Not even a Golban one!"
+      },
+      {
+       "tone": "folksy",
+       "text": "They want our roads, our land and our money. They can have our unions too."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's show Golba that good jobs and fair rules can be built in the same place."
+      }
+     ]
+    },
+    {
+     "label": "Turn it down: no subsidies for foreign giants",
+     "effects": {
+      "shift": {
+       "nation": -6,
+       "economy": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": "<-20"
+         }
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.1
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A third of the cost from the taxpayer, for a factory Golba can move in ten years? No."
+      },
+      {
+       "tone": "fiery",
+       "text": "We are not paying a foreign billionaire to take our land!"
+      },
+      {
+       "tone": "folksy",
+       "text": "If you have to pay a guest to stay, he isn't a guest."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nephew_contract",
+   "kind": "scandal",
+   "title": "Health minister's nephew wins a hospital contract",
+   "trust": -6,
+   "text": "A company founded eight months ago by the Health Minister's nephew has won a 400-million-pezo contract to supply Cranebo's hospitals. It has six employees and an office above a dry cleaner's.",
+   "choices": [
+    {
+     "label": "Lead the charge: \"This is how they all work\"",
+     "effects": {
+      "shift": {
+       "system": -8
+      },
+      "trust": -3,
+      "awareness": 0.07,
+      "leader": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.25
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.35
+       },
+       {
+        "who": {},
+        "amt": 0.06
+       },
+       {
+        "who": {
+         "loyalTo": "nup"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every public contract above ten million should be published, with the name of every owner."
+      },
+      {
+       "tone": "fiery",
+       "text": "Six employees, four hundred million. That isn't a contract, it's a family dinner!"
+      },
+      {
+       "tone": "hopeful",
+       "text": "Imagine a ministry where your nephew has to win a contract like everyone else."
+      }
+     ]
+    },
+    {
+     "label": "Demand an independent investigation",
+     "effects": {
+      "trust": 2,
+      "awareness": 0.05,
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {},
+        "amt": 0.06
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Let the prosecutors see every invoice. If it's clean, it will survive the daylight."
+      },
+      {
+       "tone": "folksy",
+       "text": "If my nephew won a hospital contract, my mother would be the first to ask questions."
+      }
+     ]
+    },
+    {
+     "label": "Turn it into a joke",
+     "effects": {
+      "awareness": 0.06,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.2
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "I'd like to apologise to my own nephew. I never got him anything."
+      },
+      {
+       "tone": "folksy",
+       "text": "Six employees and four hundred million. Finally, a {national} company with good productivity.",
+       "sharp": true,
+       "risk": 0.55
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mps_beach",
+   "kind": "scandal",
+   "title": "MPs on a \"fact-finding trip\" to Potania's beaches",
+   "trust": -5,
+   "text": "Eleven MPs from four parties spent a week at a five-star Potanian resort, paid for by a mining company, to \"study rare-earth logistics\". The photos are mostly of the pool.",
+   "choices": [
+    {
+     "label": "Name and shame all four parties",
+     "effects": {
+      "shift": {
+       "system": -8
+      },
+      "awareness": 0.06,
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.35
+       },
+       {
+        "who": {},
+        "amt": 0.06
+       },
+       {
+        "who": {
+         "loyalTo": "nup"
+        },
+        "amt": -0.1
+       },
+       {
+        "who": {
+         "loyalTo": "clf"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "Rare-earth logistics, from a sun lounger! Every one of them should pay it back."
+      },
+      {
+       "tone": "folksy",
+       "text": "I studied logistics once. It was in a warehouse in Bayernal, in January."
+      },
+      {
+       "tone": "hopeful",
+       "text": "One day a {national} MP will go abroad and come back with a factory, not a tan."
+      },
+      {
+       "tone": "folksy",
+       "text": "Four parties, one pool. At last, cross-party cooperation.",
+       "sharp": true,
+       "risk": 0.5
+      }
+     ]
+    },
+    {
+     "label": "Propose a ban on paid trips",
+     "effects": {
+      "shift": {
+       "system": -3
+      },
+      "trust": 2,
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "No MP should accept a trip paid for by anyone who wants something from parliament."
+      },
+      {
+       "tone": "folksy",
+       "text": "If a company pays for your holiday, you're not on holiday. You're at work, for them."
+      }
+     ]
+    },
+    {
+     "label": "Say nothing: your own donors took you to dinner last month",
+     "effects": {
+      "awareness": 0,
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.05
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "journalists_tapped",
+   "kind": "scandal",
+   "title": "Interior ministry tapped nine journalists' phones",
+   "trust": -6,
+   "text": "The Herald reveals that the Interior Ministry listened to the phones of nine journalists for two years. The minister calls it \"routine security work\".",
+   "choices": [
+    {
+     "label": "Demand the minister resign",
+     "effects": {
+      "shift": {
+       "order": 8,
+       "system": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A minister who listens to journalists' phones cannot stay a minister for another day."
+      },
+      {
+       "tone": "fiery",
+       "text": "They spied on the press for two years! Who else are they listening to?"
+      },
+      {
+       "tone": "hopeful",
+       "text": "A free press is how a country corrects itself. Let's show this one still works."
+      },
+      {
+       "tone": "fiery",
+       "text": "If the minister wants to hear what people think of him, I'll tell him for free.",
+       "sharp": true,
+       "risk": 0.55
+      }
+     ]
+    },
+    {
+     "label": "Defend the security services",
+     "effects": {
+      "shift": {
+       "order": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": "<-25"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Security work is sometimes uncomfortable. Let the courts decide whether it went too far."
+      },
+      {
+       "tone": "fiery",
+       "text": "While journalists complain, the security services keep us alive!"
+      },
+      {
+       "tone": "folksy",
+       "text": "If you've nothing to hide, a tapped phone is just a very boring recording.",
+       "sharp": true,
+       "risk": 0.7
+      }
+     ]
+    },
+    {
+     "label": "Joke that you assumed yours was tapped too",
+     "effects": {
+      "trust": -2,
+      "awareness": 0.05,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "I say good morning to them every day. They're the only people who listen to me all the way through."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "grandma_degree",
+   "kind": "opportunity",
+   "title": "A 78-year-old from {city} gets her degree",
+   "where": {
+    "regions": [
+     "fauraifai",
+     "erland",
+     "yamlin"
+    ],
+    "city": true
+   },
+   "text": "Vesna Petrova, 78, a retired seamstress from {city}, graduated in history this week. She started at 72, after her husband died. The photo of her in the gown has been shared four million times.",
+   "choices": [
+    {
+     "label": "Visit her and congratulate her",
+     "effects": {
+      "awareness": 0.05,
+      "leader": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.1
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "She is what education is for. Not a certificate: a life that keeps growing."
+      },
+      {
+       "tone": "folksy",
+       "text": "She asked what I studied. I changed the subject."
+      },
+      {
+       "tone": "hopeful",
+       "text": "If Vesna can start again at seventy-two, so can this country."
+      }
+     ]
+    },
+    {
+     "label": "Promise free classes for adults of any age",
+     "effects": {
+      "shift": {
+       "welfare": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every adult should be able to go back to learning, at any age, at no cost."
+      },
+      {
+       "tone": "folksy",
+       "text": "My uncle always wanted to learn the violin. He's eighty. There's still time."
+      },
+      {
+       "tone": "hopeful",
+       "text": "No {national} should ever be too old to start again."
+      }
+     ]
+    },
+    {
+     "label": "Post a short congratulation",
+     "effects": {
+      "awareness": 0.02
+     }
+    }
+   ]
+  },
+  {
+   "id": "waiter_envelope",
+   "kind": "opportunity",
+   "title": "Waiter returns fifty thousand pezos he found",
+   "where": {
+    "regions": [
+     "cranbia",
+     "yamlin"
+    ],
+    "city": true
+   },
+   "text": "A waiter in {city} found an envelope with fifty thousand pezos under a table and spent two days tracking down its owner. The video of the handover has eleven million views. He earns 1,400 pezos a month.",
+   "choices": [
+    {
+     "label": "Praise him: this is the real {country}",
+     "effects": {
+      "awareness": 0.04,
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {},
+        "amt": 0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Honesty like his deserves more than a viral video. It deserves to be normal again."
+      },
+      {
+       "tone": "folksy",
+       "text": "Most of this country is like him. We just don't film it."
+      },
+      {
+       "tone": "hopeful",
+       "text": "That waiter is the country I believe in. Honest, and underpaid."
+      },
+      {
+       "tone": "folksy",
+       "text": "Fifty thousand pezos, and he gave it back. I know ministers who'd have kept the table.",
+       "sharp": true,
+       "risk": 0.5
+      }
+     ]
+    },
+    {
+     "label": "Point out that he earns 1,400 a month",
+     "effects": {
+      "shift": {
+       "economy": -5,
+       "welfare": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "An honest man shouldn't need a viral video to make rent."
+      },
+      {
+       "tone": "fiery",
+       "text": "He gave back fifty thousand pezos. His boss gives him fourteen hundred!"
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's build a country where people like him never have to choose between honesty and rent."
+      }
+     ]
+    },
+    {
+     "label": "Offer him a job in your party",
+     "effects": {
+      "awareness": 0.07,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "We need people like him around the table. The offer is open."
+      },
+      {
+       "tone": "folksy",
+       "text": "We need someone who gives money back. It would be a first in politics."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nurse_letter",
+   "kind": "crisis",
+   "title": "A nurse's resignation letter goes viral",
+   "trust": -2,
+   "where": {
+    "regions": [
+     "cranbia",
+     "yamlin",
+     "erland"
+    ],
+    "city": true
+   },
+   "text": "After nineteen years, a nurse in {city} posted her resignation letter: \"I can't keep apologising to patients for things I can't fix.\" Two million people have shared it.",
+   "choices": [
+    {
+     "label": "Promise a pay rise for nurses",
+     "effects": {
+      "shift": {
+       "welfare": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Nurses are leaving faster than we can train them. Pay them what the job is worth."
+      },
+      {
+       "tone": "fiery",
+       "text": "Nineteen years of night shifts, and the government sends a thank-you card!"
+      },
+      {
+       "tone": "folksy",
+       "text": "When my father was dying, a nurse held his hand at four in the morning. Pay her."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Imagine hospitals where nurses stay forty years because they want to."
+      }
+     ]
+    },
+    {
+     "label": "Say the system needs reform, not just money",
+     "effects": {
+      "shift": {
+       "welfare": 5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Her letter isn't only about pay. It's about a system that buries her in forms."
+      },
+      {
+       "tone": "folksy",
+       "text": "Ask any nurse how much of a shift is paperwork. Then cut that first."
+      }
+     ]
+    },
+    {
+     "label": "Share it, and say no more",
+     "effects": {
+      "awareness": 0.03
+     }
+    }
+   ]
+  },
+  {
+   "id": "campbell_mocks",
+   "kind": "regional",
+   "title": "Freddy Campbell calls your party \"Cranebo people\"",
+   "where": {
+    "region": "erland"
+   },
+   "text": "Freddy Campbell, who films himself on a tractor for two million viewers a week, spent nine minutes mocking your party as \"Cranebo people who've never seen a cow\". His viewers loved it.",
+   "choices": [
+    {
+     "label": "Go to his farm for an interview",
+     "effects": {
+      "awareness": 0.07,
+      "leader": [
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.1
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Mr Campbell, I've come to talk about grain prices. I'll leave the tractor to you."
+      },
+      {
+       "tone": "folksy",
+       "text": "I've seen a cow, Freddy. I've even been kicked by one."
+      },
+      {
+       "tone": "hopeful",
+       "text": "I came to listen. If Erland feels forgotten, that's on all of us in Cranebo."
+      },
+      {
+       "tone": "folksy",
+       "text": "Nice tractor, Freddy. Who paid for it, the subsidies you hate?",
+       "sharp": true,
+       "risk": 0.7,
+       "react": [
+        {
+         "who": {
+          "region": "erland"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Answer him with a farm policy",
+     "effects": {
+      "shift": {
+       "economy": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Here is what we'd do for farmers. Mr Campbell is welcome to read it on air."
+      },
+      {
+       "tone": "folksy",
+       "text": "I won't pretend I can drive a tractor. I can bring down the price of diesel."
+      }
+     ]
+    },
+    {
+     "label": "Ignore him",
+     "effects": {
+      "awareness": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "hannigan_stream",
+   "kind": "opportunity",
+   "title": "Jeremy Hannigan asks a politician onto his stream",
+   "text": "Jeremy Hannigan, who streams games to a quarter of the country's teenagers, mentioned politics for the first time: \"None of them have ever played a game. Why should I vote?\" His chat wants a party leader to come on.",
+   "choices": [
+    {
+     "label": "Go on his stream and play",
+     "effects": {
+      "awareness": 0.08,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.35
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "I'll answer every question you have, but I'm not touching the controller."
+      },
+      {
+       "tone": "folksy",
+       "text": "I'm terrible at this. Turns out, so is the government."
+      },
+      {
+       "tone": "hopeful",
+       "text": "You want a reason to vote? Ask me anything. I'll stay until your chat runs out of questions."
+      }
+     ]
+    },
+    {
+     "label": "Send a statement about young voters",
+     "effects": {
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "We take young voters seriously, and we would be glad to join a future stream."
+      }
+     ]
+    },
+    {
+     "label": "Decline: politics isn't a game",
+     "effects": {
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.05
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.1
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "jeffries_numbers",
+   "kind": "crisis",
+   "title": "Yvonne Jeffries says the inflation figures are fake",
+   "trust": -3,
+   "text": "Yvonne Jeffries, who explains the economy on a whiteboard to two million viewers, says the statistics office hides the real inflation rate. Her video has been watched more than the last budget speech.",
+   "choices": [
+    {
+     "label": "Agree: nobody trusts the official numbers",
+     "effects": {
+      "shift": {
+       "system": -8
+      },
+      "trust": -3,
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.2
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "Of course the numbers are cooked. Look at your own receipts!"
+      },
+      {
+       "tone": "folksy",
+       "text": "The ministry says prices are up six percent. My butcher says otherwise."
+      },
+      {
+       "tone": "fiery",
+       "text": "The statistics office answers to the people whose jobs depend on the number.",
+       "sharp": true,
+       "risk": 0.6
+      }
+     ]
+    },
+    {
+     "label": "Defend the statistics office, and make it independent",
+     "effects": {
+      "shift": {
+       "system": 4
+      },
+      "trust": 2,
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Our statisticians aren't liars. Make them independent, and nobody will ever need to ask."
+      },
+      {
+       "tone": "hopeful",
+       "text": "A country that trusts its own numbers can argue about everything else. Let's earn that back."
+      }
+     ]
+    },
+    {
+     "label": "Invite her to go through the numbers in public",
+     "effects": {
+      "awareness": 0.05,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.1
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Let's sit down with the data in front of everyone. Whoever is wrong apologises."
+      },
+      {
+       "tone": "folksy",
+       "text": "Bring your whiteboard, Yvonne. I'll bring my shopping receipts."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "inheritance_tax",
+   "kind": "crisis",
+   "title": "Government plans a tax on inherited homes",
+   "trust": -3,
+   "text": "To fill a hole in the budget, the NUP wants to tax inherited homes worth more than 300,000 pezos. Most families in Cranebo's suburbs would pay. Most in Fauran wouldn't.",
+   "choices": [
+    {
+     "label": "Oppose it: a family home is not a fortune",
+     "effects": {
+      "shift": {
+       "economy": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "46-60"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": "<-20"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "A family home is not a fortune. Tax the fortunes."
+      },
+      {
+       "tone": "fiery",
+       "text": "They want your parents' house to fill the hole they dug!"
+      },
+      {
+       "tone": "folksy",
+       "text": "My parents paid for that house twice: once to the bank, once in tax. Not three times."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Every family should be able to leave something to its children. That's what all the work was for."
+      }
+     ]
+    },
+    {
+     "label": "Support it, with a much higher threshold",
+     "effects": {
+      "shift": {
+       "economy": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.2
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Inherited wealth is the least earned money there is. Taxing it above a million is fair."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's be a country where you get ahead by what you do, not by who you were born to."
+      },
+      {
+       "tone": "statesman",
+       "text": "Most people who inherit a house didn't build it. They waited.",
+       "sharp": true,
+       "risk": 0.7,
+       "react": [
+        {
+         "who": {
+          "age": "46-60"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Say the hole should be filled with spending cuts",
+     "effects": {
+      "shift": {
+       "welfare": 8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.2
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The state doesn't have a revenue problem. It has a spending problem."
+      },
+      {
+       "tone": "folksy",
+       "text": "When my budget has a hole, I stop buying things. I don't empty my neighbour's attic."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "james_accounts",
+   "kind": "opportunity",
+   "title": "Leaked list: two thousand {nationals} with secret accounts in James",
+   "trust": -4,
+   "text": "A leaked list from a bank in James names two thousand {nationals} with hidden accounts. A former minister, three footballers and the country's most famous chef are on it.",
+   "choices": [
+    {
+     "label": "Demand every name be published",
+     "effects": {
+      "shift": {
+       "system": -6
+      },
+      "awareness": 0.05,
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Publish the list, prosecute what's illegal, and close the door it went through."
+      },
+      {
+       "tone": "fiery",
+       "text": "Two thousand names. Publish every one!"
+      },
+      {
+       "tone": "folksy",
+       "text": "The chef's on the list? I always thought those prices were suspicious."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Imagine a country where everyone pays their share. The rest of us would pay less."
+      },
+      {
+       "tone": "fiery",
+       "text": "Footballers, a chef and a minister: the national team of not paying.",
+       "sharp": true,
+       "risk": 0.5
+      }
+     ]
+    },
+    {
+     "label": "Offer an amnesty if they bring the money home",
+     "effects": {
+      "shift": {
+       "economy": 4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Bring the money home, pay a fair fine, and invest it here. Everyone gains."
+      },
+      {
+       "tone": "folksy",
+       "text": "Better half a loaf in {country} than a whole one in James."
+      }
+     ]
+    },
+    {
+     "label": "Stay careful: one of your donors may be on it",
+     "effects": {
+      "awareness": 0,
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.05
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "rider_tax",
+   "kind": "crisis",
+   "title": "Tax bills for forty thousand delivery riders",
+   "text": "The tax office has sent bills for three years of unpaid tax to forty thousand delivery riders. Many earned less than the minimum wage. The apps they rode for paid almost no tax at all.",
+   "choices": [
+    {
+     "label": "Make the apps pay, not the riders",
+     "effects": {
+      "shift": {
+       "economy": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": ">20"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "If a company controls your hours, it is your employer. It should pay like one."
+      },
+      {
+       "tone": "fiery",
+       "text": "Forty thousand riders get the bill. The apps get a tax break!"
+      },
+      {
+       "tone": "folksy",
+       "text": "My nephew rides for one of these apps. He earns less than the bike cost."
+      },
+      {
+       "tone": "hopeful",
+       "text": "A job on a bike can pay enough to plan a life. Other countries manage it. So can we."
+      }
+     ]
+    },
+    {
+     "label": "Say the law is the law",
+     "effects": {
+      "shift": {
+       "economy": 3,
+       "order": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Tax applies to everyone. Give them time to pay, but they have to pay."
+      },
+      {
+       "tone": "folksy",
+       "text": "I paid my taxes on a waiter's wage. Nobody made a video about me.",
+       "sharp": true,
+       "risk": 0.55
+      }
+     ]
+    },
+    {
+     "label": "Promise to write off their debts",
+     "effects": {
+      "shift": {
+       "welfare": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "folksy",
+       "text": "Wipe the slate. They were never really self-employed anyway."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let them start again with a clean slate and a real contract."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stadium_money",
+   "kind": "crisis",
+   "title": "600 million for a stadium in Cranebo",
+   "trust": -2,
+   "where": {
+    "province": "cranbia_3"
+   },
+   "text": "The government has approved 600 million pezos for a new stadium in Cranebo, ahead of hosting the Continental Cup. The new hospital wing promised to Fauran since 2019 has been postponed again.",
+   "choices": [
+    {
+     "label": "Back the stadium: the Cup will pay for it",
+     "effects": {
+      "awareness": 0.03,
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "region": "cranbia"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Tournaments bring visitors and investment. Done properly, the stadium pays for itself."
+      },
+      {
+       "tone": "folksy",
+       "text": "Half the world will be watching Cranebo. We can't play in a car park."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Picture a million visitors seeing {country} at its best. That's worth a stadium."
+      }
+     ]
+    },
+    {
+     "label": "Say the money belongs in Fauran's hospital",
+     "effects": {
+      "shift": {
+       "welfare": -4,
+       "system": -3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.4
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "cranbia"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Build the hospital first. The stadium can wait a season."
+      },
+      {
+       "tone": "fiery",
+       "text": "A stadium in the capital, and Fauran waits another year for a hospital!"
+      },
+      {
+       "tone": "folksy",
+       "text": "You can't have a baby in a stadium. Well, you can, but nobody recommends it."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let's be the country that builds the hospital first, and still wins the Cup."
+      }
+     ]
+    },
+    {
+     "label": "Call for a vote in Cranebo",
+     "effects": {
+      "shift": {
+       "system": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Six hundred million is the city's money. Let the city decide."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "anthem_silent",
+   "kind": "crisis",
+   "title": "National team striker stays silent for the anthem",
+   "text": "Striker Lukas Jørgensen, born in Alinni, kept his mouth shut during the anthem at last night's match. Nationalist papers want him dropped. His teammates posted a photo of the whole squad with their arms around him.",
+   "choices": [
+    {
+     "label": "Defend his right to stay silent",
+     "effects": {
+      "shift": {
+       "nation": 6,
+       "order": 4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "nationality": "alinnian"
+        },
+        "amt": 0.4
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "He wears the shirt and scores the goals. Singing was never in his contract."
+      },
+      {
+       "tone": "folksy",
+       "text": "I don't sing the anthem either. You've heard me sing."
+      },
+      {
+       "tone": "hopeful",
+       "text": "One team, every province, every voice, including the quiet ones. That's a country worth singing about."
+      }
+     ]
+    },
+    {
+     "label": "Say he should sing or leave the team",
+     "effects": {
+      "shift": {
+       "nation": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-20"
+         }
+        },
+        "amt": 0.35
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "nationality": "alinnian"
+        },
+        "amt": -0.6
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Playing for your country means honouring its anthem. It's a small thing to ask."
+      },
+      {
+       "tone": "fiery",
+       "text": "If you won't sing for the shirt, don't wear it!"
+      },
+      {
+       "tone": "fiery",
+       "text": "Maybe he'd sing if we played the Trueant anthem.",
+       "sharp": true,
+       "risk": 0.8,
+       "react": [
+        {
+         "who": {
+          "nationality": "alinnian"
+         },
+         "amt": -0.3
+        },
+        {
+         "who": {
+          "class": "middle"
+         },
+         "amt": -0.15
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Say politicians should stay out of football",
+     "effects": {
+      "goodwill": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.05
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Football is ninety minutes on a pitch. It doesn't need politicians."
+      },
+      {
+       "tone": "folksy",
+       "text": "I'll leave team selection to the manager. I can't even pick a sock."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wrestling_gold",
+   "kind": "opportunity",
+   "title": "A shepherd's son from {province} is world wrestling champion",
+   "trust": 2,
+   "where": {
+    "regions": [
+     "fauraifai"
+    ]
+   },
+   "text": "Ivaylo Halachev, 24, a shepherd's son from {province}, won world wrestling gold last night. He trained in a barn because his village gym closed in 2021.",
+   "choices": [
+    {
+     "label": "Promise to reopen village gyms",
+     "effects": {
+      "shift": {
+       "welfare": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.35
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "region": "erland"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every village that lost its gym lost something we can rebuild cheaply."
+      },
+      {
+       "tone": "folksy",
+       "text": "A world champion trained in a barn. Imagine what he'd have done with a roof."
+      },
+      {
+       "tone": "hopeful",
+       "text": "The next Ivaylo is in a village somewhere right now. Let's give them a gym."
+      }
+     ]
+    },
+    {
+     "label": "Meet him at the airport",
+     "effects": {
+      "awareness": 0.06,
+      "leader": [
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "{province} has given the country a champion. The country owes {province} more than applause."
+      },
+      {
+       "tone": "folksy",
+       "text": "I didn't offer to wrestle him. I'm brave, not stupid."
+      },
+      {
+       "tone": "hopeful",
+       "text": "He came home to a whole country cheering. That's how Fauran deserves to be seen."
+      }
+     ]
+    },
+    {
+     "label": "Say the government made his win harder",
+     "effects": {
+      "shift": {
+       "system": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "region": "fauraifai"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "loyalTo": "nup"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "fiery",
+       "text": "He won in spite of this government, not because of it!"
+      },
+      {
+       "tone": "folksy",
+       "text": "He trained in a barn. Meanwhile the sports minister got a new office."
+      }
+     ]
+    }
+   ]
+  },
+  {
    "id": "alinni_protests", "where": {"region": "alinni"},
    "kind": "followup",
    "deck": false,

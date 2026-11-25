@@ -2196,6 +2196,11 @@ func _shot(args: Dictionary) -> void:
 			for i in 3: await get_tree().process_frame
 			(_sheet_layer.get_child(-1) as Paper)._scroll.scroll_vertical = int(args.scroll)
 	await get_tree().process_frame
+	if args.has("queue"):   # fire these events now: --queue=norbanian_boats,smog_cranbia (with --open=1, the first one opens)
+		if args.has("open"): S.queue.clear()
+		for id in String(args.queue).split(",", false): G.queue_event(S, id)
+		render()
+		if args.has("open") and S.queue.size(): _event_sheet(S.queue[0])
 	_shot_words = args.has("words")
 	if args.has("step2"):
 		var ev: Dictionary = G.event_of(S.queue[0])
@@ -2206,9 +2211,6 @@ func _shot(args: Dictionary) -> void:
 	if args.has("result"):
 		var ev2: Dictionary = G.event_of(S.queue[0])
 		_event_result(_sheet_layer.get_child(-1), G.resolve_event(S, 0, 0 if ev2.choices[0].get("lines", []).size() else -1), ev2)
-	if args.has("queue"):   # fire these events now: --queue=norbanian_boats,smog_cranbia
-		for id in String(args.queue).split(",", false): G.queue_event(S, id)
-		render()
 	if args.has("mapmode"): _set_map_mode(String(args.mapmode))
 	if args.has("routeedit") and S.has("convoy"):   # choosing the convoy's stops, three picked
 		_route_edit = true; _route_from = 0; _route_draft = S.convoy.route.slice(0, int(args.routeedit)); _render_map()

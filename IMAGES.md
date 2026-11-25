@@ -33,12 +33,12 @@ One picture per kind of event covers every event in the game. Start here:
 
 | Have | File | Used for | Something like |
 |---|---|---|---|
-|   | `events/_crisis.jpg` | Crisis (25 events) | an empty hospital corridor, a queue, a closed factory gate |
-|   | `events/_regional.jpg` | Regional issue (5 events) | a small-town high street, a harbour, a field with pylons |
+|   | `events/_crisis.jpg` | Crisis (35 events) | an empty hospital corridor, a queue, a closed factory gate |
+|   | `events/_regional.jpg` | Regional issue (8 events) | a small-town high street, a harbour, a field with pylons |
 |   | `events/_foreign.jpg` | Foreign affairs (8 events) | a border post, flags outside a ministry, a warship on the horizon |
-|   | `events/_opportunity.jpg` | Opportunity (6 events) | a crowd at a rally, a ribbon being cut, a factory floor |
+|   | `events/_opportunity.jpg` | Opportunity (14 events) | a crowd at a rally, a ribbon being cut, a factory floor |
 |   | `events/_trap.jpg` | Tricky moment (3 events) | a television studio, a row of microphones, cameras pointed at one chair |
-|   | `events/_scandal.jpg` | Scandal (8 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
+|   | `events/_scandal.jpg` | Scandal (11 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
 |   | `events/_followup.jpg` | Consequences (16 events) | the morning after: an empty hall, newspapers on a doormat |
 |   | `events/_flagship.jpg` | Flagship promise | a campaign poster going up on a wall |
 |   | `events/_secret.jpg` | In confidence | two people talking in a doorway, a phone face down on a table |
@@ -104,6 +104,16 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/crime_wave.jpg` | Robberies surge in Cranebo |
 |   | `events/hospital_queues.jpg` | Patients die waiting in hospital corridors |
 |   | `events/cranbia_strike.jpg` | Metalworkers strike in Cranbia |
+|   | `events/social_id.jpg` | Government wants ID checks on social media |
+|   | `events/golban_weekend.jpg` | Golba's Founders Weekend outsells Harvest Day |
+|   | `events/golban_words.jpg` | The Language Academy wants Golban words out of adverts |
+|   | `events/fuel_price.jpg` | Petrol passes three pezos a litre |
+|   | `events/nurse_letter.jpg` | A nurse's resignation letter goes viral |
+|   | `events/jeffries_numbers.jpg` | Yvonne Jeffries says the inflation figures are fake |
+|   | `events/inheritance_tax.jpg` | Government plans a tax on inherited homes |
+|   | `events/rider_tax.jpg` | Tax bills for forty thousand delivery riders |
+|   | `events/stadium_money.jpg` | 600 million for a stadium in Cranebo |
+|   | `events/anthem_silent.jpg` | National team striker stays silent for the anthem |
 |   | `events/crisis_insurgency_1.jpg` | Bombing in Alinni |
 |   | `events/crisis_insurgency_2.jpg` | Curfew and mass arrests in Alinni |
 |   | `events/crisis_insurgency_3.jpg` | The Free Alinni commander is caught |
@@ -129,6 +139,9 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/smog_cranbia.jpg` | Smog chokes Cranbia |
 |   | `events/nomad_schools.jpg` | Travelling teachers for Fauran's villages |
 |   | `events/erland_drought.jpg` | Drought hits the Erland harvest |
+|   | `events/noodle_market.jpg` | Norbanian food takes over {city}'s old market |
+|   | `events/bakeries_close.jpg` | Village bakeries in {province} close as flour doubles |
+|   | `events/campbell_mocks.jpg` | Freddy Campbell calls your party "Cranebo people" |
 
 ### Foreign affairs
 
@@ -153,6 +166,14 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/tv_debate.jpg` | Invitation to the big TV debate |
 |   | `events/fauraifai_quake.jpg` | Earthquake in {province} |
 |   | `events/celebrity_endorsement.jpg` | Pop star Lira Vey wants to endorse you |
+|   | `events/fake_clip.jpg` | A doctored video of the Labour leader spreads |
+|   | `events/clip_dance.jpg` | Teenagers are dancing to your speech |
+|   | `events/golban_carmaker.jpg` | A Golban carmaker wants a factory near {city} |
+|   | `events/grandma_degree.jpg` | A 78-year-old from {city} gets her degree |
+|   | `events/waiter_envelope.jpg` | Waiter returns fifty thousand pezos he found |
+|   | `events/hannigan_stream.jpg` | Jeremy Hannigan asks a politician onto his stream |
+|   | `events/james_accounts.jpg` | Leaked list: two thousand {nationals} with secret accounts in James |
+|   | `events/wrestling_gold.jpg` | A shepherd's son from {province} is world wrestling champion |
 
 ### Tricky moment
 
@@ -169,6 +190,9 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/deputy_fight.jpg` | Your deputy in a nightclub brawl |
 |   | `events/minister_corruption.jpg` | NUP minister caught with a suitcase of cash |
 |   | `events/rival_plagiarism.jpg` | Labour leader's thesis was copied |
+|   | `events/nephew_contract.jpg` | Health minister's nephew wins a hospital contract |
+|   | `events/mps_beach.jpg` | MPs on a "fact-finding trip" to Potania's beaches |
+|   | `events/journalists_tapped.jpg` | Interior ministry tapped nine journalists' phones |
 |   | `events/leak_dillihan.jpg` | Leak: your party took money from Dillihan |
 |   | `events/leak_trueants.jpg` | Leak: Trueant money in your party accounts |
 |   | `events/leak_potania.jpg` | Leak: Potanian mining money behind your campaign |
