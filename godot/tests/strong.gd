@@ -3,7 +3,7 @@ extends SceneTree
 ## to the province where it matters most, every action spent speaking for the manifesto,
 ## a sensible budget. Usage: -- <style> <seed> [flags]
 ##   style: populist | centrist | left | provocative (the populist manifesto, every line
-##   provocative) | switch (provocative for two years, then fiery) | timed (fiery, but
+##   provocative) | hopeful (a hopeful, mildly anti-system progressive) | switch (provocative for two years, then fiery) | timed (fiery, but
 ##   provocative in a hot debate when earlier outrage has worn off)
 ## flags (comma-separated) switch parts off: notrips,nospeak,nobudget,nomoney,nooffices,noclaim;
 ## image: most of the budget on TV and social media (recognition and the leader's image)
@@ -13,6 +13,7 @@ const STYLES := {
 	"left": {"m": {"nation": 3, "system": 1, "society": 1, "order": 3, "economy": 0, "welfare": 0, "foreign": 3}, "tone": "folksy"},
 	"provocative": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative"},
 	"timed": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "timed": true},
+	"hopeful": {"m": {"nation": 2, "system": 1, "society": 1, "order": 2, "economy": 1, "welfare": 1, "foreign": 2}, "tone": "hopeful"},
 	"switch": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative", "then": "fiery", "at": 96},
 }
 var G

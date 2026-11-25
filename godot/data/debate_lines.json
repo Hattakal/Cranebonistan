@@ -1,5 +1,5 @@
 {
- "_note": "What the leader can say in a debate. TOPIC_LINES are for the topics in debates.json, by side (L = the axis's left side, R = its right). AXIS_LINES cover every other debate (from events, issues, proposals). Tones: statesman, fiery, folksy, provocative. 'risk' overrides the tone's usual chance of a viral clip or a gaffe; 'react' adds groups that love or hate this particular line.",
+ "_note": "What the leader can say in a debate. TOPIC_LINES are for the topics in debates.json, by side (L = the axis's left side, R = its right). AXIS_LINES cover every other debate (from events, issues, proposals). Styles: statesman (shown as Measured), fiery, folksy, hopeful; 'sharp': true makes a line the provocative edge of its style. Hopeful is left out where it would sound wrong. 'risk' overrides the usual chance of a viral clip or a gaffe; 'react' adds groups that love or hate this particular line.",
  "TOPIC_LINES": {
   "cost_of_living": {
    "L": [
@@ -16,7 +16,8 @@
      "text": "My neighbour counts coins at the bakery now. She never used to count coins."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Somebody is getting rich off your empty fridge. I'll give you their names.",
      "risk": 0.7,
      "react": [
@@ -27,6 +28,10 @@
        "amt": -0.12
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Imagine a week when the shopping costs what it cost the week before. That isn't a miracle. It's a decision."
     }
    ],
    "R": [
@@ -43,9 +48,14 @@
      "text": "You don't fix a leaky roof by painting the ceiling. Stop the money printing."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "If you want queues for bread, ask the people who want price controls. They've done it before.",
      "risk": 0.65
+    },
+    {
+     "tone": "hopeful",
+     "text": "Picture a high street with three bakeries fighting over your custom. That's how prices fall, and it's closer than you think."
     }
    ]
   },
@@ -64,7 +74,8 @@
      "text": "My cousin's boy went to Golba to wash dishes. He has a degree in engineering."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "The owners moved your job abroad and bought a yacht with the savings. Remember that on election day.",
      "risk": 0.7,
      "react": [
@@ -75,6 +86,10 @@
        "amt": -0.15
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "The next great factory in {country} doesn't exist yet. Let's build it in a town everybody has written off."
     }
    ],
    "R": [
@@ -91,9 +106,14 @@
      "text": "Ask any shopkeeper in Bayernal what stops him hiring. It's the forms, not the customers."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Some people would rather have a ministry of jobs than actual jobs.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "Somewhere in Bayernal a girl has an idea for a company. Let's make it easy enough that she starts it here."
     }
    ]
   },
@@ -112,7 +132,8 @@
      "text": "When the house is full, you don't keep inviting guests. That's not hate, that's arithmetic."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "They come for our benefits and stay for our silence. Not anymore.",
      "risk": 0.8,
      "react": [
@@ -129,6 +150,10 @@
        "amt": -0.06
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "When the numbers are ones our towns can manage, the welcome can be a real one again."
     }
    ],
    "R": [
@@ -145,7 +170,8 @@
      "text": "Who do you think picked the Erland harvest last year? It wasn't the people complaining."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Funny how the loudest people about immigration have never met an immigrant.",
      "risk": 0.6,
      "react": [
@@ -156,6 +182,10 @@
        "amt": -0.1
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "In twenty years the children arriving today will be running our hospitals. Let's be the country they're grateful to."
     }
    ]
   },
@@ -174,7 +204,8 @@
      "text": "You lock your door at night. A country should too."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "The government is so afraid of a fight it would hand over the keys to the next province.",
      "risk": 0.65
     }
@@ -193,9 +224,14 @@
      "text": "My father served on that border. He said the best day was the one nothing happened."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "The loudest war hawks in Cranebo have never held anything heavier than a microphone.",
      "risk": 0.6
+    },
+    {
+     "tone": "hopeful",
+     "text": "One day that border will be a place people cross for lunch. Every quiet year brings that day closer."
     }
    ]
   },
@@ -214,7 +250,8 @@
      "text": "Nobody marches in the cold for fun. Ask them what they want before you call the police."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "If the palace is scared of the street, maybe the palace should be.",
      "risk": 0.75,
      "react": [
@@ -231,6 +268,10 @@
        "amt": -0.1
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Those people in the square aren't the end of something. They're the start of a better country, if someone listens."
     }
    ],
    "R": [
@@ -247,7 +288,8 @@
      "text": "You can be angry and still go home for dinner. Most of {country} does."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "A few hundred people with megaphones are not 'the people'.",
      "risk": 0.55,
      "react": [
@@ -258,6 +300,10 @@
        "amt": -0.1
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Every one of those grievances can be fixed, and fixed for good, without a single window broken."
     }
    ]
   },
@@ -276,7 +322,8 @@
      "text": "Being {national} is a Sunday lunch, a song, a flag on the balcony. It isn't complicated."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "If the flag offends you, there are other flags.",
      "risk": 0.75,
      "react": [
@@ -287,12 +334,16 @@
        "amt": -0.3
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Let's give our children a {country} so good they'll want to tell its story themselves."
     }
    ],
    "R": [
     {
      "tone": "statesman",
-     "text": "A {national} is anyone who builds this country, whatever language they pray or dream in."
+     "text": "A {national} is anyone who builds this country, whatever language they speak or dream in."
     },
     {
      "tone": "fiery",
@@ -311,7 +362,8 @@
      ]
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "The people waving the most flags are usually hiding the emptiest ideas.",
      "risk": 0.6,
      "react": [
@@ -322,6 +374,10 @@
        "amt": -0.12
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Picture a {country} where nobody asks where your grandmother was born. We're nearer to it than the shouting suggests."
     }
    ]
   },
@@ -340,7 +396,8 @@
      "text": "Everyone chips in for the village well. Some people just have bigger buckets."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Let's see how patriotic the tycoons are when the bill arrives.",
      "risk": 0.65,
      "react": [
@@ -351,6 +408,10 @@
        "amt": -0.15
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Imagine a school in every village with a roof that doesn't leak. A fair tax pays for that, and nothing else."
     }
    ],
    "R": [
@@ -367,9 +428,14 @@
      "text": "My family can't spend more than it earns. Why should the government?"
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Some people think money grows in the Treasury basement.",
      "risk": 0.5
+    },
+    {
+     "tone": "hopeful",
+     "text": "Picture handing your children a country that owes nothing to anyone. No government has ever given them that."
     }
    ]
   },
@@ -388,7 +454,8 @@
      "text": "My sister raised two boys alone. Nobody would dare call that less of a family."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "The 'family values' crowd should spend more time with their own families.",
      "risk": 0.65,
      "react": [
@@ -399,6 +466,10 @@
        "amt": -0.12
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "A country where every family gets the same welcome. Most of us already live in it; the law can catch up."
     }
    ],
    "R": [
@@ -415,7 +486,8 @@
      "text": "Sunday at my mother's table, three generations. That's the {country} I want to keep."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "A country that stops having children has decided to disappear.",
      "risk": 0.6,
      "react": [
@@ -426,6 +498,10 @@
        "amt": -0.12
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Let's make {country} a place where young couples feel they can afford a family again."
     }
    ]
   },
@@ -444,7 +520,8 @@
      "text": "You don't buy a fire extinguisher after the fire."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "The doves will be the first to ask for the army when the shooting starts.",
      "risk": 0.55
     }
@@ -463,9 +540,14 @@
      "text": "A tank costs as much as a school. I know which one my village needs."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Somebody in the ministry is getting a nice commission on every shell.",
      "risk": 0.7
+    },
+    {
+     "tone": "hopeful",
+     "text": "Every pezo we don't spend on shells can build something our grandchildren will thank us for."
     }
    ]
   },
@@ -484,9 +566,14 @@
      "text": "My aunt waited eleven months for a hip. She walked to the appointment on the other one."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Let the ministers wait in line with the rest of us. Watch how fast it gets fixed.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "A hospital where you're seen the same day. Other countries manage it. No law of nature says we can't."
     }
    ],
    "R": [
@@ -503,7 +590,8 @@
      "text": "If the bucket leaks, you don't pour in more water. You fix the bucket."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Half the hospital budget goes to people who have never touched a patient.",
      "risk": 0.6,
      "react": [
@@ -514,6 +602,10 @@
        "amt": -0.06
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Imagine the same budget, half the paperwork, and nurses who spend their day with patients. That's the reform."
     }
    ]
   },
@@ -532,7 +624,8 @@
      "text": "My father worked thirty years at the same mill. They gave him a watch. It stopped in a week."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "If the bosses say they can't afford a raise, ask to see their car.",
      "risk": 0.6,
      "react": [
@@ -543,6 +636,10 @@
        "amt": -0.12
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "A country where a day's work pays for a week's life. That used to be normal. It can be again."
     }
    ],
    "R": [
@@ -559,9 +656,14 @@
      "text": "Nobody in Teksmisa ever got a raise from a law. They got it from a busy season."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "The minimum wage is the best gift we could give to Dillihan factories.",
      "risk": 0.5
+    },
+    {
+     "tone": "hopeful",
+     "text": "Picture a job market so busy that employers have to compete for you. That's the raise that lasts."
     }
    ]
   },
@@ -580,7 +682,8 @@
      "text": "Before you hire the neighbour's son, you check that your own son has a job."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "This visa scheme is a welcome mat for people who will never call this home.",
      "risk": 0.7,
      "react": [
@@ -591,6 +694,10 @@
        "amt": -0.25
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Train our own young people for these jobs, and give them a reason to stay. They're the future we keep exporting."
     }
    ],
    "R": [
@@ -607,9 +714,14 @@
      "text": "The best baker in Yamlin came here with one suitcase. Ask anyone in line for his bread."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "If you're afraid of a nurse from Norbanistan, you've never needed a nurse.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "The next doctor in your village might arrive on a visa this year. Let's make sure she wants to stay."
     }
    ]
   },
@@ -628,8 +740,19 @@
      "text": "When the milk goes sour, you don't pick out the bad drops. You pour it all away."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "I'd tell you which ministers are clean, but I don't want to waste your time with an empty list.",
+     "risk": 0.6
+    },
+    {
+     "tone": "hopeful",
+     "text": "Picture a government you never have to think about, because it simply works. We can have that. Not with these people."
+    },
+    {
+     "tone": "hopeful",
+     "sharp": true,
+     "text": "Picture a cabinet with nobody in it you've heard of. That's the point.",
      "risk": 0.6
     }
    ],
@@ -647,7 +770,8 @@
      "text": "One bad apple doesn't mean you cut down the orchard."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Every revolutionary in Cranebo already has his eye on a ministry car.",
      "risk": 0.55,
      "react": [
@@ -660,6 +784,10 @@
        "amt": -0.1
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Our courts can be the cleanest in the region within ten years. It starts with giving them the means."
     }
    ]
   },
@@ -678,9 +806,14 @@
      "text": "My mother used to leave her door open in Cranebo. Now she has three locks."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Some people care more about the rights of a thief than the safety of his victim.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "A town where your daughter can walk home at midnight. That's what police are for, and we'll get there."
     }
    ],
    "R": [
@@ -697,9 +830,14 @@
      "text": "The best policeman my street ever had was a youth club."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "If more police made us safe, the capital would be the safest place on earth.",
      "risk": 0.5
+    },
+    {
+     "tone": "hopeful",
+     "text": "Give every teenager somewhere to be on a Friday night, and watch what happens to the crime figures."
     }
    ]
   },
@@ -718,7 +856,8 @@
      "text": "My nephew is a policeman. He gets up at five and he never knows if he'll come home."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "If you don't want trouble with the police, don't go looking for it.",
      "risk": 0.75,
      "react": [
@@ -751,9 +890,14 @@
      "text": "If my son did that to someone, I'd march him to the station myself."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Those officers swore an oath to protect the public. Someone should remind them who the public is.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "We can have police that people trust again. It starts with this one case, done right."
     }
    ]
   },
@@ -772,7 +916,8 @@
      "text": "Shout all you like, but let the ambulance through."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Professional protesters will just have to find a real job.",
      "risk": 0.65,
      "react": [
@@ -799,9 +944,14 @@
      "text": "My grandfather marched in Cranebo for the vote. He didn't ask anyone's permission."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "The government fears a crowd more than it fears a crisis. Ask yourself why.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "A free country is a noisy one. Let them march: that's what a free people sounds like."
     }
    ]
   }
@@ -822,9 +972,14 @@
      "text": "When the market decides, it's never the little guy who wins."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "The free market is very free for the people who own it.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "A country where nobody's rent depends on a share price in Golba. We can build that."
     }
    ],
    "R": [
@@ -841,9 +996,14 @@
      "text": "No ministry ever ran a better bakery than a baker."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Central planning: the efficiency of the post office, in every corner of your life.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "Clear the way and {nationals} will build things nobody has imagined yet. They always have."
     }
    ]
   },
@@ -862,9 +1022,14 @@
      "text": "My father paid in for forty years. He deserves to get something back."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Austerity is when the rich tell the poor to be patient.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "Nobody in {country} should be one illness away from ruin. Let's be the generation that ends that."
     }
    ],
    "R": [
@@ -881,7 +1046,8 @@
      "text": "Living within your means isn't cruel. It's what every household does."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Some people treat the welfare office like a career.",
      "risk": 0.75,
      "react": [
@@ -892,6 +1058,10 @@
        "amt": -0.15
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "A state small enough to understand and strong enough to keep its word. Fewer promises, all of them kept."
     }
    ]
   },
@@ -910,7 +1080,8 @@
      "text": "You look after your own family first. A nation is a bigger family."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Not everyone who holds a {national} passport has a {national} heart.",
      "risk": 0.8,
      "react": [
@@ -927,6 +1098,10 @@
        "amt": -0.2
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Let's make {country} a place our children never want to leave."
     }
    ],
    "R": [
@@ -943,7 +1118,8 @@
      "text": "Yamlin has had five languages in every market for three hundred years. We're still here."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Nationalism is what people reach for when they run out of ideas.",
      "risk": 0.6,
      "react": [
@@ -954,6 +1130,16 @@
        "amt": -0.12
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Our best years will come from all of us together: every language, every province, one country."
+    },
+    {
+     "tone": "hopeful",
+     "sharp": true,
+     "text": "The future of this country already speaks three languages in the playground. Some people just haven't noticed.",
+     "risk": 0.6
     }
    ]
   },
@@ -972,7 +1158,8 @@
      "text": "Times change. My grandmother couldn't open a bank account. My daughter runs a bank."
     },
     {
-     "tone": "folksy", "sharp": true,
+     "tone": "folksy",
+     "sharp": true,
      "text": "Tradition is just peer pressure from dead people.",
      "risk": 0.75,
      "react": [
@@ -989,6 +1176,16 @@
        "amt": -0.1
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "In ten years our children will wonder what we were arguing about. Let's get there sooner."
+    },
+    {
+     "tone": "hopeful",
+     "sharp": true,
+     "text": "The future is coming either way. Some people would just rather meet it with their eyes shut.",
+     "risk": 0.6
     }
    ],
    "R": [
@@ -1005,7 +1202,8 @@
      "text": "Some things are old because they work."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Cranebo can keep its fashions. The rest of the country has values.",
      "risk": 0.6,
      "react": [
@@ -1016,6 +1214,10 @@
        "amt": -0.12
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "What our grandparents gave us can carry us into a better century, not hold us back."
     }
    ]
   },
@@ -1034,7 +1236,8 @@
      "text": "Rules are what let you sleep at night."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Those who have nothing to hide have nothing to fear.",
      "risk": 0.6,
      "react": [
@@ -1045,6 +1248,10 @@
        "amt": -0.1
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Picture a {country} so safe you forget to lock the car. Order is what lets people make plans."
     }
    ],
    "R": [
@@ -1061,9 +1268,14 @@
      "text": "I don't need a camera on every corner to know my own street."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "The people who want an iron fist always imagine it on someone else's neck.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "Free people build better countries. Trust them and see what they make."
     }
    ]
   },
@@ -1082,7 +1294,8 @@
      "text": "The bully in the schoolyard only stops when someone stands up to him."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Our neighbours respect one thing, and it isn't a diplomatic note.",
      "risk": 0.65,
      "react": [
@@ -1109,9 +1322,14 @@
      "text": "Good fences, good neighbours, and a cup of coffee over the fence."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Every war in our history was started by men who never fought in it.",
      "risk": 0.55
+    },
+    {
+     "tone": "hopeful",
+     "text": "Our grandchildren could cross every border in this region without showing a passport. Talks are how that starts."
     }
    ]
   },
@@ -1130,7 +1348,8 @@
      "text": "You can't fix a rotten table by changing the tablecloth."
     },
     {
-     "tone": "fiery", "sharp": true,
+     "tone": "fiery",
+     "sharp": true,
      "text": "Parliament is a club, and you're not a member.",
      "risk": 0.6,
      "react": [
@@ -1141,6 +1360,16 @@
        "amt": -0.08
       }
      ]
+    },
+    {
+     "tone": "hopeful",
+     "text": "Imagine a parliament that looks like the bus you took this morning. That's the country we're building."
+    },
+    {
+     "tone": "hopeful",
+     "sharp": true,
+     "text": "They told you this country's best days are behind it. They meant theirs.",
+     "risk": 0.6
     }
    ],
    "R": [
@@ -1157,7 +1386,8 @@
      "text": "My grandfather built his house slowly, one stone at a time. It's still standing."
     },
     {
-     "tone": "statesman", "sharp": true,
+     "tone": "statesman",
+     "sharp": true,
      "text": "Every revolution ends with new people in the same old cars.",
      "risk": 0.55,
      "react": [
@@ -1189,7 +1419,8 @@
     "text": "If you want a neighbour to stay, you don't lock the door. You ask him to dinner."
    },
    {
-    "tone": "statesman", "sharp": true,
+    "tone": "statesman",
+    "sharp": true,
     "text": "If our union is so strong, why is the government so afraid of a vote?",
     "risk": 0.7,
     "react": [
@@ -1200,6 +1431,10 @@
       "amt": -0.12
      }
     ]
+   },
+   {
+    "tone": "hopeful",
+    "text": "A vote, freely held, and whatever the answer, Alinni and {country} start again as equals."
    }
   ],
   "deport_campaign": [
@@ -1216,7 +1451,8 @@
     "text": "You don't get to move into a house just because the window was open."
    },
    {
-    "tone": "fiery", "sharp": true,
+    "tone": "fiery",
+    "sharp": true,
     "text": "Pack your bags. The party's over.",
     "risk": 0.8,
     "react": [
@@ -1249,7 +1485,8 @@
     "text": "When the harvest is good, the big farm helps fix the village road. Always has."
    },
    {
-    "tone": "fiery", "sharp": true,
+    "tone": "fiery",
+    "sharp": true,
     "text": "Let's find out how much the tycoons really love this country.",
     "risk": 0.65,
     "react": [
@@ -1260,6 +1497,10 @@
       "amt": -0.18
      }
     ]
+   },
+   {
+    "tone": "hopeful",
+    "text": "One levy, and every child in {country} starts school in a building fit for them."
    }
   ],
   "bigger_army": [
@@ -1276,7 +1517,8 @@
     "text": "A strong fence makes for a quiet neighbour."
    },
    {
-    "tone": "fiery", "sharp": true,
+    "tone": "fiery",
+    "sharp": true,
     "text": "Our generals are polishing medals while our neighbours are buying tanks.",
     "risk": 0.6
    }
@@ -1295,7 +1537,8 @@
     "text": "Every feud in my village ended over coffee, never over a fence."
    },
    {
-    "tone": "statesman", "sharp": true,
+    "tone": "statesman",
+    "sharp": true,
     "text": "The government only talks to the Trueants through the barrel of a rifle.",
     "risk": 0.65,
     "react": [
@@ -1308,6 +1551,10 @@
       "amt": -0.12
      }
     ]
+   },
+   {
+    "tone": "hopeful",
+    "text": "One day the Trueants and we will laugh about this border over a drink. Somebody has to make the first call."
    }
   ],
   "corruption_list": [
@@ -1324,7 +1571,8 @@
     "text": "Everybody in Cranebo knows who's on the take. I've just written it down."
    },
    {
-    "tone": "fiery", "sharp": true,
+    "tone": "fiery",
+    "sharp": true,
     "text": "Thirty names, and I left out the ones you'll see on television tonight.",
     "risk": 0.75
    }
@@ -1343,9 +1591,14 @@
     "text": "My mother worked for forty years and now she counts tea bags."
    },
    {
-    "tone": "fiery", "sharp": true,
+    "tone": "fiery",
+    "sharp": true,
     "text": "The government found money for bankers. It can find it for your grandmother.",
     "risk": 0.55
+   },
+   {
+    "tone": "hopeful",
+    "text": "A country where growing old is something to look forward to. We can afford that, if we decide to."
    }
   ],
   "james_pact": [
@@ -1362,7 +1615,8 @@
     "text": "You stand by the small kid in the schoolyard. That's how you were raised."
    },
    {
-    "tone": "fiery", "sharp": true,
+    "tone": "fiery",
+    "sharp": true,
     "text": "Bordon wants James's mines. Let them come and ask us.",
     "risk": 0.7,
     "react": [
@@ -1391,7 +1645,8 @@
     "text": "Three generations around one table on Sunday. That's what we're protecting."
    },
    {
-    "tone": "statesman", "sharp": true,
+    "tone": "statesman",
+    "sharp": true,
     "text": "Some of our schools teach everything except how to be a good {national}.",
     "risk": 0.65,
     "react": [
@@ -1402,6 +1657,10 @@
       "amt": -0.12
      }
     ]
+   },
+   {
+    "tone": "hopeful",
+    "text": "Let's raise children who know where they come from and believe in where they're going."
    }
   ],
   "herder_titles": [
@@ -1418,9 +1677,14 @@
     "text": "Your grandfather's grandfather worked that land. You shouldn't need a lawyer to prove it."
    },
    {
-    "tone": "statesman", "sharp": true,
+    "tone": "statesman",
+    "sharp": true,
     "text": "Dillihan's surveyors know Fauran's land better than our own ministry does.",
     "risk": 0.65
+   },
+   {
+    "tone": "hopeful",
+    "text": "Give every Fauran family the deed to its land, and watch what they build on it."
    }
   ],
   "greater_cranebonistan": [
@@ -1437,7 +1701,8 @@
     "text": "My grandmother still calls those villages ours. She's not wrong."
    },
    {
-    "tone": "statesman", "sharp": true,
+    "tone": "statesman",
+    "sharp": true,
     "text": "Borders are drawn by the strong. We should remember how to be strong.",
     "risk": 0.8,
     "react": [
@@ -1472,7 +1737,8 @@
     "text": "My father's shoes were made in Bayernal and lasted twenty years."
    },
    {
-    "tone": "fiery", "sharp": true,
+    "tone": "fiery",
+    "sharp": true,
     "text": "If you love Golba so much, go and live there.",
     "risk": 0.7,
     "react": [
@@ -1489,6 +1755,10 @@
       "amt": -0.08
      }
     ]
+   },
+   {
+    "tone": "hopeful",
+    "text": "Picture shops full of things made in {country}, and made well. We used to be that country. We can be again."
    }
   ]
  }
