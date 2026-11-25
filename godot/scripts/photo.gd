@@ -51,7 +51,7 @@ func _init(tex: Texture2D = null, screen := false, circle := false) -> void:
 	_mat = Look.material("photo", {"shadow": Look.mix(Look.N950, Look.INK, 0.5), "light": Look.PAPER})
 	material = _mat
 	if on_screen:
-		_mat.set_shader_parameter("light", Color("e6ecf5"))
+		_mat.set_shader_parameter("light", Look.SCREEN_LIGHT)
 		_mat.set_shader_parameter("shadow", Look.N950)
 		_mat.set_shader_parameter("dots", 0.0)
 		_mat.set_shader_parameter("lines", 0.22)

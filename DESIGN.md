@@ -443,6 +443,8 @@ Cranbovia sits on the edge of Western European democracy: its politics are close
 
 ### Technology
 
+*Code review (November 2026):* the voters' scores now work out what doesn't depend on the group once per month (each issue's weight by region, each party's fixed terms) instead of for every group and party, the same sums in the same order, so seeded games give identical results; summarising the electorate went from about 105 to 85 ms. The map only works out each province's profile for the modes that use it. Every colour outside `look.gd` moved into the palettes (the TV glow and a picture's light on a screen are new palette entries). Carlos's and Margaret's notes on the desk moved from code into `carlos.json` and `margaret.json` (DESK). One shared `and_list` replaced two copies. `tests/perf.gd` times the rules.
+
 **Godot 4.7**. The rules have no screen code, so whole games can be played and tested headless; they are a chain of files in `godot/scripts/rules/`, one per system, ending in `godot/scripts/sim.gd` (the autoload `Game`). All content is JSON in `godot/data/`, loaded through the mod loader (*Moddable*). `tools/check.sh` boots the game and runs every test game. Hosted on GitHub.
 
 *History:* the first versions were a browser game in HTML, CSS and JavaScript. It was meant as a prototype, never the release format; the rules were kept separate from the screens so they could move to an engine. In November 2026 the game moved to Godot, the rules were ported line for line (and checked to give identical results), and the Godot version then took its own direction (the national debate, seven axes). The browser version was retired and is kept in the repository history on the branch `browser-version`.

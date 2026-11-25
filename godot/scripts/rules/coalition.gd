@@ -181,7 +181,7 @@ func _compromise(s: Dictionary, in_play: Array, seats: Dictionary, alive: Array,
 		var cab: Array = _share_cabinet(s, ent, _pm_holder(seats, f, ent))
 		var names: Array = members.map(func(m): return "you" if party_of(s, m).isPlayer else _short(s, m))
 		log.append({"t": "compromise", "party": f, "members": members,
-			"why": coalition_text("compromise", {"parties": ", ".join(names.slice(0, -1)) + " and " + String(names[-1])})})
+			"why": coalition_text("compromise", {"parties": and_list(names)})})
 		return {"members": members, "cabinet": cab, "formateur": f, "shares": ent, "compromise": true}
 	return null
 

@@ -711,7 +711,8 @@ func _render_map() -> void:
 	_map.party_color = Color(G.player_party(S).color)
 	for f in G.FOREIGN:
 		_map.hot[f.id] = S.countries.get(f.id, {}).get("hot", false)
-	_profiles = G.district_profiles(S)
+	# what each province is like: only the modes that colour by it (and their tooltips) need it
+	_profiles = G.district_profiles(S) if _map_mode in ["known", "issues", "fed", "distress"] else {}
 	_convoy_btn.visible = S.has("convoy") and not S.result
 	_route_bar.visible = _route_edit
 	if _route_edit:
@@ -1783,7 +1784,7 @@ func _route_finish(keep: bool) -> void:
 class TourPhoto extends Control:
 	var kind := "good"
 	var region := ""
-	var party_color := Color("b03a2e")
+	var party_color := Look.RED
 	var _tex: Texture2D = null
 	func _ready() -> void:
 		_tex = Photo.find(["tours/%s_%s" % [region, kind], "tours/" + kind])
@@ -1795,7 +1796,7 @@ class TourPhoto extends Control:
 		var r = Rect2(Vector2.ZERO, size)
 		if _tex: return
 		var inner = r
-		var ink = Color("121a28")
+		var ink = Look.N900
 		draw_rect(inner, Look.mix(ink, Look.PAPER, 0.5))
 		# back wall, banner and stage
 		draw_rect(Rect2(inner.position, Vector2(inner.size.x, inner.size.y * 0.55)), Look.mix(ink, Look.PAPER, 0.68))
@@ -1952,11 +1953,6 @@ class SeatBar extends Control:
 			x += w
 		draw_rect(Rect2(size.x / 2 - 1.5, -5, 3, size.y + 10), Color.WHITE)   # the majority line
 
-## "a, b and c"
-func _and_list(xs: Array) -> String:
-	if xs.size() <= 1: return "".join(xs)
-	return ", ".join(xs.slice(0, -1)) + " and " + String(xs[-1])
-
 ## The ending: an opinion column on the campaign (the columnist: coalition.json COLUMN).
 func _profile_sheet() -> void:
 	var pr: Dictionary = G.build_profile(S)
@@ -1985,7 +1981,7 @@ func _profile_sheet() -> void:
 			if c.ministry == "pm": pm = c.party
 		var names: Array = gov.members.map(func(id): return "you" if id == "player" else String(G.party_of(S, id).name))
 		var pmp = G.party_of(S, pm)
-		para += " The new government is %s, with %s as Prime Minister." % [("%s alone" % names[0]) if names.size() == 1 else "a coalition of " + _and_list(names), "you" if pm == "player" else ("%s of the %s" % [pmp.leader, pmp.short]) if pmp else "nobody yet"]
+		para += " The new government is %s, with %s as Prime Minister." % [("%s alone" % names[0]) if names.size() == 1 else "a coalition of " + Game.and_list(names), "you" if pm == "player" else ("%s of the %s" % [pmp.leader, pmp.short]) if pmp else "nobody yet"]
 	elif r.has("coalition"): para += " Nobody could put a government together."
 	p.text(para, 17)
 	p.text("Four years ago almost nobody had heard of %s. This column's verdict: %s. %s" % [you.leader, pr.archetype.title, pr.archetype.line], 17)
@@ -2022,7 +2018,7 @@ func _said_pair(first: Dictionary, second: Dictionary, side_of) -> Control:
 	for i in 2:
 		var q: Dictionary = cols[i][0]
 		var box = PanelContainer.new()
-		var sb = Look.box(Color(0.7, 0.15, 0.12, 0.06) if i == 1 else Color(0, 0, 0, 0.04), 0, Look.RED if i == 1 else Look.MUTED, 0, 0, 12)
+		var sb = Look.box(Color(Look.RED, 0.06) if i == 1 else Color(0, 0, 0, 0.04), 0, Look.RED if i == 1 else Look.MUTED, 0, 0, 12)
 		sb.border_width_left = 4
 		box.add_theme_stylebox_override("panel", sb)
 		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL

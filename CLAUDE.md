@@ -53,7 +53,8 @@ godot --headless --path godot --import                     # needed after adding
 godot --headless --path godot -s tests/scandals.gd -- deny 4   # a game that takes dirty money and answers every scandal one way (deny/own/attack/subject/scapegoat)
 godot --headless --path godot -s tests/rivals.gd            # what the rival parties did over a whole game
 godot --headless --path godot -s tests/coalition.gd         # the coalition talks on made-up results, with extra parties
-godot --headless --path godot -s tests/strong.gd -- populist 2   # a competent player (populist | centrist | left), to measure difficulty; add e.g. nospeak,notrips or trace
+godot --headless --path godot -s tests/strong.gd -- populist 2   # a competent player (populist | centrist | left | provocative | switch | timed), to measure difficulty; add e.g. nospeak,notrips,image or trace
+godot --headless --path godot -s tests/perf.gd               # how long the rules take (a week is about 100 ms; most of it is the voters and the media)
 ```
 
 Screenshots of the real game (use these to check any visual change; look at the image before claiming it works):

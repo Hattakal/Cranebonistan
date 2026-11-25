@@ -129,5 +129,16 @@
    {"id": "tip_9", "text": "The Country file lists every problem we could talk about. Problems are opportunities, boss."},
    {"id": "tip_10", "text": "Your causes are your brand. Two is the limit; pick the ones with the most angry voters."}
   ]
+ },
+ "DESK": {
+  "_note": "What Carlos says on the desk card, the first that fits wins. Written in, not voiced. {n}: actions left, {s}: 's' when more than one, {topic}: the hottest debate, {money}: funds in millions, {when}: when the next budget is.",
+  "over": "Whatever happens next, it was an honour, boss. Really.",
+  "first_trip": "First things first, boss: pick a district on the map and go and shake some hands. Once a month, and it costs us nothing.",
+  "hot": "Everyone's talking about {topic}. {n} action{s} left. Whatever you say about it, I'm sure it'll be the right thing.",
+  "agenda": "{n} action{s} left this month, and nobody has started this month's argument yet. Could be you, boss.",
+  "campaign": "{n} action{s} left this week. The convoy rolls on either way, boss.",
+  "actions": "{n} action{s} left this month. Whenever you're ready.",
+  "money": "We're sitting on ₱{money}M. Next budget in {when}. I've kept the donors happy.",
+  "quiet": "Quiet week. I've moved the bad news to Monday."
  }
 }

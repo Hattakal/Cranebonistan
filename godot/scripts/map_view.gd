@@ -412,7 +412,7 @@ func _light(c: Vector2, r: float) -> void:
 	draw_circle(c, r * 3.0, Color(Look.LAMP, 0.09))
 	draw_circle(c, r * 1.9, Color(Look.LAMP, 0.2))
 	draw_circle(c, r * 1.15, Color(Look.LAMP, 0.9))
-	draw_circle(c, r * 0.7, Color("fff6e4"))
+	draw_circle(c, r * 0.7, Look.LAMP.lerp(Color.WHITE, 0.85))   # the white-hot middle of a light
 
 func _text(pos: Vector2, text: String, font: Font, fsize: int, col: Color, halo := Color.TRANSPARENT, align := HORIZONTAL_ALIGNMENT_CENTER) -> void:
 	var w = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize).x

@@ -51,5 +51,11 @@
   "Not now, Margaret.",
   "It's politics. Everyone does it.",
   "We'll talk after the election."
- ]
+ ],
+ "DESK": {
+  "_note": "Margaret's note on the desk card, the first that fits wins (none when nothing fits, or once she has left the party).",
+  "drift": "Pick a position and keep it. People are starting to notice.",
+  "outrage": "Shouting gets you noticed. It doesn't get you trusted.",
+  "money": "I saw the donor list. We'll talk."
+ }
 }

@@ -408,7 +408,7 @@ func _show_end() -> void:
 		var pm = ""
 		for c in gov.cabinet:
 			if c.ministry == "pm": pm = c.party
-		_sub.text = "%s governs alone." % String(_party(gov.members[0]).name) if gov.members.size() == 1 else "A coalition of %s." % _and_list(gov.members.map(func(id): return String(_party(id).name)))
+		_sub.text = "%s governs alone." % String(_party(gov.members[0]).name) if gov.members.size() == 1 else "A coalition of %s." % Game.and_list(gov.members.map(func(id): return String(_party(id).name)))
 		var grid = GridContainer.new()
 		grid.columns = 2
 		grid.add_theme_constant_override("h_separation", 40)
@@ -448,10 +448,6 @@ func _show_end() -> void:
 	go.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	go.pressed.connect(func(): finished.emit())
 	box.add_child(go)
-
-func _and_list(xs: Array) -> String:
-	if xs.size() <= 1: return "".join(xs)
-	return ", ".join(xs.slice(0, -1)) + " and " + xs[-1]
 
 # ---------- Drawing ----------
 ## A seat bar: the parties of a (possible) government, and the line a majority must cross.

@@ -537,7 +537,7 @@ class DriftMeter extends Control:
 	func _init(x: float) -> void: v = x
 	func _draw() -> void:
 		var y = size.y / 2 - 5
-		var cols = [Look.GOOD_HI, Look.LAMP, Color("e8843c"), Look.RED]
+		var cols = [Look.GOOD_HI, Look.LAMP, Look.mix(Look.LAMP, Look.RED, 0.5), Look.RED]
 		var widths = [0.2, 0.2, 0.2, 0.4]
 		var x = 0.0
 		for i in 4:

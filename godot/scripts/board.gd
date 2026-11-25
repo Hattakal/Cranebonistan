@@ -26,7 +26,7 @@ class Card extends PanelContainer:
 		lit = paper
 		if lit:
 			_sb = Look.box(Look.PAPER, 2, Color.TRANSPARENT, 0, 0, 0)
-			_sb.shadow_color = Color(0.95, 0.72, 0.4, 0.13)   # the pool of lamp light it lies in
+			_sb.shadow_color = Color(Look.LAMP, 0.13)   # the pool of lamp light it lies in
 			_sb.shadow_size = 34
 		else:
 			_sb = Look.glass(0, Color(Look.N800, 0.94))
@@ -38,7 +38,7 @@ class Card extends PanelContainer:
 		_hover = _sb.duplicate()
 		if lit:
 			_hover.bg_color = Look.CARD
-			_hover.shadow_color = Color(0.95, 0.72, 0.4, 0.22)
+			_hover.shadow_color = Color(Look.LAMP, 0.22)
 		else:
 			_hover.bg_color = Look.N700
 			if accent.a == 0: _hover.border_color = Look.LAMP_DIM
@@ -382,24 +382,34 @@ func _pim_note(s: Dictionary) -> String:
 	var n: int = s.actionsLeft
 	var agenda: bool = not s.agenda.done
 	var nb = _next_week(s, func(c): return c.isQuarterStart)
-	if s.result: return "Whatever happens next, it was an honour, boss. Really."
 	var hottest = null
 	for d in s.debates:
 		if hottest == null or d.heat > hottest.heat: hottest = d
-	if game.visit_block(s) == "" and s.week < 8: return "First things first, boss: pick a district on the map and go and shake some hands. Once a month, and it costs us nothing."
-	if n > 0 and hottest and hottest.heat >= 50: return "Everyone's talking about %s. %d action%s left. Whatever you say about it, I'm sure it'll be the right thing." % [hottest.title.to_lower(), n, "" if n == 1 else "s"]
-	if n > 0 and agenda: return "%d action%s left this month, and nobody has started this month's argument yet. Could be you, boss." % [n, "" if n == 1 else "s"]
-	if n > 0 and game.in_campaign(s): return "%d action%s left this week. The convoy rolls on either way, boss." % [n, "" if n == 1 else "s"]
-	if n > 0: return "%d action%s left this month. Whenever you're ready." % [n, "" if n == 1 else "s"]
-	if s.money > 6 and nb >= 0: return "We're sitting on ₱%sM. Next budget in %s. I've kept the donors happy." % [Game.fmt1(s.money), game.date_label(nb, false)]
-	return "Quiet week. I've moved the bad news to Monday."
+	# the lines are in data/carlos.json DESK; the first that fits wins
+	var fill = {"n": n, "s": "" if n == 1 else "s", "topic": hottest.title.to_lower() if hottest else "", "money": Game.fmt1(s.money), "when": game.date_label(nb, false) if nb >= 0 else ""}
+	var key = "quiet"
+	if s.result: key = "over"
+	elif game.visit_block(s) == "" and s.week < 8: key = "first_trip"
+	elif n > 0 and hottest and hottest.heat >= 50: key = "hot"
+	elif n > 0 and agenda: key = "agenda"
+	elif n > 0 and game.in_campaign(s): key = "campaign"
+	elif n > 0: key = "actions"
+	elif s.money > 6 and nb >= 0: key = "money"
+	return String(_desk_lines("carlos").get(key, "")).format(fill)
+
+## The desk notes of Carlos or Margaret (data/<who>.json DESK).
+var _desk_cache = {}
+func _desk_lines(who: String) -> Dictionary:
+	if not _desk_cache.has(who): _desk_cache[who] = Mods.data(who).get("DESK", {})
+	return _desk_cache[who]
 
 func _teyl_note(s: Dictionary) -> String:
 	if game.teyl(s) == null: return ""   # she has left the party
-	if game.inconsistency_of(s, game.player_party(s)) >= 2: return "Pick a position and keep it. People are starting to notice."
-	if s.record.outrages >= 3: return "Shouting gets you noticed. It doesn't get you trusted."
+	var lines: Dictionary = _desk_lines("margaret")
+	if game.inconsistency_of(s, game.player_party(s)) >= 2: return String(lines.get("drift", ""))
+	if s.record.outrages >= 3: return String(lines.get("outrage", ""))
 	for m in s.record.money:
-		if m.dirty: return "I saw the donor list. We'll talk."
+		if m.dirty: return String(lines.get("money", ""))
 	return ""
 
 func _watch(s: Dictionary) -> Array:

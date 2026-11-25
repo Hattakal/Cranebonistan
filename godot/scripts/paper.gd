@@ -83,7 +83,7 @@ func _sheet_box(screen_on: bool) -> StyleBoxFlat:
 	var sb: StyleBoxFlat
 	if screen_on:
 		sb = Look.box(Look.N850, 4, Look.N600, 1, 0, 0)
-		sb.shadow_color = Color(0.35, 0.55, 1.0, 0.1)    # the glow of the set in a dark room
+		sb.shadow_color = Color(Look.SCREEN_GLOW, 0.1)    # the glow of the set in a dark room
 		sb.shadow_size = 60
 	else:
 		sb = Look.box(Look.PAPER, 1, Color.TRANSPARENT, 0, 0, 0)

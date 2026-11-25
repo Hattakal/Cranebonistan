@@ -220,7 +220,21 @@ func score_context(s: Dictionary) -> Dictionary:
 	for p in s.parties: fit[p.id] = leader_fit(s, p)
 	var cs: Dictionary = C.serious
 	var serious: float = float(cs.vote) * (serious_of(s) - float(cs.mid)) / (100.0 - float(cs.mid) if serious_of(s) > float(cs.mid) else float(cs.mid))
-	return {"inc": inc, "own": own, "distrust": distrust, "fit": fit, "clim": leader_climate(s, distrust), "serious": serious}
+	# worked out once here rather than for every group and party (the same sums, in the same order)
+	var salf = {}   # region -> axis -> how much this month's climate multiplies that issue (salience_of)
+	for r in REGIONS:
+		var rc: Dictionary = s.get("regionClimate", {}).get(r.id, {})
+		var f = {}
+		for ax in AXES:
+			var climate: float = float(s.climate.get(ax.id, 0)) + float(rc.get(ax.id, 0))
+			f[ax.id] = maxf(0.3, 1 + float(s.salMod.get(ax.id, 0)) + climate + float(s.permSal.get(ax.id, 0)))
+		salf[r.id] = f
+	var pc = {}     # party id -> the parts of its score that don't depend on the group
+	for p in s.parties:
+		pc[p.id] = {"pen": maxf(0, inc[p.id] - C.inconsistencyTolerance) / 4.0,
+			"trust": C.trustWeight * distrust * (0.5 - p.establishment),
+			"lead": C.rivalLeaderWeight * ((p.charisma - 50) / 50.0)}
+	return {"inc": inc, "own": own, "distrust": distrust, "fit": fit, "clim": leader_climate(s, distrust), "serious": serious, "salf": salf, "pc": pc}
 
 # ---------- What kind of leader people want ----------
 ## A group's wish for each kind of leader (data/leader_types.json), summing to 1.
@@ -329,8 +343,9 @@ func leader_image(s: Dictionary, p: Dictionary) -> Array:
 func pop_prep(s: Dictionary, pop: Dictionary, ctx: Dictionary) -> Dictionary:
 	var sal = {}
 	var sw = 0.0
+	var salf = ctx.get("salf", {}).get(pop.region)
 	for ax in AXES:
-		var v: float = salience_of(s, pop, ax.id)
+		var v: float = (pop.sal[ax.id] * salf[ax.id]) if salf != null else salience_of(s, pop, ax.id)
 		sal[ax.id] = v
 		sw += v
 	var lw = {}
@@ -341,7 +356,7 @@ func pop_prep(s: Dictionary, pop: Dictionary, ctx: Dictionary) -> Dictionary:
 			lw[k] = float(pop.wants[k]) * float(ctx.clim.get(k, 1.0))
 			den += lw[k]
 		for k in lw: lw[k] = lw[k] / den if den > 0 else 0.0
-	return {"sal": sal, "sw": sw, "lw": lw}
+	return {"sal": sal, "sw": sw, "lw": lw, "st": s.districts.get(pop.get("district", ""), null)}
 
 func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Dictionary, pre = null) -> float:
 	if pre == null: pre = pop_prep(s, pop, ctx)
@@ -355,7 +370,8 @@ func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Diction
 	var sc = -d / C.distanceScale * (1 - C.devotionBlind * dev)
 	var gw: float = pop.goodwill[party.id]
 	var aw: float = pop.aware[party.id]
-	var st = s.districts.get(pop.get("district", ""), null)
+	var st = pre.st if pre.has("st") else s.districts.get(pop.get("district", ""), null)
+	var pc = ctx.get("pc", {}).get(party.id)
 	if st:
 		if party.isPlayer:
 			gw += float(st.goodwill)
@@ -366,16 +382,16 @@ func party_score(s: Dictionary, pop: Dictionary, party: Dictionary, ctx: Diction
 	if party.isPlayer:
 		sc += C.leaderWeight * pop.leader[party.id] * pop.leaderPull * (party.charisma / 50.0)
 		sc += float(ctx.get("serious", 0.0))   # people vote more readily for a party they take seriously
-	else: sc += C.rivalLeaderWeight * ((party.charisma - 50) / 50.0) * pop.leaderPull
+	else: sc += (pc.lead if pc else C.rivalLeaderWeight * ((party.charisma - 50) / 50.0)) * pop.leaderPull
 	# the kind of leader they want, against the kind this one is
 	if not pre.lw.is_empty():
 		var fit: Dictionary = ctx.fit[party.id]
 		var m = 0.0
 		for k in pre.lw: m += pre.lw[k] * float(fit.get(k, 0.4))
 		sc += C.typeWeight * (m - 0.4) * pop.leaderPull
-	var penalty = maxf(0, ctx.inc[party.id] - C.inconsistencyTolerance) / 4.0
+	var penalty: float = pc.pen if pc else maxf(0, ctx.inc[party.id] - C.inconsistencyTolerance) / 4.0
 	sc -= penalty * pop.engagement * (1 - C.devotionBlind * dev)
-	sc += C.trustWeight * ctx.distrust * (0.5 - party.establishment) * pop.disaffection
+	sc += (pc.trust if pc else C.trustWeight * ctx.distrust * (0.5 - party.establishment)) * pop.disaffection
 	for o in ctx.own[party.id]:
 		var p: float = pop.pos[o.axis]
 		if (o.side == "L" and p < -15) or (o.side == "R" and p > 15):
@@ -473,9 +489,10 @@ func summarize(s: Dictionary, pops: Array, ctx = null, cache = null) -> Dictiona
 		for m in MINOR_PARTIES:
 			res.support[m.id] += votes[m.id]
 			res.voters += votes[m.id]
+		var salf = ctx.salf.get(pop.region) if ctx.has("salf") else null
 		for ax in AXES:
 			res.pos[ax.id] += pop.size * pop.pos[ax.id]
-			res.sal[ax.id] += pop.size * salience_of(s, pop, ax.id)
+			res.sal[ax.id] += pop.size * ((pop.sal[ax.id] * salf[ax.id]) if salf != null else salience_of(s, pop, ax.id))
 		var dev = devotion_of(pop, player)
 		res.aware += pop.size * pop.aware.player
 		res.leader += pop.size * pop.leader.player

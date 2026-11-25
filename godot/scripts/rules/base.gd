@@ -310,6 +310,11 @@ const MEDIA_WARM := 0.05      # goodwill a full-time viewer gains for the favour
 const SHIELD_MAX := 0.6
 const SHIELD_GAIN := 0.3      # how fast friendly coverage builds cover (it fades by 30% a month)
 
+## "a, b and c": a list in words.
+static func and_list(xs: Array) -> String:
+	if xs.size() <= 1: return "".join(xs.map(func(x): return str(x)))
+	return ", ".join(xs.slice(0, -1).map(func(x): return str(x))) + " and " + str(xs[-1])
+
 static func shield_of(pop: Dictionary, pid: String) -> float:
 	return float(pop.get("shield", {}).get(pid, 0.0))
 
