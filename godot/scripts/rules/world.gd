@@ -595,7 +595,7 @@ func raise_options(s: Dictionary) -> Array:
 	return out
 
 func raise_chance(s: Dictionary, opt: Dictionary, line: Dictionary) -> float:
-	var tone_k = {"statesman": 0.85, "folksy": 1.0, "fiery": 1.1, "provocative": 1.25}.get(line.tone, 1.0)
+	var tone_k = 1.25 if (line.get("sharp", false) or line.get("tone", "") == "provocative") else {"statesman": 0.85, "folksy": 1.0, "fiery": 1.1, "hopeful": 1.0}.get(line.get("tone", ""), 1.0)
 	return clampf2(opt.chance * (0.6 + 0.5 * debate_reach(s)) * tone_k, 0.1, 0.95)
 
 func raise_lines(s: Dictionary, opt: Dictionary, side: String) -> Array:
@@ -785,8 +785,11 @@ func gain_charisma(player: Dictionary, d: float) -> void:
 
 func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary:
 	var player = player_party(s)
-	var tone: String = line.tone if TONES.has(line.get("tone", "")) else "statesman"
-	var risk: float = line.risk if line.has("risk") and line.risk != null else TONE_RISK[tone]
+	# a sharp line: the provocative edge on a style (its voice still counts as that style).
+	# An old "provocative" line counts as a sharp fiery one.
+	var sharp: bool = line_sharp(line)
+	var tone: String = line_style(line)
+	var risk: float = line.risk if line.has("risk") and line.risk != null else float(TONE_RISK.get("provocative" if sharp else tone, 0.2))
 	var r = rand(s)
 	var charm: float = player.charisma / 100.0
 	var outcome = "normal"
@@ -798,14 +801,17 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	var press: float = 1.0 - (float(C.upkeep.get("pressSoften", 0.25)) if s.get("pressOffice", false) else 0.0)   # the press office softens a gaffe
 	if outcome == "gaffe": neg *= press
 	var reacts: Array = TONES[tone].react.duplicate()
+	if sharp:   # the edge: half the style's own reactions, all of the provocative ones
+		reacts = reacts.map(func(g): return merged(g, {"amt": float(g.amt) * 0.5}))
+		reacts.append_array(TONES.get("provocative", {}).get("react", []))
 	reacts.append_array(line.get("react", []))
 	var qk = 0.4 if quick else 1.0
 	var scaled = reacts.map(func(g): return {"who": g.get("who"), "amt": g.amt * qk * (pos if g.amt > 0 else neg)})
 	apply_effects(s, {"goodwill": scaled, "awareness": 0.06 if outcome == "viral" else (0.035 if outcome == "gaffe" else 0.01)})
 	if outcome == "viral": change_serious(s, float(C.serious.viral))
 	elif outcome == "gaffe": change_serious(s, float(C.serious.gaffe))
-	# a provocative line that lands gets you noticed, less so when you have been at it lately
-	if tone == "provocative":
+	# a sharp line that lands gets you noticed, less so when you have been at it lately
+	if sharp:
 		var pc: Dictionary = C.serious.get("provocative", {})
 		var fresh: float = 1.0 / (1.0 + float(pc.get("fatigue", 0.6)) * float(s.get("outrage", 0.0)))
 		if outcome != "gaffe":
@@ -817,6 +823,7 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 			if matches(pop, g.who): pop.leader.player = clampf2(pop.leader.player + g.amt * 0.35, -2, 2)
 	for k in s.style: s.style[k] *= C.styleMemory
 	s.style[tone] = float(s.style.get(tone, 0)) + 1
+	s.sharp = float(s.get("sharp", 0.0)) * C.styleMemory + (1.0 if sharp else 0.0)   # how often you've been sharp lately
 	var total = dsum(s.style)
 	var entries = []
 	for k in s.style: entries.append([k, s.style[k]])
@@ -829,7 +836,7 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	elif total > 3 and tone != top[0] and share > 0.5:
 		player.charisma = clampf2(player.charisma - 0.6, 10, 100)
 		style_note = "It didn't sound like you. Some voters wonder who the real you is."
-	media_hear(s, tone, outcome, 0.5 if quick else 1.0)
+	media_hear(s, "provocative" if sharp else tone, outcome, 0.5 if quick else 1.0)
 	if outcome == "viral":
 		s.record.memes += 1
 		gain_charisma(player, 2.0)
@@ -840,4 +847,14 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 		for pop in s.pops:
 			pop.leader.player = clampf2(pop.leader.player - 0.04 * press, -2, 2)
 			pop.goodwill.player = clampf2(pop.goodwill.player - 0.03 * press * (1 - shield_of(pop, "player")), -2, 2)
-	return {"outcome": outcome, "press": TONES[tone].press[outcome], "styleNote": style_note}
+	return {"outcome": outcome, "press": TONES["provocative" if sharp and TONES.has("provocative") else tone].press[outcome], "styleNote": style_note, "sharp": sharp}
+
+## The style a line is said in (statesman, fiery, folksy, hopeful); an old "provocative" line is fiery.
+## Is a line the sharp edge of its style (said to start a fight)?
+func line_sharp(line: Dictionary) -> bool:
+	return bool(line.get("sharp", false)) or line.get("tone", "") == "provocative"
+
+func line_style(line: Dictionary) -> String:
+	var t: String = String(line.get("tone", "statesman"))
+	if t == "provocative": return "fiery"
+	return t if TONES.has(t) else "statesman"

@@ -5,7 +5,7 @@
    {"tone": "statesman", "text": "\"Because {country} deserves a government that keeps its word. That is all {party} has ever asked for.\""},
    {"tone": "fiery", "text": "\"Because for thirty years the people on this stage have robbed you blind, and tonight that ends.\""},
    {"tone": "folksy", "text": "\"I'm not a career politician. I'm someone who got tired of waiting for a bus that never comes.\""},
-   {"tone": "provocative", "text": "\"Look at the people next to me. Would you lend any of them your car?\""}
+   {"tone": "folksy", "sharp": true, "text": "\"Look at the people next to me. Would you lend any of them your car?\""}
   ]},
  "ATTACK": {"title": "{rival} attacks", "prompt": "{rival} of the {rival_party} turns to you: {attack}",
   "attacks": {
@@ -19,13 +19,13 @@
    {"tone": "statesman", "text": "\"I have listened and I have learned. A leader who never changes their mind isn't listening.\""},
    {"tone": "fiery", "text": "\"How dare you lecture anyone? Your party has lied to this country for a generation.\""},
    {"tone": "folksy", "text": "\"At least I change my mind now and then. {rival} hasn't changed a thing since the cassette tape.\"", "react": [{"who": {"loyalTo": "{rival_id}"}, "amt": -0.1}]},
-   {"tone": "provocative", "text": "\"That's invented. Everybody knows your people make things up.\"", "react": [{"who": {"class": "middle"}, "amt": -0.1}]}
+   {"tone": "fiery", "sharp": true, "text": "\"That's invented. Everybody knows your people make things up.\"", "react": [{"who": {"class": "middle"}, "amt": -0.1}]}
   ]},
  "CLOSING": {"title": "Closing statement", "prompt": "\"You have thirty seconds. Speak to the voters.\"",
   "lines": [
    {"tone": "statesman", "text": "\"On election day, vote for the country you want your children to grow up in.\""},
    {"tone": "fiery", "text": "\"They are afraid of you. On election day, prove them right.\""},
    {"tone": "folksy", "text": "\"If you want more of the same, you know who to vote for. If you don't, you know where to find me.\""},
-   {"tone": "provocative", "text": "\"If they win again, don't say I didn't warn you.\""}
+   {"tone": "fiery", "sharp": true, "text": "\"If they win again, don't say I didn't warn you.\""}
   ]}
 }

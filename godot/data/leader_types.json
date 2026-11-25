@@ -19,6 +19,7 @@
   {"id": "clean", "label": "Clean hands", "want": "someone untouched by the old politics",
    "base": 0.6, "disaffected": 0.6, "lean": {"system:L": 0.2},
    "climate": {"distrust": 0.8}},
+  {"id": "visionary", "label": "A visionary", "want": "someone with a picture of a better country", "base": 0.5, "by": {"age": {"18-29": 0.5, "30-45": 0.2}, "class": {"middle": 0.2}}, "lean": {"society:L": 0.4}, "pull": 0.3, "climate": {"hard_times": 0.3, "crisis": 0.2}},
   {"id": "expert", "label": "An expert", "want": "someone who knows how things work",
    "base": 0.6, "by": {"class": {"upper": 0.6, "middle": 0.3}, "age": {"46-60": 0.2}}, "lean": {"economy:R": 0.3},
    "climate": {"hard_times": 0.5, "crisis": 0.2}}

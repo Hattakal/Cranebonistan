@@ -290,7 +290,7 @@ func leader_fit(s: Dictionary, p: Dictionary) -> Dictionary:
 	var ext = 0.0
 	for ax in AXES: ext += absf(float(pos[ax.id])) / 80.0
 	var calm: float = clampf2(1 - ext / AXES.size(), 0, 1)
-	var tone = {"statesman": 0.25 + 0.5 * est, "fiery": 0.15 + 0.3 * maxf(radical, auth), "folksy": 0.2, "provocative": 0.1 * radical}
+	var tone = {"statesman": 0.25 + 0.5 * est, "fiery": 0.15 + 0.3 * maxf(radical, auth), "folksy": 0.2, "hopeful": 0.1 * (1 - est), "provocative": 0.1 * radical}
 	var visits = 0
 	var stains = 0.0
 	var slips = 0.0
@@ -298,7 +298,7 @@ func leader_fit(s: Dictionary, p: Dictionary) -> Dictionary:
 	if p.isPlayer:
 		est = clampf2(0.5 + float(pos.system) / 140.0, 0, 1)
 		var sh: Dictionary = style_profile(s).shares
-		if sh.size(): tone = {"statesman": float(sh.get("statesman", 0)), "fiery": float(sh.get("fiery", 0)), "folksy": float(sh.get("folksy", 0)), "provocative": float(sh.get("provocative", 0))}
+		if sh.size(): tone = {"statesman": float(sh.get("statesman", 0)), "fiery": float(sh.get("fiery", 0)), "folksy": float(sh.get("folksy", 0)), "hopeful": float(sh.get("hopeful", 0)), "provocative": float(sh.get("sharp", 0))}
 		for id in s.get("districts", {}): visits += int(s.districts[id].get("visits", 0))
 		stains = s.record.money.filter(func(m): return m.dirty).size() * 0.35 + float(s.record.outrages) * 0.1
 		slips = float(s.record.gaffes)
@@ -306,7 +306,8 @@ func leader_fit(s: Dictionary, p: Dictionary) -> Dictionary:
 	else:
 		stains = clampf2((60 - float(p.get("stability", 60))) / 60.0, 0, 1)
 	var f = {
-		"star": 0.6 * ch + 0.3 * (tone.folksy + tone.provocative) + minf(0.2, memes * 0.04),
+		"star": 0.6 * ch + 0.3 * minf(1.0, tone.folksy + tone.provocative + tone.hopeful) + minf(0.2, memes * 0.04),
+		"visionary": 0.55 * tone.hopeful + 0.3 * (1 - est) + 0.15 * ch,
 		"statesman": 0.45 * tone.statesman + 0.3 * calm + 0.25 * (1 - radical) - minf(0.4, slips * 0.06),
 		"revolutionary": 0.55 * radical + 0.3 * (tone.fiery + tone.provocative) + 0.15 * (1 - est),
 		"strongman": 0.35 * auth + 0.15 * hawk + 0.3 * tone.fiery + 0.2 * ch,
@@ -748,10 +749,13 @@ func style_profile(s: Dictionary) -> Dictionary:
 	if total < 2: return {"label": "Still finding a voice", "shares": {}}
 	var shares = {}
 	for k in s.style: shares[k] = s.style[k] / total
+	shares.sharp = float(s.get("sharp", 0.0)) / total   # how much of it was sharp (any style)
 	var sh = func(k): return float(shares.get(k, 0))
 	var label = "A bit of everything"
-	if sh.call("folksy") + sh.call("provocative") > 0.65 and sh.call("provocative") > 0.25: label = "Charismatic buffoon"
-	elif sh.call("fiery") + sh.call("provocative") > 0.65: label = "Firebrand"
+	if sh.call("folksy") > 0.45 and sh.call("sharp") > 0.25: label = "Charismatic buffoon"
+	elif sh.call("fiery") > 0.5 and sh.call("sharp") > 0.2: label = "Firebrand"
+	elif sh.call("hopeful") > 0.45 and sh.call("sharp") > 0.2: label = "Angry dreamer"
+	elif sh.call("hopeful") > 0.5: label = "Visionary"
 	elif sh.call("statesman") > 0.55: label = "Statesman"
 	elif sh.call("folksy") > 0.5: label = "Man of the people"
 	elif sh.call("statesman") + sh.call("fiery") > 0.7: label = "Strongman"

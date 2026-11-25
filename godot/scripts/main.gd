@@ -1094,7 +1094,7 @@ func _event_step1(p: Paper, ev: Dictionary) -> void:
 	var any_lines = false
 	for ch in ev.choices:
 		if ch.get("lines", []).size(): any_lines = true
-	p.step("Step 1 of 2" if any_lines else "Your decision", "What do you promise?" if ev.get("kind", "") == "flagship" else "What do you say?")
+	p.step("Step 1" if any_lines else "Your decision", "What do you promise?" if ev.get("kind", "") == "flagship" else "What do you say?")
 	for i in ev.choices.size():
 		var ch: Dictionary = ev.choices[i]
 		p.card("index", func(box):
@@ -1108,19 +1108,12 @@ func _event_step1(p: Paper, ev: Dictionary) -> void:
 
 func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
 	var ch: Dictionary = ev.choices[i]
-	p.clear()
-	_event_header(p, ev)
-	p.step("Step 2 of 2", "How do you say it?")
-	if ev.get("kind", "") == "flagship": p.text("Your promise: %s. This goes on every poster for a year." % ch.label, 14, "type")
-	else: p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 14, "type")
-	p.scribble("The wording matters. The same position can win people over, or blow up in your face.  — C.")
-	for j in ch.lines.size():
-		var line: Dictionary = ch.lines[j]
-		p.card("slip", func(box): box.add_child(Look.label("“%s”" % line.text, "news_italic", 21, Look.INK, true)),
-			func(): _event_result(p, G.resolve_event(S, i, j), ev))
-	var back = p.button("← Say something else", func(): _event_step1(p, ev), false)
-	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	p.add(back)
+	var head = func():
+		_event_header(p, ev)
+		if ev.get("kind", "") == "flagship": p.text("Your promise: %s. This goes on every poster for a year." % ch.label, 14, "type")
+		else: p.text("You will %s." % (ch.label.substr(0, 1).to_lower() + ch.label.substr(1).trim_suffix(".")), 14, "type")
+	_say_it(p, ch.lines, head, 2, func(j): _event_result(p, G.resolve_event(S, i, j), ev),
+		func(): _event_step1(p, ev), "← Say something else")
 
 func _event_result(p: Paper, res: Dictionary, ev := {}) -> void:
 	p.clear()
@@ -1151,49 +1144,129 @@ func _result_body(p: Paper, title: String, res: Dictionary, strap := "CBC · Eve
 		p.add(Look.caps("Who moved", 11, Look.MUTED, 2))
 		_changes_chips(p, res.changes)
 
+# ----- Saying it: a style, then the exact words -----
+## How you say something comes in two choices: the style (Measured, Fiery, Folksy,
+## Hopeful: content.json TONES), then the exact words in it, some sharp, some simply
+## better put than others. A step with only one option is skipped.
+
+## The styles among `lines`, in the order of TONES: [{"tone", "idx": indices into lines}].
+var _shot_words := false
+
+func _styles_in(lines: Array) -> Array:
+	var by = {}
+	for j in lines.size():
+		var t: String = G.line_style(lines[j])
+		if not by.has(t): by[t] = []
+		by[t].append(j)
+	var out = []
+	for t in G.TONES:
+		if by.has(t): out.append({"tone": t, "idx": by[t]})
+	return out
+
+func _tone_name(t: String) -> String:
+	return String(G.TONES.get(t, {}).get("name", t.capitalize()))
+
+func _risky(line: Dictionary) -> bool:
+	var r = line.get("risk")
+	if r == null: r = G.TONE_RISK.get("provocative" if G.line_sharp(line) else G.line_style(line), 0.3)
+	return float(r) >= 0.6
+
+## The small caps over a line: its style (when `style`), whether it is sharp or risky, and `extra`.
+func _tone_tag(box: VBoxContainer, line: Dictionary, extra := "", style := false) -> void:
+	var parts = []
+	if style: parts.append(_tone_name(G.line_style(line)))
+	if G.line_sharp(line): parts.append(_tone_name("provocative"))
+	if _risky(line): parts.append("risky")
+	if extra != "": parts.append(extra)
+	if parts.is_empty(): return
+	var t: String = " · ".join(parts)
+	box.add_child(Look.caps(t.substr(0, 1).to_upper() + t.substr(1), 10, Look.RED if _risky(line) else Look.MUTED, 1))
+
+## Say it: choose a style, then the words. `head` draws the top of the sheet again, `step`
+## numbers the first of these steps (0: unnumbered), `pick` gets the chosen line's index in
+## `lines`, `back` goes to whatever came before. `extra` adds to a line's tag.
+func _say_it(p: Paper, lines: Array, head: Callable, step: int, pick: Callable, back: Callable, back_label: String, extra := Callable()) -> void:
+	var styles: Array = _styles_in(lines)
+	if _shot_words:   # a screenshot of the wording step (--words=1)
+		_shot_words = false
+		for st in styles:
+			if st.idx.size() > 1:
+				_say_words(p, lines, st.idx, head, step + 1 if step > 0 else 0, pick, back, back_label, extra); return
+	if styles.size() == 1:
+		_say_words(p, lines, styles[0].idx, head, step, pick, back, back_label, extra)
+		return
+	p.clear()
+	head.call()
+	p.step("Step %d" % step if step > 0 else "Your voice", "How do you come across?")
+	for st in styles:
+		var tone: Dictionary = G.TONES.get(st.tone, {})
+		var idx: Array = st.idx
+		p.card("index", func(box):
+			box.add_child(Look.label(_tone_name(st.tone), "display", 22, Look.INK))
+			if tone.has("pitch"): box.add_child(Look.label(tone.pitch, "body", 13, Look.MUTED, true)),
+			func():
+				if idx.size() == 1: pick.call(idx[0])
+				else: _say_words(p, lines, idx, head, step + 1 if step > 0 else 0, pick,
+					func(): _say_it(p, lines, head, step, pick, back, back_label, extra), "← Another style", extra))
+	_back_button(p, back, back_label)
+	p.top()
+
+func _say_words(p: Paper, lines: Array, idx: Array, head: Callable, step: int, pick: Callable, back: Callable, back_label: String, extra := Callable()) -> void:
+	p.clear()
+	head.call()
+	p.step("Step %d" % step if step > 0 else "Your words", "How exactly do you put it?")
+	p.small("%s. The same voice can be put well or badly: some of these will land better than others." % _tone_name(G.line_style(lines[idx[0]])))
+	for j in idx:
+		var line: Dictionary = lines[j]
+		p.card("slip", func(box):
+			_tone_tag(box, line, extra.call(line) if extra.is_valid() else "")
+			box.add_child(Look.label("“%s”" % line.text, "news_italic", 20, Look.INK, true)),
+			func(): pick.call(j))
+	_back_button(p, back, back_label)
+	p.top()
+
+func _back_button(p: Paper, back: Callable, label: String) -> void:
+	if not back.is_valid(): return
+	if label.begins_with("←"):
+		var b = p.button(label, back, false)
+		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		p.add(b)
+	else: p.actions([p.button(label, back)])
+
 # ----- Speaking in a debate -----
-const TONE_NAMES := {"statesman": "Measured", "fiery": "Fiery", "folksy": "Folksy", "provocative": "Provocative"}
-
-func _tone_tag(box: VBoxContainer, line: Dictionary, extra := "") -> void:
-	var risky: bool = float(line.get("risk", G.TONE_RISK.get(line.tone, 0.3))) >= 0.6
-	box.add_child(Look.caps(TONE_NAMES.get(line.tone, line.tone) + (" · risky" if risky else "") + extra, 10, Look.RED if risky else Look.MUTED, 1))
-
 func _speak_sheet(id: String, side: String) -> void:
 	var d = G.debate_by_id(S, id)
 	if d == null: return
 	var ax: Dictionary = Game.by_id(G.AXES, d.axis)
 	var major: bool = G.is_major(d)
 	var p = _paper(760, false)
-	p.kicker(("Major debate · " if major else "The national debate · ") + ax.issue)
-	p.heading(d.title, 34)
-	p.text(d.text, 16)
-	p.step("Speaking for", (ax.left if side == "L" else ax.right))
-	if major: p.scribble("The whole country is watching. Your exact words will be quoted: they can go viral, or become a gaffe that helps the other side.  — C.")
-	else: p.small("A smaller argument. Your line mostly shapes how people hear you; it won't make the evening news.")
+	var head = func():
+		p.kicker(("Major debate · " if major else "The national debate · ") + ax.issue)
+		p.heading(d.title, 34)
+		p.text(d.text, 16)
+		p.text("Your side: %s." % (ax.left if side == "L" else ax.right), 14, "type")
+		if major: p.scribble("The whole country is watching. Your exact words will be quoted: they can go viral, or become a gaffe that helps the other side.  — C.")
+		else: p.small("A smaller argument. Your line mostly shapes how people hear you; it won't make the evening news.")
 	var lines: Array = G.debate_lines(S, d, side)
-	for j in lines.size():
+	_say_it(p, lines, head, 0, func(j):
 		var line: Dictionary = lines[j]
-		p.card("slip", func(box):
-			_tone_tag(box, line)
-			box.add_child(Look.label("“%s”" % line.text, "news_italic", 20, Look.INK, true)),
-			func():
-				var res: Dictionary = G.act_speak(S, id, side, j)
-				if not res.ok:
-					_toast(res.text); return
-				_after_speaking(res, line, d.axis, side)
-				# every speech shows how it played; a smaller debate just doesn't make the evening news
-				p.clear()
-				_result_body(p, res.title, res, "CBC · Evening news" if res.major else "On the record")
-				p.actions([p.button("Back to work", func(): _done(p))])
-				p.top())
-	p.actions([p.button("Back", func(): p.close())])
+		var res: Dictionary = G.act_speak(S, id, side, j)
+		if not res.ok:
+			_toast(res.text); return
+		_after_speaking(res, line, d.axis, side)
+		# every speech shows how it played; a smaller debate just doesn't make the evening news
+		p.clear()
+		_result_body(p, res.title, res, "CBC · Evening news" if res.major else "On the record")
+		p.actions([p.button("Back to work", func(): _done(p))])
+		p.top(),
+		func(): p.close(), "Back")
 
 func _after_speaking(res: Dictionary, line: Dictionary, axis: String, side: String) -> void:
 	var outcome: String = res.delivery.outcome
 	if outcome == "viral": _advisor.say("viral", true)
 	elif outcome == "gaffe":
 		_advisor.say("gaffe", false, 0.35)   # only now and then, so it stays funny
-		if line.tone == "provocative": _margaret("provocative_gaffe")
+		if G.line_sharp(line): _margaret("provocative_gaffe")
 	elif res.get("major", false): _advisor.say("speak", false, 0.4)
 	var mine = G.manifesto_side(S, axis)
 	if mine != "" and mine != side: _margaret("against_manifesto")
@@ -1212,7 +1285,7 @@ func _raise_head(p: Paper, opt: Dictionary) -> void:
 func _raise_side(p: Paper, opt: Dictionary) -> void:
 	p.clear()
 	_raise_head(p, opt)
-	p.step("Step 1 of 2", "Which side are you on?")
+	p.step("Step 1", "Which side are you on?")
 	var ax: Dictionary = Game.by_id(G.AXES, opt.axis)
 	var mine = G.manifesto_side(S, opt.axis)
 	for side in ["L", "R"]:
@@ -1223,34 +1296,27 @@ func _raise_side(p: Paper, opt: Dictionary) -> void:
 	p.actions([p.button("Not now", func(): p.close())])
 
 func _raise_words(p: Paper, opt: Dictionary, side: String) -> void:
-	p.clear()
-	_raise_head(p, opt)
 	var ax: Dictionary = Game.by_id(G.AXES, opt.axis)
-	p.step("Step 2 of 2" if opt.side == "" else "Your words", "How do you put it to the country?")
-	p.small("Arguing for %s. Whether it catches on depends on your reach and on how you say it. Bold lines catch more easily, and blow up more easily." % (ax.left if side == "L" else ax.right).to_lower())
+	var head = func():
+		_raise_head(p, opt)
+		p.text("Your side: %s." % (ax.left if side == "L" else ax.right), 14, "type")
+		p.small("Whether it catches on depends on your reach and on how you say it. Bold lines catch more easily, and blow up more easily.")
 	var lines: Array = G.raise_lines(S, opt, side)
-	for j in lines.size():
+	var pick = func(j):
 		var line: Dictionary = lines[j]
-		p.card("slip", func(box):
-			_tone_tag(box, line, " · %d%% chance it catches on" % Game.jround(G.raise_chance(S, opt, line) * 100))
-			box.add_child(Look.label("“%s”" % line.text, "news_italic", 20, Look.INK, true)),
-			func():
-				var res: Dictionary = G.act_raise(S, opt, side, j)
-				if not res.ok:
-					_toast(res.text); return
-				_after_speaking(res, line, opt.axis, side)
-				if res.delivery.outcome == "normal": _advisor.say("raise_caught" if res.caught else "raise_fizzled", false, 0.8)
-				p.clear()
-				_result_body(p, opt.title, res)
-				p.stamp("It caught on" if res.caught else "It fizzled", Look.GOOD if res.caught else Look.MUTED)
-				p.actions([p.button("Back to work", func(): _done(p))])
-				p.top())
-	if opt.side == "":
-		var back = p.button("← Other side", func(): _raise_side(p, opt), false)
-		back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		p.add(back)
-	else:
-		p.actions([p.button("Not now", func(): p.close())])
+		var res: Dictionary = G.act_raise(S, opt, side, j)
+		if not res.ok:
+			_toast(res.text); return
+		_after_speaking(res, line, opt.axis, side)
+		if res.delivery.outcome == "normal": _advisor.say("raise_caught" if res.caught else "raise_fizzled", false, 0.8)
+		p.clear()
+		_result_body(p, opt.title, res)
+		p.stamp("It caught on" if res.caught else "It fizzled", Look.GOOD if res.caught else Look.MUTED)
+		p.actions([p.button("Back to work", func(): _done(p))])
+		p.top()
+	var chance = func(line): return "%d%% chance it catches on" % Game.jround(G.raise_chance(S, opt, line) * 100)
+	if opt.side == "": _say_it(p, lines, head, 2, pick, func(): _raise_side(p, opt), "← Other side", chance)
+	else: _say_it(p, lines, head, 0, pick, func(): p.close(), "Not now", chance)
 
 # ----- The budget: a ledger -----
 func _budget_sheet(front: Dictionary, keep_scroll := 0) -> void:
@@ -1469,7 +1535,9 @@ func _debate_round(p: Paper) -> void:
 	p.step("Your answer", "What do you say?")
 	for j in rd.lines.size():
 		var line: Dictionary = rd.lines[j]
-		p.card("slip", func(box): box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
+		p.card("slip", func(box):
+			_tone_tag(box, line, "", true)
+			box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
 			var res: Dictionary = G.answer_debate(S, j)
 			p.clear()
 			p.decided()
@@ -1503,7 +1571,9 @@ func _interview_round(p: Paper) -> void:
 	p.step("Your answer", "What do you say?")
 	for j in rd.lines.size():
 		var line: Dictionary = rd.lines[j]
-		p.card("slip", func(box): box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
+		p.card("slip", func(box):
+			_tone_tag(box, line, "", true)
+			box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
 			var res: Dictionary = G.answer_interview(S, j)
 			p.clear()
 			p.decided()
@@ -2126,6 +2196,7 @@ func _shot(args: Dictionary) -> void:
 			for i in 3: await get_tree().process_frame
 			(_sheet_layer.get_child(-1) as Paper)._scroll.scroll_vertical = int(args.scroll)
 	await get_tree().process_frame
+	_shot_words = args.has("words")
 	if args.has("step2"):
 		var ev: Dictionary = G.event_of(S.queue[0])
 		var ci = -1

@@ -24,7 +24,7 @@
     "text": "\"Someone who got angry, and stayed angry, and decided to do something about it.\""
    },
    {
-    "tone": "provocative",
+    "tone": "fiery", "sharp": true,
     "text": "\"Someone the people at the top are already afraid of. Ask them why.\""
    }
   ]
@@ -67,7 +67,7 @@
    },
    {
     "kind": "attack",
-    "tone": "provocative",
+    "tone": "statesman", "sharp": true,
     "text": "\"You've had a team going through my old quotes for a week. That tells people what this programme is for.\""
    },
    {
@@ -93,7 +93,7 @@
    },
    {
     "kind": "attack",
-    "tone": "provocative",
+    "tone": "statesman", "sharp": true,
     "text": "\"Shall we talk about who owns this channel's shares instead?\""
    },
    {
@@ -119,7 +119,7 @@
    },
    {
     "kind": "attack",
-    "tone": "provocative",
+    "tone": "folksy", "sharp": true,
     "text": "\"The deficit was there when I arrived. Funny how nobody asked my predecessor.\""
    },
    {

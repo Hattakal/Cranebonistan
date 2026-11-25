@@ -87,7 +87,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Let the Golban ambassador write us a letter. We'll read it after lunch.",
        "react": [
         {
@@ -207,7 +207,7 @@
        "text": "A two-year freeze on bread, fuel and rent, while wages catch up."
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "If a shopkeeper doesn't like the price, he can sell something else.",
        "react": [
         {
@@ -323,7 +323,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Tax cuts for everyone except the people who write the tax code.",
        "react": [
         {
@@ -460,7 +460,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "If Norbanistan wants its people looked after, it can look after them.",
        "react": [
         {
@@ -593,7 +593,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Half the people complaining about foreigners have never met one.",
        "react": [
         {
@@ -717,7 +717,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "The capital can have the arrivals or the money. Not just the speeches.",
        "react": [
         {
@@ -852,7 +852,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "If the Trueants want Alinni back, they can come and ask the army.",
        "react": [
         {
@@ -982,7 +982,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "Our army could hold the line for a week. Golba's can hold it for ever.",
        "react": [
         {
@@ -1109,7 +1109,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "Anyone who wants a war is welcome to go first.",
        "react": [
         {
@@ -1239,7 +1239,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "If you've done nothing wrong, you'll love the new cameras.",
        "react": [
         {
@@ -1357,7 +1357,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "The rioters are the only people in Arthemta the government has noticed in years.",
        "react": [
         {
@@ -1486,7 +1486,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "First we arrest the police. Then we'll see about crime.",
        "react": [
         {
@@ -1618,7 +1618,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "This country was doing fine when people knew what a family was.",
        "react": [
         {
@@ -1745,7 +1745,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "If equal rights frighten you, ask yourself what you were planning.",
        "react": [
         {
@@ -1866,7 +1866,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Both sides of this argument should find a hobby.",
        "react": [
         {

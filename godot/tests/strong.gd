@@ -20,9 +20,16 @@ var tone = "fiery"
 var off = {}
 
 func line_of(lines: Array) -> int:
+	# "provocative" means a sharp line in any style (a fiery one if there is one)
+	var best = -1
 	for i in lines.size():
-		if lines[i].get("tone", "") == tone and not lines[i].get("gaffe", false) and float(lines[i].get("risk", 0)) < 0.9: return i
-	return 0
+		var l: Dictionary = lines[i]
+		if l.get("gaffe", false) or float(l.get("risk", 0)) >= 0.9: continue
+		var sharp: bool = G.line_sharp(l)
+		if tone == "provocative":
+			if sharp and (best < 0 or G.line_style(l) == "fiery"): best = i
+		elif not sharp and G.line_style(l) == tone: return i
+	return best if best >= 0 else 0
 
 func side_for(s: Dictionary, axis: String) -> String:
 	var m = G.manifesto_side(s, axis)

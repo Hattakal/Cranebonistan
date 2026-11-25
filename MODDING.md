@@ -110,10 +110,10 @@ The rules refer to a few things by id. Change their names, numbers and text free
 - **Party** `player`; **politician** `teyl` (Margaret Teyl).
 - **Region** `alinni`, and **nationalities** `cranebonian`, `alinnian`, `norbanian`.
 - **Ages** `18-29`, `30-45`, `46-60`, `61+`; **classes** `working`, `middle`, `upper`.
-- **Tones** `statesman`, `fiery`, `folksy`, `provocative`.
+- **Tones** `statesman`, `fiery`, `folksy`, `hopeful` (the four styles), and `provocative` (the sharp edge on a style: a line with `"sharp": true` gets its reactions on top of half its style's). Each tone in `TONES` has a `name` and a `pitch` shown when the player picks how to come across; an outlet's `tones` say how much it likes each.
 - **World numbers** `jobs`, `prices`, `migration`, `border`, `unrest`.
 - **Money offers** `chamber` and `tycoon` (business money that feeds hypocrisy).
-- **Leader types** `star`, `statesman`, `revolutionary`, `strongman`, `one_of_us`, `clean`, `expert`.
+- **Leader types** `star`, `statesman`, `revolutionary`, `strongman`, `one_of_us`, `clean`, `expert`, `visionary`.
 - **Media kinds** `public`, `paper`, `tabloid`, `business`, `network`, `online`, `regional`, `platform`, `foreign`, `influencer`.
 - **The seven issues** (`economy`, `welfare`, `nation`, `society`, `order`, `foreign`, `system`).
 - **`COUNTRY`** in content.json (`name`, `national`, `nationals`).

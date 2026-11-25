@@ -26,7 +26,7 @@
     "folksy": 1.1,
     "fiery": 0.8,
     "provocative": 0.5
-   }
+   , "hopeful": 1.1}
   },
   {
    "id": "herald",
@@ -60,7 +60,7 @@
     "folksy": 0.9,
     "fiery": 0.7,
     "provocative": 0.4
-   }
+   , "hopeful": 1.0}
   },
   {
    "id": "post",
@@ -95,7 +95,7 @@
     "folksy": 1.3,
     "fiery": 1.2,
     "provocative": 1.1
-   }
+   , "hopeful": 1.1}
   },
   {
    "id": "ledger",
@@ -125,7 +125,7 @@
     "folksy": 0.8,
     "fiery": 0.5,
     "provocative": 0.3
-   }
+   , "hopeful": 0.8}
   },
   {
    "id": "eagle",
@@ -170,7 +170,7 @@
     "folksy": 1.2,
     "fiery": 1.4,
     "provocative": 1.2
-   }
+   , "hopeful": 0.7}
   },
   {
    "id": "kettle",
@@ -206,7 +206,7 @@
     "folksy": 1.1,
     "fiery": 1.5,
     "provocative": 1.2
-   }
+   , "hopeful": 0.6}
   },
   {
    "id": "courier",
@@ -240,7 +240,7 @@
     "folksy": 1.5,
     "fiery": 0.9,
     "provocative": 0.6
-   }
+   , "hopeful": 1.0}
   },
   {
    "id": "clipr",
@@ -267,7 +267,7 @@
     "folksy": 1.0,
     "fiery": 1.4,
     "provocative": 1.7
-   }
+   , "hopeful": 1.2}
   },
   {
    "id": "chatter",
@@ -298,7 +298,7 @@
     "folksy": 0.9,
     "fiery": 1.4,
     "provocative": 1.5
-   }
+   , "hopeful": 0.8}
   },
   {
    "id": "trueants_tv",
@@ -329,7 +329,7 @@
     "folksy": 1.0,
     "fiery": 1.2,
     "provocative": 1.0
-   },
+   , "hopeful": 1.0},
    "country": "trueants"
   },
   {
@@ -362,7 +362,7 @@
     "folksy": 0.9,
     "fiery": 0.7,
     "provocative": 0.5
-   },
+   , "hopeful": 1.1},
    "country": "dillihan"
   },
   {
@@ -399,7 +399,7 @@
     "folksy": 1.0,
     "fiery": 1.4,
     "provocative": 1.2
-   },
+   , "hopeful": 0.9},
    "subs": 0.9
   },
   {
@@ -439,7 +439,7 @@
     "folksy": 1.6,
     "fiery": 1.2,
     "provocative": 1.0
-   },
+   , "hopeful": 1.0},
    "subs": 1.1
   },
   {
@@ -476,7 +476,7 @@
     "folksy": 1.1,
     "fiery": 1.5,
     "provocative": 1.6
-   },
+   , "hopeful": 0.7},
    "subs": 1.4
   },
   {
@@ -504,7 +504,7 @@
     "folksy": 1.3,
     "fiery": 1.0,
     "provocative": 1.5
-   },
+   , "hopeful": 1.2},
    "subs": 2.6
   },
   {
@@ -535,7 +535,7 @@
     "folksy": 1.2,
     "fiery": 1.1,
     "provocative": 1.5
-   },
+   , "hopeful": 0.9},
    "subs": 1.6
   },
   {
@@ -571,7 +571,7 @@
     "folksy": 0.8,
     "fiery": 0.6,
     "provocative": 0.5
-   },
+   , "hopeful": 1.0},
    "subs": 0.5
   },
   {
@@ -608,7 +608,7 @@
     "folksy": 1.4,
     "fiery": 0.8,
     "provocative": 1.0
-   },
+   , "hopeful": 1.3},
    "subs": 0.8
   }
  ],

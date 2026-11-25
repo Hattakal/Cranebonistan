@@ -1431,7 +1431,7 @@
        "text": "The Central Bank is asleep at the wheel. Raise the rates, or resign!"
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "If your mortgage goes up, thank the clowns who let the Pezo rot.",
        "react": [
         {
@@ -1527,7 +1527,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "The Alinnians want a Trueant passport and a {national} pension. Pick one!",
        "react": [
         {
@@ -1587,7 +1587,7 @@
        "text": "Relax. The Pezo has seen worse, and so have we."
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "Only cowards and Golban bankers panic over one bad month.",
        "react": [
         {
@@ -1859,7 +1859,7 @@
        "text": "If it takes four years to get a permit for a shed, imagine a tower block."
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "Tenants complain about rents, then fight every new building on their street.",
        "react": [
         {
@@ -1913,7 +1913,7 @@
        "text": "Every new arrival is another name on the waiting list ahead of yours."
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "Ten Norbanians to a flat and the rent still goes up. Explain that.",
        "react": [
         {
@@ -2144,7 +2144,7 @@
        "text": "Let these engineers build something. Worst case, they're back in the taxi."
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Stop crying on the internet and start a company.",
        "react": [
         {
@@ -2190,7 +2190,7 @@
        "text": "We made a video too. It's shorter, and the taxi has a better driver."
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Rate my rivals' cabinet: three taxi drivers and a minister who's never had a job."
       },
       {
@@ -2242,7 +2242,7 @@
        "text": "They bought houses for a song, then pulled the ladder up behind them."
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "OK, grandpa. Your pension is my rent.",
        "react": [
         {
@@ -2713,7 +2713,7 @@
        "text": "Not one more ship! {country} is not the world's waiting room!"
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Send them to Golba. Golba loves lecturing us about human rights.",
        "react": [
         {
@@ -2767,7 +2767,7 @@
        "text": "Somebody has to pick the fruit, and it isn't going to be the minister."
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "If your job can be done by a man off a boat, maybe ask yourself why.",
        "react": [
         {
@@ -3250,7 +3250,7 @@
        "text": "Every kid with a football pitch is a kid without a knife."
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "If you want fewer robbers, stop running the country like one.",
        "react": [
         {
@@ -3311,7 +3311,7 @@
        "text": "These gangs came on the boats, and they can leave on them."
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "Funny how the robberies started when the ships arrived.",
        "react": [
         {
@@ -3453,7 +3453,7 @@
        "text": "Let him come and try. Our soldiers will be waiting."
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "The Trueants can't keep their own lights on. Let them come; we'll leave ours on for them.",
        "react": [
         {
@@ -3639,7 +3639,7 @@
        "text": "A man who can't pay his own teachers wants another region? Good luck to him."
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "The Southern Trueants: the only country where the power goes off more often than the president.",
        "react": [
         {
@@ -4501,7 +4501,7 @@
        "text": "Yamlin is drowning and the prime minister is sunbathing!"
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Somebody send the prime minister a postcard. He seems to like them."
       },
       {
@@ -4532,7 +4532,7 @@
      },
      "lines": [
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Thoughts and prayers to Yamlin from the beautiful Potanian coast!",
        "react": [
         {
@@ -5290,7 +5290,7 @@
        "text": "Subsidies keep weak farms alive and strong ones waiting. Let prices do their work."
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "Farming is a business. Some businesses fail.",
        "react": [
         {
@@ -5350,7 +5350,7 @@
        ]
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "Erland's farmers have had their hand out for decades. Time for some competition.",
        "react": [
         {
@@ -5413,8 +5413,8 @@
        "text": "Faith and hard work have carried Erland through droughts before. They will again."
       },
       {
-       "tone": "provocative",
-       "text": "Some people in the capital laugh at prayer. Let them. Erland knows better.",
+       "tone": "folksy", "sharp": true,
+       "text": "Some people in the capital laugh at Harvest Day. Let them. Erland knows better.",
        "react": [
         {
          "who": {
@@ -5529,7 +5529,7 @@
        "text": "If the factories close, nobody gets a raise. Cranbia needs a settlement that keeps it working."
       },
       {
-       "tone": "provocative",
+       "tone": "statesman", "sharp": true,
        "text": "Strikes are a luxury for people who've never had to make a payroll.",
        "react": [
         {
@@ -5626,7 +5626,7 @@
        "text": "Somebody is paying for these banners, and it isn't the metalworkers."
       },
       {
-       "tone": "provocative",
+       "tone": "fiery", "sharp": true,
        "text": "Ask who funds the strike committee. I hear they speak Dillihani.",
        "react": [
         {
@@ -6122,7 +6122,7 @@
        "text": "One suitcase? This whole government is a suitcase!"
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "A gift between old friends? I have old friends too. They give me socks."
       },
       {
@@ -6196,7 +6196,7 @@
        "text": "No comment. I don't know anything about suitcases. I travel light."
       },
       {
-       "tone": "provocative",
+       "tone": "folksy", "sharp": true,
        "text": "Everyone does it. At least he did it in person.",
        "react": [
         {
@@ -10544,6 +10544,8 @@
  ],
  "TONES": {
   "statesman": {
+   "name": "Measured",
+   "pitch": "Calm, serious, in charge. Older and middle-class voters trust it; the young and the fed-up find it dull.",
    "react": [
     {
      "who": {
@@ -10582,6 +10584,8 @@
    }
   },
   "fiery": {
+   "name": "Fiery",
+   "pitch": "Angry on their behalf. Working people and the fed-up love it; the comfortable flinch.",
    "react": [
     {
      "who": {
@@ -10623,6 +10627,8 @@
    }
   },
   "folksy": {
+   "name": "Folksy",
+   "pitch": "Plain talk and a joke, like at the kitchen table. The young and the provinces warm to it; the well-off wince.",
    "react": [
     {
      "who": {
@@ -10658,7 +10664,12 @@
     "gaffe": "The joke fell flat, and people noticed."
    }
   },
+  "hopeful": {
+   "name": "Hopeful",
+   "pitch": "A picture of a better country, from someone outside the usual game. The young and the middle class lean in; the fed-up and the old roll their eyes.","react": [{"who": {"age": ["18-29", "30-45"]}, "amt": 0.08}, {"who": {"class": "middle"}, "amt": 0.06}, {"who": {"lean": {"society": "<-15"}}, "amt": 0.06}, {"who": {"lean": {"system": "<-25"}}, "amt": -0.06}, {"who": {"age": "61+"}, "amt": -0.06}], "press": {"normal": "It sounded like a better country. Some believed it.", "viral": "The line is everywhere: people are quoting it to each other.", "gaffe": "A promise that big made people laugh, and not with you."}},
   "provocative": {
+   "name": "Sharp",
+   "pitch": "The edge on a style: said to start a fight. It gets noticed and taken seriously, and it blows up more often.",
    "react": [
     {
      "who": {
@@ -10701,7 +10712,8 @@
   "statesman": 0.1,
   "folksy": 0.3,
   "fiery": 0.35,
-  "provocative": 0.6
+  "provocative": 0.6,
+  "hopeful": 0.15
  },
  "ARCHETYPES": {
   "weathervane": {

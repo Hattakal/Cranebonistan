@@ -262,7 +262,7 @@ func build_profile(s: Dictionary) -> Dictionary:
 		"weathervane": mini(cons.size(), 6) * 0.8 + mini(rec.betrayed.size(), 5) * 1.2 + mini(player_flips, 10) * 0.3,
 		"believer": ext * 8 + (3.0 if drift < 1 else 0.0) - mini(cons.size(), 6),
 		"strongman": sh.call("fiery") * 8 + sh.call("statesman") * 3 + nation.devotion * 20,
-		"clown": (sh.call("folksy") + sh.call("provocative")) * 7 + rec.memes * 1.5 + rec.gaffes * 1.5,
+		"clown": (sh.call("folksy") + sh.call("sharp")) * 7 + rec.memes * 1.5 + rec.gaffes * 1.5,
 		"technocrat": sh.call("statesman") * 9 + (1 - ext) * 3,
 		"fixer": dirty.size() * 3 + rec.dossiers * 2,
 		"demagogue": rec.blamed.size() * 3 + rec.outrages * 1.2,
