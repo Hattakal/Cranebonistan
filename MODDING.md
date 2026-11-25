@@ -42,7 +42,7 @@ Put a file in your mod's `data/` folder with the **same name** as the game's fil
 | `scandals.json`, `violence.json` | Secrets and how they leak; political violence and rivals' labels |
 | `party.json` | Your party's founding politicians |
 | `leader_types.json` | What kind of leader each group wants |
-| `names.json` | Name pools by background |
+| `names.json` | Name pools by background (`POOLS`, by region `REGIONS` and by country abroad `FOREIGN`), and `YES_MEN`: one name in every background's language, for the yes-men who fill a drifting party |
 | `tours.json` | Stories from the leader's trips |
 | `carlos.json`, `margaret.json` | What Carlos and Margaret say |
 | `news.json` | What the rules write about the parties: rival scandals, new leaders, splits, their tours, adverts and leaks, the start of the campaign |

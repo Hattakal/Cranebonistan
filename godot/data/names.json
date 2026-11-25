@@ -1,5 +1,5 @@
 {
- "_note": "Name pools by background. People the game creates during play (yes-men, new rival leaders, politicians who defect to you) get a first name and a surname from the pool that fits them, and a hometown in their region. Which pool: an Alinni (nationality) gets 'alinni', a Norbanian-born 'norbanian'; anyone else takes their region's pool (REGIONS below). Foreign characters use their country's pool (FOREIGN: Southern Trueants Germanic, Dillihan Arabic, Bordon Slavic like Fauran, Potania Korean, Golba Chinese; James has none yet). Every list is a placeholder to replace: keep adding names, the more the better (a long game uses a few dozen). Avoid combinations that belong to famous real people. Every name is written in the Latin alphabet (accents and umlauts are fine; Japanese, Chinese, Korean and Arabic names are romanised).",
+ "_note": "Name pools by background. People the game creates during play (yes-men, new rival leaders, politicians who defect to you) get a first name and a surname from the pool that fits them, and a hometown in their region. Which pool: an Alinni (nationality) gets 'alinni', a Norbanian-born 'norbanian'; anyone else takes their region's pool (REGIONS below). Foreign characters use their country's pool (FOREIGN: Southern Trueants Germanic, Dillihan Arabic, Bordon Slavic like Fauran, Potania Korean, Golba Chinese; James Slavic like Bordon, Salmark Turkic (Central Asian)). Every list is a placeholder to replace: keep adding names, the more the better (a long game uses a few dozen). Avoid combinations that belong to famous real people. Every name is written in the Latin alphabet (accents and umlauts are fine; Japanese, Chinese, Korean and Arabic names are romanised).",
  "REGIONS": {
   "cranbia": "cranbia",
   "yamlin": "yamlin",
@@ -741,6 +741,42 @@
     "Song",
     "Yoon"
    ]
+  },
+  "salmark": {
+   "style": "Turkic (Central Asian)",
+   "m": [
+    "Aibek",
+    "Askar",
+    "Azamat",
+    "Bakhyt",
+    "Daniyar",
+    "Kairat",
+    "Marat",
+    "Nurlan",
+    "Timur",
+    "Yerlan"
+   ],
+   "f": [
+    "Aigerim",
+    "Aizhan",
+    "Asel",
+    "Dinara",
+    "Gulnara",
+    "Madina",
+    "Saule",
+    "Zhanar"
+   ],
+   "last": [
+    "Baimukhan",
+    "Esen",
+    "Kassym",
+    "Nurlanuly",
+    "Ospan",
+    "Sarsen",
+    "Seitkali",
+    "Tokhtar",
+    "Zhumabay"
+   ]
   }
  },
  "FOREIGN": {
@@ -748,6 +784,33 @@
   "dillihan": "dillihan",
   "bourdeaux": "fauran",
   "potania": "potania",
-  "golba": "golba"
- }
+  "golba": "golba",
+  "james": "fauran",
+  "salmark": "salmark"
+ },
+ "YES_MEN_NOTE": "Names for the yes-men who replace politicians who quit (the party left them behind). Each set is one name, put into every background's language: the yes-men take them before any other, preferring a set already begun, so a party that drifts far fills up with the same man in five languages. A background missing from a set (or a set used up) falls back to the ordinary pool.",
+ "YES_MEN": [
+  {
+   "cranbia": {
+    "m": "Nicolas Petit",
+    "f": "Nicole Petit"
+   },
+   "erland": {
+    "m": "Nick Small",
+    "f": "Nicola Small"
+   },
+   "yamlin": {
+    "m": "Niccolò Piccolo",
+    "f": "Nicoletta Piccolo"
+   },
+   "fauran": {
+    "m": "Nikola Malý",
+    "f": "Nikolina Malá"
+   },
+   "alinni": {
+    "m": "Niklas Klein",
+    "f": "Nicole Klein"
+   }
+  }
+ ]
 }

@@ -42,7 +42,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/media.json` | Newspapers, channels and platforms: audience, slant, honesty, what tone plays well; which outlet breaks each kind of event |
 | `godot/data/leader_types.json` | The kinds of leader voters want, and who wants which |
 | `godot/data/tours.json` | Short stories from the leader's trips |
-| `godot/data/names.json` | Name pools by background (Cranbia French, Yamlin Italian/Greek, Erland British, Fauran Slavic, Alinni Nordic/Germanic, Norbanian Japanese, Golba Chinese) |
+| `godot/data/names.json` | Name pools by background (Cranbia French, Yamlin Italian/Greek, Erland British, Fauran Slavic, Alinni Nordic/Germanic, Norbanian Japanese, Golba Chinese, Salmark Turkic), and the yes-men's echoing names |
 | `godot/data/scandals.json`, `violence.json`, `interview.json` | Secrets and scandals; political violence and rivals' labels; the year-one interview |
 | `godot/data/coalition.json` | Forming a government: the ministries and what each is worth, how parties bargain, the outcome texts |
 | `godot/data/districts.json` | Province overrides: names, seats, local leans |

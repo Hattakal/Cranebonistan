@@ -683,7 +683,7 @@ func make_person(s: Dictionary, region := "", nationality := "", sex := "", age 
 			if x2 <= 0: nationality = nid; break
 	if sex == "": sex = "f" if rand(s) < 0.5 else "m"
 	if age <= 0: age = 32 + int(rand(s) * 30)
-	var key: String = "alinni" if nationality == "alinnian" else ("norbanian" if nationality == "norbanian" else String(NAMES.get("REGIONS", {}).get(region, "cranbia")))
+	var key: String = name_pool_key(region, nationality)
 	var pool: Dictionary = NAMES.get("POOLS", {}).get(key, {})
 	var name = ""
 	var used = {}
@@ -700,6 +700,32 @@ func make_person(s: Dictionary, region := "", nationality := "", sex := "", age 
 	var towns = MAP.cities.filter(func(c): return c.area == region)
 	var home: String = pick(s, towns).name if towns.size() and rand(s) < 0.8 else (reg.name if reg else "")
 	return {"name": name, "sex": sex, "age": age, "region": region, "nationality": nationality, "hometown": home}
+
+## Which name pool (names.json POOLS) someone of this region and nationality takes.
+func name_pool_key(region: String, nationality: String) -> String:
+	if nationality == "alinnian": return "alinni"
+	if nationality == "norbanian": return "norbanian"
+	return String(NAMES.get("REGIONS", {}).get(region, "cranbia"))
+
+## A yes-man's name (names.json YES_MEN): the same name in each background's language,
+## a set already begun first. "" when none is left for this person.
+func yes_man_name(s: Dictionary, who: Dictionary) -> String:
+	var key: String = name_pool_key(who.region, who.nationality)
+	var used = {}
+	for f in s.figures: used[f.name] = true
+	for l in s.get("figuresLost", []): used[l.name] = true
+	for p in s.parties: used[p.leader] = true
+	var best = ""
+	var best_n = -1
+	for grp in NAMES.get("YES_MEN", []):
+		var mine = grp.get(key, {}).get(who.sex, "")
+		if mine == "" or used.has(mine): continue
+		var begun = 0
+		for k in grp:
+			for sx in grp[k]:
+				if used.has(grp[k][sx]): begun += 1
+		if begun > best_n: best_n = begun; best = mine
+	return best
 
 ## Someone from abroad (a minister, an envoy, a businessman): a name from their
 ## country's pool (names.json FOREIGN).

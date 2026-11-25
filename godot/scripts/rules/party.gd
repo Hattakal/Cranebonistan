@@ -119,6 +119,8 @@ func figures_monthly(s: Dictionary) -> void:
 ## owe the job to you, and usually less able than the person who left.
 func _replace_figure(s: Dictionary, gone: Dictionary) -> void:
 	var who: Dictionary = make_person(s, gone.region)
+	var echo: String = yes_man_name(s, who)
+	if echo != "": who.name = echo
 	var mine = manifesto_side(s, gone.axis)
 	var side: String = mine if mine != "" else gone.side
 	var lean_word: String = side_label(side_key(gone.axis, side)).to_lower()
