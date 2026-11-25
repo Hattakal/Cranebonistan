@@ -267,7 +267,7 @@ func render(s: Dictionary) -> void:
 		var c = _card(false, Look.RED)
 		c.clickable = false
 		var v = _vbox(c)
-		v.add_child(_head("Margaret Teyl", Look.RED_HI, "note"))
+		v.add_child(_head("Margaret Perkins", Look.RED_HI, "note"))
 		v.add_child(Look.dlabel(teyl, "type", 13, Look.TXT, true))
 	# 5. the wire: this week's headlines
 	if s.log.size():

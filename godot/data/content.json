@@ -803,7 +803,7 @@
    "name": "Workers' Empowerment Party",
    "short": "WEP",
    "color": "#9e1b32",
-   "leader": "Vera Lunn",
+   "leader": "Jelena Živanović",
    "share": 0.008,
    "blurb": "Openly socialist: nationalise the banks, the ports and the land. Has never won a seat and does not expect to.",
    "manifesto": {
@@ -821,7 +821,7 @@
    "name": "The Iron Crane",
    "short": "IRON",
    "color": "#4b4b4b",
-   "leader": "Garin Holt",
+   "leader": "Vuk Jevtović",
    "share": 0.007,
    "blurb": "Ultra-nationalist: one people, one language, closed borders. Its rallies are small, loud and well photographed.",
    "manifesto": {
@@ -839,7 +839,7 @@
    "name": "Liberal Democrats",
    "short": "LD",
    "color": "#d9a400",
-   "leader": "Felix Amber",
+   "leader": "Thierry Barthes",
    "share": 0.001,
    "blurb": "Libertarian: abolish most of the state, starting with income tax. Holds its congress in a hotel bar.",
    "manifesto": {
@@ -857,7 +857,7 @@
    "name": "Rents Are High Party",
    "short": "RENT",
    "color": "#7a52a8",
-   "leader": "Tobi Rask",
+   "leader": "Tayshaun Warren",
    "share": 0.002,
    "blurb": "One issue: the rent is too high. Asked about anything else, its leader explains that the rent is too high.",
    "manifesto": {
@@ -888,7 +888,7 @@
    "color": "#3a64b8",
    "ruling": true,
    "emblem": "landmark",
-   "leader": "Aurel Mendrik",
+   "leader": "Thomas Sanders",
    "leaderSex": "m",
    "leaderAge": 68,
    "charisma": 52,
@@ -916,7 +916,7 @@
    "short": "CLF",
    "color": "#3e9a5c",
    "emblem": "hammer",
-   "leader": "Sanna Brokk",
+   "leader": "Charlotte Charpentier",
    "leaderSex": "f",
    "leaderAge": 58,
    "charisma": 46,
@@ -945,7 +945,7 @@
    "short": "OC",
    "color": "#c99a16",
    "emblem": "anchor",
-   "leader": "Teodor Lisz",
+   "leader": "Adam Deschamps",
    "leaderSex": "m",
    "leaderAge": 54,
    "charisma": 55,
@@ -6223,7 +6223,7 @@
    "id": "rival_plagiarism",
    "kind": "scandal",
    "title": "Labour leader's thesis was copied",
-   "text": "Journalists found that Sanna Brokk, leader of the Labour Front, copied most of her university thesis. Labour voters are embarrassed.",
+   "text": "Journalists found that Charlotte Charpentier, leader of the Labour Front, copied most of her university thesis. Labour voters are embarrassed.",
    "choices": [
     {
      "label": "Mock her mercilessly on social media",

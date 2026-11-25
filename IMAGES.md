@@ -99,7 +99,7 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/rent_crisis.jpg` | Rents in Cranebo double in three years |
 |   | `events/pension_reform.jpg` | Government plans to raise the retirement age |
 |   | `events/youth_video.jpg` | Viral video: graduates driving taxis |
-|   | `events/norbanian_boats.jpg` | Refugee ships dock in Yamlin |
+|   | `events/norbanian_boats.jpg` | Refugee ships dock in {city} |
 |   | `events/civil_partnerships.jpg` | Civil partnership bill |
 |   | `events/crime_wave.jpg` | Robberies surge in Cranebo |
 |   | `events/hospital_queues.jpg` | Patients die waiting in hospital corridors |
@@ -124,7 +124,7 @@ For when the short list is done: a picture of its own for one event.
 
 | Have | File | Headline |
 |---|---|---|
-|   | `events/port_automation.jpg` | Robots replace dock workers in Yamlin |
+|   | `events/port_automation.jpg` | Robots replace dock workers in {city} |
 |   | `events/alinnian_schools.jpg` | Alinnian-language schools bill |
 |   | `events/smog_cranbia.jpg` | Smog chokes Cranbia |
 |   | `events/nomad_schools.jpg` | Travelling teachers for Fauran's villages |
@@ -148,10 +148,10 @@ For when the short list is done: a picture of its own for one event.
 | Have | File | Headline |
 |---|---|---|
 |   | `events/festival_holiday.jpg` | Make Harvest Day a national holiday? |
-|   | `events/yamlin_flood.jpg` | Floods devastate Yamlin's old town |
+|   | `events/yamlin_flood.jpg` | Floods devastate {city}'s old town |
 |   | `events/cup_victory.jpg` | {country} wins the Continental Cup |
 |   | `events/tv_debate.jpg` | Invitation to the big TV debate |
-|   | `events/fauraifai_quake.jpg` | Earthquake in Fauran |
+|   | `events/fauraifai_quake.jpg` | Earthquake in {province} |
 |   | `events/celebrity_endorsement.jpg` | Pop star Lira Vey wants to endorse you |
 
 ### Tricky moment

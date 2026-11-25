@@ -248,11 +248,11 @@ func _teyl_walkout(s: Dictionary) -> void:
 		if f.get("yes", false) or f.get("doubter", false): continue
 		if f.loyalty >= 75: continue
 		s.figures.erase(f)
-		s.figuresLost.append({"name": f.name, "role": f.role, "week": s.week, "why": "left with Margaret Teyl"})
+		s.figuresLost.append({"name": f.name, "role": f.role, "week": s.week, "why": "left with Margaret Perkins"})
 		went.append(f.name)
 		_replace_figure(s, f)
 	if went.size():
-		push_news(s, {"kind": "threat", "title": "%s walks out of %s" % ["Margaret Teyl", player_party(s).short],
+		push_news(s, {"kind": "threat", "title": "%s walks out of %s" % ["Margaret Perkins", player_party(s).short],
 			"text": "The party secretary has resigned, and %s went with her. The people who built the party are leaving it to the people who owe it their jobs." % " and ".join(went)})
 
 # ---------- Political violence ----------

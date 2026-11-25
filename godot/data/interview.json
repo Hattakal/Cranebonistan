@@ -1,10 +1,10 @@
 {
  "_note": "The big interview, in the first year: the country meets the leader. It is done by the most trusted outlet (the most honest one with a wide reach), and it can't be gamed: dodging a question, or answering against your own manifesto, costs you; plain answers in your own voice pay. Questions: who you are (by tone), the boldest line in your manifesto, what the country cares most about, your second boldest line, and your record. Answers to issue questions are the lines in debate_lines.json (AXIS_LINES), plus a dodge. Placeholders: {leader} {party} {stance} {issue} {home} {first} {second} {source}. 'verdicts': picked by how clear you were (score: +1 a clear answer in line with your manifesto or your record owned, -1 a dodge, -1 a U-turn, -2 a denial of something real). Drafts: rewrite freely.",
  "INTERVIEWERS": {
-  "cbc": "Hanne Morel",
-  "herald": "Piet Lagarde",
-  "ledger": "Ines Castell",
-  "courier": "Ruben Hart"
+  "cbc": "Catherine Drinkwater",
+  "herald": "Ferdinand Dumont",
+  "ledger": "Louise Simon",
+  "courier": "Andrea Colombo"
  },
  "MONTH": 8,
  "OPENING": {

@@ -1,9 +1,9 @@
 {
- "_note": "The people in your party. Each cares most about one side of one issue. At the start they share the manifesto: a figure whose side differs from the manifesto's is turned around, and 'noteOther' replaces their note. One of them (never Teyl), picked at random each game, is the exception and starts against the manifesto. Steering the manifesto, or speaking, against their side costs loyalty; below 25 they quit and a less able yes-man takes the chair. 'skill' 0-100 (the bench's strength). Margaret Teyl is the party secretary and always starts in the party. 'hometown': where they grew up.",
+ "_note": "The people in your party. Each cares most about one side of one issue. At the start they share the manifesto: a figure whose side differs from the manifesto's is turned around, and 'noteOther' replaces their note. One of them (never Perkins), picked at random each game, is the exception and starts against the manifesto. Steering the manifesto, or speaking, against their side costs loyalty; below 25 they quit and a less able yes-man takes the chair. 'skill' 0-100 (the bench's strength). Margaret Perkins is the party secretary and always starts in the party. 'hometown': where they grew up.",
  "FIGURES": [
   {
    "id": "teyl",
-   "name": "Margaret Teyl",
+   "name": "Margaret Perkins",
    "role": "Party secretary",
    "region": "cranbia",
    "axis": "system",
@@ -15,7 +15,7 @@
   },
   {
    "id": "orlik",
-   "name": "Teo Orlik",
+   "name": "Guy Fontaine",
    "role": "Union organiser, Tarroport",
    "region": "cranbia",
    "axis": "economy",
@@ -28,7 +28,7 @@
   },
   {
    "id": "vanna",
-   "name": "Vanna Ekstrom",
+   "name": "Aurora Mancini",
    "role": "Spokesperson",
    "region": "yamlin",
    "axis": "society",
@@ -41,7 +41,7 @@
   },
   {
    "id": "brandt",
-   "name": "Josef Brandt",
+   "name": "Robert George",
    "role": "Farmers' leader, Bayernal",
    "region": "erland",
    "axis": "nation",
@@ -54,7 +54,7 @@
   },
   {
    "id": "kaya",
-   "name": "Elsa Kaver",
+   "name": "Emma Bianchi",
    "role": "Party treasurer",
    "region": "yamlin",
    "axis": "welfare",
@@ -80,7 +80,7 @@
   },
   {
    "id": "sarn",
-   "name": "Piet Sarn",
+   "name": "Milcho Angelov",
    "role": "Mayor of Kravk",
    "region": "fauraifai",
    "axis": "welfare",

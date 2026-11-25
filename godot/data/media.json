@@ -66,7 +66,7 @@
    "id": "post",
    "name": "The Morning Post",
    "kind": "tabloid",
-   "owner": "Henrik Strell, who also owns half the country's billboards",
+   "owner": "Mattia Greco, who also owns half the country's billboards",
    "blurb": "The biggest-selling paper in the country. Three words to a headline.",
    "honesty": 0.35,
    "pos": {
@@ -131,7 +131,7 @@
    "id": "eagle",
    "name": "Eagle TV",
    "kind": "network",
-   "owner": "Henrik Strell again, through a company in James",
+   "owner": "Mattia Greco again, through a company in James",
    "blurb": "Twenty-four hours of outrage, mostly about Cranebo.",
    "honesty": 0.15,
    "pos": {
@@ -367,7 +367,7 @@
   },
   {
    "id": "vos",
-   "name": "Lena Vos",
+   "name": "Yvonne Jeffries",
    "kind": "influencer",
    "owner": "herself, and a few thousand monthly supporters",
    "blurb": "Explains the economy in ten minutes with a whiteboard. Her viewers think the rest of the media is lying.",
@@ -404,7 +404,7 @@
   },
   {
    "id": "bakk",
-   "name": "Jory Bakk",
+   "name": "Freddy Campbell",
    "kind": "influencer",
    "owner": "himself, from a farm outside Kansilia",
    "blurb": "Films himself on a tractor, talking about Cranebo. Two million views a week.",
@@ -444,7 +444,7 @@
   },
   {
    "id": "dunn",
-   "name": "Marek Dunn",
+   "name": "Mario Goranov",
    "kind": "influencer",
    "owner": "himself, and his supplement sponsors",
    "blurb": "A four-hour podcast about how everything is rigged. Sells vitamins in the breaks.",
@@ -509,7 +509,7 @@
   },
   {
    "id": "ross",
-   "name": "Dalia Ross",
+   "name": "Betty Bridge",
    "kind": "influencer",
    "owner": "herself; her lawyers are kept busy",
    "blurb": "Celebrity gossip and online feuds. If two famous people fall out, she had it first.",
@@ -540,7 +540,7 @@
   },
   {
    "id": "teller",
-   "name": "Kova Teller",
+   "name": "Daniel Mihaylov",
    "kind": "influencer",
    "owner": "himself; formerly of the Pezo Ledger",
    "blurb": "An economist with charts on Chatter. Bankers read him; so do people who want to sound like bankers.",

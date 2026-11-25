@@ -1,5 +1,5 @@
 ## advisor.gd — Carlos Aster in the corner of headquarters, and Margaret
-## Teyl's notes. Carlos talks (with a recording if one exists in
+## Perkins's notes. Carlos talks (with a recording if one exists in
 ## assets/voice/carlos/<id>.ogg or .wav); Margaret only writes, and rarely.
 class_name Advisor
 extends Control
@@ -156,7 +156,7 @@ func margaret(trigger: String) -> void:
 	_note.add_theme_stylebox_override("panel", sb)
 	var v = VBoxContainer.new()
 	v.add_theme_constant_override("separation", 8)
-	v.add_child(Look.caps("Margaret Teyl · party secretary", 11, Look.RED, 2))
+	v.add_child(Look.caps("Margaret Perkins · party secretary", 11, Look.RED, 2))
 	var t = Look.label(text, "type", 14, Look.INK, true)
 	t.custom_minimum_size.x = 380
 	v.add_child(t)

@@ -29,7 +29,7 @@ static func find(names: Array) -> Texture2D:
 			if Mods.has_asset(p): return Mods.texture(p)
 	return null
 
-## "Aurel Mendrik" -> "aurel-mendrik"
+## "Thomas Sanders" -> "aurel-mendrik"
 static func slug(name: String) -> String:
 	var out = ""
 	for ch in name.to_lower():
