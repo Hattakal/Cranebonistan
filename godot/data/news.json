@@ -1,0 +1,29 @@
+{
+ "_note": "News the rules write about the parties: what rival parties go through and do. Placeholders: {short} the party's short name, {name} its full name, {leader} its leader, and the extras named in each entry. 'title' heads the story, 'text' is its body; a one-line entry is a move in the ticker and on the Parties page.",
+ "RIVAL": {
+  "scandal": {"title": "{short} rocked by scandal", "text": "Leaked messages show {leader} arranging state contracts for party donors. {short} is in turmoil and trust in politics has fallen."},
+  "infighting": {"title": "Open infighting in {short}", "text": "A faction inside {name} is openly attacking {leader}. Party members are taking sides."},
+  "new_leader": {"title": "{short} replaces {old} with {leader}", "text": "{leader} is {style}, and is moving {short} toward {toward}."},
+  "new_leader_style": {"star": "a charismatic crowd-pleaser", "dull": "a dull party insider", "plain": "a capable but unexciting figure"},
+  "rebound": {"title": "{leader} wins back the room", "text": "A strong conference speech has united {short} again. Its base is energised."},
+  "split": {"title": "{name} splits apart", "text": "After months of infighting, a third of {short}'s MPs have walked out. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."},
+  "copies_you": {"title": "{short} copies your line on {issue}", "text": "Worried about losing voters to you, {leader} has moved {short} toward {toward}. They will compete for the same voters."},
+  "fills_niche": {"title": "{short} takes up {side}", "text": "Nobody was speaking for {side} voters on {issue}, so {leader} has started to. Expect to hear a lot more about it from them."}
+ },
+ "MOVE": {
+  "toured": "{leader} toured {place}.",
+  "adverts": "{short} spent ₱{amount}M on adverts.",
+  "sponsor": "{short} signed a deal with {personality}.",
+  "bought": "Buyers close to {short} took over {outlet}.",
+  "caught": "{short}'s investigators were caught digging into {target}.",
+  "nothing": "{short} had {target} investigated, and found nothing.",
+  "found": "{short}'s investigators found something on {target}.",
+  "leak_you": "{short} leaks a story about {what}.",
+  "leak_you_money": "where {target}'s money comes from",
+  "leak_you_expenses": "{target_leader}'s expense claims",
+  "leak": "{short} leaks a damaging story about {target}."
+ },
+ "CAMPAIGN": {
+  "begins": {"title": "The campaign begins", "text": "{weeks} weeks to the election. The parties' convoys are on the road, the posters are going up, and from now on every week counts."}
+ }
+}

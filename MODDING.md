@@ -45,6 +45,7 @@ Put a file in your mod's `data/` folder with the **same name** as the game's fil
 | `names.json` | Name pools by background |
 | `tours.json` | Stories from the leader's trips |
 | `carlos.json`, `margaret.json` | What Carlos and Margaret say |
+| `news.json` | What the rules write about the parties: rival scandals, new leaders, splits, their tours, adverts and leaks, the start of the campaign |
 | `mapmodes.json` | The map's modes (names, legends) and how distress is worked out |
 
 Every game file starts with a `_note` explaining its fields.

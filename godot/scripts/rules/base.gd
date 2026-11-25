@@ -59,6 +59,7 @@ var FIGURES: Array = []       # your party's politicians (data/party.json)
 var CITY_INFO: Dictionary = {} # population, lean and a line per city (data/cities.json)
 var FLAGSHIP: Array = []       # the year-three flagship promise (data/flagship.json)
 var TOURS: Dictionary = {}     # short stories from the leader's trips (data/tours.json)
+var NEWS: Dictionary = {}      # what the rules write about the parties (data/news.json)
 var MAPMODES: Dictionary = {}  # the map's modes and how distress is worked out (data/mapmodes.json)
 var FINAL_DEBATE: Dictionary = {}  # the final debate's questions and answers (data/final_debate.json)
 var LEADER_TYPES: Array = []   # the kinds of leader voters want (data/leader_types.json)
@@ -309,6 +310,18 @@ const MEDIA_VIEW := 0.03      # how far a full-time viewer moves toward an outle
 const MEDIA_WARM := 0.05      # goodwill a full-time viewer gains for the favoured party each month
 const SHIELD_MAX := 0.6
 const SHIELD_GAIN := 0.3      # how fast friendly coverage builds cover (it fades by 30% a month)
+
+## A text from data/news.json: news(section, key) is a {title, text} (or a line), filled in.
+## `p`: a party, for {short}, {name} and {leader}.
+func news(section: String, key: String, p = null, fill := {}) -> Variant:
+	var f: Dictionary = fill.duplicate()
+	if p: f.merge({"short": p.short, "name": p.name, "leader": p.leader})
+	var v = NEWS.get(section, {}).get(key, key)
+	if v is Dictionary:
+		var out = {}
+		for k in v: out[k] = String(v[k]).format(f)
+		return out
+	return String(v).format(f)
 
 ## "a, b and c": a list in words.
 static func and_list(xs: Array) -> String:

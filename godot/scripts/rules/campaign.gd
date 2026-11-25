@@ -66,8 +66,7 @@ func campaign_start(s: Dictionary) -> void:
 	s.convoy = {"route": plan_route(s, "player", n)}
 	s.rivalConvoys = {}
 	for p in rivals(s): s.rivalConvoys[p.id] = plan_route(s, p.id, n)
-	push_news(s, {"kind": "neutral", "title": "The campaign begins",
-		"text": "%d weeks to the election. The parties' convoys are on the road, the posters are going up, and from now on every week counts." % int(C.campaign.weeks)})
+	push_news(s, merged({"kind": "neutral"}, news("CAMPAIGN", "begins", null, {"weeks": int(C.campaign.weeks)})))
 	s.queue.append({"type": "convoy"})
 
 ## Change your route from stop `from` on (the stops before it have happened).

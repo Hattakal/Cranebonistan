@@ -59,6 +59,7 @@ func load_content(_unused := "") -> void:
 	LEADER_TYPES = _data("leader_types", {}).get("TYPES", [])
 	TOURS = _data("tours", {})
 	MAPMODES = _data("mapmodes", {})
+	NEWS = _data("news", {})
 	_load_districts()
 	for c in MAP.cities:   # the designer's sizes beat the dot sizes on the map
 		if CITY_INFO.get(c.name, {}).has("size"): c.size = int(CITY_INFO[c.name].size)

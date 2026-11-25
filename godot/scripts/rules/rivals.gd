@@ -29,12 +29,10 @@ func _happening_run(id: String, s: Dictionary, p: Dictionary) -> void:
 			p.charisma = clampf2(p.charisma - 5, 10, 100)
 			change_trust(s, -4)
 			for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.25, -2, 2)
-			push_news(s, {"party": p.id, "kind": "bad", "title": "%s rocked by scandal" % p.short,
-				"text": "Leaked messages show %s arranging state contracts for party donors. %s is in turmoil and trust in politics has fallen." % [p.leader, p.short]})
+			push_news(s, merged({"party": p.id, "kind": "bad"}, news("RIVAL", "scandal", p)))
 		"infighting":
 			p.stability = clampf2(p.stability - 12, 0, 100)
-			push_news(s, {"party": p.id, "kind": "bad", "title": "Open infighting in %s" % p.short,
-				"text": "A faction inside %s is openly attacking %s. Party members are taking sides." % [p.name, p.leader]})
+			push_news(s, merged({"party": p.id, "kind": "bad"}, news("RIVAL", "infighting", p)))
 		"new_leader":
 			var old: String = p.leader
 			var reach: Dictionary = by_id(PARTIES, p.id).get("reach", {}) if by_id(PARTIES, p.id) else {}
@@ -48,16 +46,15 @@ func _happening_run(id: String, s: Dictionary, p: Dictionary) -> void:
 			p.perceived[ax] = clampf2(p.perceived[ax] + dir * 22, -100, 100)
 			p.manifesto[ax] = p.perceived[ax]
 			var a = by_id(AXES, ax)
-			var style = "a charismatic crowd-pleaser" if p.charisma >= 62 else ("a dull party insider" if p.charisma <= 40 else "a capable but unexciting figure")
-			push_news(s, {"party": p.id, "kind": "good" if p.charisma >= 55 else "neutral", "title": "%s replaces %s with %s" % [p.short, old, p.leader],
-				"text": "%s is %s, and is moving %s toward %s." % [p.leader, style, p.short, (a.left if dir < 0 else a.right).to_lower()]})
+			var styles: Dictionary = NEWS.get("RIVAL", {}).get("new_leader_style", {})
+			var style: String = String(styles.get("star" if p.charisma >= 62 else ("dull" if p.charisma <= 40 else "plain"), ""))
+			push_news(s, merged({"party": p.id, "kind": "good" if p.charisma >= 55 else "neutral"}, news("RIVAL", "new_leader", p, {"old": old, "style": style, "toward": (a.left if dir < 0 else a.right).to_lower()})))
 		"rebound":
 			p.stability = clampf2(p.stability + 15, 0, 100)
 			p.charisma = clampf2(p.charisma + 6, 10, 100)
 			for pop in s.pops:
 				if pop.loyal[p.id] > 0.15: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] + 0.2, -2, 2)
-			push_news(s, {"party": p.id, "kind": "good", "title": "%s wins back the room" % p.leader,
-				"text": "A strong conference speech has united %s again. Its base is energised." % p.short})
+			push_news(s, merged({"party": p.id, "kind": "good"}, news("RIVAL", "rebound", p)))
 
 func rival_happening(s: Dictionary) -> void:
 	var cands = []
@@ -82,8 +79,7 @@ func collapse_party(s: Dictionary, p: Dictionary) -> void:
 	p.lastCollapse = s.week
 	p.stability = 55.0
 	change_trust(s, -3)
-	push_news(s, {"party": p.id, "kind": "vacuum", "title": "%s splits apart" % p.name,
-		"text": "After months of infighting, a third of %s's MPs have walked out. About %s million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up." % [p.short, fmt1(freed / 1e6)]})
+	push_news(s, merged({"party": p.id, "kind": "vacuum"}, news("RIVAL", "split", p, {"freed": fmt1(freed / 1e6)})))
 	s.queue.append({"type": "event", "event": defector_event(s, p, freed)})
 
 func defector_event(s: Dictionary, p: Dictionary, _freed: float) -> Dictionary:
@@ -134,8 +130,7 @@ func rivals_adapt(s: Dictionary, before: Dictionary, now: Dictionary) -> void:
 		var side = "L" if d < 0 else "R"
 		add_ownership(s, p.id, side_key(ax.id, side), 0.12)
 		trim_claims(s, p.id, side_key(ax.id, side))
-		push_news(s, {"party": p.id, "kind": "threat", "title": "%s copies your line on %s" % [p.short, ax.issue.to_lower()],
-			"text": "Worried about losing voters to you, %s has moved %s toward %s. They will compete for the same voters." % [p.leader, p.short, (ax.left if d < 0 else ax.right).to_lower()]})
+		push_news(s, merged({"party": p.id, "kind": "threat"}, news("RIVAL", "copies_you", p, {"issue": ax.issue.to_lower(), "toward": (ax.left if d < 0 else ax.right).to_lower()})))
 
 func rivals_fill_niche(s: Dictionary) -> void:
 	var best = null
@@ -165,8 +160,7 @@ func rivals_fill_niche(s: Dictionary) -> void:
 	add_ownership(s, p.id, best.key, 0.12)
 	trim_claims(s, p.id, best.key)
 	var name = (ax.left if best.side == "L" else ax.right).to_lower()
-	push_news(s, {"party": p.id, "kind": "threat", "title": "%s takes up %s" % [p.short, name],
-		"text": "Nobody was speaking for %s voters on %s, so %s has started to. Expect to hear a lot more about it from them." % [name, ax.issue.to_lower(), p.leader]})
+	push_news(s, merged({"party": p.id, "kind": "threat"}, news("RIVAL", "fills_niche", p, {"side": name, "issue": ax.issue.to_lower()})))
 
 func rivals_monthly(s: Dictionary, now_support: Dictionary) -> void:
 	for p in rivals(s):
@@ -232,7 +226,7 @@ func rival_visit(s: Dictionary, p: Dictionary, best: Dictionary, mult := 1.0) ->
 	st.rtrip[p.id] = minf(0.8, had + mult * VISIT_GOODWILL * RIVAL_EDGE * sqrt(float(p.charisma) / 50.0) / (1.0 + 2.0 * had))
 	if not st.has("rtripWeek"): st.rtripWeek = {}
 	st.rtripWeek[p.id] = s.week   # shown on the map: who has been campaigning where
-	rival_move(s, p, "%s toured %s." % [p.leader, best.name])
+	rival_move(s, p, news("MOVE", "toured", p, {"place": best.name}))
 
 ## Adverts: some of the money goes on the groups the party wants most.
 func _rival_ads(s: Dictionary, p: Dictionary) -> void:
@@ -253,7 +247,7 @@ func _rival_ads(s: Dictionary, p: Dictionary) -> void:
 			w += sal[ax]
 		var near: float = clampf2(1.0 - (d / w if w > 0 else 0.0) / 60.0, 0, 1)
 		pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] + k * near, -2, 2)
-	rival_move(s, p, "%s spent ₱%sM on adverts." % [p.short, fmt1(spend)])
+	rival_move(s, p, news("MOVE", "adverts", p, {"amount": fmt1(spend)}))
 
 ## A personality whose line is close to theirs, and once in a while an outlet for sale.
 func _rival_media(s: Dictionary, p: Dictionary) -> void:
@@ -272,7 +266,7 @@ func _rival_media(s: Dictionary, p: Dictionary) -> void:
 			var price: float = sponsor_price(s, best)
 			p.money = float(p.money) - price
 			s.media[best.id].sponsor = p.id
-			rival_move(s, p, "%s signed a deal with %s." % [p.short, best.name])
+			rival_move(s, p, news("MOVE", "sponsor", p, {"personality": best.name}))
 	if rand(s) < 0.015:
 		for o in OUTLETS:
 			var st: Dictionary = s.media[o.id]
@@ -281,7 +275,7 @@ func _rival_media(s: Dictionary, p: Dictionary) -> void:
 			if outlet_favour(s, o, p) < 0.2: continue
 			p.money = float(p.money) - price
 			st.owner = p.id
-			rival_move(s, p, "Buyers close to %s took over %s." % [p.short, o.name])
+			rival_move(s, p, news("MOVE", "bought", p, {"outlet": o.name}))
 			break
 
 ## Investigators: usually at whoever is closest to them in the polls.
@@ -299,30 +293,30 @@ func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
 	var r = rand(s)
 	if r < 0.15:
 		for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.08, -2, 2)
-		rival_move(s, p, "%s's investigators were caught digging into %s." % [p.short, target.short], target.isPlayer)
+		rival_move(s, p, news("MOVE", "caught", p, {"target": target.short}), target.isPlayer)
 		if target.isPlayer: change_relation(s, p.id, -4, "they spied on you")
 		return
 	if r > 0.6:
-		rival_move(s, p, "%s had %s investigated, and found nothing." % [p.short, target.short])
+		rival_move(s, p, news("MOVE", "nothing", p, {"target": target.short}))
 		return
 	if target.isPlayer and live_secrets(s).size():
 		var sec: Dictionary = ssort(live_secrets(s), func(a, b): return float(b.size) - float(a.size))[0]
 		change_relation(s, p.id, -6, "they dug up dirt on you")
-		rival_move(s, p, "%s's investigators found something on %s." % [p.short, target.short])
+		rival_move(s, p, news("MOVE", "found", p, {"target": target.short}))
 		leak_secret(s, sec, p.short)
 		return
 	if target.isPlayer:
 		var dirty: Array = s.record.money.filter(func(m): return m.dirty)
 		var hit: float = 0.22 if dirty.size() else 0.08
-		var what: String = ("where %s's money comes from" % target.short) if dirty.size() else "%s's expense claims" % target.leader
+		var what: String = news("MOVE", "leak_you_money" if dirty.size() else "leak_you_expenses", null, {"target": target.short, "target_leader": target.leader})
 		for pop in s.pops: pop.goodwill.player = clampf2(pop.goodwill.player - hit * (1 - shield_of(pop, "player")), -2, 2)
 		for o in OUTLETS: s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) - hit * float(o.get("honesty", 0.5)), -1, 1)
 		change_relation(s, p.id, -6, "they dug up dirt on you")
-		rival_move(s, p, "%s leaks a story about %s." % [p.short, what], true)
+		rival_move(s, p, news("MOVE", "leak_you", p, {"what": what}), true)
 	else:
 		target.stability = clampf2(float(target.stability) - 6, 0, 100)
 		for pop in s.pops: pop.goodwill[target.id] = clampf2(pop.goodwill[target.id] - 0.1 * (1 - shield_of(pop, target.id)), -2, 2)
-		rival_move(s, p, "%s leaks a damaging story about %s." % [p.short, target.short])
+		rival_move(s, p, news("MOVE", "leak", p, {"target": target.short}))
 
 func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 	if now.player < C.scrutinyFrom or rand(s) > C.scrutinyChance: return
