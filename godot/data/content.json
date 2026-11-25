@@ -14662,7 +14662,7 @@
      }
     },
     {
-     "label": "Condemn it, but say the anger is understandable",
+     "label": "Condemn it, but call it a symptom of years of being ignored",
      "effects": {
       "shift": {
        "nation": -4
@@ -14869,14 +14869,13 @@
      }
     },
     {
-     "label": "Accuse the police of targeting patriots",
+     "label": "Say the police failed to stop him, and the press is using him to smear your voters",
      "effects": {
       "shift": {
-       "nation": -8,
-       "system": -6,
-       "order": 5
+       "nation": -5,
+       "system": -6
       },
-      "trust": -4,
+      "trust": -3,
       "goodwill": [
        {
         "who": {
