@@ -12020,6 +12020,265 @@
    ]
   },
   {
+   "id": "minister_children",
+   "kind": "crisis",
+   "title": "Interior minister asked who looks after her children",
+   "text": "On live television, the interviewer asked Interior Minister Claire Anderson, in the middle of a border crisis, who looks after her two children while she works such long hours. Nobody has ever asked her male colleagues. The clip is everywhere.",
+   "choices": [
+    {
+     "label": "Call the question out",
+     "effects": {
+      "shift": {
+       "society": -5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "30-45"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "society": ">20"
+         }
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Ask her about the border. That's her job, and it's the question the country needs answered."
+      },
+      {
+       "tone": "fiery",
+       "text": "In twenty years nobody has asked a male minister who minds his kids. Not once!"
+      },
+      {
+       "tone": "folksy",
+       "text": "I've been asked about my party, my money and my tie. Never about who's feeding my children."
+      },
+      {
+       "tone": "hopeful",
+       "text": "One day that question will sound as strange as asking her if she can read. Let's get there quickly."
+      }
+     ]
+    },
+    {
+     "label": "Say it's a fair question for any parent",
+     "effects": {
+      "shift": {
+       "society": 5
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "society": ">20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Every parent in public life should be asked how they balance it. Fathers too."
+      },
+      {
+       "tone": "folksy",
+       "text": "My mother would have asked her the same thing. Then she'd have offered to babysit."
+      }
+     ]
+    },
+    {
+     "label": "Stay out of it: you'd rather talk about the border",
+     "effects": {
+      "goodwill": [
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "I'll leave the interviewers to argue among themselves. The border is the story."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "goranov_women",
+   "kind": "opportunity",
+   "title": "Mario Goranov: women are \"too emotional for a crisis\"",
+   "text": "On his four-hour podcast, Mario Goranov told a million listeners, most of them young men, that women in government are \"too emotional to lead in a crisis\". He has invited every party leader on his show next week. Two have already said yes.",
+   "choices": [
+    {
+     "label": "Condemn it, and refuse his invitation",
+     "effects": {
+      "shift": {
+       "society": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.05
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Half the people who kept this country running through every crisis were women. I won't sit next to someone who says otherwise."
+      },
+      {
+       "tone": "folksy",
+       "text": "My grandmother ran a farm through a drought and a war. Mr Goranov can tell her about emotions."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Our daughters should grow up thinking that's a strange thing to say. I'd like to help with that."
+      }
+     ]
+    },
+    {
+     "label": "Go on the show anyway: his listeners vote too",
+     "effects": {
+      "awareness": 0.07,
+      "leader": [
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.2
+       }
+      ],
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<-15"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<-20"
+         }
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "I'll go where the voters are. I won't agree with everything said in the studio."
+      },
+      {
+       "tone": "folksy",
+       "text": "A million young men listen to him. Somebody should talk to them about rent."
+      },
+      {
+       "tone": "folksy",
+       "text": "I'll go on, as long as nobody gets too emotional about it.",
+       "sharp": true,
+       "risk": 0.75,
+       "react": [
+        {
+         "who": {
+          "lean": {
+           "society": "<-20"
+          }
+         },
+         "amt": -0.15
+        },
+        {
+         "who": {
+          "age": "30-45"
+         },
+         "amt": -0.1
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "label": "Say nothing",
+     "effects": {
+      "awareness": 0
+     }
+    }
+   ]
+  },
+  {
    "id": "alinni_protests", "where": {"region": "alinni"},
    "kind": "followup",
    "deck": false,

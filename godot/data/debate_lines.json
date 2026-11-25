@@ -502,6 +502,20 @@
     {
      "tone": "hopeful",
      "text": "Let's make {country} a place where young couples feel they can afford a family again."
+    },
+    {
+     "tone": "statesman",
+     "text": "A parent who chooses to stay home with the children is doing the most important job in {country}. The tax system should say so."
+    },
+    {
+     "tone": "folksy",
+     "text": "My father brought home the wages and my mother ran the house. Nobody in that house felt hard done by."
+    },
+    {
+     "tone": "fiery",
+     "text": "Some people in Cranebo think raising children is a waste of a degree.",
+     "sharp": true,
+     "risk": 0.6
     }
    ]
   },
@@ -1218,6 +1232,14 @@
     {
      "tone": "hopeful",
      "text": "What our grandparents gave us can carry us into a better century, not hold us back."
+    },
+    {
+     "tone": "statesman",
+     "text": "Men and women are equal, and they are not the same. A sensible country makes room for both."
+    },
+    {
+     "tone": "folksy",
+     "text": "Fathers teach some things and mothers teach others. That isn't prejudice, it's every family I grew up around."
     }
    ]
   },
@@ -1661,6 +1683,10 @@
    {
     "tone": "hopeful",
     "text": "Let's raise children who know where they come from and believe in where they're going."
+   },
+   {
+    "tone": "statesman",
+    "text": "Every family that wants a mother or father at home should be able to afford one."
    }
   ],
   "herder_titles": [

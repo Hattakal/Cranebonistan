@@ -33,10 +33,10 @@ One picture per kind of event covers every event in the game. Start here:
 
 | Have | File | Used for | Something like |
 |---|---|---|---|
-|   | `events/_crisis.jpg` | Crisis (43 events) | an empty hospital corridor, a queue, a closed factory gate |
+|   | `events/_crisis.jpg` | Crisis (44 events) | an empty hospital corridor, a queue, a closed factory gate |
 |   | `events/_regional.jpg` | Regional issue (11 events) | a small-town high street, a harbour, a field with pylons |
 |   | `events/_foreign.jpg` | Foreign affairs (11 events) | a border post, flags outside a ministry, a warship on the horizon |
-|   | `events/_opportunity.jpg` | Opportunity (14 events) | a crowd at a rally, a ribbon being cut, a factory floor |
+|   | `events/_opportunity.jpg` | Opportunity (15 events) | a crowd at a rally, a ribbon being cut, a factory floor |
 |   | `events/_trap.jpg` | Tricky moment (3 events) | a television studio, a row of microphones, cameras pointed at one chair |
 |   | `events/_scandal.jpg` | Scandal (11 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
 |   | `events/_followup.jpg` | Consequences (16 events) | the morning after: an empty hall, newspapers on a doormat |
@@ -122,6 +122,7 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/school_kitchen.jpg` | Rats in the kitchen that feeds two hundred schools |
 |   | `events/violent_series.jpg` | Calls to ban "Black Harbour" after school knife fights |
 |   | `events/women_killed.jpg` | Three women killed by former partners in one week |
+|   | `events/minister_children.jpg` | Interior minister asked who looks after her children |
 |   | `events/crisis_insurgency_1.jpg` | Bombing in Alinni |
 |   | `events/crisis_insurgency_2.jpg` | Curfew and mass arrests in Alinni |
 |   | `events/crisis_insurgency_3.jpg` | The Free Alinni commander is caught |
@@ -188,6 +189,7 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/hannigan_stream.jpg` | Jeremy Hannigan asks a politician onto his stream |
 |   | `events/james_accounts.jpg` | Leaked list: two thousand {nationals} with secret accounts in James |
 |   | `events/wrestling_gold.jpg` | A shepherd's son from {province} is world wrestling champion |
+|   | `events/goranov_women.jpg` | Mario Goranov: women are "too emotional for a crisis" |
 
 ### Tricky moment
 
