@@ -1317,6 +1317,14 @@ func _polls() -> void:
 			if st == "ally": allies.append(nm2)
 			elif st == "enemy": enemies.append(nm2)
 		_add(Look.dlabel("Allies: %s · Enemies: %s" % [", ".join(allies) if allies.size() else "none", ", ".join(enemies) if enemies.size() else "none"], "body", 13, Look.TXT, true), c)
+		# bad blood between rivals, and why
+		if not p.isPlayer:
+			var grudges = []
+			for q in G.rivals(S):
+				if q.id == p.id: continue
+				var why: String = G.pair_grudge(S, p.id, q.id)
+				if why != "": grudges.append("%s (%s)" % [q.short, why])
+			if grudges.size(): _add(Look.dlabel("Bad blood with " + "; ".join(grudges), "body", 12, Look.RED_HI, true), c)
 		if p.isPlayer:
 			_add(Look.dlabel("%d of %d actions left %s." % [S.actionsLeft, int(G.C.campaign.actionsPerWeek) if G.in_campaign(S) else int(G.C.actionsPerMonth), G.period_word(S)], "body", 12, Look.TXT, true), c)
 			for i in S.dossiers.size():

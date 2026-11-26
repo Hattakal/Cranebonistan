@@ -387,6 +387,12 @@ func rivals_debate(s: Dictionary) -> void:
 			var side: String = row.key.split(":")[1]
 			var d = open_debate(s, t.id, t.axis, t.title, t.text, p.id, 30, -25.0 if side == "L" else 25.0)
 			_note_move(d, p.id, "start", side, s.week)
+			var foe = null
+			for q in s.parties:
+				if q.id == p.id: continue
+				var v: float = float(q.perceived[t.axis]) * (1.0 if side == "L" else -1.0)   # how far on the other side
+				if v > 30 and (foe == null or v > float(foe.perceived[t.axis]) * (1.0 if side == "L" else -1.0)): foe = q
+			if foe: change_pair(s, foe.id, p.id, -3, "%s picked a fight with them over %s" % [p.short, String(by_id(AXES, t.axis).issue).to_lower()])
 			push_news(s, merged({"party": p.id, "kind": "threat", "quiet": true}, news("WORLD", "rival_fight", null, {"short": p.short, "topic": t.title, "text": t.text})))
 
 func fan_preview(s: Dictionary, d: Dictionary, side: String) -> Dictionary:

@@ -107,7 +107,19 @@ func campaign_weekly(s: Dictionary) -> void:
 	if i < route.size():
 		var res: Dictionary = tour(s, route[i], float(C.campaign.rally), true)
 		s.queue.append({"type": "rally", "res": res})
+		_stronghold_stop(s, "player", route[i])
 	for pid in s.get("rivalConvoys", {}):
 		var p = party_of(s, pid)
 		var r: Array = s.rivalConvoys[pid]
-		if p and i < r.size(): rival_visit(s, p, district_by_id(r[i]), float(C.campaign.rally))
+		if p and i < r.size():
+			rival_visit(s, p, district_by_id(r[i]), float(C.campaign.rally))
+			_stronghold_stop(s, pid, r[i])
+
+## A convoy camped in another party's stronghold (a province it won clearly last time)
+## is a small hostile act between the two (CONFIG.relations).
+func _stronghold_stop(s: Dictionary, pid: String, did: String) -> void:
+	var past: Dictionary = s.get("pastElection", {}).get(did, {})
+	var owner: String = String(past.get("winner", ""))
+	if owner == "" or owner == pid or float(past.get("margin", 0)) < float(C.relations.get("strongMargin", 0.12)): return
+	var d = district_by_id(did)
+	change_pair(s, owner, pid, float(C.relations.get("stronghold", -1.5)), "%s campaigned in their stronghold, %s" % ["You" if pid == "player" else party_of(s, pid).short, d.name if d else did])

@@ -25,7 +25,7 @@ func load_content(_unused := "") -> void:
 	var d: Dictionary = Mods.data("content")
 	C = d.CONFIG; AXES = d.AXES; AGES = d.AGES; CLASSES = d.CLASSES; NATIONALITIES = d.NATIONALITIES
 	REGIONS = d.REGIONS; FOREIGN = d.FOREIGN; CAPITAL = d.CAPITAL; VIEW_GROUPS = d.VIEW_GROUPS
-	PARTIES = d.PARTIES; MINOR_PARTIES = _minor_parties(d.get("MINOR_PARTIES", [])); LEADER_POOL = d.LEADER_POOL; PARTY_TEMPLATES = d.PARTY_TEMPLATES
+	PARTIES = d.PARTIES; PARTY_HISTORY = d.get("PARTY_HISTORY", []); MINOR_PARTIES = _minor_parties(d.get("MINOR_PARTIES", [])); LEADER_POOL = d.LEADER_POOL; PARTY_TEMPLATES = d.PARTY_TEMPLATES
 	PLAYER_COLORS = d.PLAYER_COLORS; PLAYER_EMBLEMS = d.PLAYER_EMBLEMS; PLAYER_PORTRAITS = d.PLAYER_PORTRAITS
 	CAMPAIGN = d.CAMPAIGN; EVENTS = d.EVENTS; FUNDING_OFFERS = d.FUNDING_OFFERS; INITIATIVES = d.INITIATIVES
 	CRISES = d.CRISES; INDICATORS = d.INDICATORS; TONES = d.TONES; TONE_RISK = d.TONE_RISK
@@ -128,6 +128,7 @@ func new_game(opts := {}) -> Dictionary:
 		trim_claims(s, p.id)
 	s.districts = new_districts(s)
 	s.relations = new_relations(s)
+	new_pair_relations(s)
 	s.pops = build_pops(s)
 	_home_start(s, str(opts.get("home", "")))
 	seed_loyalty(s)

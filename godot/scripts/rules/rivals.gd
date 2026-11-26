@@ -288,6 +288,7 @@ func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
 		if q.id == p.id: continue
 		var gap: float = absf(float(now.get(q.id, 0)) - float(now.get(p.id, 0)))
 		if q.isPlayer: gap *= 0.7   # the new party is everyone's favourite target
+		gap *= clampf2(1.0 + (relation(s, p.id) if q.isPlayer else pair_relation(s, p.id, q.id)) / 100.0, 0.3, 1.7)   # and the ones they can't stand
 		if gap < close: close = gap; target = q
 	if target == null: return
 	var r = rand(s)
@@ -295,6 +296,7 @@ func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
 		for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.08, -2, 2)
 		rival_move(s, p, news("MOVE", "caught", p, {"target": target.short}), target.isPlayer)
 		if target.isPlayer: change_relation(s, p.id, -4, "they spied on you")
+		else: change_pair(s, target.id, p.id, -4, "%s were caught spying on them" % p.short)
 		return
 	if r > 0.6:
 		rival_move(s, p, news("MOVE", "nothing", p, {"target": target.short}))
@@ -317,6 +319,7 @@ func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
 		target.stability = clampf2(float(target.stability) - 6, 0, 100)
 		for pop in s.pops: pop.goodwill[target.id] = clampf2(pop.goodwill[target.id] - 0.1 * (1 - shield_of(pop, target.id)), -2, 2)
 		rival_move(s, p, news("MOVE", "leak", p, {"target": target.short}))
+		change_pair(s, target.id, p.id, -5, "%s leaked a story about them" % p.short)
 
 func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 	if now.player < C.scrutinyFrom or rand(s) > C.scrutinyChance: return
@@ -330,7 +333,74 @@ func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 ## moved by what you do to them. Nothing uses it yet: later, parties standing
 ## aside in each other's districts, and forming a government.
 func relation_base(s: Dictionary, pid: String) -> float:
-	return policy_relation(player_party(s), party_of(s, pid))
+	return pair_base(s, player_party(s), party_of(s, pid))
+
+## How cut off a party is: how far its positions are from everyone else's, 0..1.
+## Two parties nobody else will touch warm to each other (CONFIG.relations.isolated).
+func isolation(s: Dictionary, p: Dictionary) -> float:
+	var tot = 0.0
+	var n = 0
+	for q in s.parties:
+		if q.id == p.id: continue
+		tot += policy_relation(p, q); n += 1
+	return clampf2(-(tot / maxf(1, n)) / 30.0, 0, 1)
+
+## What two parties' positions alone earn them, plus the pull between two outcasts.
+func pair_base(s: Dictionary, a: Dictionary, b: Dictionary) -> float:
+	return policy_relation(a, b) + float(C.get("relations", {}).get("isolated", 25)) * isolation(s, a) * isolation(s, b)
+
+# ----- Between two rival parties: the same model as yours, the same both ways -----
+func _pair_key(a: String, b: String) -> String:
+	return a + "|" + b if a < b else b + "|" + a
+
+func pair_relation(s: Dictionary, a: String, b: String) -> float:
+	var pa = party_of(s, a)
+	var pb = party_of(s, b)
+	if pa == null or pb == null: return 0.0
+	var st: Dictionary = s.get("pairRel", {}).get(_pair_key(a, b), {})
+	return clampf2(float(st.get("fade", pair_base(s, pa, pb))) + float(st.get("scar", 0.0)), -100, 100)
+
+## A hostile act between two rivals leaves a scar; a favour heals scars first.
+func change_pair(s: Dictionary, a: String, b: String, delta: float, why: String) -> void:
+	var pa = party_of(s, a)
+	var pb = party_of(s, b)
+	if pa == null or pb == null or a == b: return
+	if pa.isPlayer: change_relation(s, b, delta, why); return
+	if pb.isPlayer: change_relation(s, a, delta, why); return
+	if not s.has("pairRel"): s.pairRel = {}
+	var k: String = _pair_key(a, b)
+	var st: Dictionary = s.pairRel.get(k, {"fade": pair_base(s, pa, pb), "scar": 0.0, "notes": []})
+	var fade: float = float(st.fade)
+	var scar: float = float(st.scar)
+	if delta < 0:
+		scar += delta * SCAR_SHARE
+		fade += delta * (1 - SCAR_SHARE)
+	else:
+		var heal: float = minf(delta, -scar)
+		scar += heal
+		fade += delta - heal
+	st.fade = clampf2(fade, -100, 100)
+	st.scar = clampf2(scar, -100, 0)
+	var notes: Array = st.get("notes", [])
+	notes.append({"week": s.week, "text": why, "delta": delta, "by": a})
+	st.notes = notes.slice(-6)
+	s.pairRel[k] = st
+
+## The worst blood between two rivals, in a few words ("" when there is none worth saying).
+func pair_grudge(s: Dictionary, a: String, b: String) -> String:
+	var st: Dictionary = s.get("pairRel", {}).get(_pair_key(a, b), {})
+	if float(st.get("scar", 0)) > -4: return ""
+	var worst = null
+	for n in st.get("notes", []):
+		if float(n.delta) < 0 and (worst == null or float(n.delta) <= float(worst.delta)): worst = n
+	return String(worst.text) if worst else ""
+
+## At the start: what the parties remember from before the game (content.json PARTY_HISTORY).
+func new_pair_relations(s: Dictionary) -> void:
+	s.pairRel = {}
+	for h in PARTY_HISTORY:
+		var ids: Array = h.get("parties", [])
+		if ids.size() == 2: change_pair(s, ids[0], ids[1], float(h.get("amt", -20)), String(h.get("why", "")))
 
 ## How two parties feel about each other from their positions alone, -40..40.
 func policy_relation(a: Dictionary, b: Dictionary) -> float:
@@ -379,6 +449,13 @@ func relations_monthly(s: Dictionary) -> void:
 	for p in rivals(s):
 		var v = _rel_fading(s, p.id)
 		s.relations[p.id] = v + (relation_base(s, p.id) - v) * 0.1
+	for k in s.get("pairRel", {}):
+		var ids: PackedStringArray = k.split("|")
+		var pa = party_of(s, ids[0])
+		var pb = party_of(s, ids[1])
+		if pa == null or pb == null: continue
+		var st: Dictionary = s.pairRel[k]
+		st.fade = float(st.fade) + (pair_base(s, pa, pb) - float(st.fade)) * 0.1
 
 func act_research(s: Dictionary, party_id: String) -> Dictionary:
 	var cost: float = ACTIONS.research.cost

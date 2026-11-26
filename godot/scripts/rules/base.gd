@@ -10,7 +10,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 52
+const SAVE_VERSION := 53
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -23,6 +23,7 @@ var FOREIGN: Array
 var CAPITAL: Dictionary
 var VIEW_GROUPS: Array
 var PARTIES: Array
+var PARTY_HISTORY: Array    # what the parties remember from before the game (content.json)
 var MINOR_PARTIES: Array    # small parties with a fixed share of the vote (content.json MINOR_PARTIES)
 var LEADER_POOL: Array
 var PARTY_TEMPLATES: Array

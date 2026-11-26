@@ -37,7 +37,7 @@ func party_relation(s: Dictionary, a: String, b: String) -> float:
 	if pa == null or pb == null: return 0.0
 	if pa.isPlayer: return relation(s, b)
 	if pb.isPlayer: return relation(s, a)
-	return policy_relation(pa, pb)
+	return pair_relation(s, a, b)
 
 ## "ally", "neutral" or "enemy". `relaxed`: after a shut-out, enemies count as neutral.
 func party_stance(s: Dictionary, a: String, b: String, relaxed := false) -> String:
@@ -56,6 +56,8 @@ func enemy_reason(s: Dictionary, a: String, b: String) -> String:
 		var other: String = b if pa.isPlayer else a
 		var notes: Array = s.get("relationNotes", {}).get(other, []).filter(func(n): return float(n.delta) < 0)
 		if notes.size(): return coalition_text("enemies", names) + " (%s)" % notes[-1].text
+	var grudge: String = pair_grudge(s, a, b) if not (pa.isPlayer or pb.isPlayer) else ""
+	if grudge != "": return coalition_text("enemies", names) + " (%s)" % grudge
 	var diffs: Array = biggest_differences(s, pa, pb, 2)
 	var issues: Array = diffs.map(func(x): return String(by_id(AXES, x.ax).issue).to_lower())
 	return coalition_text("enemies", names) + " (" + coalition_text("enemies_policy", {"issues": " and ".join(issues)}) + ")"
