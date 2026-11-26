@@ -255,7 +255,11 @@ func _try_formateur(s: Dictionary, f: String, in_play: Array, seats: Dictionary,
 		for i in range(log.size() - 1, -1, -1):
 			if log[i].t == "approach" and log[i].p == pm and log[i].verdict == "join":
 				log[i].why = coalition_text("neutral_pm", {}, party_of(s, pm).isPlayer); break
-	return {"members": members, "cabinet": cab, "formateur": f, "shares": ent}
+	var agreement = []
+	if members.has("player") and mine_dec != null and mine_dec.accept:
+		for id in mine_dec.ministries:
+			if String(id).begins_with("line:"): agreement.append({"axis": String(id).substr(5), "party": "player"})
+	return {"members": members, "cabinet": cab, "formateur": f, "shares": ent, "agreement": agreement}
 
 ## The order in which `f` approaches the others: first the partners of the majority it
 ## likes best (the most of it made of itself and its allies, then the fewest seats it
@@ -439,12 +443,32 @@ func coalition_needs(s: Dictionary, combo: Array) -> Dictionary:
 		out[p] = {"need": need * _cabinet_total(), "ask": need * float(_cset("OPENING_ASK", 1.15)) * _cabinet_total(), "stance": st}
 	return out
 
-## What an offer (ministry id -> party id) is worth to party `pid`.
+## What an offer is worth to party `pid`: its ministries (ministry id -> party id), and the
+## lines of the coalition agreement it gets ("line:<axis>" -> party id: on that issue the
+## coalition follows that party's manifesto).
 func offer_value(s: Dictionary, offer: Dictionary, pid: String) -> float:
 	var v = 0.0
 	for mid in offer:
-		if offer[mid] == pid: v += _ministry_value(s, pid, _ministry(mid))
+		if offer[mid] != pid: continue
+		if String(mid).begins_with("line:"): v += line_worth()
+		else: v += _ministry_value(s, pid, _ministry(mid))
 	return v
+
+## A line of the coalition agreement, in cabinet weight: an average ministry is worth
+## LINES_PER_MINISTRY lines (coalition.json).
+func line_worth() -> float:
+	var ms: Array = _cset("MINISTRIES", []).filter(func(m): return m.id != "pm")
+	var avg = 0.0
+	for m in ms: avg += float(m.weight)
+	avg /= maxf(1, ms.size())
+	return avg / float(_cset("LINES_PER_MINISTRY", 3))
+
+## The issues where party `b` could get its own line from party `a`: their manifestos differ.
+func concedable_axes(s: Dictionary, a: String, b: String) -> Array:
+	var pa = party_of(s, a)
+	var pb = party_of(s, b)
+	if pa == null or pb == null: return []
+	return AXES.filter(func(ax): return stance_of(pa.manifesto[ax.id]) != stance_of(pb.manifesto[ax.id])).map(func(ax): return ax.id)
 
 ## A first offer: every member's fair share by seats, the Prime Minister's office yours.
 func coalition_default_offer(s: Dictionary, combo: Array) -> Dictionary:
@@ -489,7 +513,10 @@ func coalition_form(s: Dictionary, combo: Array, offer: Dictionary) -> void:
 	var cab = []
 	for m in _cset("MINISTRIES", []):
 		cab.append({"ministry": m.id, "name": m.name, "party": offer.get(m.id, "player"), "weight": float(m.weight)})
-	co.government = {"members": combo.duplicate(), "cabinet": cab, "formateur": "player"}
+	var agreement = []
+	for k in offer:
+		if String(k).begins_with("line:") and offer[k] != "player": agreement.append({"axis": String(k).substr(5), "party": offer[k]})
+	co.government = {"members": combo.duplicate(), "cabinet": cab, "formateur": "player", "agreement": agreement}
 	co.log.append({"t": "government", "members": combo.duplicate(), "cabinet": cab, "pm": _pm_of(cab)})
 	_coalition_close(s)
 
@@ -569,7 +596,8 @@ func _make_ask(s: Dictionary, f: String, members: Array, mine: Array, seats: Dic
 func coalition_ask_verdict(s: Dictionary, ask: Dictionary, demands: Array) -> Dictionary:
 	var v = 0.0
 	for id in demands:
-		if id != "pm": v += float(_ministry(id).get("weight", 0))
+		if String(id).begins_with("line:"): v += line_worth()
+		elif id != "pm": v += float(_ministry(id).get("weight", 0))
 	var f: String = _short(s, ask.f)
 	if demands.has("pm"):
 		if not ask.desperate: return {"accept": false, "why": coalition_text("you_no_pm", {"f": f})}

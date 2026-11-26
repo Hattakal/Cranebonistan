@@ -409,6 +409,9 @@ func _show_end() -> void:
 		for c in gov.cabinet:
 			if c.ministry == "pm": pm = c.party
 		_sub.text = "%s governs alone." % String(_party(gov.members[0]).name) if gov.members.size() == 1 else "A coalition of %s." % Game.and_list(gov.members.map(func(id): return String(_party(id).name)))
+		var ag: Array = gov.get("agreement", [])
+		if ag.size():
+			_sub.text += " The agreement follows " + Game.and_list(ag.map(func(a): return "%s on %s" % ["your line" if a.party == "player" else String(_party(a.party).short) + "'s line", String(Game.by_id(G.AXES, a.axis).issue).to_lower()])) + "."
 		var grid = GridContainer.new()
 		grid.columns = 2
 		grid.add_theme_constant_override("h_separation", 40)
@@ -532,10 +535,14 @@ func _build_ask() -> void:
 	for p in ask.combo: seats += int(co.seats[p])
 	_sub.text = "They aim at %s: %d seats. Name the ministries you want; they say yes or no, and don't haggle." % [" + ".join(ask.combo.map(func(p): return _name(p))), seats]
 	_set_bar(ask.combo)
+	var scroll = ScrollContainer.new()
+	scroll.position = Vector2(60, 170)
+	scroll.size = Vector2(_w() - 100, _h() - 185)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_stage.add_child(scroll)
 	var root = VBoxContainer.new()
-	root.position = Vector2(60, 170)
 	root.add_theme_constant_override("separation", 12)
-	_stage.add_child(root)
+	scroll.add_child(root)
 	var panel = PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", Look.glass())
 	panel.custom_minimum_size.x = 560
@@ -576,6 +583,35 @@ func _build_ask() -> void:
 			_build_ask())
 		row.add_child(b)
 		v.add_child(row)
+	# instead of ministries, your own line on an issue in their coalition's agreement
+	var axes: Array = G.concedable_axes(S, ask.f, "player")
+	if axes.size():
+		v.add_child(HSeparator.new())
+		v.add_child(Look.dcaps("The coalition agreement · your line instead of a ministry", 11, Look.DIM, 2))
+		for axid in axes:
+			var ax: Dictionary = Game.by_id(G.AXES, axid)
+			var key: String = "line:" + axid
+			var yours: bool = _demands.has(key)
+			var row = HBoxContainer.new()
+			row.add_theme_constant_override("separation", 8)
+			var holder: String = "player" if yours else String(ask.f)
+			var nm = Look.dlabel("%s: %s" % [String(ax.issue), G.stance_name(axid, G.stance_of(_party(holder).manifesto[axid])).to_lower()], "body", 14, Look.TXT)
+			nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(nm)
+			var b = Button.new()
+			b.text = "Your line" if yours else "%s's line" % String(f.short)
+			b.custom_minimum_size.x = 90
+			b.add_theme_font_size_override("font_size", Look.fs(13))
+			b.add_theme_font_override("font", Look.font("display_bold"))
+			Look.dark_button(b, false, false, 4)
+			b.add_theme_color_override("font_color", Look.lit(Color(_party(holder).color)))
+			b.tooltip_text = "Click to ask for your own line on this issue (about a third of a ministry)."
+			b.pressed.connect(func():
+				if _demands.has(key): _demands.erase(key)
+				else: _demands.append(key)
+				_build_ask())
+			row.add_child(b)
+			v.add_child(row)
 	var foot = HBoxContainer.new()
 	foot.add_theme_constant_override("separation", 12)
 	root.add_child(foot)
@@ -619,11 +655,15 @@ func _build_negotiation() -> void:
 		"final": "Their counteroffers. Change what you like: this is your final offer, and they take it or leave it.",
 		"verdicts": "Their answers. Form one of the governments that said yes, or reject them all."}[_phase]
 	_set_bar(["player"])
+	var scroll = ScrollContainer.new()   # a long coalition agreement can run past the screen
+	scroll.position = Vector2(60, 170)
+	scroll.size = Vector2(_w() - 100, _h() - 185)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_stage.add_child(scroll)
 	var root = VBoxContainer.new()
-	root.position = Vector2(60, 170)
 	root.custom_minimum_size = Vector2(_w() - 120, 0)
 	root.add_theme_constant_override("separation", 14)
-	_stage.add_child(root)
+	scroll.add_child(root)
 	if _options.is_empty():
 		root.add_child(Look.dlabel("No majority without enemies has room for you this round.", "news", 22, Look.TXT, true))
 	var cols = HBoxContainer.new()
@@ -689,6 +729,47 @@ func _big_button(text: String, primary: bool, on_press: Callable) -> Button:
 	b.pressed.connect(on_press)
 	return b
 
+## The coalition agreement: on each issue where a partner's manifesto differs from yours,
+## you can give that partner its own line instead of a ministry (three lines are worth
+## about one ministry: coalition.json LINES_PER_MINISTRY).
+func _agreement_rows(v: VBoxContainer, o: Dictionary, combo: Array) -> void:
+	var rows = []
+	for ax in G.AXES:
+		var who: Array = combo.filter(func(p): return p != "player" and G.concedable_axes(S, "player", p).has(ax.id))
+		if who.size(): rows.append([ax, who])
+	if rows.is_empty(): return
+	v.add_child(HSeparator.new())
+	v.add_child(Look.dcaps("The coalition agreement · their line instead of a ministry", 11, Look.DIM, 2))
+	for r in rows:
+		var ax: Dictionary = r[0]
+		var who: Array = r[1]
+		var key: String = "line:" + String(ax.id)
+		var holder: String = String(o.offer.get(key, "player"))
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var stance: String = G.stance_name(ax.id, G.stance_of(_party(holder).manifesto[ax.id]))
+		var nm = Look.dlabel("%s: %s" % [String(ax.issue), stance.to_lower()], "body", 14, Look.TXT)
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(nm)
+		var b = Button.new()
+		b.text = ("Your line" if holder == "player" else _name(holder) + "'s line")
+		b.custom_minimum_size.x = 90
+		b.add_theme_font_size_override("font_size", Look.fs(13))
+		b.add_theme_font_override("font", Look.font("display_bold"))
+		Look.dark_button(b, false, false, 4)
+		b.add_theme_color_override("font_color", Look.lit(Color(_party(holder).color)))
+		b.tooltip_text = "Click to give a partner its own line on this issue instead of yours."
+		b.disabled = _phase == "verdicts"
+		var opts: Array = ["player"] + who
+		b.pressed.connect(func():
+			var k: int = opts.find(String(o.offer.get(key, "player")))
+			var nxt: String = opts[(k + 1) % opts.size()]
+			if nxt == "player": o.offer.erase(key)
+			else: o.offer[key] = nxt
+			_build_negotiation())
+		row.add_child(b)
+		v.add_child(row)
+
 ## One possible coalition: its ministries, who gets each, and what each partner thinks.
 func _option_column(i: int) -> Control:
 	var o: Dictionary = _options[i]
@@ -711,7 +792,8 @@ func _option_column(i: int) -> Control:
 		var got = 0.0   # the plain share of the cabinet: favourites count double only in their own reckoning
 		for mm in _ministries():
 			if String(o.offer.get(mm.id, "")) == p: got += float(mm.weight)
-		var line = "%s (%s): offered %d%% of the cabinet · favourites: %s" % [String(_party(p).short), needs[p].stance, Game.jround(got / total * 100),
+		var lines: int = o.offer.keys().filter(func(k): return String(k).begins_with("line:") and o.offer[k] == p).size()
+		var line = "%s (%s): offered %d%% of the cabinet%s · favourites: %s" % [String(_party(p).short), needs[p].stance, Game.jround(got / total * 100), (" and %d line%s" % [lines, "" if lines == 1 else "s"]) if lines else "",
 			", ".join(G.favourite_ministries(S, p).map(func(id): return String(G._ministry(id).get("name", id))))]
 		v.add_child(Look.dlabel(line, "body", 13, Look.TXT, true))
 	v.add_child(HSeparator.new())
@@ -741,6 +823,7 @@ func _option_column(i: int) -> Control:
 			_build_negotiation())
 		row.add_child(b)
 		v.add_child(row)
+	_agreement_rows(v, o, combo)
 	if _phase == "final": v.add_child(Look.dlabel("A dot: what they asked for on top of your offer. ★ a party's favourite: worth double to them.", "body_italic", 12, Look.DIM, true))
 	elif _phase == "offer": v.add_child(Look.dlabel("★ a party's favourite ministry: worth double to them.", "body_italic", 12, Look.DIM, true))
 	if _phase == "verdicts":
