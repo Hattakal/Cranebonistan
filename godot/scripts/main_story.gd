@@ -88,7 +88,9 @@ func _founding_build(p: Paper) -> void:
 	p.add(Look.label("Voters will see you as: %s" % G.view_label(point), "body_bold", 15, Look.RED, true))
 	# 3. home
 	p.step("Three", "Where were you mayor?")
-	p.small("Your old city is your head start: people across its region know you and like you, and the party opens with an office there. Alinni's cities are not open to you: Alinnians elect their own minority leaders.")
+	var mino = Game.by_id(G.REGIONS, "alinni")
+	var minp = Game.by_id(G.NATIONALITIES, "alinnian")
+	p.small("Your old city is your head start: people across its region know you and like you, and the party opens with an office there.%s" % ((" %s's cities are not open to you: %s elect their own minority leaders." % [mino.name, minp.plural]) if mino and minp else ""))
 	for r in G.REGIONS:
 		var cities: Array = G.home_cities().filter(func(c): return c.area == r.id)
 		if cities.is_empty(): continue
@@ -128,7 +130,7 @@ func _profile_sheet() -> void:
 	var oc: Dictionary = G.COALITION.get("OUTCOMES", {}).get(r.get("coalition", {}).get("outcome", ""), {})
 	var fill = {"party": you.name, "leader": you.leader}
 	var p = _paper(860, false)
-	p.source(String(col.get("outlet", "The Cranebo Herald")), "Opinion · %s" % G.date_label(S.week, false))
+	p.source(String(col.get("outlet", _outlet("herald"))), "Opinion · %s" % G.date_label(S.week, false))
 	p.heading(String(oc.get("headline", pr.headline)).format(fill) if oc.has("headline") else String(pr.headline).capitalize(), 40)
 	if oc.has("line"): p.text(String(oc.line).format(fill), 19, "news_italic")
 	if col.has("author"): p.small("By %s, %s" % [col.author, col.get("role", "")], Look.INK)

@@ -777,9 +777,19 @@ class Ticker extends Control:
 			if total <= 0: break
 		draw_rect(Rect2(0, 0, tag_w + 14, size.y), Look.N950)
 		draw_rect(Rect2(0, 1, tag_w, size.y - 1), Look.RED)
-		draw_string(Look.spaced("display_bold", 2), Vector2(12, size.y / 2 + 6), "CBC NEWS", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+		draw_string(Look.spaced("display_bold", 2), Vector2(12, size.y / 2 + 6), (String(Game.outlet_by_id("cbc").name if Game.outlet_by_id("cbc") else "") + " news").to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
 		var blink = 0.35 + 0.65 * absf(sin(Time.get_ticks_msec() / 700.0))
 		draw_circle(Vector2(tag_w - 16, size.y / 2), 3.5, Color(1, 1, 1, blink))
+
+## An outlet's name by id (media.json): "cbc" is the state broadcaster (the evening news,
+## the debates, election night), "herald" the paper of record.
+func _outlet(id: String) -> String:
+	var o = G.outlet_by_id(id)
+	return String(o.name) if o else id.to_upper()
+
+## The evening news strap, on the state broadcaster.
+func _tv(what: String) -> String:
+	return "%s · %s" % [_outlet("cbc"), what]
 
 # ---------- Hooks: filled in by later files of the chain ----------
 func _auto_open() -> void: pass

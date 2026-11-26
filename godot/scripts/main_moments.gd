@@ -175,7 +175,7 @@ func _news_sheet(front: Dictionary) -> void:
 	var labels = {"vacuum": "Power vacuum", "bad": "Trouble", "good": "Comeback", "neutral": "Change", "threat": "Threat", "issue": "Hot issue"}
 	var p = _paper(820)
 	var lead: Dictionary = front.items[0]
-	p.source("The Cranebo Herald", "%s · %s" % [labels.get(lead.get("kind", ""), "News"), G.date_label(S.week, false)])
+	p.source(_outlet("herald"), "%s · %s" % [labels.get(lead.get("kind", ""), "News"), G.date_label(S.week, false)])
 	p.heading(lead.title, 38)
 	p.photo(Photo.find(["news/" + str(lead.get("kind", ""))]), 260)
 	p.text(lead.text, 18)
@@ -211,7 +211,7 @@ func _debate_round(p: Paper) -> void:
 	p.clear()
 	var d: Dictionary = S.debate
 	var rd: Dictionary = d.rounds[d.step]
-	p.tv_strap("CBC · Live", "The final debate · question %d of %d" % [d.step + 1, d.rounds.size()])
+	p.tv_strap(_tv("Live"), "The final debate · question %d of %d" % [d.step + 1, d.rounds.size()])
 	p.heading(rd.title, 36)
 	p.text(rd.prompt, 18)
 	p.step("Your answer", "What do you say?")
@@ -223,7 +223,7 @@ func _debate_round(p: Paper) -> void:
 			var res: Dictionary = G.answer_debate(S, j)
 			p.clear()
 			p.decided()
-			p.tv_strap("CBC · Live", "The final debate · " + res.round)
+			p.tv_strap(_tv("Live"), "The final debate · " + res.round)
 			p.add(Look.label(res.quote, "news_bold", 24, Look.INK, true))
 			p.text(res.press, 17, "news_italic")
 			if res.outcome == "viral": p.stamp("The clip of the night", Look.GOOD)
@@ -296,7 +296,7 @@ func _election_sheet() -> void:
 	var r: Dictionary = S.result
 	var p = _paper(860, false)
 	p.screen()
-	p.tv_strap("CBC · Election night", "The results")
+	p.tv_strap(_tv("Election night"), "The results")
 	var you: Dictionary = G.player_party(S)
 	var first = G.party_of(S, r.ranking[0])
 	var alone: bool = int(r.seats.national[r.ranking[0]]) > int(G.C.seats) / 2

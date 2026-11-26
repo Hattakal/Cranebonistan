@@ -273,7 +273,7 @@ func render(s: Dictionary) -> void:
 	if s.log.size():
 		var c = _card()
 		var v = _vbox(c)
-		v.add_child(_head("The Cranebo Herald", Look.DIM, "latest"))
+		v.add_child(_head(_outlet("herald"), Look.DIM, "latest"))
 		var n = 0
 		for i in range(s.log.size() - 1, -1, -1):
 			if n >= 3: break
@@ -369,7 +369,7 @@ func _front_summary(s: Dictionary, front) -> Dictionary:
 		"interview":
 			return {"kicker": "Year one", "title": "The big interview", "text": "An hour on %s with %s. The country is about to meet you." % [s.interview.outletName, s.interview.who], "stamp": "On air"}
 		"debate":
-			return {"kicker": "Live on CBC", "title": "The final debate", "text": "Seven million people are watching. Your rivals have been reading your old quotes.", "stamp": "Tonight"}
+			return {"kicker": "Live on %s" % _outlet("cbc"), "title": "The final debate", "text": "Seven million people are watching. Your rivals have been reading your old quotes.", "stamp": "Tonight"}
 		"convoy":
 			return {"kicker": "The campaign", "title": "Plan the convoy", "text": "%d weeks to go. Where does the convoy stop each week?" % int(game.C.campaign.weeks), "stamp": "Plan it"}
 		"rally":
@@ -421,3 +421,8 @@ func _watch(s: Dictionary) -> Array:
 		var st: Dictionary = s.countries.get(f.id, {})
 		if st.get("hot", false): items.append([" ".join(f.name), st.get("relation", "Trouble on the border")])
 	return items.slice(0, 3)
+
+## An outlet's name by id (media.json).
+func _outlet(id: String) -> String:
+	var o = Game.outlet_by_id(id)
+	return String(o.name) if o else id.to_upper()

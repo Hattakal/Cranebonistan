@@ -248,12 +248,13 @@ func _teyl_walkout(s: Dictionary) -> void:
 		if f.get("yes", false) or f.get("doubter", false): continue
 		if f.loyalty >= 75: continue
 		s.figures.erase(f)
-		s.figuresLost.append({"name": f.name, "role": f.role, "week": s.week, "why": "left with Margaret Perkins"})
+		s.figuresLost.append({"name": f.name, "role": f.role, "week": s.week, "why": "left with %s" % (by_id(FIGURES, "teyl").name if by_id(FIGURES, "teyl") else "the party secretary")})
 		went.append(f.name)
 		_replace_figure(s, f)
 	if went.size():
-		push_news(s, {"kind": "threat", "title": "%s walks out of %s" % ["Margaret Perkins", player_party(s).short],
-			"text": "The party secretary has resigned, and %s went with her. The people who built the party are leaving it to the people who owe it their jobs." % " and ".join(went)})
+		var sec = by_id(FIGURES, "teyl")
+		push_news(s, merged({"kind": "threat"}, news("WORLD", "secretary_walks", null, {"secretary": sec.name if sec else "The party secretary", "you": player_party(s).short,
+			"went": and_list(went), "her": "her" if sec == null or sec.get("sex", "f") == "f" else "him"})))
 
 # ---------- Political violence ----------
 ## Violence happens in the world, never by the player's hand. It becomes likelier
@@ -335,4 +336,4 @@ func labels_monthly(s: Dictionary) -> void:
 	for pop in s.pops:
 		if float(pop.loyal.get(who.id, 0)) > 0.2: pop.goodwill.player = clampf2(pop.goodwill.player - 0.04, -2, 2)
 		elif devotion_of(pop, player_party(s)) > 0.3 or float(pop.disaffection) > 1.2: pop.goodwill.player = clampf2(pop.goodwill.player + 0.02, -2, 2)
-	push_news(s, {"party": who.id, "kind": "threat", "quiet": true, "title": "%s calls %s %s" % [who.short, player_party(s).short, word], "text": ""})
+	push_news(s, {"party": who.id, "kind": "threat", "quiet": true, "title": news("WORLD", "called_names", null, {"short": who.short, "you": player_party(s).short, "word": word}), "text": ""})

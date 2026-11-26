@@ -822,13 +822,6 @@ class Tug extends Control:
 		draw_circle(Vector2(x, y), 4, Look.N850)
 
 # ---------- The country ----------
-const IND_EFFECT := {
-	"jobs": "When jobs are scarce, jobs and the economy matter more to voters, trust falls and the government suffers.",
-	"prices": "Rising prices make the economy and public services matter more, cost the government support and push up unrest.",
-	"migration": "High migration makes immigration a bigger issue, especially in Yamlin, and holds down wages.",
-	"border": "Border tension makes defence and national identity matter more, and pushes prices up. Governments gain a little from a crisis.",
-	"unrest": "An angry public makes the political system itself the issue. Outsiders feed on it.",
-}
 
 ## The country's problems, big and small. Any of them can be raised as a debate.
 func _country_issues() -> void:
@@ -853,7 +846,7 @@ func _country_issues() -> void:
 		var opt = null
 		for o in opts:
 			if o.kind == "metric" and o.metric == ind: opt = o
-		majors.append(["%s: %s" % [lbl, G.indicator_word(ind, w_of(ind)).to_lower()], IND_EFFECT.get(ind, ""), opt, bad])
+		majors.append(["%s: %s" % [lbl, G.indicator_word(ind, w_of(ind)).to_lower()], String(Game.by_id(G.INDICATORS, ind).get("effect", "")), opt, bad])
 	if majors.is_empty(): _p("Nothing is badly wrong. For now.", mc, Look.TXT, 14)
 	for m in majors:
 		var row = HBoxContainer.new()
@@ -932,7 +925,7 @@ func _country() -> void:
 		var dl: float = vals[-1] - (vals[-2] if vals.size() > 1 else vals[-1])
 		var good = null if ind.good == null else ((dl > 0) if ind.good == "high" else (dl < 0))
 		c.add_child(Look.dlabel("steady this month" if absf(dl) < 1.5 else ("%s %d this month" % ["▲" if dl > 0 else "▼", Game.jround(absf(dl))]), "body_bold", 12, Look.DIM if (good == null or absf(dl) < 1.5) else (Look.GOOD_HI if good else Look.RED_HI)))
-		c.add_child(Look.dlabel(IND_EFFECT.get(ind.id, ""), "body", 12, Look.DIM, true))
+		c.add_child(Look.dlabel(String(ind.get("effect", "")), "body", 12, Look.DIM, true))
 	if S.crisis:
 		var cr = Game.by_id(G.CRISES, S.crisis.id)
 		_p("%s: %s" % [cr.name, cr.blurb], null, Look.RED_HI, 15)

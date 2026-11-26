@@ -19708,6 +19708,7 @@
  "INDICATORS": [
   {
    "id": "jobs",
+   "effect": "When jobs are scarce, jobs and the economy matter more to voters, trust falls and the government suffers.",
    "label": "Jobs",
    "normal": 55,
    "words": [
@@ -19732,6 +19733,7 @@
   },
   {
    "id": "prices",
+   "effect": "Rising prices make the economy and public services matter more, cost the government support and push up unrest.",
    "label": "Prices",
    "normal": 45,
    "words": [
@@ -19756,6 +19758,7 @@
   },
   {
    "id": "migration",
+   "effect": "High migration makes immigration a bigger issue, especially in Yamlin, and holds down wages.",
    "label": "Migration",
    "normal": 55,
    "words": [
@@ -19780,6 +19783,7 @@
   },
   {
    "id": "border",
+   "effect": "Border tension makes defence and national identity matter more, and pushes prices up. Governments gain a little from a crisis.",
    "label": "Border tension",
    "normal": 40,
    "words": [
@@ -19804,6 +19808,7 @@
   },
   {
    "id": "unrest",
+   "effect": "An angry public makes the political system itself the issue. Outsiders feed on it.",
    "label": "Public mood",
    "normal": 32,
    "words": [

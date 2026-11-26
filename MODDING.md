@@ -45,7 +45,7 @@ Put a file in your mod's `data/` folder with the **same name** as the game's fil
 | `names.json` | Name pools by background (`POOLS`, by region `REGIONS` and by country abroad `FOREIGN`), and `YES_MEN`: one name in every background's language, for the yes-men who fill a drifting party |
 | `tours.json` | Stories from the leader's trips |
 | `carlos.json`, `margaret.json` | What Carlos and Margaret say |
-| `news.json` | What the rules write about the parties: rival scandals, new leaders, splits, their tours, adverts and leaks, the start of the campaign |
+| `news.json` | What the rules write about the parties and the country: rival scandals, new leaders, splits, their tours, adverts and leaks, the start of the campaign, new arguments, stories in the news, your own politicians quitting |
 | `mapmodes.json` | The map's modes (names, legends) and how distress is worked out |
 
 Every game file starts with a `_note` explaining its fields.
@@ -114,6 +114,7 @@ The rules refer to a few things by id. Change their names, numbers and text free
 - **World numbers** `jobs`, `prices`, `migration`, `border`, `unrest`.
 - **Money offers** `chamber` and `tycoon` (business money that feeds hypocrisy).
 - **Leader types** `star`, `statesman`, `revolutionary`, `strongman`, `one_of_us`, `clean`, `expert`, `visionary`.
+- **Outlets** `cbc` (the state broadcaster: the evening news, the TV debate, election night, the ticker) and `herald` (the paper of record: the news sheet, the ending's column).
 - **Media kinds** `public`, `paper`, `tabloid`, `business`, `network`, `online`, `regional`, `platform`, `foreign`, `influencer`.
 - **The seven issues** (`economy`, `welfare`, `nation`, `society`, `order`, `foreign`, `system`).
 - **`COUNTRY`** in content.json (`name`, `national`, `nationals`).

@@ -322,7 +322,7 @@ func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 	if now.player < C.scrutinyFrom or rand(s) > C.scrutinyChance: return
 	var story: Dictionary = pick(s, SCRUTINY_STORIES)
 	apply_effects(s, merged(story.fx, {"awareness": 0.02}))
-	push_news(s, {"kind": "threat", "title": story.title, "text": story.text + " Leading the polls makes you a target."})
+	push_news(s, {"kind": "threat", "title": story.title, "text": news("WORLD", "front_scrutiny", null, {"text": story.text})})
 
 # ---------- Relations with the other parties (skeleton) ----------
 ## How each rival party feels about yours, -100 (bitter) to +100 (friendly).

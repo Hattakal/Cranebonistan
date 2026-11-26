@@ -110,8 +110,8 @@ func figures_monthly(s: Dictionary) -> void:
 		s.figuresLost.append({"name": f.name, "role": f.role, "week": s.week})
 		for pop in s.pops:
 			if pop.region == f.region: pop.goodwill.player = clampf2(pop.goodwill.player - 0.06, -2, 2)
-		push_news(s, {"kind": "threat", "title": "%s quits %s" % [f.name, player_party(s).short],
-			"text": "%s, %s, says the party is no longer the one %s joined. %s local supporters are not happy either." % [f.name, f.role.to_lower(), "she" if f.get("sex", "m") == "f" else "he", "Her" if f.get("sex", "m") == "f" else "His"]})
+		var fem: bool = f.get("sex", "m") == "f"
+		push_news(s, merged({"kind": "threat"}, news("WORLD", "figure_quits", null, {"figure": f.name, "role": f.role.to_lower(), "you": player_party(s).short, "they": "she" if fem else "he", "Their": "Her" if fem else "His"})))
 		if f.id != "teyl": _replace_figure(s, f)
 		else: _teyl_walkout(s)
 
@@ -194,8 +194,7 @@ func steer_monthly(s: Dictionary) -> void:
 	player.manifesto[st.axis] = C.stanceCenters[clampi(cur + st.dir, 0, 4)]
 	shift_perceived(s, {st.axis: st.dir * 6}, false)
 	var ax = by_id(AXES, st.axis)
-	push_news(s, {"kind": "issue", "quiet": true, "title": "%s changes course on %s" % [player.short, ax.issue.to_lower()],
-		"text": "The party's manifesto now says %s." % stance_name(st.axis, stance_of(player.manifesto[st.axis])).to_lower()})
+	push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "course_change", null, {"you": player.short, "issue": ax.issue.to_lower(), "stance": stance_name(st.axis, stance_of(player.manifesto[st.axis])).to_lower()})))
 	_log(s, "action", "The party's new line on %s is %s." % [ax.issue.to_lower(), stance_name(st.axis, stance_of(player.manifesto[st.axis])).to_lower()])
 	s.steer = null
 

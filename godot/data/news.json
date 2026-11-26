@@ -1,14 +1,39 @@
 {
  "_note": "News the rules write about the parties: what rival parties go through and do. Placeholders: {short} the party's short name, {name} its full name, {leader} its leader, and the extras named in each entry. 'title' heads the story, 'text' is its body; a one-line entry is a move in the ticker and on the Parties page.",
  "RIVAL": {
-  "scandal": {"title": "{short} rocked by scandal", "text": "Leaked messages show {leader} arranging state contracts for party donors. {short} is in turmoil and trust in politics has fallen."},
-  "infighting": {"title": "Open infighting in {short}", "text": "A faction inside {name} is openly attacking {leader}. Party members are taking sides."},
-  "new_leader": {"title": "{short} replaces {old} with {leader}", "text": "{leader} is {style}, and is moving {short} toward {toward}."},
-  "new_leader_style": {"star": "a charismatic crowd-pleaser", "dull": "a dull party insider", "plain": "a capable but unexciting figure"},
-  "rebound": {"title": "{leader} wins back the room", "text": "A strong conference speech has united {short} again. Its base is energised."},
-  "split": {"title": "{name} splits apart", "text": "After months of infighting, a third of {short}'s MPs have walked out. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."},
-  "copies_you": {"title": "{short} copies your line on {issue}", "text": "Worried about losing voters to you, {leader} has moved {short} toward {toward}. They will compete for the same voters."},
-  "fills_niche": {"title": "{short} takes up {side}", "text": "Nobody was speaking for {side} voters on {issue}, so {leader} has started to. Expect to hear a lot more about it from them."}
+  "scandal": {
+   "title": "{short} rocked by scandal",
+   "text": "Leaked messages show {leader} arranging state contracts for party donors. {short} is in turmoil and trust in politics has fallen."
+  },
+  "infighting": {
+   "title": "Open infighting in {short}",
+   "text": "A faction inside {name} is openly attacking {leader}. Party members are taking sides."
+  },
+  "new_leader": {
+   "title": "{short} replaces {old} with {leader}",
+   "text": "{leader} is {style}, and is moving {short} toward {toward}."
+  },
+  "new_leader_style": {
+   "star": "a charismatic crowd-pleaser",
+   "dull": "a dull party insider",
+   "plain": "a capable but unexciting figure"
+  },
+  "rebound": {
+   "title": "{leader} wins back the room",
+   "text": "A strong conference speech has united {short} again. Its base is energised."
+  },
+  "split": {
+   "title": "{name} splits apart",
+   "text": "After months of infighting, a third of {short}'s MPs have walked out. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."
+  },
+  "copies_you": {
+   "title": "{short} copies your line on {issue}",
+   "text": "Worried about losing voters to you, {leader} has moved {short} toward {toward}. They will compete for the same voters."
+  },
+  "fills_niche": {
+   "title": "{short} takes up {side}",
+   "text": "Nobody was speaking for {side} voters on {issue}, so {leader} has started to. Expect to hear a lot more about it from them."
+  }
  },
  "MOVE": {
   "toured": "{leader} toured {place}.",
@@ -24,6 +49,62 @@
   "leak": "{short} leaks a damaging story about {target}."
  },
  "CAMPAIGN": {
-  "begins": {"title": "The campaign begins", "text": "{weeks} weeks to the election. The parties' convoys are on the road, the posters are going up, and from now on every week counts."}
+  "begins": {
+   "title": "The campaign begins",
+   "text": "{weeks} weeks to the election. The parties' convoys are on the road, the posters are going up, and from now on every week counts."
+  }
+ },
+ "WORLD": {
+  "_note": "Stories the rules write about the country and your own party. Placeholders as named: {you} your party's short name, {outlet}, {topic}, {text}, {figure}, {role}, {they}/{Their} (the politician's pronouns), {issue}, {stance}, {short} (another party), {word}, {side}, {secretary}, {went}, {her}.",
+  "media_argument": {
+   "title": "{outlet} starts an argument: {topic}",
+   "text": "{text}"
+  },
+  "sponsor_dropped": {
+   "title": "{outlet} drops your party",
+   "text": "The money stopped, and so did the warm words."
+  },
+  "outlet_bought": {
+   "title": "{outlet} changes hands",
+   "text": "Buyers close to {you} have taken over {outlet}. Its journalists say nothing will change."
+  },
+  "figure_quits": {
+   "title": "{figure} quits {you}",
+   "text": "{figure}, {role}, says the party is no longer the one {they} joined. {Their} local supporters are not happy either."
+  },
+  "course_change": {
+   "title": "{you} changes course on {issue}",
+   "text": "The party's manifesto now says {stance}."
+  },
+  "front_scrutiny": "{text} Leading the polls makes you a target.",
+  "secretary_walks": {
+   "title": "{secretary} walks out of {you}",
+   "text": "The party secretary has resigned, and {went} went with {her}. The people who built the party are leaving it to the people who owe it their jobs."
+  },
+  "called_names": "{short} calls {you} {word}",
+  "debate_settling": {
+   "title": "{topic}: the argument is settling",
+   "text": "The country has stopped shouting about it, but the {side} side won the argument. Voters' minds moved, and they won't move back quickly."
+  },
+  "new_argument": {
+   "title": "New argument: {topic}",
+   "text": "{text}"
+  },
+  "everyone_talking": {
+   "title": "Everyone is talking about it: {topic}",
+   "text": "{text}"
+  },
+  "rival_fight": {
+   "title": "{short} starts a fight: {topic}",
+   "text": "{text}"
+  },
+  "in_the_news": {
+   "title": "In the news: {topic}",
+   "text": "{text}"
+  },
+  "still_not_fixed": {
+   "title": "Still not fixed: {topic}",
+   "text": "{text}"
+  }
  }
 }

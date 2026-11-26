@@ -163,7 +163,7 @@ func media_start_debate(s: Dictionary, pool: Array) -> bool:
 	if mine.is_empty(): return false
 	var t: Dictionary = pick(s, mine)
 	open_debate(s, t.id, t.axis, t.title, t.text, "media:" + o.id, 30, signf(float(st.pos[t.axis])) * 25)
-	push_news(s, {"kind": "issue", "quiet": true, "title": "%s starts an argument: %s" % [o.name, t.title], "text": t.text})
+	push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "media_argument", null, {"outlet": o.name, "topic": t.title, "text": t.text})))
 	return true
 
 # ---------- Personalities: sponsoring them ----------
@@ -205,7 +205,7 @@ func sponsors_monthly(s: Dictionary) -> void:
 		if spon == "player":
 			if s.money < price:
 				st.sponsor = ""
-				push_news(s, {"kind": "issue", "quiet": true, "title": "%s drops your party" % o.name, "text": "The money stopped, and so did the warm words."})
+				push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "sponsor_dropped", null, {"outlet": o.name})))
 				continue
 			s.money -= price
 		else:
@@ -277,7 +277,7 @@ func act_buy_outlet(s: Dictionary, id: String) -> Dictionary:
 	spend_action(s, price)
 	s.media[id].owner = "player"
 	var text = "%s now belongs to friends of the party. Its line will move your way; some of its readers will notice and leave." % o.name
-	push_news(s, {"kind": "issue", "title": "%s changes hands" % o.name, "text": "Buyers close to %s have taken over %s. Its journalists say nothing will change." % [player_party(s).short, o.name]})
+	push_news(s, merged({"kind": "issue"}, news("WORLD", "outlet_bought", null, {"outlet": o.name, "you": player_party(s).short})))
 	_log(s, "action", text)
 	return {"ok": true, "text": text}
 

@@ -134,7 +134,7 @@ func _event_step2(p: Paper, ev: Dictionary, i: int) -> void:
 func _event_result(p: Paper, res: Dictionary, ev := {}) -> void:
 	p.clear()
 	p.decided()
-	_result_body(p, res.get("title", ""), res, "CBC · Evening news", Photo.event(ev) if ev.size() else null)
+	_result_body(p, res.get("title", ""), res, "", Photo.event(ev) if ev.size() else null)
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 
@@ -149,9 +149,12 @@ func _drift_note(f: Dictionary) -> String:
 	if now == 1: return " Your manifesto says %s: people who care about this notice, a little." % G.stance_name(f.axis, mine).to_lower()
 	return " Your manifesto says %s. That's a real break with it, and the people who care about it will hold it against you." % G.stance_name(f.axis, mine).to_lower()
 
-func _result_body(p: Paper, title: String, res: Dictionary, strap := "CBC · Evening news", picture: Texture2D = null) -> void:
+## `strap` "" is the evening news (the sheet becomes a screen); anything else stays on paper.
+func _result_body(p: Paper, title: String, res: Dictionary, strap := "", picture: Texture2D = null) -> void:
 	var player: Dictionary = G.player_party(S)
-	if strap.begins_with("CBC"): p.screen()   # it made the evening news
+	if strap == "":   # it made the evening news
+		strap = _tv("Evening news")
+		p.screen()
 	p.photo(picture, 240)
 	p.tv_strap(strap, "How it played · " + title)
 	if res.get("quote"):
@@ -281,7 +284,7 @@ func _speak_sheet(id: String, side: String) -> void:
 		_after_speaking(res, line, d.axis, side)
 		# every speech shows how it played; a smaller debate just doesn't make the evening news
 		p.clear()
-		_result_body(p, res.title, res, "CBC · Evening news" if res.major else "On the record")
+		_result_body(p, res.title, res, "" if res.major else "On the record")
 		p.actions([p.button("Back to work", func(): _done(p))])
 		p.top(),
 		func(): p.close(), "Back")

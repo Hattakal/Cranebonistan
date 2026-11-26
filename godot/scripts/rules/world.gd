@@ -332,7 +332,7 @@ func debates_monthly(s: Dictionary) -> void:
 		if pool.size() and not media_start_debate(s, pool):
 			var t: Dictionary = pick(s, pool)
 			open_debate(s, t.id, t.axis, t.title, t.text, "news", 30)
-			push_news(s, {"kind": "issue", "quiet": true, "title": "New argument: " + t.title, "text": t.text})
+			push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "new_argument", null, {"topic": t.title, "text": t.text})))
 
 func debates_from_world(s: Dictionary) -> void:
 	for t in TOPICS:
@@ -345,7 +345,7 @@ func debates_from_world(s: Dictionary) -> void:
 			if not ((s.world[k] < n) if cond[0] == "<" else (s.world[k] > n)): ok = false
 		if not ok: continue
 		open_debate(s, t.id, t.axis, t.title, t.text, "economy", 38)
-		push_news(s, {"kind": "issue", "quiet": true, "title": "Everyone is talking about it: " + t.title, "text": t.text})
+		push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "everyone_talking", null, {"topic": t.title, "text": t.text})))
 
 func rivals_debate(s: Dictionary) -> void:
 	for p in rivals(s):
@@ -387,7 +387,7 @@ func rivals_debate(s: Dictionary) -> void:
 			var side: String = row.key.split(":")[1]
 			var d = open_debate(s, t.id, t.axis, t.title, t.text, p.id, 30, -25.0 if side == "L" else 25.0)
 			_note_move(d, p.id, "start", side, s.week)
-			push_news(s, {"party": p.id, "kind": "threat", "quiet": true, "title": "%s starts a fight: %s" % [p.short, t.title], "text": t.text})
+			push_news(s, merged({"party": p.id, "kind": "threat", "quiet": true}, news("WORLD", "rival_fight", null, {"short": p.short, "topic": t.title, "text": t.text})))
 
 func fan_preview(s: Dictionary, d: Dictionary, side: String) -> Dictionary:
 	var reach = debate_reach(s)
@@ -533,7 +533,7 @@ func issues_monthly(s: Dictionary) -> void:
 		if r <= 0 or i == pool.size() - 1:
 			var st: Dictionary = story_turns_up(s, pool[i].id)
 			s.issueCooldown[pool[i].id] = s.week
-			push_news(s, {"kind": "issue", "quiet": true, "title": "In the news: " + st.title, "text": st.text})
+			push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "in_the_news", null, {"topic": st.title, "text": st.text})))
 			return
 
 ## Stories that leave the news without ever becoming a debate were never solved: each
@@ -562,7 +562,7 @@ func _stories_come_back(s: Dictionary) -> void:
 		s.issues.append({"id": r.id, "week": s.week, "district": pl.get("district", ""), "back": true})
 		change_trust(s, -STORY_RETURN_TRUST)
 		var st: Dictionary = story(s, r.id)
-		push_news(s, {"kind": "issue", "quiet": true, "title": "Still not fixed: " + st.title, "text": st.text})
+		push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "still_not_fixed", null, {"topic": st.title, "text": st.text})))
 	s.storyReturns = later
 
 func issue_by_id(id: String) -> Dictionary:

@@ -767,8 +767,7 @@ func end_debate(s: Dictionary, d: Dictionary) -> void:
 	s.debateCooldown[d.id] = s.week
 	s.debatesPast.append({"title": d.title, "axis": d.axis, "lean": d.lean, "peak": d.peak, "week": s.week})
 	if d.peak >= 40 and absf(d.lean) >= 35:
-		push_news(s, {"kind": "issue", "quiet": true, "title": "%s: the argument is settling" % d.title,
-			"text": "The country has stopped shouting about it, but the %s side won the argument. Voters' minds moved, and they won't move back quickly." % side_of_lean(d.axis, d.lean).to_lower()})
+		push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "debate_settling", null, {"topic": d.title, "side": side_of_lean(d.axis, d.lean).to_lower()})))
 
 func style_profile(s: Dictionary) -> Dictionary:
 	var total = dsum(s.style)
