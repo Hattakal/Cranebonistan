@@ -1,13 +1,19 @@
 {
  "_note": "The final debate, a month before the election. Three rounds: the opening, the strongest rival's attack, the closing. The attack is picked from your record: a contradiction if there is one, else a group you blamed, else dirty money, else the default. Placeholders: {leader} {party} {rival} {rival_party} {first_date} {first} {second_date} {second} {group}. 'react' (optional) on a line: extra goodwill changes for groups. 'hurt': what an attack that lands costs you before you even answer. Drafts: rewrite freely.",
- "OPENING": {"title": "Opening statement", "prompt": "The moderator turns to {leader}: \"Your party didn't exist four years ago. Why should anyone vote for it?\"",
+ "OPENING": {
+  "title": "Opening statement",
+  "prompt": "The moderator turns to {leader}: \"Your party didn't exist four years ago. Why should anyone vote for it?\"",
   "lines": [
    {"tone": "statesman", "text": "\"Because {country} deserves a government that keeps its word. That is all {party} has ever asked for.\""},
    {"tone": "fiery", "text": "\"Because for thirty years the people on this stage have robbed you blind, and tonight that ends.\""},
    {"tone": "folksy", "text": "\"I'm not a career politician. I'm someone who got tired of waiting for a bus that never comes.\""},
-   {"tone": "folksy", "sharp": true, "text": "\"Look at the people next to me. Would you lend any of them your car?\""}
-  ]},
- "ATTACK": {"title": "{rival} attacks", "prompt": "{rival} of the {rival_party} turns to you: {attack}",
+   {"tone": "folksy", "sharp": true, "text": "\"Look at the people next to me. Would you lend any of them your car?\""},
+   {"tone": "hopeful", "text": "\"Four years ago nobody thought a new party could stand on this stage. Imagine what we can do with the next four.\""}
+  ]
+ },
+ "ATTACK": {
+  "title": "{rival} attacks",
+  "prompt": "{rival} of the {rival_party} turns to you: {attack}",
   "attacks": {
    "contradiction": "\"In {first_date} you said: '{first}' In {second_date} you said: '{second}' Which one do you actually believe?\"",
    "blamed": "\"Your whole campaign has been about blaming {group}. Is that all you have to offer?\"",
@@ -18,14 +24,29 @@
   "lines": [
    {"tone": "statesman", "text": "\"I have listened and I have learned. A leader who never changes their mind isn't listening.\""},
    {"tone": "fiery", "text": "\"How dare you lecture anyone? Your party has lied to this country for a generation.\""},
-   {"tone": "folksy", "text": "\"At least I change my mind now and then. {rival} hasn't changed a thing since the cassette tape.\"", "react": [{"who": {"loyalTo": "{rival_id}"}, "amt": -0.1}]},
-   {"tone": "fiery", "sharp": true, "text": "\"That's invented. Everybody knows your people make things up.\"", "react": [{"who": {"class": "middle"}, "amt": -0.1}]}
-  ]},
- "CLOSING": {"title": "Closing statement", "prompt": "\"You have thirty seconds. Speak to the voters.\"",
+   {
+    "tone": "folksy",
+    "text": "\"At least I change my mind now and then. {rival} hasn't changed a thing since the cassette tape.\"",
+    "react": [{"who": {"loyalTo": "{rival_id}"}, "amt": -0.1}]
+   },
+   {
+    "tone": "fiery",
+    "sharp": true,
+    "text": "\"That's invented. Everybody knows your people make things up.\"",
+    "react": [{"who": {"class": "middle"}, "amt": -0.1}]
+   },
+   {"tone": "hopeful", "text": "\"I'd rather spend tonight on what we'll build than on what you've said about me.\""}
+  ]
+ },
+ "CLOSING": {
+  "title": "Closing statement",
+  "prompt": "\"You have thirty seconds. Speak to the voters.\"",
   "lines": [
    {"tone": "statesman", "text": "\"On election day, vote for the country you want your children to grow up in.\""},
    {"tone": "fiery", "text": "\"They are afraid of you. On election day, prove them right.\""},
    {"tone": "folksy", "text": "\"If you want more of the same, you know who to vote for. If you don't, you know where to find me.\""},
-   {"tone": "fiery", "sharp": true, "text": "\"If they win again, don't say I didn't warn you.\""}
-  ]}
+   {"tone": "fiery", "sharp": true, "text": "\"If they win again, don't say I didn't warn you.\""},
+   {"tone": "hopeful", "text": "\"Vote for the country you think we could be. I think we could be something remarkable.\""}
+  ]
+ }
 }
