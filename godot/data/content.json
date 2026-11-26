@@ -13002,158 +13002,6 @@
    ]
   },
   {
-   "id": "postal_votes",
-   "kind": "crisis",
-   "title": "Video: a man carries a bag of postal votes in {city}",
-   "where": {
-    "region": "alinni",
-    "city": true
-   },
-   "text": "A video shows a man in {city} carrying a bag of postal votes into a council office days after the local elections. Shared with the caption \"This is how they steal it\", it has been seen four million times. Officials say he is a postman.",
-   "choices": [
-    {
-     "label": "Demand an independent recount",
-     "effects": {
-      "shift": {
-       "system": -3
-      },
-      "goodwill": [
-       {
-        "who": {
-         "class": "middle"
-        },
-        "amt": 0.1
-       },
-       {
-        "who": {
-         "lean": {
-          "system": "<-15"
-         }
-        },
-        "amt": 0.15
-       }
-      ]
-     },
-     "lines": [
-      {
-       "tone": "statesman",
-       "text": "An independent audit of every postal vote in {city}. If it's clean, that ends the rumours."
-      },
-      {
-       "tone": "folksy",
-       "text": "Count them again, in front of the cameras. If he's a postman, he'll be famous."
-      }
-     ]
-    },
-    {
-     "label": "Say the elections are rigged",
-     "effects": {
-      "shift": {
-       "system": -8
-      },
-      "trust": -5,
-      "goodwill": [
-       {
-        "who": {
-         "lean": {
-          "system": "<-15"
-         }
-        },
-        "amt": 0.35
-       },
-       {
-        "who": {
-         "lean": {
-          "nation": "<-20"
-         }
-        },
-        "amt": 0.1
-       },
-       {
-        "who": {
-         "class": "middle"
-        },
-        "amt": -0.3
-       },
-       {
-        "who": {
-         "lean": {
-          "system": ">15"
-         }
-        },
-        "amt": -0.3
-       },
-       {
-        "who": {
-         "nationality": "alinnian"
-        },
-        "amt": -0.2
-       }
-      ]
-     },
-     "lines": [
-      {
-       "tone": "fiery",
-       "text": "They've been stealing elections in Alinni for years. Now there's a video!"
-      },
-      {
-       "tone": "folksy",
-       "text": "My aunt swears she voted for us. Funny how her village came out zero."
-      },
-      {
-       "tone": "fiery",
-       "text": "If we lose in {city}, now you know why.",
-       "sharp": true,
-       "risk": 0.7
-      }
-     ]
-    },
-    {
-     "label": "Defend the election officials",
-     "effects": {
-      "shift": {
-       "system": 5
-      },
-      "trust": 2,
-      "goodwill": [
-       {
-        "who": {
-         "lean": {
-          "system": ">15"
-         }
-        },
-        "amt": 0.2
-       },
-       {
-        "who": {
-         "class": "middle"
-        },
-        "amt": 0.15
-       },
-       {
-        "who": {
-         "lean": {
-          "system": "<-15"
-         }
-        },
-        "amt": -0.2
-       }
-      ]
-     },
-     "lines": [
-      {
-       "tone": "statesman",
-       "text": "A man carrying a bag of post is a postman. Our votes are counted by our neighbours, and they count well."
-      },
-      {
-       "tone": "hopeful",
-       "text": "We have some of the cleanest elections in the region. Let's keep believing in them, because it's true."
-      }
-     ]
-    }
-   ]
-  },
-  {
    "id": "rail_sale",
    "kind": "crisis",
    "title": "Government to sell the state railway",
@@ -13471,9 +13319,9 @@
   {
    "id": "crypto_crash",
    "kind": "crisis",
-   "title": "PezoCoin collapses; pensioners lose their savings",
+   "title": "CraneCoin collapses; pensioners lose their savings",
    "trust": -3,
-   "text": "PezoCoin, a digital currency advertised on every Clipr feed for a year, collapsed overnight. Its founder has left for James. Forty thousand {nationals}, many of them pensioners, have lost their savings.",
+   "text": "CraneCoin, a digital currency advertised on every Clipr feed for a year, collapsed overnight. Its founder has left for James. Forty thousand {nationals}, many of them pensioners, have lost their savings.",
    "choices": [
     {
      "label": "Compensate the victims",
@@ -13553,7 +13401,7 @@
       },
       {
        "tone": "fiery",
-       "text": "Where were the regulators while PezoCoin was on every phone in the country?"
+       "text": "Where were the regulators while CraneCoin was on every phone in the country?"
       }
      ]
     },

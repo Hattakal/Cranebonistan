@@ -33,7 +33,7 @@ One picture per kind of event covers every event in the game. Start here:
 
 | Have | File | Used for | Something like |
 |---|---|---|---|
-|   | `events/_crisis.jpg` | Crisis (58 events) | an empty hospital corridor, a queue, a closed factory gate |
+|   | `events/_crisis.jpg` | Crisis (57 events) | an empty hospital corridor, a queue, a closed factory gate |
 |   | `events/_regional.jpg` | Regional issue (14 events) | a small-town high street, a harbour, a field with pylons |
 |   | `events/_foreign.jpg` | Foreign affairs (12 events) | a border post, flags outside a ministry, a warship on the horizon |
 |   | `events/_opportunity.jpg` | Opportunity (17 events) | a crowd at a rally, a ribbon being cut, a factory floor |
@@ -127,9 +127,8 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/betting_ads.jpg` | One in six young men has gambling debts |
 |   | `events/face_cameras.jpg` | Facial-recognition cameras for every square in Cranebo |
 |   | `events/mp_payrise.jpg` | MPs vote themselves a 30% pay rise |
-|   | `events/postal_votes.jpg` | Video: a man carries a bag of postal votes in {city} |
 |   | `events/rail_sale.jpg` | Government to sell the state railway |
-|   | `events/crypto_crash.jpg` | PezoCoin collapses; pensioners lose their savings |
+|   | `events/crypto_crash.jpg` | CraneCoin collapses; pensioners lose their savings |
 |   | `events/baby_bonus.jpg` | Births fall to a record low; the NUP offers 10,000 pezos a child |
 |   | `events/childcare_cost.jpg` | A nursery place now costs more than rent |
 |   | `events/river_tents.jpg` | Two kilometres of tents along Cranebo's river |
