@@ -36,6 +36,17 @@ const STYLES := {
 	# every offer of money taken, secret foreign money included; or only the clean, public ones
 	"dirtymoney": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "money": "all"},
 	"cleanmoney": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "money": "clean"},
+	# one voice, played as well as possible: its natural manifesto, the best event choices; a line
+	# that would be a gaffe is swapped for another voice ("v_"), and with "vv_" also a line in
+	# another voice that would go viral (the test player looks ahead on a copy of the game)
+	"v_measured": {"m": {"nation": 2, "system": 3, "society": 2, "order": 2, "economy": 2, "welfare": 2, "foreign": 2}, "tone": "statesman", "oracle": "gaffe"},
+	"v_fiery": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "oracle": "gaffe"},
+	"v_folksy": {"m": {"nation": 3, "system": 1, "society": 1, "order": 3, "economy": 0, "welfare": 0, "foreign": 3}, "tone": "folksy", "oracle": "gaffe"},
+	"v_hopeful": {"m": {"nation": 2, "system": 1, "society": 1, "order": 2, "economy": 1, "welfare": 1, "foreign": 2}, "tone": "hopeful", "oracle": "gaffe"},
+	"vv_measured": {"m": {"nation": 2, "system": 3, "society": 2, "order": 2, "economy": 2, "welfare": 2, "foreign": 2}, "tone": "statesman", "oracle": "viral"},
+	"vv_fiery": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "oracle": "viral"},
+	"vv_folksy": {"m": {"nation": 3, "system": 1, "society": 1, "order": 3, "economy": 0, "welfare": 0, "foreign": 3}, "tone": "folksy", "oracle": "viral"},
+	"vv_hopeful": {"m": {"nation": 2, "system": 1, "society": 1, "order": 2, "economy": 1, "welfare": 1, "foreign": 2}, "tone": "hopeful", "oracle": "viral"},
 	"switch": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative", "then": "fiery", "at": 96},
 }
 var G
@@ -79,6 +90,36 @@ func line_score(s: Dictionary, line: Dictionary) -> float:
 ## Choosing well or badly this time?
 func _bad() -> bool:
 	return ST.get("pick", "") == "worst" and rng.randf() < float(ST.get("p", 1.0))
+
+## The looking-ahead player: `try` plays line j on a copy of the game and returns its outcome
+## ("viral", "normal", "gaffe"). Own voice first, a line in it going viral if one would; a
+## gaffe is swapped for the best other line that isn't one; with "viral", another voice's
+## line that would go viral beats an ordinary line in your own.
+var swaps = {"gaffe": 0, "viral": 0}
+func oracle_line(s: Dictionary, lines: Array, try: Callable) -> int:
+	var mine = []
+	var other = []
+	for i in lines.size():
+		var l: Dictionary = lines[i]
+		if float(l.get("risk", 0.3)) <= 0.1 and l.get("react", []).any(func(g): return g.who is Dictionary and g.who.is_empty() and float(g.amt) < 0): continue   # the dull, evasive ones
+		(mine if G.line_style(l) == tone and not G.line_sharp(l) else other).append(i)
+	var outc = {}
+	for i in mine + other: outc[i] = try.call(s.duplicate(true), i)
+	var by_score = func(xs: Array) -> Array: return G.ssort(xs, func(a, b): return line_score(s, lines[b]) - line_score(s, lines[a]))
+	mine = by_score.call(mine)
+	other = by_score.call(other)
+	for i in mine:
+		if outc[i] == "viral": return i
+	if ST.oracle == "viral":
+		for i in other:
+			if outc[i] == "viral": swaps.viral += 1; return i
+	for i in mine:
+		if outc[i] != "gaffe": return i
+	for i in other:
+		if outc[i] != "gaffe":
+			if mine.size(): swaps.gaffe += 1
+			return i
+	return mine[0] if mine.size() else (other[0] if other.size() else 0)
 
 func pick_line(s: Dictionary, lines: Array) -> int:
 	if lines.is_empty(): return -1
@@ -157,7 +198,10 @@ func _init() -> void:
 					var ci = best_choice(s, ev)
 					var lines: Array = ev.choices[ci].get("lines", [])
 					var b4 = G.summarize(s, s.pops).support.player if off.has("trace") else 0.0
-					G.resolve_event(s, ci, pick_line(s, lines) if lines.size() else -1)
+					var li: int = pick_line(s, lines) if lines.size() else -1
+					if ST.has("oracle") and lines.size():
+						li = oracle_line(s, lines, func(c, j): return String(G.resolve_event(c, ci, j).get("delivery", {}).get("outcome", "normal")))
+					G.resolve_event(s, ci, li)
 					if off.has("trace") and s.week >= 136 and s.week <= 150: print("  EVENT w%d %s [%s] -> %s: %.1f -> %.1f" % [s.week, ev.title, ev.get("kind", ""), ev.choices[ci].label, b4 * 100, G.summarize(s, s.pops).support.player * 100])
 				"budget":
 					var take = [] if off.has("nomoney") else f.offers.filter(func(id): return id in ["chamber", "union", "tycoon"])
@@ -173,7 +217,11 @@ func _init() -> void:
 					if off.has("image"): plan = {"road": m * 0.1, "social": m * 0.45, "tv": m * 0.45}
 					G.resolve_budget(s, {} if (off.has("nobudget") or ST.has("dirt")) else plan, take)
 					if off.has("trace") and s.week >= 136 and s.week <= 150: print("  BUDGET w%d spent of %.1f, took %s: %.1f -> %.1f" % [s.week, m, str(take), b5 * 100, G.summarize(s, s.pops).support.player * 100])
-				"debate": G.answer_debate(s, pick_line(s, s.debate.rounds[s.debate.step].lines))
+				"debate":
+					var dl: Array = s.debate.rounds[s.debate.step].lines
+					var dj: int = pick_line(s, dl)
+					if ST.has("oracle"): dj = oracle_line(s, dl, func(c, j): return String(G.answer_debate(c, j).get("outcome", "normal")))
+					G.answer_debate(s, dj)
 				"interview":
 					var rd: Dictionary = s.interview.rounds[s.interview.step]
 					var pick = 0
@@ -223,7 +271,11 @@ func _init() -> void:
 					if lines.is_empty(): continue
 					var keep = tone
 					if STYLES[style].has("timed") and d.heat >= 38 and float(s.get("outrage", 0)) < 0.6: tone = "provocative"
-					var r = G.act_speak(s, d.id, side, pick_line(s, lines))
+					var sj: int = pick_line(s, lines)
+					if ST.has("oracle") and G.is_major(d):
+						var did_id: String = d.id
+						sj = oracle_line(s, lines, func(c, j): return String(G.act_speak(c, did_id, side, j).get("delivery", {}).get("outcome", "normal")))
+					var r = G.act_speak(s, d.id, side, sj)
 					tone = keep
 					if r.ok:
 						did = true
@@ -235,7 +287,11 @@ func _init() -> void:
 						if side == "" or side != G.manifesto_side(s, opt.axis): continue
 						var lines: Array = G.raise_lines(s, opt, side)
 						if lines.is_empty(): continue
-						var r = G.act_raise(s, opt, side, pick_line(s, lines))
+						var rj: int = pick_line(s, lines)
+						if ST.has("oracle"):
+							var o2: Dictionary = opt
+							rj = oracle_line(s, lines, func(c, j): return String(G.act_raise(c, o2, side, j).get("delivery", {}).get("outcome", "normal")))
+						var r = G.act_raise(s, opt, side, rj)
 						if r.ok: did = true; break
 			if not did and not off.has("nooffices") and not ST.has("dirt") and s.money > 4:
 				for c in G.MAP.cities:
@@ -267,6 +323,7 @@ func _init() -> void:
 		var x: Dictionary = s.get("projection", {}).get(d.id, {})
 		for k in x.get("votes", {}): alt += float(x.votes[k])
 		alv += float(x.get("votes", {}).get("player", 0))
+	if ST.has("oracle"): print("SWAPS %s seed %d gaffes dodged %d, viral swaps %d" % [style, seed_n, swaps.gaffe, swaps.viral])
 	print("EXTRA %s seed %d | Alinni vote %.1f%% | relations: %s | pacts %d (all: %d) | dirty money taken %d, leaked %s | dug %d, released %d" % [style, seed_n, alv / maxf(1, alt) * 100, ", ".join(rels), pacts_made, s.get("pacts", []).size() / 2,
 		dirty_taken, "%d (any scandal leaked: %d)" % [s.get("secrets", []).filter(func(x): return x.get("kind", "") == "money" and x.get("leaked", false)).size(), s.get("secrets", []).filter(func(x): return x.get("leaked", false)).size()], dug, released])
 	print("RESULT %s seed %d %s: you %.1f%% of the vote, %d of %d seats, rank %d%s | by year %s | gaffes %d viral %d | charisma %d | trust %d" % [style, seed_n, ",".join(off.keys()),
