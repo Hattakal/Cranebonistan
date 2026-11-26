@@ -52,7 +52,7 @@ The browser (HTML/JavaScript) prototype was retired in November 2026. It is kept
 | `godot/data/scenes.json` | Back-room dialogue with Carlos Martin and Margaret Perkins (not yet shown in the Godot version) |
 | `godot/scripts/rules/` | The rules, one file per system, chained: `base` (content, helpers, calendar), `voters`, `districts`, `media`, `party`, `scandals`, `rivals`, `world` (events, debates, polls), `moments` (interview, flagship, final debate, profile), `coalition` (forming a government after the election). No screen code |
 | `godot/scripts/sim.gd` | The end of the chain, the autoload `Game`: loading content, a new game, the monthly update, the clock |
-| `godot/scripts/main.gd` | Headquarters: top bar, layout, decision sheets, saving |
+| `godot/scripts/main_base.gd` … `main.gd` | Headquarters, a chain of files like the rules (base → map → events → moments → places → story → main): top bar, layout, Options, Carlos and Margaret and saving (`main_base`); the map and its modes (`main_map`); events, speaking and starting debates (`main_events`); the budget, polls, news, the TV debate, election night, the interview and the coalition talks (`main_moments`); a province, trips and the convoy (`main_places`); founding the party and the ending (`main_story`); screenshots (`main.gd`) |
 | `godot/scripts/board.gd` | The desk beside the map: what needs you now |
 | `godot/scripts/files.gd` | The planning files along the top bar |
 | `godot/scripts/paper.gd` | Decision sheets: paper under the lamp (front pages, choices, drafts, the ledger) or a television screen (anything broadcast) |
