@@ -33,12 +33,12 @@ One picture per kind of event covers every event in the game. Start here:
 
 | Have | File | Used for | Something like |
 |---|---|---|---|
-|   | `events/_crisis.jpg` | Crisis (44 events) | an empty hospital corridor, a queue, a closed factory gate |
-|   | `events/_regional.jpg` | Regional issue (11 events) | a small-town high street, a harbour, a field with pylons |
-|   | `events/_foreign.jpg` | Foreign affairs (11 events) | a border post, flags outside a ministry, a warship on the horizon |
-|   | `events/_opportunity.jpg` | Opportunity (15 events) | a crowd at a rally, a ribbon being cut, a factory floor |
+|   | `events/_crisis.jpg` | Crisis (58 events) | an empty hospital corridor, a queue, a closed factory gate |
+|   | `events/_regional.jpg` | Regional issue (14 events) | a small-town high street, a harbour, a field with pylons |
+|   | `events/_foreign.jpg` | Foreign affairs (12 events) | a border post, flags outside a ministry, a warship on the horizon |
+|   | `events/_opportunity.jpg` | Opportunity (17 events) | a crowd at a rally, a ribbon being cut, a factory floor |
 |   | `events/_trap.jpg` | Tricky moment (3 events) | a television studio, a row of microphones, cameras pointed at one chair |
-|   | `events/_scandal.jpg` | Scandal (11 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
+|   | `events/_scandal.jpg` | Scandal (13 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
 |   | `events/_followup.jpg` | Consequences (16 events) | the morning after: an empty hall, newspapers on a doormat |
 |   | `events/_flagship.jpg` | Flagship promise | a campaign poster going up on a wall |
 |   | `events/_secret.jpg` | In confidence | two people talking in a doorway, a phone face down on a table |
@@ -123,6 +123,20 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/violent_series.jpg` | Calls to ban "Black Harbour" after school knife fights |
 |   | `events/women_killed.jpg` | Three women killed by former partners in one week |
 |   | `events/minister_children.jpg` | Interior minister asked who looks after her children |
+|   | `events/hunting_ban.jpg` | Petition to ban hunting reaches 400,000 signatures |
+|   | `events/betting_ads.jpg` | One in six young men has gambling debts |
+|   | `events/face_cameras.jpg` | Facial-recognition cameras for every square in Cranebo |
+|   | `events/mp_payrise.jpg` | MPs vote themselves a 30% pay rise |
+|   | `events/postal_votes.jpg` | Video: a man carries a bag of postal votes in {city} |
+|   | `events/rail_sale.jpg` | Government to sell the state railway |
+|   | `events/crypto_crash.jpg` | PezoCoin collapses; pensioners lose their savings |
+|   | `events/baby_bonus.jpg` | Births fall to a record low; the NUP offers 10,000 pezos a child |
+|   | `events/childcare_cost.jpg` | A nursery place now costs more than rent |
+|   | `events/river_tents.jpg` | Two kilometres of tents along Cranebo's river |
+|   | `events/tuition_fees.jpg` | University fees of 4,000 pezos a year |
+|   | `events/aid_cut.jpg` | Government cuts foreign aid by two thirds |
+|   | `events/fauran_fires.jpg` | Wildfires across {province} in a record heatwave |
+|   | `events/bernard_statue.jpg` | Students want Bernard's statue taken down |
 |   | `events/crisis_insurgency_1.jpg` | Bombing in Alinni |
 |   | `events/crisis_insurgency_2.jpg` | Curfew and mass arrests in Alinni |
 |   | `events/crisis_insurgency_3.jpg` | The Free Alinni commander is caught |
@@ -154,6 +168,9 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/data_centre.jpg` | A Golban data centre wants {province}'s water |
 |   | `events/fauran_cheese.jpg` | Cranebo inspectors ban Fauran's raw-milk cheese |
 |   | `events/river_waste.jpg` | The river below {city} runs orange |
+|   | `events/no_doctor.jpg` | The last doctor in {province}'s valleys retires |
+|   | `events/history_1964.jpg` | New schoolbooks call 1964 a "reunification" |
+|   | `events/rogue_branch.jpg` | Your {province} branch prints its own leaflets |
 
 ### Foreign affairs
 
@@ -170,6 +187,7 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/abroad_golba.jpg` | Three hundred {nationals} deported from Golba overnight |
 |   | `events/abroad_trueants.jpg` | {national} lorries held at the Trueant border for eleven days |
 |   | `events/abroad_norbanistan.jpg` | Four {national} aid workers taken hostage in Norbanistan |
+|   | `events/golba_pact.jpg` | Golba offers a defence pact, and wants a base |
 
 ### Opportunity
 
@@ -190,6 +208,8 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/james_accounts.jpg` | Leaked list: two thousand {nationals} with secret accounts in James |
 |   | `events/wrestling_gold.jpg` | A shepherd's son from {province} is world wrestling champion |
 |   | `events/goranov_women.jpg` | Mario Goranov: women are "too emotional for a crisis" |
+|   | `events/nuclear_plant.jpg` | A nuclear power plant near {city} |
+|   | `events/donor_speech.jpg` | Your biggest donor sends you a speech |
 
 ### Tricky moment
 
@@ -209,6 +229,8 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/nephew_contract.jpg` | Health minister's nephew wins a hospital contract |
 |   | `events/mps_beach.jpg` | MPs on a "fact-finding trip" to Potania's beaches |
 |   | `events/journalists_tapped.jpg` | Interior ministry tapped nine journalists' phones |
+|   | `events/police_chief.jpg` | Cranebo's police chief had two million pezos in James |
+|   | `events/old_posts.jpg` | Your candidate's old posts resurface |
 |   | `events/leak_dillihan.jpg` | Leak: your party took money from Dillihan |
 |   | `events/leak_trueants.jpg` | Leak: Trueant money in your party accounts |
 |   | `events/leak_potania.jpg` | Leak: Potanian mining money behind your campaign |
