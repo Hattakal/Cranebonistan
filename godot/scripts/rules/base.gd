@@ -10,7 +10,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 53
+const SAVE_VERSION := 54
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -535,6 +535,10 @@ func _money_secret(s: Dictionary, fx: Dictionary) -> void:
 	pass
 
 func _teyl_walkout(s: Dictionary) -> void:
+	pass
+
+## A pact to stand aside (an event choice can make one), defined in rules/campaign.gd.
+func make_pact(s: Dictionary, pk: Dictionary) -> void:
 	pass
 
 ## Called when the election result is in (rules/districts.gd), defined in rules/coalition.gd.

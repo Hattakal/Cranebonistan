@@ -68,6 +68,11 @@ func district_votes(s: Dictionary, d: Dictionary, ctx, cache = null, pops = null
 		var sup = cache[pop.id] if cache != null and cache.has(pop.id) else pop_support(s, pop, null, ctx)
 		var votes = pop_votes(pop, sup)
 		for id in votes: out[id] += votes[id]
+	for pk in s.get("pacts", []):   # a party standing aside: most of its voters go to its partner
+		if pk.district != d.id: continue
+		var moved: float = float(out.get(pk.aside, 0.0)) * float(C.get("pacts", {}).get("share", 0.7))
+		out[pk.aside] = float(out.get(pk.aside, 0.0)) - moved
+		out[pk.gets] = float(out.get(pk.gets, 0.0)) + moved
 	return out
 
 ## Every district: votes, the winner, the runner-up and the winning margin (share points).

@@ -28,17 +28,6 @@ func coalition_text(key: String, fill := {}, you := false) -> String:
 func _cset(key: String, default):
 	return COALITION.get(key, default)
 
-## How party a and party b see each other, -100..100. The player's relations are
-## the ones built during the campaign; between two rivals, how close they stand.
-func party_relation(s: Dictionary, a: String, b: String) -> float:
-	if a == b: return 100.0
-	var pa = party_of(s, a)
-	var pb = party_of(s, b)
-	if pa == null or pb == null: return 0.0
-	if pa.isPlayer: return relation(s, b)
-	if pb.isPlayer: return relation(s, a)
-	return pair_relation(s, a, b)
-
 ## "ally", "neutral" or "enemy". `relaxed`: after a shut-out, enemies count as neutral.
 func party_stance(s: Dictionary, a: String, b: String, relaxed := false) -> String:
 	var r: float = party_relation(s, a, b)

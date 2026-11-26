@@ -105,6 +105,16 @@
   "still_not_fixed": {
    "title": "Still not fixed: {topic}",
    "text": "{text}"
+  },
+  "pact": {
+   "title": "Pact: {a} and {b} stand aside for each other",
+   "text": "{b} stands aside for {a} in {x}; {a} stands aside for {b} in {y}. Most of their voters there are expected to follow."
+  },
+  "pact_offer": {
+   "title": "{short} offers a pact",
+   "text": "{leader}'s people have a proposal: {short} stands aside for you in {y} ({ys} seats) if you stand aside for them in {x} ({xs} seats). Most voters follow their party's lead; a pact can't be undone.",
+   "accept": "Shake hands: you stand aside in {x}, they stand aside in {y}",
+   "decline": "Turn it down"
   }
  }
 }

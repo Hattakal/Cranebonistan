@@ -1351,6 +1351,7 @@ func _polls() -> void:
 		var pb = _btn("Win over a branch · ₱%sM" % str(G.ACTIONS.poach.cost), func(): _did(G.act_poach(S, p.id)), (not can) or act_blocked or S.money < float(G.ACTIONS.poach.cost))
 		pb.tooltip_text = G.ACTIONS.poach.help + ("" if can else ("\nThey were raided recently." if p.stability < 40 else "\nThe party is too stable for anyone to leave: %s." % stability_word(p.stability).to_lower()))
 		acts.add_child(pb)
+		_pact_row(c, p, act_blocked)
 	_rule()
 	_eyebrow("National vote intention · %s · %s" % [poll.label, G.date_label(poll.week, false)])
 	_bars(poll.national, prev.national if prev else null)
@@ -1360,6 +1361,27 @@ func _polls() -> void:
 	ch.custom_minimum_size.y = 240
 	_add(ch)
 	_p("A tracking poll comes out every month, with a detailed poll of every group each December.")
+
+## Pacts with this party: the ones made, and in the campaign, trades they would take (one action each).
+func _pact_row(c: Control, p: Dictionary, act_blocked: bool) -> void:
+	var dn = func(id): return G.district_by_id(id).name
+	for pk in S.get("pacts", []):
+		if pk.aside == p.id and pk.gets == "player": _add(Look.dlabel("Pact: %s stands aside for you in %s." % [p.short, dn.call(pk.district)], "body_bold", 12, Look.GOOD_HI, true), c)
+		elif pk.aside == "player" and pk.gets == p.id: _add(Look.dlabel("Pact: you stand aside for %s in %s." % [p.short, dn.call(pk.district)], "body_bold", 12, Look.GOOD_HI, true), c)
+	if not G.in_campaign(S): return
+	if not G.can_pact(S, "player", p.id):
+		_add(Look.dlabel("Won't make a pact with you: you are enemies.", "body", 12, Look.DIM, true), c)
+		return
+	var offers: Array = G.pact_offers(S, p.id)
+	if offers.is_empty():
+		_add(Look.dlabel("No pact they would take right now: a trade needs a province each of you would win with the other's voters, and one each of you is far from winning, of about the same size.", "body", 12, Look.DIM, true), c)
+		return
+	for o in offers:
+		var you_s: int = int(G.district_by_id(o.you_get).seats)
+		var they_s: int = int(G.district_by_id(o.they_get).seats)
+		var b = _btn("Pact: they stand aside in %s (%d seats), you in %s (%d)" % [dn.call(o.you_get), you_s, dn.call(o.they_get), they_s], func(): _did(G.act_pact(S, p.id, o.you_get, o.they_get)), act_blocked)
+		b.tooltip_text = "One action. In each province, the party standing aside keeps about a third of its voters; the rest go to its partner. A pact can't be undone."
+		_row(c, 6).add_child(b)
 
 class Chart extends Control:
 	var G

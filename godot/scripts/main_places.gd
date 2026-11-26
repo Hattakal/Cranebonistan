@@ -9,6 +9,10 @@ func _district_sheet(id: String) -> void:
 	p.kicker("District · %s · %d seat%s" % [r.name, d.seats, "" if d.seats == 1 else "s"])
 	p.heading(d.name, 36)
 	if d.cities.size(): p.small("Includes " + ", ".join(d.cities) + ".")
+	for pk in S.get("pacts", []):
+		if pk.district != d.id: continue
+		var nm = func(id): return "you" if id == "player" else String(G.party_of(S, id).short)
+		p.small("Pact: %s stand%s aside here for %s." % [nm.call(pk.aside).capitalize() if pk.aside == "player" else nm.call(pk.aside), "" if pk.aside == "player" else "s", nm.call(pk.gets)], Look.INK)
 	if x.size():
 		var ids: Array = Game.ssort(x.votes.keys(), func(a, b): return x.votes[b] - x.votes[a])
 		var tot: float = 0.0

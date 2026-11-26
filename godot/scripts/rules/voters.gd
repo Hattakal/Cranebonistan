@@ -566,6 +566,7 @@ func apply_effects(s: Dictionary, fx: Dictionary) -> void:
 	var inf = influence_of(s)
 	var from_news: bool = fx.get("fromNews", false)
 	shift_perceived(s, fx.get("shift"))
+	if fx.get("pact"): make_pact(s, fx.pact)
 	for g in fx.get("goodwill", []):
 		var party: String = g.get("party", player.id)
 		var amt: float = g.amt

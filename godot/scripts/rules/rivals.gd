@@ -296,7 +296,7 @@ func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
 		for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.08, -2, 2)
 		rival_move(s, p, news("MOVE", "caught", p, {"target": target.short}), target.isPlayer)
 		if target.isPlayer: change_relation(s, p.id, -4, "they spied on you")
-		else: change_pair(s, target.id, p.id, -4, "%s were caught spying on them" % p.short)
+		else: change_pair(s, target.id, p.id, -4, "%s were caught spying on %s" % [p.short, target.short])
 		return
 	if r > 0.6:
 		rival_move(s, p, news("MOVE", "nothing", p, {"target": target.short}))
@@ -319,7 +319,7 @@ func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
 		target.stability = clampf2(float(target.stability) - 6, 0, 100)
 		for pop in s.pops: pop.goodwill[target.id] = clampf2(pop.goodwill[target.id] - 0.1 * (1 - shield_of(pop, target.id)), -2, 2)
 		rival_move(s, p, news("MOVE", "leak", p, {"target": target.short}))
-		change_pair(s, target.id, p.id, -5, "%s leaked a story about them" % p.short)
+		change_pair(s, target.id, p.id, -5, "%s leaked a story about %s" % [p.short, target.short])
 
 func frontrunner_scrutiny(s: Dictionary, now: Dictionary) -> void:
 	if now.player < C.scrutinyFrom or rand(s) > C.scrutinyChance: return
@@ -348,6 +348,17 @@ func isolation(s: Dictionary, p: Dictionary) -> float:
 ## What two parties' positions alone earn them, plus the pull between two outcasts.
 func pair_base(s: Dictionary, a: Dictionary, b: Dictionary) -> float:
 	return policy_relation(a, b) + float(C.get("relations", {}).get("isolated", 25)) * isolation(s, a) * isolation(s, b)
+
+## How party a and party b see each other, -100..100. The player's relations are
+## the ones built during the campaign; between two rivals, how close they stand.
+func party_relation(s: Dictionary, a: String, b: String) -> float:
+	if a == b: return 100.0
+	var pa = party_of(s, a)
+	var pb = party_of(s, b)
+	if pa == null or pb == null: return 0.0
+	if pa.isPlayer: return relation(s, b)
+	if pb.isPlayer: return relation(s, a)
+	return pair_relation(s, a, b)
 
 # ----- Between two rival parties: the same model as yours, the same both ways -----
 func _pair_key(a: String, b: String) -> String:
