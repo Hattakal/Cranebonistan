@@ -4,7 +4,10 @@ extends SceneTree
 ## a sensible budget. Usage: -- <style> <seed> [flags]
 ##   style: populist | centrist | left | provocative (the populist manifesto, every line
 ##   provocative) | hopeful (a hopeful, mildly anti-system progressive) | switch (provocative for two years, then fiery) | timed (fiery, but
-##   provocative in a hot debate when earlier outrage has worn off)
+##   provocative in a hot debate when earlier outrage has worn off), or a way of playing:
+##   right | wrong80 | wrong (the best or worst choices and wordings), only_<style> (one style all
+##   game), alinni (Alinni first), appease (keep the rivals sweet, every pact), dirt (money only
+##   for digging), dirtymoney (every offer taken) | cleanmoney (only public money)
 ## flags (comma-separated) switch parts off: notrips,nospeak,nobudget,nomoney,nooffices,noclaim;
 ## image: most of the budget on TV and social media (recognition and the leader's image)
 const STYLES := {
@@ -14,11 +17,80 @@ const STYLES := {
 	"provocative": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative"},
 	"timed": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "timed": true},
 	"hopeful": {"m": {"nation": 2, "system": 1, "society": 1, "order": 2, "economy": 1, "welfare": 1, "foreign": 2}, "tone": "hopeful"},
+	# choosing well or badly (populist manifesto, any style): every best choice and wording; the worst
+	# 80% of the time; the worst always
+	"right": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "pick": "best"},
+	"wrong80": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "pick": "worst", "p": 0.8},
+	"wrong": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "pick": "worst", "p": 1.0},
+	# one style all game, the same populist manifesto
+	"only_measured": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "statesman"},
+	"only_fiery": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery"},
+	"only_folksy": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "folksy"},
+	"only_hopeful": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "hopeful"},
+	# Alinni first: their positions, trips there for the first two years, choices that please them
+	"alinni": {"m": {"nation": 4, "system": 1, "society": 2, "order": 3, "economy": 2, "welfare": 1, "foreign": 3}, "tone": "statesman", "alinni": true},
+	# keep the other parties sweet: a moderate manifesto, choices that move you toward them, every pact going
+	"appease": {"m": {"nation": 2, "system": 3, "society": 2, "order": 2, "economy": 2, "welfare": 2, "foreign": 2}, "tone": "statesman", "appease": true},
+	# money only for digging: no budget, no offices; investigate every month and release what you find
+	"dirt": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "dirt": true},
+	# every offer of money taken, secret foreign money included; or only the clean, public ones
+	"dirtymoney": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "money": "all"},
+	"cleanmoney": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "money": "clean"},
 	"switch": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative", "then": "fiery", "at": 96},
 }
 var G
 var tone = "fiery"
 var off = {}
+var ST: Dictionary = {}
+var rng := RandomNumberGenerator.new()
+var _share_cache = {}
+var dirty_taken = 0
+var released = 0
+var dug = 0
+var pacts_made = 0
+
+## How much of the electorate a "who" covers (0..1).
+func _share(s: Dictionary, who) -> float:
+	var k: String = JSON.stringify(who)
+	if _share_cache.has(k): return _share_cache[k]
+	var a = 0.0
+	var t = 0.0
+	for pop in s.pops:
+		t += pop.size
+		if G.matches(pop, who): a += pop.size
+	_share_cache[k] = a / maxf(1, t)
+	return _share_cache[k]
+
+## What a line should earn, roughly: its style's reactions (half, plus the provocative ones,
+## for a sharp line) and its own, weighted by how many voters they reach, less its risk.
+func line_score(s: Dictionary, line: Dictionary) -> float:
+	var st: String = G.line_style(line)
+	var reacts: Array = G.TONES[st].react.duplicate()
+	if G.line_sharp(line):
+		reacts = reacts.map(func(g): return {"who": g.who, "amt": float(g.amt) * 0.5})
+		reacts.append_array(G.TONES.get("provocative", {}).get("react", []))
+	reacts.append_array(line.get("react", []))
+	var v = 0.0
+	for g in reacts: v += float(g.amt) * _share(s, g.who)
+	var risk = line.get("risk")
+	if risk == null: risk = G.TONE_RISK.get("provocative" if G.line_sharp(line) else st, 0.2)
+	return v - float(risk) * 0.03
+
+## Choosing well or badly this time?
+func _bad() -> bool:
+	return ST.get("pick", "") == "worst" and rng.randf() < float(ST.get("p", 1.0))
+
+func pick_line(s: Dictionary, lines: Array) -> int:
+	if lines.is_empty(): return -1
+	if ST.get("pick", "") == "":
+		return line_of(lines)
+	var bad: bool = _bad()
+	var best = 0
+	var bv = INF if bad else -INF
+	for i in lines.size():
+		var v: float = line_score(s, lines[i])
+		if (bad and v < bv) or (not bad and v > bv): bv = v; best = i
+	return best
 
 func line_of(lines: Array) -> int:
 	# "provocative" means a sharp line in any style (a fiery one if there is one)
@@ -38,8 +110,9 @@ func side_for(s: Dictionary, axis: String) -> String:
 
 func best_choice(s: Dictionary, ev: Dictionary) -> int:
 	var man: Dictionary = G.player_party(s).manifesto
+	var bad: bool = _bad()
 	var best = 0
-	var bv = -1e9
+	var bv = 1e9 if bad else -1e9
 	for i in ev.choices.size():
 		var fx: Dictionary = ev.choices[i].effects
 		var v = 0.0
@@ -47,7 +120,20 @@ func best_choice(s: Dictionary, ev: Dictionary) -> int:
 		for g in fx.get("goodwill", []): v += float(g.amt) * 4
 		if fx.has("secretAnswer"): v = {"deny": 1, "attack": 3, "own": 2}.get(fx.secretAnswer.how, 0)
 		if fx.has("violence"): v = {"condemn": 2, "allsides": 3, "understand": 0}.get(fx.violence.how, 0)
-		if v > bv: bv = v; best = i
+		if ST.has("alinni"):
+			for g in fx.get("goodwill", []):
+				var w = g.who
+				if w is Dictionary and (w.get("nationality", "") == "alinnian" or w.get("region", "") == "alinni"): v += float(g.amt) * 12
+		if ST.has("appease"):   # stay close to where the other parties stand; blame nobody
+			var rv: Array = G.rivals(s)
+			for ax in fx.get("shift", {}):
+				var mean = 0.0
+				for p in rv: mean += float(p.perceived[ax])
+				mean /= maxf(1, rv.size())
+				var me: float = float(G.player_party(s).perceived[ax])
+				v += (absf(me - mean) - absf(me + float(fx.shift[ax]) - mean)) * 0.2
+			if fx.has("blame"): v -= 5
+		if (bad and v < bv) or (not bad and v > bv): bv = v; best = i
 	return best
 
 func _init() -> void:
@@ -57,6 +143,8 @@ func _init() -> void:
 	if args.size() > 2:
 		for f in args[2].split(","): off[f] = true
 	G = load("res://scripts/sim.gd").new()
+	ST = STYLES[style]
+	rng.seed = seed_n * 7919
 	tone = STYLES[style].tone
 	var s: Dictionary = G.new_game({"seed": seed_n, "partyName": "Test", "home": "Bayernal", "manifesto": STYLES[style].m})
 	var track = []
@@ -69,24 +157,32 @@ func _init() -> void:
 					var ci = best_choice(s, ev)
 					var lines: Array = ev.choices[ci].get("lines", [])
 					var b4 = G.summarize(s, s.pops).support.player if off.has("trace") else 0.0
-					G.resolve_event(s, ci, line_of(lines) if lines.size() else -1)
+					G.resolve_event(s, ci, pick_line(s, lines) if lines.size() else -1)
 					if off.has("trace") and s.week >= 136 and s.week <= 150: print("  EVENT w%d %s [%s] -> %s: %.1f -> %.1f" % [s.week, ev.title, ev.get("kind", ""), ev.choices[ci].label, b4 * 100, G.summarize(s, s.pops).support.player * 100])
 				"budget":
 					var take = [] if off.has("nomoney") else f.offers.filter(func(id): return id in ["chamber", "union", "tycoon"])
+					if ST.get("money", "") == "all": take = f.offers.duplicate()
+					elif ST.get("money", "") == "clean": take = f.offers.filter(func(id): return id in ["chamber", "union"])
+					for id in take:
+						if G.by_id(G.FUNDING_OFFERS, id).effects.has("scandal"): dirty_taken += 1
 					var extra = 0.0
 					for id in take: extra += float(G.by_id(G.FUNDING_OFFERS, id).effects.get("money", 0))
 					var m: float = (s.money + extra) * 0.75
 					var b5 = G.summarize(s, s.pops).support.player if off.has("trace") else 0.0
 					var plan = {"road": m * 0.35, "social": m * 0.35, "tv": m * 0.3}
 					if off.has("image"): plan = {"road": m * 0.1, "social": m * 0.45, "tv": m * 0.45}
-					G.resolve_budget(s, {} if off.has("nobudget") else plan, take)
+					G.resolve_budget(s, {} if (off.has("nobudget") or ST.has("dirt")) else plan, take)
 					if off.has("trace") and s.week >= 136 and s.week <= 150: print("  BUDGET w%d spent of %.1f, took %s: %.1f -> %.1f" % [s.week, m, str(take), b5 * 100, G.summarize(s, s.pops).support.player * 100])
-				"debate": G.answer_debate(s, line_of(s.debate.rounds[s.debate.step].lines))
+				"debate": G.answer_debate(s, pick_line(s, s.debate.rounds[s.debate.step].lines))
 				"interview":
 					var rd: Dictionary = s.interview.rounds[s.interview.step]
 					var pick = 0
-					for i in rd.lines.size():
-						if rd.lines[i].get("kind", "") in ["clear", "own"] or (rd.lines[i].get("kind", "") == "style" and rd.lines[i].tone == tone): pick = i; break
+					if _bad():
+						for i in rd.lines.size():
+							if rd.lines[i].get("kind", "") in ["dodge", "deny", "deflect"]: pick = i; break
+					else:
+						for i in rd.lines.size():
+							if rd.lines[i].get("kind", "") in ["clear", "own"] or (rd.lines[i].get("kind", "") == "style" and rd.lines[i].tone == tone): pick = i; break
 					G.answer_interview(s, pick)
 				"election": break
 				_: G.dismiss_front(s)
@@ -99,7 +195,8 @@ func _init() -> void:
 			for d in G.DISTRICTS:
 				var x: Dictionary = s.projection[d.id]
 				var gap: float = (float(x.share) - float(x.you)) if x.winner != "player" else float(x.margin)
-				if d.region == "alinni": continue
+				if d.region == "alinni" and not ST.has("alinni"): continue
+				if ST.has("alinni") and s.week < 96 and d.region != "alinni": continue
 				var v: float = float(d.seats) * maxf(0.02, 0.2 - gap) / (1.0 + 0.3 * int(s.districts[d.id].visits))
 				if v > bv: bv = v; best = d.id
 			if best != "": G.act_visit(s, best)
@@ -107,7 +204,17 @@ func _init() -> void:
 		while s.actionsLeft > 0 and guard < 6 and s.queue.is_empty():
 			guard += 1
 			var did = false
-			if not off.has("nospeak"):
+			if ST.has("dirt"):
+				for i in s.dossiers.size():
+					if G.act_release(s, i).get("ok", false): did = true; released += 1; break
+				if not did and s.money >= float(G.ACTIONS.research.cost):
+					var tgt = G.ssort(G.rivals(s), func(a, b): return float(s.lastSupport.get(b.id, 0) if s.lastSupport else 0) - float(s.lastSupport.get(a.id, 0) if s.lastSupport else 0))[0]
+					if G.act_research(s, tgt.id).ok: did = true; dug += 1
+			if not did and ST.has("appease") and G.in_campaign(s):
+				for p in G.rivals(s):
+					var offs: Array = G.pact_offers(s, p.id)
+					if offs.size() and G.act_pact(s, p.id, offs[0].you_get, offs[0].they_get).ok: did = true; pacts_made += 1; break
+			if not did and not off.has("nospeak"):
 				var ds: Array = G.ssort(s.debates.duplicate(), func(a, b): return b.heat - a.heat)
 				for d in ds:
 					var side = side_for(s, d.axis)
@@ -116,7 +223,7 @@ func _init() -> void:
 					if lines.is_empty(): continue
 					var keep = tone
 					if STYLES[style].has("timed") and d.heat >= 38 and float(s.get("outrage", 0)) < 0.6: tone = "provocative"
-					var r = G.act_speak(s, d.id, side, line_of(lines))
+					var r = G.act_speak(s, d.id, side, pick_line(s, lines))
 					tone = keep
 					if r.ok:
 						did = true
@@ -128,9 +235,9 @@ func _init() -> void:
 						if side == "" or side != G.manifesto_side(s, opt.axis): continue
 						var lines: Array = G.raise_lines(s, opt, side)
 						if lines.is_empty(): continue
-						var r = G.act_raise(s, opt, side, line_of(lines))
+						var r = G.act_raise(s, opt, side, pick_line(s, lines))
 						if r.ok: did = true; break
-			if not did and not off.has("nooffices") and s.money > 4:
+			if not did and not off.has("nooffices") and not ST.has("dirt") and s.money > 4:
 				for c in G.MAP.cities:
 					if c.area in ["erland", "fauraifai", "cranbia"] and G.community_level(s, c.name) < G.COMMUNITY_MAX and s.money >= G.COMMUNITY_COST[G.community_level(s, c.name)] + 2:
 						if G.act_community(s, c.name).ok: did = true; break
@@ -150,6 +257,18 @@ func _init() -> void:
 			print("  m%d sup %.1f aware %.2f goodwill %.3f leader %.3f charisma %d trust %d crisis %s salMod %s | %s" % [s.week / 4, sm.support.player * 100, sm.aware, gw / tot, ld / tot, int(G.player_party(s).charisma), int(s.trust), str(s.crisis.id if s.crisis else "-"), str(s.salMod).substr(0, 90), own])
 		G.advance_week(s)
 	var r: Dictionary = s.result
+	var rels = []
+	for p in G.rivals(s): rels.append("%s %d" % [p.short, int(G.relation(s, p.id))])
+	# your share of the vote in Alinni's provinces, as projected at the end
+	var alv = 0.0
+	var alt = 0.0
+	for d in G.DISTRICTS:
+		if d.region != "alinni": continue
+		var x: Dictionary = s.get("projection", {}).get(d.id, {})
+		for k in x.get("votes", {}): alt += float(x.votes[k])
+		alv += float(x.get("votes", {}).get("player", 0))
+	print("EXTRA %s seed %d | Alinni vote %.1f%% | relations: %s | pacts %d (all: %d) | dirty money taken %d, leaked %s | dug %d, released %d" % [style, seed_n, alv / maxf(1, alt) * 100, ", ".join(rels), pacts_made, s.get("pacts", []).size() / 2,
+		dirty_taken, "%d (any scandal leaked: %d)" % [s.get("secrets", []).filter(func(x): return x.get("kind", "") == "money" and x.get("leaked", false)).size(), s.get("secrets", []).filter(func(x): return x.get("leaked", false)).size()], dug, released])
 	print("RESULT %s seed %d %s: you %.1f%% of the vote, %d of %d seats, rank %d%s | by year %s | gaffes %d viral %d | charisma %d | trust %d" % [style, seed_n, ",".join(off.keys()),
 		r.votes.player * 100, r.seats.national.player, int(G.C.seats), r.ranking.find("player") + 1, " MAJORITY" if r.majority else "", " ".join(track), s.record.gaffes, s.record.memes, int(G.player_party(s).charisma), int(s.trust)])
 	quit()
