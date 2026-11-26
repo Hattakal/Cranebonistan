@@ -7186,7 +7186,7 @@
   {
    "id": "fuel_price",
    "kind": "crisis",
-   "title": "Petrol passes three pezos a litre",
+   "title": "Petrol passes ten pezos a litre",
    "when": {
     "prices": ">50"
    },
@@ -7296,7 +7296,7 @@
       },
       {
        "tone": "fiery",
-       "text": "Three pezos a litre while the oil companies count their money? Cap it!"
+       "text": "Ten pezos a litre while the oil companies count their money? Cap it!"
       },
       {
        "tone": "folksy",
@@ -7730,7 +7730,7 @@
    "kind": "scandal",
    "title": "Health minister's nephew wins a hospital contract",
    "trust": -6,
-   "text": "A company founded eight months ago by the Health Minister's nephew has won a 400-million-pezo contract to supply Cranebo's hospitals. It has six employees and an office above a dry cleaner's.",
+   "text": "A company founded eight months ago by the Health Minister's nephew has won a 1.5-billion-pezo contract to supply Cranebo's hospitals. It has six employees and an office above a dry cleaner's.",
    "choices": [
     {
      "label": "Lead the charge: \"This is how they all work\"",
@@ -7774,11 +7774,11 @@
      "lines": [
       {
        "tone": "statesman",
-       "text": "Every public contract above ten million should be published, with the name of every owner."
+       "text": "Every public contract above forty million should be published, with the name of every owner."
       },
       {
        "tone": "fiery",
-       "text": "Six employees, four hundred million. That isn't a contract, it's a family dinner!"
+       "text": "Six employees, a billion and a half. That isn't a contract, it's a family dinner!"
       },
       {
        "tone": "hopeful",
@@ -7850,7 +7850,7 @@
       },
       {
        "tone": "folksy",
-       "text": "Six employees and four hundred million. Finally, a {national} company with good productivity.",
+       "text": "Six employees and a billion and a half. Finally, a {national} company with good productivity.",
        "sharp": true,
        "risk": 0.55
       }
@@ -8226,7 +8226,7 @@
   {
    "id": "waiter_envelope",
    "kind": "opportunity",
-   "title": "Waiter returns fifty thousand pezos he found",
+   "title": "Waiter returns two hundred thousand pezos he found",
    "where": {
     "regions": [
      "cranbia",
@@ -8234,7 +8234,7 @@
     ],
     "city": true
    },
-   "text": "A waiter in {city} found an envelope with fifty thousand pezos under a table and spent two days tracking down its owner. The video of the handover has eleven million views. He earns 1,400 pezos a month.",
+   "text": "A waiter in {city} found an envelope with two hundred thousand pezos under a table and spent two days tracking down its owner. The video of the handover has eleven million views. He earns 5,600 pezos a month.",
    "choices": [
     {
      "label": "Praise him: this is the real {country}",
@@ -8268,14 +8268,14 @@
       },
       {
        "tone": "folksy",
-       "text": "Fifty thousand pezos, and he gave it back. I know ministers who'd have kept the table.",
+       "text": "Two hundred thousand pezos, and he gave it back. I know ministers who'd have kept the table.",
        "sharp": true,
        "risk": 0.5
       }
      ]
     },
     {
-     "label": "Point out that he earns 1,400 a month",
+     "label": "Point out that he earns 5,600 a month",
      "effects": {
       "shift": {
        "economy": -5,
@@ -8309,7 +8309,7 @@
       },
       {
        "tone": "fiery",
-       "text": "He gave back fifty thousand pezos. His boss gives him fourteen hundred!"
+       "text": "He gave back two hundred thousand pezos. His boss gives him fifty-six hundred!"
       },
       {
        "tone": "hopeful",
@@ -8799,7 +8799,7 @@
    "kind": "crisis",
    "title": "Government plans a tax on inherited homes",
    "trust": -3,
-   "text": "To fill a hole in the budget, the NUP wants to tax inherited homes worth more than 300,000 pezos. Most families in Cranebo's suburbs would pay. Most in Fauran wouldn't.",
+   "text": "To fill a hole in the budget, the NUP wants to tax inherited homes worth more than 1.2 million pezos. Most families in Cranebo's suburbs would pay. Most in Fauran wouldn't.",
    "choices": [
     {
      "label": "Oppose it: a family home is not a fortune",
@@ -8899,7 +8899,7 @@
      "lines": [
       {
        "tone": "statesman",
-       "text": "Inherited wealth is the least earned money there is. Taxing it above a million is fair."
+       "text": "Inherited wealth is the least earned money there is. Taxing it above four million is fair."
       },
       {
        "tone": "hopeful",
@@ -9241,12 +9241,12 @@
   {
    "id": "stadium_money",
    "kind": "crisis",
-   "title": "600 million for a stadium in Cranebo",
+   "title": "2.5 billion for a stadium in Cranebo",
    "trust": -2,
    "where": {
     "province": "cranbia_3"
    },
-   "text": "The government has approved 600 million pezos for a new stadium in Cranebo, ahead of hosting the Continental Cup. The new hospital wing promised to Fauran since 2019 has been postponed again.",
+   "text": "The government has approved 2.5 billion pezos for a new stadium in Cranebo, ahead of hosting the Continental Cup. The new hospital wing promised to Fauran since 2019 has been postponed again.",
    "choices": [
     {
      "label": "Back the stadium: the Cup will pay for it",
@@ -9373,7 +9373,7 @@
      "lines": [
       {
        "tone": "statesman",
-       "text": "Six hundred million is the city's money. Let the city decide."
+       "text": "Two and a half billion is the city's money. Let the city decide."
       },
       {"tone": "hopeful", "text": "Let Cranebo decide. A city that chooses its own stadium will fill it."}
      ]
@@ -12738,9 +12738,9 @@
   {
    "id": "police_chief",
    "kind": "scandal",
-   "title": "Cranebo's police chief had two million pezos in James",
+   "title": "Cranebo's police chief had eight million pezos in James",
    "trust": -5,
-   "text": "Cranebo's police chief kept a private account in James holding two million pezos. Officers now say promotions in his force were sold for cash.",
+   "text": "Cranebo's police chief kept a private account in James holding eight million pezos. Officers now say promotions in his force were sold for cash.",
    "choices": [
     {
      "label": "Demand an outside review of the whole force",
@@ -13492,8 +13492,8 @@
   {
    "id": "baby_bonus",
    "kind": "crisis",
-   "title": "Births fall to a record low; the NUP offers 10,000 pezos a child",
-   "text": "Births in {country} have fallen to the lowest since records began. The NUP proposes paying 10,000 pezos for every child born.",
+   "title": "Births fall to a record low; the NUP offers 40,000 pezos a child",
+   "text": "Births in {country} have fallen to the lowest since records began. The NUP proposes paying 40,000 pezos for every child born.",
    "choices": [
     {
      "label": "Back the bonus",
@@ -13530,7 +13530,7 @@
      "lines": [
       {
        "tone": "statesman",
-       "text": "A country that stops having children has decided to grow old. Ten thousand pezos is a start."
+       "text": "A country that stops having children has decided to grow old. Forty thousand pezos is a start."
       },
       {
        "tone": "folksy",
@@ -13572,11 +13572,11 @@
      "lines": [
       {
        "tone": "statesman",
-       "text": "Nobody has a child for ten thousand pezos. They have one when they have a home and childcare."
+       "text": "Nobody has a child for forty thousand pezos. They have one when they have a home and childcare."
       },
       {
        "tone": "folksy",
-       "text": "Ten thousand pezos buys a pram. It doesn't buy a second bedroom."
+       "text": "Forty thousand pezos buys a pram. It doesn't buy a second bedroom."
       },
       {
        "tone": "hopeful",
@@ -14001,8 +14001,8 @@
   {
    "id": "tuition_fees",
    "kind": "crisis",
-   "title": "University fees of 4,000 pezos a year",
-   "text": "The government wants to charge university students 4,000 pezos a year. Until now, university has been free. Students have occupied the main hall of Cranebo University.",
+   "title": "University fees of 16,000 pezos a year",
+   "text": "The government wants to charge university students 16,000 pezos a year. Until now, university has been free. Students have occupied the main hall of Cranebo University.",
    "choices": [
     {
      "label": "Keep university free",
@@ -14044,7 +14044,7 @@
       },
       {
        "tone": "folksy",
-       "text": "I was the first in my family to go. At four thousand a year, I wouldn't have."
+       "text": "I was the first in my family to go. At sixteen thousand a year, I wouldn't have."
       },
       {
        "tone": "hopeful",

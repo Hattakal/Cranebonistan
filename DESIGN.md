@@ -76,6 +76,24 @@ Written by the designer; the game's texts should agree with it.
 
 **Salmark**, capital **Salbourg**: a small mountain republic to the north. Mountains separate it from Cranbovia, and it is a rich, highly industrialised country (machine tools, chemicals, precision parts). Salt is history: the salt trade once paid for its independence, and the mines are now mostly museums. It keeps to itself through trade. *History:* first described as living off its salt mines; changed by the designer in November 2026. It needs no events or rules: it is a quiet neighbour (relation Neutral) that never causes trouble, unless a later idea wants it to. *History of the name:* first Clovinia (after cloves), changed because it read too close to Cranbovia ("Cranbovian and Clovinian ministers meet"). *Rejected:* making it a banking haven, which read as a Swiss parody. On the map since map4 (a strip along the top, with Salbourg); its flag is a white salt crystal on slate blue.
 
+### Money: what a pezo buys (decided November 2026)
+
+The {national} pezo (₱) is worth about a quarter of a euro. The party money in the rules stays as it is; at this rate it is in line with real parties in a country of about 35 million (between Poland and Spain), a little generous for a new party because business money is meant to tempt. Every text follows this list:
+
+| | Pezos |
+|---|---|
+| Minimum wage / average wage (a month) | 4,400 / 7,200 (a waiter earns 5,600) |
+| Rent of a flat: Cranebo / a Fauran town | 4,400 / 1,600 a month |
+| A house: Cranebo suburbs / a Fauran village | 1.2 million / 240,000 |
+| Petrol (a record would be 10) | about 7 a litre |
+| Coffee / a loaf / a newspaper | 8 / 5 / 4–12 |
+| University fees (proposed) / baby bonus (proposed) | 16,000 a year / 40,000 |
+| The state budget | about 800 billion a year (a stadium 2.5 billion, a hospital contract 1.5 billion) |
+| Your party at 20% / a new party at 3% | ₱30–45M / ₱12–25M a year |
+| A week of national adverts / a big donation | ₱1.5M / ₱3–12M |
+
+Foreign money (Golban dollars) is quoted as it is. *History:* the pezo was first treated as roughly a euro, which made party budgets three to ten times real ones; the designer chose a weaker pezo over dividing the money (November 2026), and the country's prices in texts were multiplied by four. Whether to keep the name (it reads South American) is still open; the crown was suggested.
+
 ### The map
 
 *Redrawn (November 2026, map3):* new borders, all five regions in new places, a lake on the Cranbia–Alinni border, a sea to the south-east, and capitals for the neighbours (Cklue in Bordon, Dillihan, Crumland in the Southern Trueants; James has none). New spellings: Tarropolis, Büllünt, Aikütest (the map's "Cranbero" is a typo: the capital stays **Cranebo**). Rivers and mountains are not drawn yet. The 29 provinces (the voting districts) are drawn on the map and built (6.2); the map is now in its own file, `godot/data/map.json`. Still to come: the election-night broadcast. (The leader's home city is built: see *Founding night* in section 7.) *Extended (November 2026, map4):* the canvas grew 500 px upward to show the whole country, its northern coast and Salmark. Renames from the designer's lore pass: Büllünt → **Vüllent**, Crumland → **Crümländ** (umlauts made obvious on purpose), Tarropolis → **Tarroport**, Gilopolis → **Giloford**, Lilapolis → **Lilabourg** (Harapolis stays). The sea is the **Hesperian Sea**; the lake on the Cranbia–Alinni border is **Follount Lake** (the same root as Vüllent, as Cranbovians say it). New province **Sisillia** in northern Erland (no city yet; it replaced the unnamed "North Erland"). Province ids are unchanged except that cranbia_1 and cranbia_2 swapped (Northern Cranbia / Tarroport), which nothing refers to.

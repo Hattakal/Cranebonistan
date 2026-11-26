@@ -6,7 +6,7 @@
    "name": "The Morning Post",
    "style": "tabloid",
    "motto": "The paper that asks what you're all thinking",
-   "price": "₱1.50",
+   "price": "₱6.00",
    "founded": 1988
   },
   {
@@ -14,7 +14,7 @@
    "name": "The Cranebo Herald",
    "style": "broadsheet",
    "motto": "Founded 1964. Independent ever since, it says.",
-   "price": "₱3.00",
+   "price": "₱12.00",
    "founded": 1964
   },
   {
@@ -22,14 +22,14 @@
    "name": "The {region} Courier",
    "style": "local",
    "motto": "All the news of {region}, twice a week",
-   "price": "₱1.00",
+   "price": "₱4.00",
    "founded": 1971
   }
  ],
  "DEFAULT": {
   "style": "broadsheet",
   "motto": "",
-  "price": "₱2.50",
+  "price": "₱10.00",
   "founded": 1990
  }
 }
