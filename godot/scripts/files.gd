@@ -427,7 +427,7 @@ func _platform() -> void:
 	c2.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Party offices", c2)
 	var blocked_o: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0 or G.in_campaign(S)
-	_p("Open an office in a city, then grow it (one action, ₱1–2M). It works every month on its own province: supporters there become core voters and turn out, and members pay a little in dues; rent is ₱10–20k a quarter. You can also open one by clicking the province on the map.", c2)
+	_p("Open an office in a city, then grow it (one action, ₱1–2M). It works every month on its own province: supporters there become core voters and turn out, and members pay a little in dues; rent is ₱20–40k a quarter. You can also open one by clicking the province on the map.", c2)
 	var up: Dictionary = G.C.upkeep
 	var pr_row = HBoxContainer.new()
 	pr_row.add_theme_constant_override("separation", 10)

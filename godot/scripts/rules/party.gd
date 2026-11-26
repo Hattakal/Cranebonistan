@@ -326,7 +326,7 @@ func quarterly_income(s: Dictionary) -> Dictionary:
 ## Rent and wages each quarter: the party offices by size, and the press office (CONFIG.upkeep).
 func running_costs(s: Dictionary) -> float:
 	var u: Dictionary = C.get("upkeep", {})
-	var rents: Array = u.get("office", [0.01, 0.015, 0.02])
+	var rents: Array = u.get("office", [0.02, 0.03, 0.04])
 	var t = 0.0
 	for name in s.get("communities", {}):
 		var lvl: int = int(s.communities[name])
