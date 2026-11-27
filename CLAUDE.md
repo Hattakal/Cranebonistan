@@ -83,6 +83,7 @@ In the game, ` (backtick) or F12 opens the cheat panel (`godot/scripts/cheats.gd
 - Prices and wages in texts follow the list in DESIGN.md, *Money: what a pezo buys* (a pezo is about a quarter of a euro).
 - Never write the country's name in data texts: use `{country}`, `{national}`, `{nationals}` (filled in from content.json `COUNTRY` when data loads, in `Mods.data`). In screen code use `G.COUNTRY.name`.
 - About 300 written lines live in `debate_lines.json`, `issues.json`, `carlos.json`, `margaret.json`; events and sound bites in `content.json`. Keep Ozan's voice: dry, grounded, specific to the world (Cranebo, Bayernal, Tarroport, the pezo), never cartoonish.
+- `python3 tools/texts.py export` writes texts.csv, every player-facing text (data and screen code) with how often it is seen; Ozan edits the "new" column and `python3 tools/texts.py apply` copies it back. Export again after changing texts.
 - After changing Carlos's lines, run `python3 tools/voice_script.py` to regenerate VOICE.md (the recording script; recordings go in `godot/assets/voice/carlos/<id>.ogg`).
 - After adding events or pictures, run `python3 tools/image_list.py` to regenerate IMAGES.md (where pictures go and which are missing).
 - The map is built from Ozan's Krita file: `python3 tools/build_map.py art/map4.kra` (writes `godot/data/map.json` and the map features image).

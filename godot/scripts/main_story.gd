@@ -66,7 +66,7 @@ func _founding_build(p: Paper) -> void:
 	p.add(names)
 	# 2. the manifesto
 	p.step("Two", "What do you stand for?")
-	p.small("One stance on each issue. Later, saying things one stance away from it costs nothing; further than that, voters start to notice.")
+	p.small("One stance on each issue. Later, drifting one stance away from it costs a little; further than that, voters punish it.")
 	var point = {}
 	for ax in G.AXES:
 		var cur: int = int(_found.manifesto.get(ax.id, 2))
