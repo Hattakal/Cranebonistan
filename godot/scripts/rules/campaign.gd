@@ -109,6 +109,7 @@ func campaign_weekly(s: Dictionary) -> void:
 		s.queue.append({"type": "rally", "res": res})
 		_stronghold_stop(s, "player", route[i])
 	pacts_weekly(s)
+	news_new_debate(s, int(C.campaign.get("debateRest", 4)))   # the campaign never runs out of arguments: a new one every week
 	for pid in s.get("rivalConvoys", {}):
 		var p = party_of(s, pid)
 		var r: Array = s.rivalConvoys[pid]

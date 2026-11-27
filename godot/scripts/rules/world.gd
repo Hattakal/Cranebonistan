@@ -327,13 +327,16 @@ func debates_monthly(s: Dictionary) -> void:
 				pop.pos[d.axis] = clampf2(pop.pos[d.axis] + push * minf(1.5, pop.sal[d.axis]), -100, 100)
 	rivals_debate(s)
 	# the news starts something new now and then, and always when the country has little to argue about
-	if rand(s) < 0.55 or s.debates.size() < 3:
-		var pool = TOPICS.filter(func(t): return not t.has("trigger") and debate_by_id(s, t.id) == null \
-			and s.week - int(s.debateCooldown.get(t.id, -9999)) > 8 * WEEKS_PER_MONTH)
-		if pool.size() and not media_start_debate(s, pool):
-			var t: Dictionary = pick(s, pool)
-			open_debate(s, t.id, t.axis, t.title, t.text, "news", 30)
-			push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "new_argument", null, {"topic": t.title, "text": t.text})))
+	if rand(s) < 0.55 or s.debates.size() < 3: news_new_debate(s)
+
+## The news starts a new argument: a topic nobody has argued about for a while.
+func news_new_debate(s: Dictionary, rest_months := 8) -> void:
+	var pool = TOPICS.filter(func(t): return not t.has("trigger") and debate_by_id(s, t.id) == null \
+		and s.week - int(s.debateCooldown.get(t.id, -9999)) > rest_months * WEEKS_PER_MONTH)
+	if pool.size() and not media_start_debate(s, pool):
+		var t: Dictionary = pick(s, pool)
+		open_debate(s, t.id, t.axis, t.title, t.text, "news", 30)
+		push_news(s, merged({"kind": "issue", "quiet": true}, news("WORLD", "new_argument", null, {"topic": t.title, "text": t.text})))
 
 func debates_from_world(s: Dictionary) -> void:
 	for t in TOPICS:

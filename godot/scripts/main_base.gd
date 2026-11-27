@@ -209,6 +209,10 @@ func _build() -> void:
 	_board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_board.open_decision.connect(func(): _open_front())
 	_board.open_file.connect(func(tab): _show_file(tab))
+	_board.small_task.connect(func():
+		var r: Dictionary = G.act_small_task(S)
+		if r.ok: _toast(r.text)
+		_after_change())
 	left.add_child(_board)
 	_files = Files.new()
 	_files.G = G

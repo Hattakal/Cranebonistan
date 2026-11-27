@@ -23,6 +23,7 @@ var FOREIGN: Array
 var CAPITAL: Dictionary
 var VIEW_GROUPS: Array
 var PARTIES: Array
+var SMALL_TASKS: Array       # what the leader does with an evening and no actions left (content.json)
 var STYLE_NOTES: Dictionary   # what each speaking-style label means (content.json)
 var PARTY_HISTORY: Array    # what the parties remember from before the game (content.json)
 var MINOR_PARTIES: Array    # small parties with a fixed share of the vote (content.json MINOR_PARTIES)

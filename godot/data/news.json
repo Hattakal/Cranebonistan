@@ -24,7 +24,7 @@
   },
   "split": {
    "title": "{name} splits apart",
-   "text": "After months of infighting, a third of {short}'s MPs have walked out. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."
+   "text": "After months of open infighting, a third of {short}'s MPs have walked out to sit on their own. The quarrel was never really about policy: it was about who comes after {leader}. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."
   },
   "copies_you": {
    "title": "{short} copies your line on {issue}",
@@ -33,7 +33,24 @@
   "fills_niche": {
    "title": "{short} takes up {side}",
    "text": "Nobody was speaking for {side} voters on {issue}, so {leader} has started to. Expect to hear a lot more about it from them."
-  }
+  },
+  "split_scandal": {
+   "title": "{short} falls apart over the scandal",
+   "text": "The scandal finished what the polls had started. {short}'s regional chairs resigned together this morning, saying they won't campaign for a party that still defends {leader}. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."
+  },
+  "split_leak": {
+   "title": "{short} collapses under a stream of leaks",
+   "text": "One leaked story too many. {short}'s donors have stopped paying, and half its MPs have stopped answering {leader}'s calls. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."
+  },
+  "split_direction": {
+   "title": "{short} breaks over where it is going",
+   "text": "Its moderates say {leader} chased the wrong voters; its true believers say {short} has lost its soul. Both walked out in the same week. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."
+  },
+  "split_young": {
+   "title": "{short}'s young wing walks out",
+   "text": "Tired of waiting their turn, {short}'s younger MPs and most of its youth wing have left to start something of their own, taking the party's best campaigners with them. About {freed} million of its loyal voters are now up for grabs. Whoever stands closest to them will pick them up."
+  },
+  "_split_note": "A party falls apart when its stability runs out (scandals, infighting, leaks against it). Which story runs follows the last thing that shook it: split (infighting), split_scandal, split_leak; otherwise split_direction or split_young at random. Each runs once per collapse, not five times."
  },
  "MOVE": {
   "toured": "{leader} toured {place}.",

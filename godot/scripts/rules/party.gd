@@ -353,3 +353,21 @@ func draw_offers(s: Dictionary) -> Array:
 		var chance: float = o.chance * minf(1.3, mood) if o.id == "chamber" else o.chance
 		if rand(s) < chance: pool.append(o)
 	return shuffle(s, pool).slice(0, 2).map(func(o): return o.id)
+
+## When the actions are spent: one small thing before bed (CONFIG.smallTask, content.json
+## SMALL_TASKS). Almost nothing: a little warmth at home, once a turn.
+func small_task_ready(s: Dictionary) -> bool:
+	return s.result == null and s.queue.is_empty() and s.actionsLeft <= 0 and int(s.get("smallTaskWeek", -1)) != s.week
+
+func act_small_task(s: Dictionary) -> Dictionary:
+	if not small_task_ready(s): return {"ok": false, "text": "Not now."}
+	s.smallTaskWeek = s.week
+	var home_region: String = ""
+	for city in MAP.cities:
+		if city.name == s.get("home", ""): home_region = city.area
+	var amt: float = float(C.get("smallTask", 0.01))
+	for pop in s.pops:
+		if home_region == "" or pop.region == home_region: pop.goodwill.player = clampf2(pop.goodwill.player + amt, -2, 2)
+	var tasks: Array = SMALL_TASKS if SMALL_TASKS.size() else [{"title": "Answer the letters", "text": "You answered the letters. Nobody will notice, except the people who wrote them."}]
+	var tk: Dictionary = pick(s, tasks)
+	return {"ok": true, "text": String(tk.text).format({"leader": player_party(s).leader, "home": s.get("home", "")}), "title": tk.title}

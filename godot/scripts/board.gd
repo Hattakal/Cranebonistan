@@ -8,6 +8,7 @@ extends Control
 
 signal open_decision
 signal open_file(tab: String)
+signal small_task
 
 var game
 var _flow: HFlowContainer
@@ -261,6 +262,13 @@ func render(s: Dictionary) -> void:
 	pv.add_child(Look.dlabel(_pim_note(s), "body", 15, Look.TXT, true))
 	# speaking is free; the other actions cost money, so a poor party is sent to the debates
 	pim.pressed.connect(func(): open_file.emit("debates"))
+	# 3b. out of actions: one small thing before bed
+	if game.small_task_ready(s):
+		var st = _card(false)
+		var sv = _vbox(st)
+		sv.add_child(_head("The evening", Look.DIM, "no actions left"))
+		sv.add_child(Look.dlabel("Nothing big left to do %s. Something small?" % game.period_word(s), "body", 14, Look.TXT, true))
+		st.pressed.connect(func(): small_task.emit())
 	# 4. Margaret's note, only when earned
 	var teyl = _teyl_note(s)
 	if teyl != "":
@@ -386,7 +394,7 @@ func _pim_note(s: Dictionary) -> String:
 	for d in s.debates:
 		if hottest == null or d.heat > hottest.heat: hottest = d
 	# the lines are in data/carlos.json DESK; the first that fits wins
-	var fill = {"n": n, "s": "" if n == 1 else "s", "topic": hottest.title.to_lower() if hottest else "", "money": Game.fmt1(s.money), "when": game.date_label(nb, false) if nb >= 0 else ""}
+	var fill = {"n": n, "s": "" if n == 1 else "s", "topic": (hottest.title.substr(0, 1).to_lower() + hottest.title.substr(1)).trim_suffix("?") if hottest else "", "money": Game.fmt1(s.money), "when": game.date_label(nb, false) if nb >= 0 else ""}
 	var key = "quiet"
 	if s.result: key = "over"
 	elif game.visit_block(s) == "" and s.week < 8: key = "first_trip"

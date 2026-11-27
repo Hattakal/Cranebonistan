@@ -1148,17 +1148,28 @@ func _media() -> void:
 	_media_head(left)
 	for row in nation:
 		if not (row.outlet.kind in ["platform", "influencer"]): _media_row(left, row, blocked)
+	# social media: each network, and the personalities on it
 	_eyebrow("Social media", right)
-	_media_head(right)
+	_add(Look.dlabel("Under each network, the personalities on it. Their reach and price follow their followers, who leave in numbers after a scandal. Sponsoring one is an open secret: they back whoever pays, a little less believably.", "body", 12, Look.DIM, true), right)
+	var placed = {}
 	for row in nation:
-		if row.outlet.kind == "platform": _media_row(right, row, blocked)
-	var gap = Control.new(); gap.custom_minimum_size.y = 10
-	right.add_child(gap)
-	_eyebrow("Personalities", right)
-	_add(Look.dlabel("Their reach and price follow their followers, who leave in numbers after a scandal. Sponsoring one is an open secret: they back whoever pays, a little less believably.", "body", 12, Look.DIM, true), right)
-	_media_head(right)
-	for row in nation:
-		if row.outlet.kind == "influencer": _media_row(right, row, blocked)
+		if row.outlet.kind != "platform": continue
+		var gap = Control.new(); gap.custom_minimum_size.y = 8
+		right.add_child(gap)
+		_add(Look.dcaps(String(row.outlet.name), 13, Look.TXT, 2, "display_bold"), right)
+		_media_head(right)
+		_media_row(right, row, blocked)
+		var on: Array = nation.filter(func(r): return r.outlet.kind == "influencer" and String(r.outlet.get("platform", "")) == String(row.outlet.id))
+		if on.size():
+			_add(Look.dcaps("Personalities", 9, Look.DIM, 1), right)
+			for r in on:
+				_media_row(right, r, blocked)
+				placed[r.outlet.id] = true
+	var rest: Array = nation.filter(func(r): return r.outlet.kind == "influencer" and not placed.has(r.outlet.id))
+	if rest.size():
+		_eyebrow("Personalities", right)
+		_media_head(right)
+		for r in rest: _media_row(right, r, blocked)
 
 const MEDIA_COLS := [150, 70, 62, 66]   # on you, reach, style, favours
 
@@ -1358,6 +1369,11 @@ func _polls() -> void:
 		var pb = _btn("Win over a branch · ₱%sM" % str(G.ACTIONS.poach.cost), func(): _did(G.act_poach(S, p.id)), (not can) or act_blocked or S.money < float(G.ACTIONS.poach.cost))
 		pb.tooltip_text = G.ACTIONS.poach.help + ("" if can else ("\nThey were raided recently." if p.stability < 40 else "\nThe party is too stable for anyone to leave: %s." % stability_word(p.stability).to_lower()))
 		acts.add_child(pb)
+		var since: int = S.week - int(S.get("reachOut", {}).get(p.id, -9999))
+		var wait: bool = since < int(G.C.get("relations", {}).get("reachEvery", 6)) * G.WEEKS_PER_MONTH
+		var rb2 = _btn("Reach out", func(): _did(G.act_reach_out(S, p.id)), act_blocked or wait)
+		rb2.tooltip_text = "One action: a call, a dinner, a kind word in public. It heals old wounds first, then warms things up. A party fighting you for first place warms less." + ("\nThey heard from you not long ago." if wait else "")
+		acts.add_child(rb2)
 		_pact_row(c, p, act_blocked)
 	_rule()
 	_eyebrow("National vote intention · %s · %s" % [poll.label, G.date_label(poll.week, false)])

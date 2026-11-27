@@ -170,7 +170,15 @@ func _paint_result(proj: Dictionary, live: bool) -> void:
 		# not yours yet: stripes in your colour covering your share of the vote there (30% of the
 		# vote, 30% of the province), never more than the leader's own band
 		if live and x.winner != "player" and float(x.you) >= 0.10:
-			_map.stripes[d.id] = [Look.mix(Look.LAND, Look.lit(Color(G.player_party(S).color)), 0.8), minf(float(x.you), 0.45)]
+			_map.stripes[d.id] = [_stripe_colour(_map.fills[d.id]), minf(float(x.you), 0.45)]
+
+## Your stripes over another party's province: your colour, pushed lighter or darker when it
+## sits too close to theirs to be seen.
+func _stripe_colour(under: Color) -> Color:
+	var mine: Color = Look.mix(Look.LAND, Look.lit(Color(G.player_party(S).color)), 0.8)
+	var dist: float = absf(mine.get_luminance() - under.get_luminance()) + Vector3(mine.r - under.r, mine.g - under.g, mine.b - under.b).length() * 0.5
+	if dist >= 0.25: return mine
+	return mine.lightened(0.45) if under.get_luminance() < 0.45 else mine.darkened(0.45)
 
 func _seat_legend(seats: Dictionary) -> Array:
 	var ps: Array = S.parties.filter(func(p): return int(seats.get(p.id, 0)) > 0 or p.isPlayer and _map_mode == "vote")

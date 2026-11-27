@@ -29,9 +29,11 @@ func _happening_run(id: String, s: Dictionary, p: Dictionary) -> void:
 			p.charisma = clampf2(p.charisma - 5, 10, 100)
 			change_trust(s, -4)
 			for pop in s.pops: pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.25, -2, 2)
+			p.lastTrouble = "scandal"
 			push_news(s, merged({"party": p.id, "kind": "bad"}, news("RIVAL", "scandal", p)))
 		"infighting":
 			p.stability = clampf2(p.stability - 12, 0, 100)
+			p.lastTrouble = "infighting"
 			push_news(s, merged({"party": p.id, "kind": "bad"}, news("RIVAL", "infighting", p)))
 		"new_leader":
 			var old: String = p.leader
@@ -79,7 +81,10 @@ func collapse_party(s: Dictionary, p: Dictionary) -> void:
 	p.lastCollapse = s.week
 	p.stability = 55.0
 	change_trust(s, -3)
-	push_news(s, merged({"party": p.id, "kind": "vacuum"}, news("RIVAL", "split", p, {"freed": fmt1(freed / 1e6)})))
+	# one story, in the flavour of what shook it last (news.json RIVAL split*)
+	var key: String = {"scandal": "split_scandal", "leak": "split_leak", "infighting": "split"}.get(String(p.get("lastTrouble", "")), "split_direction" if rand(s) < 0.5 else "split_young")
+	p.lastTrouble = ""
+	push_news(s, merged({"party": p.id, "kind": "vacuum"}, news("RIVAL", key, p, {"freed": fmt1(freed / 1e6)})))
 	s.queue.append({"type": "event", "event": defector_event(s, p, freed)})
 
 func defector_event(s: Dictionary, p: Dictionary, _freed: float) -> Dictionary:
@@ -317,6 +322,7 @@ func _rival_dig(s: Dictionary, p: Dictionary, now: Dictionary) -> void:
 		rival_move(s, p, news("MOVE", "leak_you", p, {"what": what}), true)
 	else:
 		target.stability = clampf2(float(target.stability) - 6, 0, 100)
+		target.lastTrouble = "leak"
 		for pop in s.pops: pop.goodwill[target.id] = clampf2(pop.goodwill[target.id] - 0.1 * (1 - shield_of(pop, target.id)), -2, 2)
 		rival_move(s, p, news("MOVE", "leak", p, {"target": target.short}))
 		change_pair(s, target.id, p.id, -5, "%s leaked a story about %s" % [p.short, target.short])
@@ -347,7 +353,20 @@ func isolation(s: Dictionary, p: Dictionary) -> float:
 
 ## What two parties' positions alone earn them, plus the pull between two outcasts.
 func pair_base(s: Dictionary, a: Dictionary, b: Dictionary) -> float:
-	return policy_relation(a, b) + float(C.get("relations", {}).get("isolated", 25)) * isolation(s, a) * isolation(s, b)
+	var rc: Dictionary = C.get("relations", {})
+	return float(rc.get("base", 0)) + policy_relation(a, b) + float(rc.get("isolated", 25)) * isolation(s, a) * isolation(s, b)
+
+## The two parties leading the polls: everyone's main rivals, slower to make up with.
+func frontrunners(s: Dictionary) -> Array:
+	var sup: Dictionary = s.lastSupport if s.get("lastSupport") else {}
+	return ssort(s.parties.map(func(p): return p.id), func(a, b): return float(sup.get(b, 0)) - float(sup.get(a, 0))).slice(0, 2)
+
+## How fast everyday feelings drift back each month: faster between parties that aren't
+## fighting for first place (CONFIG.relations.settle, settleOthers).
+func _settle(s: Dictionary, a: String, b: String) -> float:
+	var rc: Dictionary = C.get("relations", {})
+	var top: Array = frontrunners(s)
+	return float(rc.get("settle", 0.1)) if (top.has(a) or top.has(b)) else float(rc.get("settleOthers", 0.2))
 
 ## How party a and party b see each other, -100..100. The player's relations are
 ## the ones built during the campaign; between two rivals, how close they stand.
@@ -459,14 +478,34 @@ func new_relations(s: Dictionary) -> Dictionary:
 func relations_monthly(s: Dictionary) -> void:
 	for p in rivals(s):
 		var v = _rel_fading(s, p.id)
-		s.relations[p.id] = v + (relation_base(s, p.id) - v) * 0.1
+		s.relations[p.id] = v + (relation_base(s, p.id) - v) * _settle(s, "player", p.id)
 	for k in s.get("pairRel", {}):
 		var ids: PackedStringArray = k.split("|")
 		var pa = party_of(s, ids[0])
 		var pb = party_of(s, ids[1])
 		if pa == null or pb == null: continue
 		var st: Dictionary = s.pairRel[k]
-		st.fade = float(st.fade) + (pair_base(s, pa, pb) - float(st.fade)) * 0.1
+		st.fade = float(st.fade) + (pair_base(s, pa, pb) - float(st.fade)) * _settle(s, ids[0], ids[1])
+
+## Reach out to a party (one action): a call, a dinner, a kind word in public. It heals old
+## wounds first, then warms things; a party that sees you as its main threat warms less,
+## and once a party has been asked it needs time before it will listen again.
+func act_reach_out(s: Dictionary, party_id: String) -> Dictionary:
+	var p = party_of(s, party_id)
+	if p == null: return {"ok": false, "text": "No such party."}
+	var rc: Dictionary = C.get("relations", {})
+	var last: int = int(s.get("reachOut", {}).get(party_id, -9999))
+	if s.week - last < int(rc.get("reachEvery", 6)) * WEEKS_PER_MONTH: return {"ok": false, "text": "%s heard from you not long ago. Give it time." % p.short}
+	var err = can_act(s, 0)
+	if err: return {"ok": false, "text": err}
+	spend_action(s, 0)
+	if not s.has("reachOut"): s.reachOut = {}
+	s.reachOut[party_id] = s.week
+	var k: float = 0.5 if (frontrunners(s).has("player") and frontrunners(s).has(party_id)) else 1.0
+	change_relation(s, party_id, float(rc.get("reach", 10)) * k, "you reached out to them")
+	var text = "%s took the call. %s" % [p.leader, "Polite, guarded: you are the party they most need to beat." if k < 1 else "It went better than either side expected."]
+	_log(s, "action", "Reached out to %s." % p.short)
+	return {"ok": true, "text": text}
 
 func act_research(s: Dictionary, party_id: String) -> Dictionary:
 	var cost: float = ACTIONS.research.cost
@@ -508,6 +547,7 @@ func act_release(s: Dictionary, index: int) -> Dictionary:
 	var press: Dictionary = friendly_press(s)
 	var sev: float = float(dos.severity) * (1 + 0.5 * float(press.k))
 	p.stability = clampf2(p.stability - 5 * sev, 0, 100)
+	p.lastTrouble = "leak"
 	p.charisma = clampf2(p.charisma - 3 * sev, 10, 100)
 	for pop in s.pops:
 		pop.goodwill[p.id] = clampf2(pop.goodwill[p.id] - 0.12 * sev, -2, 2)

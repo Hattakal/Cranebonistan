@@ -242,7 +242,6 @@ func _draw() -> void:
 				var sp = PackedVector2Array()
 				for p in poly: sp.append(o + p * s)
 				draw_colored_polygon(sp, col)
-				if kind == "foreign": _hatch(sp)
 	# districts: each painted in the colour of the party that would win it
 	for d in districts:
 		var col: Color = _shown.get(d.id, fills.get(d.id, Look.LAND))
@@ -437,9 +436,11 @@ func _labels(s: float) -> void:
 	for w in waters:
 		# one word to a line, so a small lake's name stays on the water
 		var words: PackedStringArray = String(w.name).split(" ", false)
-		var wfs = int(maxf(10, 30 * s))
+		var lake: bool = String(w.name).contains("Lake")   # a lake's name is smaller than a sea's
+		var wfs = int(maxf(9, (20.0 if lake else 30.0) * s))
+		var at: Vector2 = Vector2(w.x, w.y) + Vector2(float(w.get("dx", 6 if lake else 0)), float(w.get("dy", 6 if lake else 0)))
 		for i in words.size():
-			_text(to_screen(Vector2(w.x, w.y)) + Vector2(0, (i - (words.size() - 1) / 2.0) * wfs * 1.05), words[i], water_font, wfs, Look.WATER_TXT)
+			_text(to_screen(at) + Vector2(0, (i - (words.size() - 1) / 2.0) * wfs * 1.05), words[i], water_font, wfs, Look.WATER_TXT)
 	# neighbours
 	for a in areas:
 		if a.kind != "foreign": continue
