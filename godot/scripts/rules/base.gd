@@ -1,7 +1,7 @@
 ## rules/base.gd — Shared ground for every rule: the content tables, settings, small helpers, random numbers, the calendar and stances, plus helpers every system uses (news, the diary, the action check).
 ##
 ## The rules are split over a chain of files, each extending the one before:
-## base → voters → districts → media → party → scandals → rivals → world → moments → campaign → coalition → sim.gd
+## base → voters → districts → media → party → scandals → rivals → world → laws → moments → campaign → coalition → sim.gd
 ## sim.gd, at the end, is the autoload "Game": everything is reached as Game.<name>.
 ## A file can call anything in itself or earlier in the chain; the few calls that
 ## must go the other way are declared as hooks at the bottom of this file.
@@ -10,7 +10,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 55
+const SAVE_VERSION := 56
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -56,6 +56,8 @@ var ELECTION_WEEK: int
 var BUDGET_KEYS: Array = []
 var _events_by_id = {}
 var TOPICS: Array = []        # debate topics (data/debates.json)
+var LAWS: Array = []          # the government's programme (data/laws.json)
+var LAWS_C: Dictionary = {}   # CONFIG.laws: how often, how bills pass
 var LINES: Dictionary = {}    # what the leader can say in them (data/debate_lines.json)
 var ISSUES: Array = []        # minor issues: local stories (data/issues.json)
 var FIGURES: Array = []       # your party's politicians (data/party.json)

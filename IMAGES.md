@@ -33,13 +33,13 @@ One picture per kind of event covers every event in the game. Start here:
 
 | Have | File | Used for | Something like |
 |---|---|---|---|
-|   | `events/_crisis.jpg` | Crisis (57 events) | an empty hospital corridor, a queue, a closed factory gate |
+|   | `events/_crisis.jpg` | Crisis (59 events) | an empty hospital corridor, a queue, a closed factory gate |
 |   | `events/_regional.jpg` | Regional issue (14 events) | a small-town high street, a harbour, a field with pylons |
 |   | `events/_foreign.jpg` | Foreign affairs (12 events) | a border post, flags outside a ministry, a warship on the horizon |
 |   | `events/_opportunity.jpg` | Opportunity (17 events) | a crowd at a rally, a ribbon being cut, a factory floor |
 |   | `events/_trap.jpg` | Tricky moment (3 events) | a television studio, a row of microphones, cameras pointed at one chair |
-|   | `events/_scandal.jpg` | Scandal (13 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
-|   | `events/_followup.jpg` | Consequences (16 events) | the morning after: an empty hall, newspapers on a doormat |
+|   | `events/_scandal.jpg` | Scandal (14 events) | a brown envelope, a car park at night, a shredder, a hotel lobby |
+|   | `events/_followup.jpg` | Consequences (20 events) | the morning after: an empty hall, newspapers on a doormat |
 |   | `events/_flagship.jpg` | Flagship promise | a campaign poster going up on a wall |
 |   | `events/_secret.jpg` | In confidence | two people talking in a doorway, a phone face down on a table |
 |   | `events/_violence.jpg` | Political violence | police tape, a broken shop window, a square at night |
@@ -107,12 +107,12 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/social_id.jpg` | Government wants ID checks on social media |
 |   | `events/golban_weekend.jpg` | Golba's Founders Weekend outsells Harvest Day |
 |   | `events/golban_words.jpg` | The Language Academy wants Golban words out of adverts |
-|   | `events/fuel_price.jpg` | Petrol passes three pezos a litre |
+|   | `events/fuel_price.jpg` | Petrol passes ten pezos a litre |
 |   | `events/nurse_letter.jpg` | A nurse's resignation letter goes viral |
 |   | `events/jeffries_numbers.jpg` | Yvonne Jeffries says the inflation figures are fake |
 |   | `events/inheritance_tax.jpg` | Government plans a tax on inherited homes |
 |   | `events/rider_tax.jpg` | Tax bills for forty thousand delivery riders |
-|   | `events/stadium_money.jpg` | 600 million for a stadium in Cranebo |
+|   | `events/stadium_money.jpg` | 2.5 billion for a stadium in Cranebo |
 |   | `events/anthem_silent.jpg` | National team striker stays silent for the anthem |
 |   | `events/ai_callcentres.jpg` | Banks replace six thousand call-centre jobs with AI |
 |   | `events/lost_girl.jpg` | Missing girl found dead near {city} |
@@ -129,10 +129,10 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/mp_payrise.jpg` | MPs vote themselves a 30% pay rise |
 |   | `events/rail_sale.jpg` | Government to sell the state railway |
 |   | `events/crypto_crash.jpg` | CraneCoin collapses; pensioners lose their savings |
-|   | `events/baby_bonus.jpg` | Births fall to a record low; the NUP offers 10,000 pezos a child |
+|   | `events/baby_bonus.jpg` | Births fall to a record low; the NUP offers 40,000 pezos a child |
 |   | `events/childcare_cost.jpg` | A nursery place now costs more than rent |
 |   | `events/river_tents.jpg` | Two kilometres of tents along Cranebo's river |
-|   | `events/tuition_fees.jpg` | University fees of 4,000 pezos a year |
+|   | `events/tuition_fees.jpg` | University fees of 16,000 pezos a year |
 |   | `events/aid_cut.jpg` | Government cuts foreign aid by two thirds |
 |   | `events/fauran_fires.jpg` | Wildfires across {province} in a record heatwave |
 |   | `events/bernard_statue.jpg` | Students want Bernard's statue taken down |
@@ -151,6 +151,8 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/crisis_expansion_1.jpg` | Troops mass on the Trueant border |
 |   | `events/crisis_expansion_2.jpg` | Four soldiers killed in a border clash |
 |   | `events/crisis_expansion_3.jpg` | Golba brokers a deal; the government claims victory |
+|   | `events/banned_march.jpg` | Police ban a teachers' march in Cranebo |
+|   | `events/bakers_stop.jpg` | Bakers in Tarroport stop baking at the capped price |
 
 ### Regional issue
 
@@ -202,7 +204,7 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/clip_dance.jpg` | Teenagers are dancing to your speech |
 |   | `events/golban_carmaker.jpg` | A Golban carmaker wants a factory near {city} |
 |   | `events/grandma_degree.jpg` | A 78-year-old from {city} gets her degree |
-|   | `events/waiter_envelope.jpg` | Waiter returns fifty thousand pezos he found |
+|   | `events/waiter_envelope.jpg` | Waiter returns two hundred thousand pezos he found |
 |   | `events/hannigan_stream.jpg` | Jeremy Hannigan asks a politician onto his stream |
 |   | `events/james_accounts.jpg` | Leaked list: two thousand {nationals} with secret accounts in James |
 |   | `events/wrestling_gold.jpg` | A shepherd's son from {province} is world wrestling champion |
@@ -228,18 +230,20 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/nephew_contract.jpg` | Health minister's nephew wins a hospital contract |
 |   | `events/mps_beach.jpg` | MPs on a "fact-finding trip" to Potania's beaches |
 |   | `events/journalists_tapped.jpg` | Interior ministry tapped nine journalists' phones |
-|   | `events/police_chief.jpg` | Cranebo's police chief had two million pezos in James |
+|   | `events/police_chief.jpg` | Cranebo's police chief had eight million pezos in James |
 |   | `events/old_posts.jpg` | Your candidate's old posts resurface |
 |   | `events/leak_dillihan.jpg` | Leak: your party took money from Dillihan |
 |   | `events/leak_trueants.jpg` | Leak: Trueant money in your party accounts |
 |   | `events/leak_potania.jpg` | Leak: Potanian mining money behind your campaign |
 |   | `events/leak_golba.jpg` | Leak: Golban lobbyists funded your party |
 |   | `events/leak_tycoon.jpg` | Leak: a tycoon's suitcase in your party office |
+|   | `events/fence_contract.jpg` | The fence contract goes to the minister's brother-in-law |
 
 ### Consequences
 
 | Have | File | Headline |
 |---|---|---|
+|   | `events/mila_mother.jpg` | Mila's mother: "Leave my daughter out of your speeches" |
 |   | `events/alinni_protests.jpg` | Mass protests in Alinni over your remarks |
 |   | `events/stranded_ship.jpg` | Turned-away refugee ship stranded at sea |
 |   | `events/deepfake_exposed.jpg` | Experts confirm your "deepfake" clip was real |
@@ -256,3 +260,6 @@ For when the short list is done: a picture of its own for one event.
 |   | `events/dillihan_land.jpg` | Dillihan: "Those pastures are Dillihani" |
 |   | `events/trueant_troops.jpg` | Trueant troops move to the border |
 |   | `events/golba_warns.jpg` | Golba warns of "consequences" |
+|   | `events/who_counts_family.jpg` | Grandparents raising grandchildren left out of the family allowance |
+|   | `events/jets_cost.jpg` | The new jets will cost twice as much |
+|   | `events/bonus_queues.jpg` | Pensioners queue for hours for the winter bonus |

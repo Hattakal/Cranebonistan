@@ -105,7 +105,8 @@
   "scandalChanceScale": 1,
   "typeWeight": 0.8,
   "flagshipOwnership": 0.05,
-  "flagshipSalience": 0.05
+  "flagshipSalience": 0.05,
+  "laws": {"agree": 15, "voteMonths": 3, "gapMonths": 2, "firstMonth": 3, "heat": 45, "push": 20, "base": 0.85, "partnerAgainst": 0.35, "publicWeight": 0.8, "weakGov": 0.15, "failStability": 5, "sinkSerious": 4}
  },
  "AXES": [
   {
@@ -18810,6 +18811,700 @@
      "hot": false
     }
    ]
+  },
+  {
+   "id": "fence_contract",
+   "deck": false,
+   "kind": "scandal",
+   "title": "The fence contract goes to the minister's brother-in-law",
+   "text": "The ₱300 million contract for the border fence went to a firm in Bayernal founded eight months ago. Its owner is married to the interior minister's sister. The first section has already been rebuilt once.",
+   "choices": [
+    {
+     "label": "Demand a public inquiry into the contract",
+     "effects": {
+      "shift": {
+       "system": -8
+      },
+      "salience": {
+       "system": 0.3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "system": "<0"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Whatever you think of the fence, a ₱300 million contract deserves an inquiry. Open the books."
+      },
+      {
+       "tone": "fiery",
+       "text": "They built a fence to keep people out and a family business to let the money in."
+      },
+      {
+       "tone": "folksy",
+       "text": "In my town, when the mayor's cousin gets the road job, we call it Tuesday. In the capital they call it security."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Every contract this size should be public, line by line. Start with this one."
+      }
+     ]
+    },
+    {
+     "label": "Say the fence matters more than who builds it",
+     "effects": {
+      "shift": {
+       "nation": -6,
+       "system": 4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "nation": "<-30"
+         }
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<-20"
+         }
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Investigate the contract, by all means. But the fence stays."
+      },
+      {
+       "tone": "fiery",
+       "text": "The opposition cares more about a brother-in-law than the border. Typical."
+      },
+      {
+       "tone": "folksy",
+       "text": "I don't care who holds the hammer, as long as the fence gets built."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Fix the contract and finish the job. We can do both."
+      }
+     ]
+    },
+    {
+     "label": "Stay out of it",
+     "effects": {}
+    }
+   ],
+   "trust": -3,
+   "government": {
+    "text": "The interior minister says the firm was chosen \"on merit\" and declines to say whose."
+   }
+  },
+  {
+   "id": "banned_march",
+   "deck": false,
+   "kind": "crisis",
+   "title": "Police ban a teachers' march in Cranebo",
+   "text": "Under the new Public Order Act, the police banned a teachers' march on pay with a day's notice. Four thousand teachers turned up anyway and stood silently on the pavement. The organisers have been fined ₱40,000 each.",
+   "choices": [
+    {
+     "label": "Defend the teachers' right to march",
+     "effects": {
+      "shift": {
+       "order": 10
+      },
+      "salience": {
+       "order": 0.3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": ">20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "order": "<-30"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Teachers standing silently on a pavement are not a threat to public order. Lift the fines."
+      },
+      {
+       "tone": "fiery",
+       "text": "They fined teachers for standing still. That's the law this government is proud of."
+      },
+      {
+       "tone": "folksy",
+       "text": "My children's teacher has been fined forty thousand pezos for standing on a pavement. I'll pay a share."
+      },
+      {
+       "tone": "hopeful",
+       "text": "A country that trusts its teachers with its children can trust them with a march."
+      }
+     ]
+    },
+    {
+     "label": "Back the police: the law is the law",
+     "effects": {
+      "shift": {
+       "order": -10
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "order": "<-20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "order": ">25"
+         }
+        },
+        "amt": -0.3
+       },
+       {
+        "who": {
+         "age": "18-29"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Parliament passed the act. If the teachers want it changed, the ballot box is open."
+      },
+      {
+       "tone": "fiery",
+       "text": "Nobody is above the law. Not even people with a pension and long holidays.",
+       "sharp": true,
+       "risk": 0.5,
+       "react": [
+        {
+         "who": {
+          "age": "30-45"
+         },
+         "amt": -0.08
+        }
+       ]
+      },
+      {
+       "tone": "folksy",
+       "text": "I liked my teachers. I also liked it when they did as they were told."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Let the teachers make their case in the right way, and I'll listen."
+      }
+     ]
+    },
+    {
+     "label": "Stay out of it",
+     "effects": {}
+    }
+   ],
+   "world": {
+    "unrest": 3
+   },
+   "government": {
+    "text": "The interior minister says the act \"is working as intended\"."
+   }
+  },
+  {
+   "id": "who_counts_family",
+   "deck": false,
+   "kind": "followup",
+   "title": "Grandparents raising grandchildren left out of the family allowance",
+   "text": "Some 30,000 grandparents raising their grandchildren get nothing from the new Family Allowance: they are married, but not to the children's parents. A grandmother from Kansilia has written to every newspaper in the country.",
+   "choices": [
+    {
+     "label": "Call for the allowance to cover every child",
+     "effects": {
+      "shift": {
+       "society": -6,
+       "welfare": -4
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "society": "<0"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">30"
+         }
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The allowance should follow the child, not the marriage certificate. Fix it this year."
+      },
+      {
+       "tone": "fiery",
+       "text": "They wrote a law for families and forgot the grandmothers. Who wrote it, and did they have any?"
+      },
+      {
+       "tone": "folksy",
+       "text": "That grandmother in Kansilia has raised more children than half the cabinet. Pay her."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Every child, every home that raises one. That's the law we should have written."
+      }
+     ]
+    },
+    {
+     "label": "Defend the law as written",
+     "effects": {
+      "shift": {
+       "society": 6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "society": ">25"
+         }
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": -0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "No law covers every case on its first day. The principle is right: support married families."
+      },
+      {
+       "tone": "fiery",
+       "text": "Typical: the government finally helps families and the opposition wants to rewrite the word."
+      },
+      {
+       "tone": "folksy",
+       "text": "Grandmothers are wonderful. Mine was. The law's about mums and dads."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Start with families, and widen it as the money allows."
+      }
+     ]
+    },
+    {
+     "label": "Stay out of it",
+     "effects": {}
+    }
+   ]
+  },
+  {
+   "id": "bakers_stop",
+   "deck": false,
+   "kind": "crisis",
+   "title": "Bakers in Tarroport stop baking at the capped price",
+   "text": "Three hundred bakeries in Tarroport have stopped making the cheap white loaf. Flour has gone up a third since the cap, and the capped loaf now sells at a loss. Queues start at six.",
+   "choices": [
+    {
+     "label": "Blame the government's cap",
+     "effects": {
+      "shift": {
+       "economy": 10
+      },
+      "salience": {
+       "economy": 0.3
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "economy": ">15"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "middle"
+        },
+        "amt": 0.1
+       },
+       {
+        "who": {
+         "lean": {
+          "economy": "<-30"
+         }
+        },
+        "amt": -0.25
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "The cap was well meant and it isn't working. Replace it with help for the families who need it."
+      },
+      {
+       "tone": "fiery",
+       "text": "They capped the price of bread. Now there's no bread. Who could have seen it coming? Everyone."
+      },
+      {
+       "tone": "folksy",
+       "text": "My baker's making cakes now. Cakes aren't capped."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Help people buy bread, and let the bakers bake it. That's not complicated."
+      }
+     ]
+    },
+    {
+     "label": "Blame the flour millers",
+     "effects": {
+      "shift": {
+       "economy": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "economy": "<-15"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "class": "upper"
+        },
+        "amt": -0.2
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Flour up a third in a year of good harvests. The competition authority should look at the millers."
+      },
+      {
+       "tone": "fiery",
+       "text": "Four families own every mill in this country, and they've decided you'll queue for bread.",
+       "sharp": true,
+       "risk": 0.55,
+       "react": [
+        {
+         "who": {
+          "class": "upper"
+         },
+         "amt": -0.1
+        }
+       ]
+      },
+      {
+       "tone": "folksy",
+       "text": "The wheat didn't get more expensive. Somebody between the field and the bakery did."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Break up the mills and the bread comes back."
+      }
+     ]
+    },
+    {
+     "label": "Call for the state to subsidise flour",
+     "effects": {
+      "shift": {
+       "economy": -6,
+       "welfare": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": 0.2
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": ">25"
+         }
+        },
+        "amt": -0.2
+       }
+      ]
+     }
+    }
+   ],
+   "sourceRegion": "cranbia",
+   "world": {
+    "prices": 2
+   },
+   "government": {
+    "text": "The trade minister says the shortages are \"temporary and regional\"."
+   }
+  },
+  {
+   "id": "jets_cost",
+   "deck": false,
+   "kind": "followup",
+   "title": "The new jets will cost twice as much",
+   "text": "The Bordon Federation has revised the price of the thirty-six jets: ₱7.8 billion, not four. The contract has no cap. The defence minister learned of it from a journalist.",
+   "choices": [
+    {
+     "label": "Call for the order to be cancelled",
+     "effects": {
+      "shift": {
+       "foreign": 10
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "foreign": ">10"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "welfare": "<-20"
+         }
+        },
+        "amt": 0.15
+       },
+       {
+        "who": {
+         "lean": {
+          "foreign": "<-30"
+         }
+        },
+        "amt": -0.3
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "No contract should double in a year. Cancel it, and start again with a cap."
+      },
+      {
+       "tone": "fiery",
+       "text": "Seven point eight billion pezos. They couldn't find six hundred for pensioners."
+      },
+      {
+       "tone": "folksy",
+       "text": "If my builder doubled the price halfway through, I'd be looking for another builder."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Imagine what four extra billion would do in our hospitals. Now cancel the order."
+      }
+     ]
+    },
+    {
+     "label": "Say security has no price tag",
+     "effects": {
+      "shift": {
+       "foreign": -8
+      },
+      "goodwill": [
+       {
+        "who": {
+         "lean": {
+          "foreign": "<-20"
+         }
+        },
+        "amt": 0.3
+       },
+       {
+        "who": {
+         "lean": {
+          "foreign": ">20"
+         }
+        },
+        "amt": -0.25
+       },
+       {
+        "who": {
+         "class": "working"
+        },
+        "amt": -0.1
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Renegotiate the price, yes. But a country that cancels its air force halfway is not taken seriously."
+      },
+      {
+       "tone": "fiery",
+       "text": "Our neighbours are watching to see if we flinch. We don't flinch."
+      },
+      {
+       "tone": "folksy",
+       "text": "Nobody ever said safety came cheap."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Pay for it once, and our grandchildren sleep easy."
+      }
+     ]
+    },
+    {
+     "label": "Stay out of it",
+     "effects": {}
+    }
+   ],
+   "trust": -2,
+   "government": {
+    "text": "The defence minister says the new price \"reflects improved capabilities\"."
+   }
+  },
+  {
+   "id": "bonus_queues",
+   "deck": false,
+   "kind": "followup",
+   "title": "Pensioners queue for hours for the winter bonus",
+   "text": "The winter bonus has to be collected in person at a post office, with three documents. Queues in Cranebo stretched round the block in freezing rain; two pensioners were taken to hospital.",
+   "choices": [
+    {
+     "label": "Blame the bureaucracy",
+     "effects": {
+      "shift": {
+       "system": -6
+      },
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.25
+       },
+       {
+        "who": {
+         "lean": {
+          "system": "<0"
+         }
+        },
+        "amt": 0.15
+       }
+      ]
+     },
+     "lines": [
+      {
+       "tone": "statesman",
+       "text": "Pay it straight into their accounts. Every other payment in this country manages it."
+      },
+      {
+       "tone": "fiery",
+       "text": "Three documents and a queue in the rain, for six hundred pezos. Somebody in a warm office designed that."
+      },
+      {
+       "tone": "folksy",
+       "text": "My mother queued two hours, then they asked for her marriage certificate. My father's been dead twelve years."
+      },
+      {
+       "tone": "hopeful",
+       "text": "Next December, it should arrive in the bank on its own. That's not too much to ask."
+      }
+     ]
+    },
+    {
+     "label": "Volunteer at a post office queue",
+     "effects": {
+      "awareness": 0.03,
+      "leader": 0.15,
+      "goodwill": [
+       {
+        "who": {
+         "age": "61+"
+        },
+        "amt": 0.15
+       }
+      ]
+     }
+    }
+   ],
+   "world": {
+    "unrest": 1
+   },
+   "government": {
+    "text": "The social affairs minister thanks pensioners \"for their patience\"."
+   }
   }
  ],
  "FUNDING_OFFERS": [

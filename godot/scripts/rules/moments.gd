@@ -1,5 +1,5 @@
 ## rules/moments.gd — The big moments: the year-three flagship promise, the year-one interview, the final debate and the end-of-game profile.
-extends "res://scripts/rules/world.gd"
+extends "res://scripts/rules/laws.gd"
 
 # ---------- The flagship promise (year three) ----------
 ## A year before the election the party commits to one tangible answer for the

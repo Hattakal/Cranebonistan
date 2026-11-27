@@ -267,6 +267,9 @@ static func leader_score(v: float) -> String:
 	var n = Game.jround(clampf(v, -1, 1) * 100)
 	return ("+%d" % n) if n > 0 else str(n)
 
+static func devotion_word(d: float) -> String:
+	return "Fanatical" if d > 0.4 else ("Strong" if d > 0.2 else ("Growing" if d > 0.08 else "Little"))
+
 static func charisma_word(c: float) -> String:
 	if c >= 75: return "Magnetic"
 	if c >= 60: return "Compelling"
@@ -439,6 +442,8 @@ func _platform() -> void:
 		["Personal image", "%s (%s)" % [leader_words(nation.leader), leader_score(nation.leader)], "What the whole country thinks of you, from -100 to +100. Gaffes and scandals lower it; good appearances raise it."],
 		["Speaking style", G.style_profile(S).label, _style_tip()],
 		["Comes across as", G.leader_image(S, player)[0].type.label if G.LEADER_TYPES.size() else "—", _image_tip(player)],
+		["Devotion", devotion_word(nation.devotion), "How devoted your voters are to you as a person (a share of them, weighted). Devoted voters care less where you stand, forgive you for changing your tune, stay with you when others drift away, and slowly come round to your views. It grows where voters like you personally, in groups that vote on personality, and faster for a charismatic leader with strong positions."],
+		["Would follow you anywhere", _people(nation.followers) if nation.followers >= 5000 else "Nobody yet", "Voters so devoted that your positions hardly matter to them any more."],
 	], c1, 2)
 	var state: Array = ["Consistent", "Voters believe you mean what you say."] if inc < 0.5 else (["Wobbling", "A few voters have noticed you changing your tune."] if inc < 2 else (["Unreliable", "Your core supporters are leaving, and engaged voters punish you."] if inc < 5 else ["Flip-flopper", "Nobody knows what you stand for. Your base is collapsing."]))
 	_add(Look.dlabel("Consistency: %s. %s" % [state[0], state[1]], "body_bold", 13, Look.RED_HI if inc >= 2 else Look.TXT, true), c1)
@@ -455,22 +460,21 @@ func _platform() -> void:
 	lg.add_child(Look.dlabel("● Where voters place you", "body", 12, Look.RED_HI))
 	for p in G.rivals(S): lg.add_child(Look.dlabel("● " + p.short, "body", 12, Look.lit(Color(p.color))))
 	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
+	var rows = VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 3)
+	c3.add_child(rows)
 	for ax in G.AXES:
 		var st: int = G.stance_of(player.manifesto[ax.id])
 		var ps: int = G.stance_of(player.perceived[ax.id])
 		var row = HBoxContainer.new()
 		row.add_theme_constant_override("separation", 6)
-		c3.add_child(row)
-		var name_col = VBoxContainer.new()
-		name_col.add_theme_constant_override("separation", -2)
-		name_col.custom_minimum_size.x = Look.fs(175)
-		var iss = Look.dcaps(ax.issue, 10, Look.FAINT, 1)
-		iss.clip_text = true
-		iss.custom_minimum_size.x = Look.fs(175)
-		name_col.add_child(iss)
-		name_col.add_child(Look.dlabel(ax.stances[st], "display_bold", 18, Look.TXT))
-		if ps != st: name_col.add_child(Look.dlabel("seen as %s" % ax.stances[ps].to_lower(), "body", 11, Look.RED_HI))
-		row.add_child(name_col)
+		row.tooltip_text = ax.issue
+		rows.add_child(row)
+		var nm = Look.dlabel(ax.stances[st] + ("" if ps == st else " · seen as %s" % ax.stances[ps].to_lower()), "display_bold", 15, Look.TXT if ps == st else Look.RED_HI)
+		nm.custom_minimum_size.x = Look.fs(170)
+		nm.clip_text = true
+		nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(nm)
 		for dir in [-1, 1]:
 			var ends = Look.dlabel(ax.left if dir < 0 else ax.right, "body", 12, Look.DIM)
 			ends.custom_minimum_size.x = Look.fs(82)
@@ -481,7 +485,8 @@ func _platform() -> void:
 				toast.emit(res.text)
 				changed.emit(), st + dir < 0 or st + dir > 4 or blocked or G.steer_block(S, ax.id, dir) != "")
 			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			b.add_theme_font_size_override("font_size", Look.fs(11))
+			b.add_theme_font_size_override("font_size", Look.fs(9))
+			b.custom_minimum_size = Vector2(Look.fs(22), Look.fs(22))
 			if st + dir >= 0 and st + dir <= 4:
 				var rx: Dictionary = G.steer_reactions(S, ax.id, dir)
 				var tip = "Steer the party toward %s: one action, three months." % ax.stances[st + dir].to_lower()
@@ -494,7 +499,7 @@ func _platform() -> void:
 			if dir < 0:
 				row.add_child(b); row.add_child(ends)
 				var t = AxisTrack.new(G, S, ax, player)
-				t.custom_minimum_size.y = 26
+				t.custom_minimum_size.y = 20
 				t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				t.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				t.tooltip_text = ("Your manifesto says %s; voters place you at %s." % [ax.stances[st].to_lower(), ax.stances[ps].to_lower()]) if ps != st else "Voters place you where your manifesto says: %s." % ax.stances[st].to_lower()
@@ -725,6 +730,12 @@ func _debates() -> void:
 			_p("%s · %s — %s (peak heat %d)" % [G.date_label(x.week, false), x.title, verdict, Game.jround(x.peak)], null, Look.TXT, 13)
 			n += 1
 
+## Why a bill is likely to pass or fall, on hover.
+func _law_tip(od: Dictionary) -> String:
+	var out = ["Chance it passes: about %d%%" % Game.jround(od.p * 100)]
+	for x in od.parts: out.append("%s: %+d" % [x.why, Game.jround(x.d * 100)])
+	return "\n".join(out)
+
 func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 	var ax: Dictionary = Game.by_id(G.AXES, d.axis)
 	var p = PanelContainer.new()
@@ -747,6 +758,12 @@ func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 	var tx = Look.dlabel(d.text, "body", 13, Look.DIM, true)
 	tx.max_lines_visible = 3
 	v.add_child(tx)
+	if d.has("law") and S.get("bill") and S.bill.id == d.law:
+		var od: Dictionary = G.law_odds(S)
+		var bl = Look.dlabel("A bill before parliament · vote %s · %s" % [G.date_label(int(S.bill.vote), false), G.law_odds_word(od.p)], "body_bold", 13, Look.RED_HI if od.p < 0.65 else Look.LAMP, true)
+		bl.tooltip_text = _law_tip(od) + "\n\nSpeaking against it moves the argument; if it falls, you get the credit for sinking it."
+		bl.mouse_filter = Control.MOUSE_FILTER_STOP
+		v.add_child(bl)
 	# heat
 	var hr = HBoxContainer.new()
 	hr.add_theme_constant_override("separation", 8)
@@ -1005,6 +1022,26 @@ func _country() -> void:
 		if w.unrest > 60: troubles.append("the public mood")
 		_facts([["Hold on power", stability_word(gov.stability)], ["Blamed for", ", ".join(troubles).capitalize() if troubles.size() else "Nothing in particular"], ["Border crisis", "Rallies people behind it" if w.border > 65 else "No effect"]], gc)
 		_p("A government in trouble loses voters to whoever looks ready to replace it, and its parties get restless (a junior partner half as much).", gc)
+		# its bills: the one before parliament, and the laws of this term
+		if S.get("bill"):
+			var law: Dictionary = G.law_by_id(S.bill.id)
+			var od: Dictionary = G.law_odds(S)
+			var bl = Look.dlabel("Before parliament: %s · vote %s · %s" % [law.title, G.date_label(int(S.bill.vote), false), G.law_odds_word(od.p)], "body_bold", 14, Look.TXT, true)
+			bl.tooltip_text = _law_tip(od)
+			bl.mouse_filter = Control.MOUSE_FILTER_STOP
+			gc.add_child(bl)
+		var done: Array = S.lawsDone.keys()
+		if done.size():
+			gc.add_child(Look.dcaps("Laws this term", 10, Look.FAINT, 1))
+			for id in done:
+				var x: Dictionary = S.lawsDone[id]
+				var lw = G.law_by_id(id)
+				if lw == null: continue
+				var you = {"for": " · you backed it", "against": " · you opposed it"}.get(x.get("you", ""), "")
+				var ll = Look.dlabel("%s · %s %s%s" % [lw.title, "passed" if x.passed else "voted down", G.date_label(int(x.week), false), you], "body", 13, Look.TXT if x.passed else Look.DIM, true)
+				ll.tooltip_text = lw.text
+				ll.mouse_filter = Control.MOUSE_FILTER_STOP
+				gc.add_child(ll)
 	var tc = _card(two)
 	tc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_eyebrow("Trust in politics", tc)

@@ -441,6 +441,90 @@
     {"tone": "hopeful", "text": "A free country is a noisy one. Let them march: that's what a free people sounds like."},
     {"tone": "folksy", "text": "If they'd needed a permit in 1942, we'd still have a king."}
    ]
+  },
+  "law_border_fence": {
+   "L": [
+    {"tone": "statesman", "text": "A country that cannot say who crosses its border is not quite a country. Pass the bill."},
+    {"tone": "fiery", "text": "For twenty years they told us the border was fine. Ask the people who live next to it."},
+    {"tone": "folksy", "text": "My uncle locks his shed. Nobody calls him a monster for it."},
+    {"tone": "hopeful", "text": "Safe borders first, open arms after. That's the order it works in."}
+   ],
+   "R": [
+    {"tone": "statesman", "text": "Two thousand guards won't fix what the regional fund was paying for: roads, schools and jobs."},
+    {"tone": "fiery", "text": "They're taking the money for your town's roads to build a fence in a field. Ask them why."},
+    {"tone": "folksy", "text": "A fence is a fine thing between two gardens. Between two countries, you're paying for it for ever."},
+    {"tone": "hopeful", "text": "We trade with Dillihan every day. Spend the money on bridges, not fences."}
+   ]
+  },
+  "law_public_order": {
+   "L": [
+    {"tone": "statesman", "text": "The right to protest is not the right to close a city for a week. The act draws that line."},
+    {"tone": "fiery", "text": "Shopkeepers in Cranebo have had enough of boarded windows. So have I."},
+    {"tone": "folksy", "text": "I've nothing against a march. I'd just like the bus to run."},
+    {"tone": "hopeful", "text": "Calm streets are where every other argument gets to happen."}
+   ],
+   "R": [
+    {"tone": "statesman", "text": "A protest that needs the police's permission a day ahead is a protest the government chose."},
+    {"tone": "fiery", "text": "Today it's the march you don't like. Tomorrow it's yours."},
+    {"tone": "folksy", "text": "My father marched when he was young. Under this act he'd have been fined for it."},
+    {"tone": "hopeful", "text": "A country that's sure of itself can stand a few placards."}
+   ]
+  },
+  "law_family_allowance": {
+   "R": [
+    {"tone": "statesman", "text": "Families raising children carry this country's future. The tax system should notice."},
+    {"tone": "fiery", "text": "For once the government is paying the people who actually hold this country together."},
+    {"tone": "folksy", "text": "Two kids, school shoes twice a year. Every pezo counts."},
+    {"tone": "hopeful", "text": "Let's make it easier to start a family here than to leave for abroad."}
+   ],
+   "L": [
+    {"tone": "statesman", "text": "Help every child, not only the ones whose parents have a certificate."},
+    {"tone": "fiery", "text": "So a child is worth ₱250 a month if their parents married, and nothing if they didn't?"},
+    {"tone": "folksy", "text": "My sister's raising two on her own. Apparently that's not a family."},
+    {"tone": "hopeful", "text": "Every child in this country deserves the same start. Write the bill for all of them."}
+   ]
+  },
+  "law_price_cap": {
+   "L": [
+    {"tone": "statesman", "text": "Two years of capped bread and fuel gives wages a chance to catch up."},
+    {"tone": "fiery", "text": "The suppliers had their record year. Now they can have a normal one."},
+    {"tone": "folksy", "text": "A loaf should cost what a loaf costs, not what somebody thinks they can get away with."},
+    {"tone": "hopeful", "text": "For two years, nobody in this country should have to choose between bread and heating."}
+   ],
+   "R": [
+    {"tone": "statesman", "text": "Caps empty shelves. Every country that has tried this learned it the hard way."},
+    {"tone": "fiery", "text": "They'll cap the price of bread and then wonder where the bread went."},
+    {"tone": "folksy", "text": "Ask a baker what flour costs. Then ask the minister."},
+    {"tone": "hopeful", "text": "Bring prices down by making more, not by pretending they're lower."}
+   ]
+  },
+  "law_new_jets": {
+   "L": [
+    {"tone": "statesman", "text": "A country serious about its borders doesn't fly planes older than its pilots."},
+    {"tone": "fiery", "text": "Dillihan is buying new jets too. Do we want to be the last to notice?"},
+    {"tone": "folksy", "text": "You don't wait for the roof to fall in before you fix it."},
+    {"tone": "hopeful", "text": "Strong enough that nobody tries. That's what these planes buy."}
+   ],
+   "R": [
+    {"tone": "statesman", "text": "Four billion pezos is twelve years of the nurses we keep saying we can't afford."},
+    {"tone": "fiery", "text": "Fighter jets for the generals, corridors for the patients. That's this budget."},
+    {"tone": "folksy", "text": "I've never once been bombed. I have waited eleven hours in a hospital corridor."},
+    {"tone": "hopeful", "text": "Spend it on the things that make a country worth defending."}
+   ]
+  },
+  "law_winter_bonus": {
+   "L": [
+    {"tone": "statesman", "text": "Pensioners spend the winter choosing which room to heat. ₱600 in December is the least we owe them."},
+    {"tone": "fiery", "text": "They built this country. Now they sit indoors in their coats. Pay them."},
+    {"tone": "folksy", "text": "My mother turns the heating off at nine and goes to bed. That's not a life."},
+    {"tone": "hopeful", "text": "A warm winter for every pensioner. That's an easy promise to keep."}
+   ],
+   "R": [
+    {"tone": "statesman", "text": "A cheque every December is not a pension policy. It's an election policy."},
+    {"tone": "fiery", "text": "They're buying your vote with your grandchildren's money."},
+    {"tone": "folksy", "text": "Nice present. Who's paying for it? It's always us."},
+    {"tone": "hopeful", "text": "Fix pensions properly and nobody will need a winter bonus."}
+   ]
   }
  },
  "AXIS_LINES": {

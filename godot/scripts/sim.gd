@@ -41,6 +41,8 @@ func load_content(_unused := "") -> void:
 	_events_by_id = {}
 	for e in EVENTS: _events_by_id[e.id] = e
 	TOPICS = _data("debates", {}).get("TOPICS", [])
+	LAWS = _data("laws", {}).get("LAWS", [])
+	LAWS_C = C.get("laws", {})
 	LINES = _data("debate_lines", {})
 	ISSUES = _data("issues", {}).get("ISSUES", [])
 	FIGURES = _data("party", {}).get("FIGURES", [])
@@ -93,7 +95,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {}, "flagship": {}, "roadFund": 0.0, "roadPerTrip": 0.0,
+		"debates": [], "debatesPast": [], "bill": null, "lawsDone": {}, "lawShift": {}, "lawNext": int(C.get("laws", {}).get("firstMonth", 3)) * int(C.weeksPerMonth), "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {}, "flagship": {}, "roadFund": 0.0, "roadPerTrip": 0.0,
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -178,6 +180,7 @@ func monthly_update(s: Dictionary) -> void:
 	var wm: Dictionary = s.get("wantMod", {})
 	for k in wm: wm[k] = float(wm[k]) * 0.85
 	debates_monthly(s)
+	laws_monthly(s)
 	issues_monthly(s)
 	s.outrage = float(s.get("outrage", 0.0)) * float(C.serious.get("provocative", {}).get("decay", 0.5))   # outrage wears off
 	serious_monthly(s)

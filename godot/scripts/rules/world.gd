@@ -243,13 +243,15 @@ func indicator_word(id: String, v: float) -> String:
 func world_monthly(s: Dictionary) -> void:
 	var w: Dictionary = s.world
 	var prev = w.duplicate()
-	var migration_target = 55.0 + (-12.0 if (s.crisis and s.crisis.id == "economy") else 0.0)
+	var ls: Dictionary = s.get("lawShift", {})   # where the laws passed have moved the country for good
+	var at = func(k: String, v: float) -> float: return v + float(ls.get(k, 0))
+	var migration_target = at.call("migration", 55.0) + (-12.0 if (s.crisis and s.crisis.id == "economy") else 0.0)
 	w.migration += (migration_target - w.migration) * 0.08 + rand_normal(s) * 2.5
-	w.jobs += (55 - w.jobs) * 0.06 + (w.migration - 55) * 0.03 - maxf(0, w.prices - 55) * 0.05 + rand_normal(s) * 1.8
-	w.prices += (45 - w.prices) * 0.06 + maxf(0, w.border - 60) * 0.03 + rand_normal(s) * 1.8
-	w.border += (40 - w.border) * 0.05 + rand_normal(s) * 2
+	w.jobs += (at.call("jobs", 55) - w.jobs) * 0.06 + (w.migration - 55) * 0.03 - maxf(0, w.prices - 55) * 0.05 + rand_normal(s) * 1.8
+	w.prices += (at.call("prices", 45) - w.prices) * 0.06 + maxf(0, w.border - 60) * 0.03 + rand_normal(s) * 1.8
+	w.border += (at.call("border", 40) - w.border) * 0.05 + rand_normal(s) * 2
 	var anger: float = maxf(0, 50 - w.jobs) * 0.25 + maxf(0, w.prices - 50) * 0.2 + maxf(0, w.migration - 65) * 0.12 + maxf(0, 40 - s.trust) * 0.15
-	w.unrest += (32 + anger - w.unrest) * 0.12 + rand_normal(s) * 1.5
+	w.unrest += (at.call("unrest", 32) + anger - w.unrest) * 0.12 + rand_normal(s) * 1.5
 	for k in w: w[k] = clampf2(w[k], 0, 100)
 	if w.jobs < 42 or w.prices > 60: change_trust(s, -0.8)
 	# hard times wear the government down, a border crisis rallies people behind it;

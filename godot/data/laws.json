@@ -1,0 +1,93 @@
+{
+ "_note": "The government's programme. Every few months (CONFIG.laws) the government tables one of these: the ruling party if it agrees with the law's side (its position past CONFIG.laws.agree), else a partner. It opens a major debate (lines in debate_lines.json TOPIC_LINES under \"law_<id>\"); after voteMonths parliament votes. A partner on the other side, the public argument going against it, or a weak government can sink it. Fields: axis and side (L/R: which way the law pushes), title, text (what it does), tabled (news when it is tabled; {short} {leader}), minMonth, weight and when (as events), passed {text, world: a jolt now, lasting: where the country's numbers settle from now on}, failed (news text), seeds (events that follow a passed law, months [from, to]; write them in content.json EVENTS with \"deck\": false).",
+ "LAWS": [
+  {
+   "id": "border_fence",
+   "axis": "nation",
+   "side": "L",
+   "title": "The Border Security Bill",
+   "text": "Two thousand new border guards and a fence along the Dillihan frontier, paid for out of the regional development fund.",
+   "tabled": "{short} says the country must \"know who is coming in\".",
+   "minMonth": 2,
+   "when": {"migration": ">60"},
+   "passed": {
+    "text": "The fence goes up in sections from the spring. Dillihan recalls its ambassador \"for consultations\", and the border provinces lose a year of road money.",
+    "world": {"migration": -3, "border": 4},
+    "lasting": {"migration": -5, "border": 3}
+   },
+   "failed": "Backbenchers from the border provinces vote against losing their road money. The fence stays a drawing.",
+   "seeds": [{"event": "fence_contract", "months": [3, 6]}]
+  },
+  {
+   "id": "public_order",
+   "axis": "order",
+   "side": "L",
+   "title": "The Public Order Act",
+   "text": "The police may ban a demonstration with a day's notice, and fine the organisers if it goes ahead.",
+   "tabled": "{short} says shopkeepers \"have swept up enough glass\".",
+   "minMonth": 4,
+   "when": {"unrest": ">55"},
+   "passed": {
+    "text": "From next month a march needs the police's blessing. The first bans are expected within weeks.",
+    "world": {"unrest": -4},
+    "lasting": {"unrest": -3}
+   },
+   "failed": "Enough members of the government vote with the opposition to send the act back. The interior minister calls it \"a delay\".",
+   "seeds": [{"event": "banned_march", "months": [2, 5]}]
+  },
+  {
+   "id": "family_allowance",
+   "axis": "society",
+   "side": "R",
+   "title": "The Family Allowance Act",
+   "text": "A tax credit of ₱250 a month for married couples with children under sixteen.",
+   "tabled": "{short} calls it \"a thank-you to the families who hold this country together\".",
+   "minMonth": 3,
+   "passed": {"text": "The first credits arrive in the autumn. Accountants report a small boom in weddings.", "world": {"prices": 1}, "lasting": {}},
+   "failed": "The government's own partners vote it down unless every child is covered. The bill goes back to committee and stays there.",
+   "seeds": [{"event": "who_counts_family", "months": [2, 5]}]
+  },
+  {
+   "id": "price_cap",
+   "axis": "economy",
+   "side": "L",
+   "title": "The Bread and Fuel Price Cap",
+   "text": "For two years, the price of bread, cooking gas and heating oil may not rise faster than wages.",
+   "tabled": "{short} says families \"cannot wait for the market to feel sorry for them\".",
+   "minMonth": 3,
+   "when": {"prices": ">55"},
+   "passed": {"text": "Prices on the shelves are frozen from Monday. Suppliers warn of \"difficulties\".", "world": {"prices": -5}, "lasting": {"prices": -3, "jobs": -2}},
+   "failed": "The senior party in government lets the cap fall on a technicality. The suppliers' association sends flowers to nobody in particular.",
+   "seeds": [{"event": "bakers_stop", "months": [3, 7]}]
+  },
+  {
+   "id": "new_jets",
+   "axis": "foreign",
+   "side": "L",
+   "title": "The Defence Modernisation Act",
+   "text": "Thirty-six new fighter jets from the Bordon Federation over ten years, for ₱4 billion.",
+   "tabled": "{short} says the air force \"flies planes older than its pilots\".",
+   "minMonth": 6,
+   "when": {"border": ">55"},
+   "passed": {
+    "text": "The first two jets arrive next year. The factory that will service them is in Bayernal.",
+    "world": {"border": 2},
+    "lasting": {"jobs": 1, "border": 2}
+   },
+   "failed": "The coalition partner refuses to vote for jets while hospitals wait. The order is \"postponed\".",
+   "seeds": [{"event": "jets_cost", "months": [4, 8]}]
+  },
+  {
+   "id": "winter_bonus",
+   "axis": "welfare",
+   "side": "L",
+   "title": "The Winter Pension Bonus",
+   "text": "₱600 for every pensioner, paid each December.",
+   "tabled": "{short} says no pensioner should \"spend the winter in a coat indoors\".",
+   "minMonth": 5,
+   "passed": {"text": "The first bonus is paid this December. Post offices brace for queues.", "world": {"unrest": -2, "prices": 1}, "lasting": {"unrest": -1}},
+   "failed": "The finance minister's party votes it down as \"unaffordable this year\". Pensioners' groups promise to remember.",
+   "seeds": [{"event": "bonus_queues", "months": [2, 6]}]
+  }
+ ]
+}
