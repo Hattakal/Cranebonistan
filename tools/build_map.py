@@ -58,6 +58,9 @@ CAPITAL = "Cranebo"
 # Names on the map that the game spells differently.
 NAME_FIX = {"Cranbero": "Cranebo"}
 CITY_TEXT_MAX = 20   # text bigger than this (font size) is an area name, not a city
+# Provinces joined into one after they are found (the second id goes into the first); ids of
+# the others stay as they are. The designer merged Middle Cranbia into Cranebo (November 2026).
+MERGE = {"cranbia_4": "cranbia_3"}
 # Label text, used only to find room for it (the game has the real names).
 LABELS = {"yamlin": ["Yamlin"], "cranbia": ["Cranbia"], "alinni": ["Alinni"], "erland": ["Erland"],
           "fauraifai": ["Fauran"], "trueants": ["Southern", "Trueants"], "dillihan": ["Dillihan", "Republic"],
@@ -287,10 +290,24 @@ def build_provinces(full, order, prov_layer, borders, prov_texts, cities, adults
             area = float(m.sum()) / area_total
             people = sum(city_adults[c] for c in inside) + rural * area
             rows.append({"region": region, "name": name, "d": mask_to_path(m), "label": [round(lx * k), round(ly * k)],
-                         "area": round(area, 4), "cities": inside, "share": people / adults[region], "named": bool(named)})
+                         "area": round(area, 4), "cities": inside, "share": people / adults[region], "named": bool(named), "_m": m})
         tot = sum(r["share"] for r in rows) or 1.0
-        for r in rows: r["share"] = round(r["share"] / tot, 4)
+        for r in rows: r["share"] = r["share"] / tot
         for i, r in enumerate(sorted(rows, key=lambda r: (r["label"][1] // 120, r["label"][0])), start=1): r["id"] = f"{region}_{i}"
+        # joined provinces: one shape, the cities and people of both, the first one's name and id
+        byid = {r["id"]: r for r in rows}
+        for src, dst in MERGE.items():
+            if src in byid and dst in byid:
+                a, b = byid[dst], byid.pop(src)
+                m = a["_m"] | b["_m"]
+                dt = ndimage.distance_transform_edt(np.pad(m, 1))[1:-1, 1:-1]
+                ly, lx = np.unravel_index(np.argmax(dt), dt.shape)
+                a.update({"_m": m, "d": mask_to_path(m), "label": [round(lx * k), round(ly * k)], "area": round(a["area"] + b["area"], 4),
+                          "cities": a["cities"] + b["cities"], "share": a["share"] + b["share"], "named": a["named"] or b["named"]})
+        rows = list(byid.values())
+        for r in rows:
+            r["share"] = round(r["share"], 4)
+            r.pop("_m", None)
         out.extend(sorted(rows, key=lambda r: r["id"]))
     return [{"id": r["id"], **{x: v for x, v in r.items() if x != "id"}} for r in out]
 

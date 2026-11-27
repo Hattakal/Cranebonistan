@@ -1235,6 +1235,15 @@ func _media_row(to: Control, row: Dictionary, blocked: bool) -> void:
 	act.alignment = BoxContainer.ALIGNMENT_END
 	line.add_child(act)
 	var price: float = float(o.get("price", 0))
+	if G.in_campaign(S) and not (o.kind in ["platform", "foreign"]):   # go on the programme (one action)
+		var why: String = G.appearance_block(S, o.id)
+		var gb = _btn("Go on", func():
+			var res: Dictionary = G.start_appearance(S, o.id)
+			toast.emit(res.text)
+			changed.emit(), blocked or why != "")
+		gb.tooltip_text = why if why != "" else "One action: two questions on air, in your own words. Its audience hears it most."
+		gb.add_theme_font_size_override("font_size", Look.fs(11))
+		act.add_child(gb)
 	if st.owner == "player":
 		act.add_child(Look.dlabel("Yours", "body_bold", 12, Look.RED_HI))
 	elif st.owner != "":
@@ -1249,7 +1258,7 @@ func _media_row(to: Control, row: Dictionary, blocked: bool) -> void:
 		act.add_child(b)
 	if o.kind == "influencer":
 		var spon: String = st.get("sponsor", "")
-		var fee: float = G.sponsor_price(S, o)
+		var fee: float = float(st.get("fee", G.sponsor_price(S, o))) if st.get("sponsor", "") != "" else G.sponsor_price(S, o, G.player_party(S))
 		if spon == "player":
 			var eb = _btn("End deal (₱%sM/q)" % Game.fmt1(fee), func():
 				var res: Dictionary = G.act_end_sponsor(S, o.id)

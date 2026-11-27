@@ -273,6 +273,42 @@ func _interview_round(p: Paper) -> void:
 			p.top())
 	p.top()
 
+# ---------- Going on a programme (the campaign) ----------
+func _appearance_sheet() -> void:
+	var p = _paper(860)
+	p.screen()
+	_appearance_round(p)
+
+func _appearance_round(p: Paper) -> void:
+	p.clear()
+	var ap: Dictionary = S.appearance
+	var rd: Dictionary = ap.rounds[ap.step]
+	p.tv_strap(ap.outletName, "Tonight's guest · question %d of %d" % [ap.step + 1, ap.rounds.size()])
+	p.heading(rd.title, 32)
+	p.text(rd.prompt, 18)
+	p.step("Your answer", "What do you say?")
+	for j in rd.lines.size():
+		var line: Dictionary = rd.lines[j]
+		p.card("slip", func(box):
+			_tone_tag(box, line, "", true)
+			box.add_child(Look.label(line.text, "news_italic", 20, Look.INK, true)), func():
+			var res: Dictionary = G.answer_appearance(S, j)
+			p.clear()
+			p.decided()
+			p.tv_strap(ap.outletName, "Tonight's guest · " + res.round)
+			p.add(Look.label(res.quote, "news_bold", 24, Look.INK, true))
+			p.text(res.press, 17, "news_italic")
+			if res.note != "": p.small(res.note, Look.INK)
+			if res.outcome == "viral": p.stamp("The clip of the week", Look.GOOD)
+			elif res.outcome == "gaffe": p.stamp("Gaffe", Look.RED)
+			_changes_chips(p, res.changes)
+			var more: bool = S.queue.size() and S.queue[0].type == "appearance"
+			p.actions([p.button("Next question" if more else "Off air", func():
+				if more: _appearance_round(p)
+				else: _done(p))])
+			p.top())
+	p.top()
+
 ## The piece the outlet runs the next morning.
 func _interview_piece(p: Paper) -> void:
 	p.clear()

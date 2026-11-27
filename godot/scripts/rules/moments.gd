@@ -233,6 +233,82 @@ func answer_interview(s: Dictionary, line_index: int) -> Dictionary:
 		finish_front(s, "interview")
 	return result
 
+# ---------- Appearances (the campaign): a programme or a personality has you on ----------
+## Two questions on the issues the outlet cares about (its own slant, or what the country
+## is arguing about), your own line in different voices or a dodge. One action; nobody
+## books a party under the national threshold. Its audience hears it most.
+func appearance_block(s: Dictionary, oid: String) -> String:
+	var o = outlet_by_id(oid)
+	if o == null or o.kind in ["platform", "foreign"]: return "Not a programme that has guests."
+	if not in_campaign(s): return "Appearances are for the official campaign."
+	if s.media[oid].owner != "" and s.media[oid].owner != "player": return "%s belongs to a rival now." % o.name
+	var share: float = float(s.lastSupport.get("player", 0)) if s.get("lastSupport") else 0.0
+	if share < maxf(threshold(), 0.01): return "%s won't book a party under %d%% in the polls." % [o.name, jround(threshold() * 100)]
+	if int(s.get("appeared", {}).get(oid, -99)) >= s.week - 4 * WEEKS_PER_MONTH: return "You were on %s not long ago." % o.name
+	return ""
+
+func start_appearance(s: Dictionary, oid: String) -> Dictionary:
+	var err: String = appearance_block(s, oid)
+	if err != "": return {"ok": false, "text": err}
+	var e2 = can_act(s, 0)
+	if e2: return {"ok": false, "text": e2}
+	spend_action(s, 0)
+	var o: Dictionary = outlet_by_id(oid)
+	if not s.has("appeared"): s.appeared = {}
+	s.appeared[oid] = s.week
+	var player = player_party(s)
+	var host: String = String(o.name) if o.kind == "influencer" else String(INTERVIEW.get("INTERVIEWERS", {}).get(oid, o.name))
+	var fill = {"interviewer": host, "leader": player.leader, "party": player.name, "home": s.get("home", "")}
+	# its own issues first, then the hottest arguments
+	var axes = []
+	var slant: Dictionary = s.media[oid].get("pos", {})
+	var cands: Array = ssort(slant.keys(), func(a, b): return absf(float(slant[b])) - absf(float(slant[a])))
+	cands.append_array(ssort(s.debates.duplicate(), func(a, b): return b.heat - a.heat).map(func(d): return d.axis))
+	cands.append_array(AXES.map(func(ax): return ax.id))
+	for ax in cands:
+		if not axes.has(ax): axes.append(ax)
+	var q: Dictionary = INTERVIEW.get("APPEARANCE", INTERVIEW.BIG)
+	var rounds = []
+	for ax in axes.slice(0, 2): rounds.append(_iv_issue(s, q, by_id(AXES, ax), fill))
+	s.appearance = {"outlet": oid, "outletName": o.name, "who": host, "rounds": rounds, "step": 0, "results": []}
+	s.queue.push_front({"type": "appearance"})
+	_log(s, "action", "Went on %s." % o.name)
+	return {"ok": true, "text": "%s has you on tonight." % o.name}
+
+func answer_appearance(s: Dictionary, line_index: int) -> Dictionary:
+	var ap: Dictionary = s.appearance
+	var rd: Dictionary = ap.rounds[ap.step]
+	var line: Dictionary = rd.lines[line_index]
+	var before = snapshot_groups(s)
+	var res = deliver_line(s, line)
+	var o: Dictionary = outlet_by_id(ap.outlet)
+	var kind: String = line.get("kind", "clear")
+	var note = ""
+	# its audience hears it most
+	var aw = 0.0
+	for pop in s.pops:
+		var r: float = outlet_reach(s, o, pop)
+		if r <= 0: continue
+		pop.aware.player = clampf2(pop.aware.player + float(C.get("appearance", {}).get("aware", 0.04)) * r, 0, 1)
+		if kind == "clear":
+			var p: float = pop.pos[rd.axis]
+			if (line.side == "L" and p < -15) or (line.side == "R" and p > 15):
+				pop.goodwill.player = clampf2(pop.goodwill.player + float(C.get("appearance", {}).get("goodwill", 0.06)) * r * pop.sal[rd.axis], -2, 2)
+	if kind == "clear":
+		shift_perceived(s, {rd.axis: (-3.0 if line.side == "L" else 3.0)})
+		s.spoke[side_key(rd.axis, line.side)] = s.week
+		s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) + 0.05, -1, 1)
+		note = "A straight answer. Its audience knew where you stood."
+		record_statement(s, {"text": String(line.text).trim_prefix("\"").trim_suffix("\""), "title": "On %s" % o.name, "effects": {"shift": {rd.axis: (-3 if line.side == "L" else 3)}}, "tone": line.tone, "spoken": true})
+	else:
+		s.media[o.id].buzz = clampf2(float(s.media[o.id].buzz) - 0.1, -1, 1)
+		note = "%s let it go. The audience didn't." % ap.who
+	var result = merged(res, {"quote": line.text, "note": note, "changes": group_changes(s, before), "round": rd.title})
+	ap.results.append(result)
+	ap.step = int(ap.step) + 1
+	if ap.step >= ap.rounds.size(): finish_front(s, "appearance")
+	return result
+
 ## The piece runs: the country now knows who you are, for better or worse.
 func _interview_done(s: Dictionary) -> void:
 	var iv: Dictionary = s.interview

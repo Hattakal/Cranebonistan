@@ -83,6 +83,13 @@ func event_news(s: Dictionary, ev: Dictionary) -> void:
 func queue_event(s: Dictionary, id) -> void:
 	var ev = event_by_id(id)
 	if ev == null: return
+	if ev.has("variants") and ev.variants.size():   # one of several tellings of the same story
+		ev = merged(ev.duplicate(true), pick(s, ev.variants))
+		ev.erase("variants")
+		if not ev.has("where"):
+			event_news(s, ev)
+			s.queue.append({"type": "event", "id": id, "event": ev})
+			return
 	event_news(s, ev)
 	if ev.has("where"):   # it happens somewhere: pin it on the map
 		var placed: Dictionary = placed_event(s, ev)

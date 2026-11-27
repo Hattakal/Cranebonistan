@@ -33,8 +33,15 @@ func outlet_weight(s: Dictionary, o: Dictionary) -> float:
 	return 0.75 if s.media[o.id].get("sponsor", "") != "" else 1.0
 
 ## A personality's price for a quarter, from their followers.
-func sponsor_price(s: Dictionary, o: Dictionary) -> float:
-	return snappedf(0.4 + float(s.media[o.id].get("subs", o.get("subs", 1))) * 1.0, 0.1)
+## A personality's price a quarter, by followers; for party `p`, 25% less if they already
+## like that party and 25% more if they are hostile (CONFIG.sponsorFriendly, sponsorHostile).
+func sponsor_price(s: Dictionary, o: Dictionary, p = null) -> float:
+	var base: float = 0.4 + float(s.media[o.id].get("subs", o.get("subs", 1))) * 1.0
+	if p != null and s.media[o.id].get("sponsor", "") == "":
+		var f: float = outlet_favour(s, o, p)
+		if f >= 0.15: base *= float(C.get("sponsorFriendly", 0.75))
+		elif f <= -0.15: base *= float(C.get("sponsorHostile", 1.25))
+	return snappedf(base, 0.1)
 
 ## How an outlet treats a party, -1..1. Partisan outlets back whoever is closest to
 ## their slant; honest ones follow what you actually say and how it goes ("buzz").
@@ -172,10 +179,11 @@ func act_sponsor(s: Dictionary, id: String) -> Dictionary:
 	if o == null or o.kind != "influencer": return {"ok": false, "text": "No such personality."}
 	var st: Dictionary = s.media[id]
 	if st.sponsor != "": return {"ok": false, "text": "%s already has a deal." % o.name}
-	var price: float = sponsor_price(s, o)
+	var price: float = sponsor_price(s, o, player_party(s))
 	var err = can_act(s, price)
 	if err: return {"ok": false, "text": err}
 	spend_action(s, price)
+	st.fee = price
 	st.sponsor = "player"
 	var text = "%s has signed a \"content partnership\" with friends of the party: ₱%sM a quarter. Everyone will guess; nobody will mind much." % [o.name, fmt1(price)]
 	_log(s, "action", "Sponsored %s." % o.name)
@@ -201,7 +209,7 @@ func sponsors_monthly(s: Dictionary) -> void:
 				"text": String(sc.text).format({"name": o.name}) + (" Your party's deal with them was mentioned, briefly." if st.get("sponsor", "") == "player" else "")})
 		var spon: String = st.get("sponsor", "")
 		if spon == "" or not quarter: continue
-		var price: float = sponsor_price(s, o)
+		var price: float = float(st.get("fee", sponsor_price(s, o)))   # the price agreed when the deal was signed
 		if spon == "player":
 			if s.money < price:
 				st.sponsor = ""

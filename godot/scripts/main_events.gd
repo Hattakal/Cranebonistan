@@ -28,6 +28,7 @@ func _open_front() -> void:
 		"news": _news_sheet(front)
 		"debate": _debate_sheet()
 		"interview": _interview_sheet()
+		"appearance": _appearance_sheet()
 		"election": _election_sheet()
 		"convoy": _convoy_sheet(true)
 		"rally": _rally_sheet(front)

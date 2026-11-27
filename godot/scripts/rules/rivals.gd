@@ -266,9 +266,10 @@ func _rival_media(s: Dictionary, p: Dictionary) -> void:
 		for o in OUTLETS:
 			if o.kind != "influencer" or s.media[o.id].get("sponsor", "") != "": continue
 			var f: float = outlet_favour(s, o, p) + float(s.media[o.id].get("reachNat", 0)) * 2
-			if f > bf and float(p.money) >= sponsor_price(s, o) * 2: bf = f; best = o
+			if f > bf and float(p.money) >= sponsor_price(s, o, p) * 2: bf = f; best = o
 		if best:
-			var price: float = sponsor_price(s, best)
+			var price: float = sponsor_price(s, best, p)
+			s.media[best.id].fee = price
 			p.money = float(p.money) - price
 			s.media[best.id].sponsor = p.id
 			rival_move(s, p, news("MOVE", "sponsor", p, {"personality": best.name}))

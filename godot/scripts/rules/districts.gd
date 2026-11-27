@@ -143,8 +143,14 @@ func visit_power(s: Dictionary, id: String) -> Dictionary:
 	var d = district_by_id(id)
 	var st: Dictionary = s.districts[id]
 	var why: Array = []
-	var k: float = 1.0 / (1.0 + 0.3 * int(st.visits))          # going back helps less each time
-	if int(st.visits) > 0: why.append("they've seen you before")
+	# going back soon helps less; after CONFIG.revisitMonths they're glad to see you again
+	var k = 1.0
+	if st.has("lastVisit"):
+		var since: float = float(s.week - int(st.lastVisit)) / WEEKS_PER_MONTH
+		var span: float = float(C.get("revisitMonths", 8))
+		if since < span:
+			k = lerpf(float(C.get("revisitLow", 0.5)), 1.0, since / span)
+			why.append("they saw you %s" % ("last month" if since < 1.5 else "%d months ago" % int(round(since))))
 	# the money set aside for trips this quarter
 	var m: float = minf(float(s.get("roadFund", 0)), float(s.get("roadPerTrip", 0)))
 	if m > 0:

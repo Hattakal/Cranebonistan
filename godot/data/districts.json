@@ -1,5 +1,10 @@
 {
- "_note": "Electoral districts (provinces). REGION_WEIGHT scales a region's seats against its population: Alinni gets fewer seats than its people would earn, part of the minority's disenfranchisement. DISTRICTS: overrides by province name or id: seats (fixed), name (rename), lean (a local lean per axis, e.g. {\"society\": -15}).",
+ "_note": "Electoral districts (provinces). REGION_WEIGHT scales a region's seats against its population: Alinni gets fewer seats than its people would earn, part of the minority's disenfranchisement. DISTRICTS: overrides by province name or id: seats (fixed), name (rename), lean (a local lean per axis, e.g. {\"society\": -15}). Yamlin Proper and Northern Cranbia, the countryside of two city regions, lean nationalist and right (designer, November 2026). Middle Cranbia was merged into Cranebo in tools/build_map.py (MERGE).",
  "REGION_WEIGHT": {"alinni": 0.75},
- "DISTRICTS": {"cranbia_4": {"name": "Middle Cranbia"}, "Senoni": {"seats": 8}, "Insubri": {"seats": 4}}
+ "DISTRICTS": {
+  "Senoni": {"seats": 8},
+  "Insubri": {"seats": 4},
+  "Yamlin Proper": {"lean": {"nation": -15, "society": 12, "order": -8, "economy": 6}},
+  "Northern Cranbia": {"lean": {"nation": -15, "society": 12, "order": -8, "economy": 6}}
+ }
 }

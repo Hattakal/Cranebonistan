@@ -79,6 +79,12 @@
   "influenceMax": 1.6,
   "pacts": {"_note": "Pacts to stand aside, in the official campaign. 'share': the part of the voters of the party standing aside that go to its partner. A party agrees when it would win the province it gets by more than 'clear' and is more than 'notClose' behind in the one it gives up; the two must be fewer than 'seatGap' seats apart and neither more than 'seatRatio' times the other. 'warmth': how much a pact warms the two parties. Each campaign week two rivals who aren't enemies make a pact with chance 'rivalChance' (when one suits both), and a rival offers you one with chance 'askChance'.", "share": 0.7, "clear": 0.03, "notClose": 0.08, "seatGap": 4, "seatRatio": 1.5, "warmth": 6, "rivalChance": 0.25, "askChance": 0.1},
   "smallTask": 0.01,
+  "appearance": {"_note": "Going on a programme or a personality's show in the campaign: awareness and, for a straight answer, goodwill among those who agree, both by how much of each group the outlet reaches.", "aware": 0.04, "goodwill": 0.06},
+  "sponsorFriendly": 0.75,
+  "sponsorHostile": 1.25,
+  "revisitMonths": 8,
+  "revisitLow": 0.5,
+  "revisitNote": "A trip to a province you toured lately counts for less: right after the last visit, revisitLow of a full trip, back to full after revisitMonths.",
   "voiceCurve": 0.5,
   "voiceCurveNote": "How the leader's image grows with the share of speeches in one voice: share + voiceCurve × share × (1 − share). 0 is straight (80% of the time in a voice is 80% of the image); 0.5 makes 80% worth 88% and 50% worth 63%.",
   "delivery": {"_note": "What a line that goes viral or turns into a gaffe does. viralPos: its good reactions multiplied; viralNeg: its bad ones (1: a viral clip is never worse than the same line said quietly); viralCharisma: charisma gained. gaffePos: its good reactions on a gaffe (the gaffe drowns them out, so a gaffe never helps); gaffeNeg: its bad reactions multiplied; gaffeCharisma: charisma lost; gaffeLeader and gaffeGoodwill: what every voter thinks less of the leader and the party.", "viralPos": 2.0, "viralNeg": 1.0, "viralCharisma": 2.0, "gaffePos": 0.3, "gaffeNeg": 1.8, "gaffeCharisma": 2.5, "gaffeLeader": 0.04, "gaffeGoodwill": 0.03},
@@ -89,8 +95,8 @@
   "extremeAnger": 0.5,
   "extremeLeader": 0.9,
   "crisisMonths": [
-   14,
-   18
+   22,
+   26
   ],
   "crisisBoostAt": 3.5,
   "crisisBoostMax": 1.667,
@@ -1312,7 +1318,7 @@
    "saturate": 0.6
   }
  },
- "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}. 'minSerious': the event only comes once you are taken seriously at least that much (0-100). 'minDemagogue': only once you have blamed groups and provoked enough (each group blamed counts 3, each sharp line 1.2). 'months': the months it can happen in (1 = January), for seasonal events; none means any time.",
+ "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}. 'minSerious': the event only comes once you are taken seriously at least that much (0-100). 'minDemagogue': only once you have blamed groups and provoked enough (each group blamed counts 3, each sharp line 1.2). 'months': the months it can happen in (1 = January), for seasonal events; none means any time. 'variants': a list of other tellings of the same event ({title, text}, or any field to replace); one is picked each time it fires, so one event can come in several flavours without firing several times.",
  "EVENTS": [
   {
    "id": "pezo_slide",

@@ -325,8 +325,25 @@ func _draw() -> void:
 	_convoy_cars(s)
 	_rival_tags(s)
 	_pins(s)
+	if Settings.get_value("mapedge") == "fade": _fade_edges()
 	_legend()
 	if hover != "" and tip_provider.is_valid(): _tooltip()
+
+## The map dissolving into the dark at its edges, like light falling off a desk lamp
+## (an option: Settings "mapedge").
+func _fade_edges() -> void:
+	var dark: Color = Look.N950
+	var clear: Color = Color(dark, 0.0)
+	var w: float = size.x * 0.14
+	var h: float = size.y * 0.14
+	var R = Rect2(Vector2.ZERO, size)
+	var quads = [
+		[R.position, Vector2(R.position.x + w, R.position.y), Vector2(R.position.x + w, R.end.y), Vector2(R.position.x, R.end.y), [dark, clear, clear, dark]],
+		[Vector2(R.end.x - w, R.position.y), Vector2(R.end.x, R.position.y), R.end, Vector2(R.end.x - w, R.end.y), [clear, dark, dark, clear]],
+		[R.position, Vector2(R.end.x, R.position.y), Vector2(R.end.x, R.position.y + h), Vector2(R.position.x, R.position.y + h), [dark, dark, clear, clear]],
+		[Vector2(R.position.x, R.end.y - h), Vector2(R.end.x, R.end.y - h), R.end, Vector2(R.position.x, R.end.y), [clear, clear, dark, dark]],
+	]
+	for q in quads: draw_polygon(PackedVector2Array([q[0], q[1], q[2], q[3]]), PackedColorArray(q[4]))
 
 var legend: Array = []   # [[short name and seats, Color, seats], ...]; without seats, just a key
 var legend_note := ""

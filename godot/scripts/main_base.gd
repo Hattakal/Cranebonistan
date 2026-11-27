@@ -30,6 +30,7 @@ func _ready() -> void:
 	G = Game
 	Settings.load_all()   # the player's options: colour scheme, text size, grain, sound
 	if _args().has("look"): Look.use(_args().look)
+	if _args().has("mapedge"): Settings.values["mapedge"] = _args().mapedge   # --mapedge=fade in a screenshot
 	if _args().has("text"): Look.text_boost = 2 if _args().text == "large" else 0   # --text=large in a screenshot
 	_build()
 	var args = _args()
@@ -73,6 +74,10 @@ func _options_build(p: Paper) -> void:
 	_option_row(p, "Film grain", "A little grain and darker corners over everything.", [["On", true], ["Off", false]], "grain", func(k, val):
 		Settings.set_value(k, val)
 		_grain.visible = val
+		_options_build(p))
+	_option_row(p, "Map edges", "Whether the map ends clean at its edges or fades into the dark around it.", [["Clear", "clear"], ["Fade", "fade"]], "mapedge", func(k, val):
+		Settings.set_value(k, val)
+		if _map: _map.queue_redraw()
 		_options_build(p))
 	_option_row(p, "Window", "", [["Window", false], ["Full screen", true]], "fullscreen", func(k, val):
 		Settings.set_value(k, val)
@@ -798,6 +803,7 @@ func _tv(what: String) -> String:
 	return "%s · %s" % [_outlet("cbc"), what]
 
 # ---------- Hooks: filled in by later files of the chain ----------
+func _appearance_sheet() -> void: pass
 func _auto_open() -> void: pass
 func _budget_sheet(_front: Dictionary, _keep_scroll := 0) -> void: pass
 func _build_map_modes() -> void: pass
