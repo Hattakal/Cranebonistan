@@ -126,15 +126,19 @@ func _iv_issue(s: Dictionary, q: Dictionary, ax: Dictionary, fill: Dictionary) -
 		if not t.begins_with("\""): t = "\"" + t + "\""
 		return {"tone": l.tone, "text": t, "kind": kind, "side": sd}
 	var lines = []
-	if side != "":
-		var other: String = "R" if side == "L" else "L"
-		for l in shuffle(s, LINES.AXIS_LINES[ax.id][side]).slice(0, 2): lines.append(quote.call(l, "clear", side))
-		lines.append(quote.call(pick(s, LINES.AXIS_LINES[ax.id][other]), "uturn", other))
-	else:
-		# a manifesto in the middle can lean either way and still be itself
-		for sd in ["L", "R"]: lines.append(quote.call(pick(s, LINES.AXIS_LINES[ax.id][sd]), "clear", sd))
+	# your own line, said in different voices (one each, never the dull or the sharp ones), and
+	# a measured dodge: the interview tests whether you stand by your manifesto
+	var sides: Array = [side] if side != "" else ["L", "R"]   # a manifesto in the middle can lean either way
+	var seen = {}
+	for sd in sides:
+		for l in shuffle(s, LINES.AXIS_LINES[ax.id][sd]):
+			var st: String = line_style(l)
+			if line_sharp(l) or seen.has(st) or float(l.get("risk", 0.3)) <= 0.1: continue
+			seen[st] = true
+			lines.append(quote.call(l, "clear", sd))
+	lines = lines.slice(0, 3)
 	var dg: Dictionary = pick(s, INTERVIEW.DODGES)
-	lines.append({"tone": dg.tone, "text": dg.text, "kind": "dodge", "side": ""})
+	lines.append({"tone": dg.tone, "text": dg.text, "kind": "dodge", "side": "", "axisName": String(ax.issue).to_lower()})
 	return {"title": q.title, "prompt": _iv_fill(q.prompt, f), "axis": ax.id, "lines": shuffle(s, lines)}
 
 func start_interview(s: Dictionary) -> void:
@@ -220,7 +224,8 @@ func answer_interview(s: Dictionary, line_index: int) -> Dictionary:
 	if kind in ["clear", "uturn"]:
 		var t: String = String(line.text).trim_prefix("\"").trim_suffix("\"")
 		record_statement(s, {"text": t, "title": "The big interview", "effects": {"shift": {rd.axis: (-5 if line.side == "L" else 5)}}, "tone": line.tone, "spoken": true})
-	var result = merged(res, {"quote": line.text, "note": note, "changes": group_changes(s, before), "round": rd.title})
+	var result = merged(res, {"quote": line.text, "note": note, "changes": group_changes(s, before), "round": rd.title, "kind": kind, "tone": line.tone,
+		"issue": String(by_id(AXES, rd.axis).issue).to_lower() if rd.axis != "" else ""})
 	iv.results.append(result)
 	iv.step = int(iv.step) + 1
 	if iv.step >= iv.rounds.size():
@@ -237,7 +242,24 @@ func _interview_done(s: Dictionary) -> void:
 	for x in INTERVIEW.VERDICTS:
 		if score >= int(x.from): v = x; break
 	if gaffes >= 2 and INTERVIEW.has("LOOSE"): v = INTERVIEW.LOOSE
-	iv.verdict = {"title": v.title, "text": v.text}
+	# the piece follows what was said: the voice that carried it, a straight answer, a dodge, the record
+	var P: Dictionary = INTERVIEW.get("PIECE", {})
+	var f = {"leader": player_party(s).leader}
+	var notes = []
+	var tones = {}
+	for r in iv.results: tones[r.tone] = int(tones.get(r.tone, 0)) + 1
+	var main_tone = ""
+	for k in tones:
+		if main_tone == "" or tones[k] > tones[main_tone]: main_tone = k
+	if P.get("voice", {}).has(main_tone): notes.append(String(P.voice[main_tone]).format(f))
+	for r in iv.results:
+		if r.kind == "clear" and P.has("clear"): notes.append(String(P.clear).format(merged(f, {"issue": r.issue, "quote": r.quote}))); break
+	for r in iv.results:
+		if r.kind == "dodge" and P.has("dodge"): notes.append(String(P.dodge).format(merged(f, {"issue": r.issue}))); break
+	for r in iv.results:
+		if P.get("record", {}).has(r.kind): notes.append(String(P.record[r.kind]).format(f))
+	if gaffes >= 1 and P.has("gaffe"): notes.append(String(P.gaffe).format(f))
+	iv.verdict = {"title": v.title, "text": v.text, "notes": notes}
 	var reach: float = float(s.media.get(iv.outlet, {}).get("reachNat", 0.3))
 	for pop in s.pops:
 		pop.aware.player = clampf2(pop.aware.player + (0.12 + reach * 0.3) * (1 - pop.aware.player), 0, 1)

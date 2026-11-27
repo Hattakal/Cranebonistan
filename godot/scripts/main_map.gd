@@ -317,7 +317,7 @@ func _tip(id: String, kind: String) -> Array:
 			lines.append("%s would win it today, %s" % [who, "safely" if lead >= 12 else ("comfortably" if lead >= 5 else "narrowly")])
 			lines.append("Your vote here: %d%%" % Game.jround(float(x.you) * 100))
 			if x.winner != "player":
-				lines.append("You'd need about %d more points" % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)))
+				lines.append("You'd need about %d more percentage points" % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)))
 		var here: Array = _rivals_here(id)
 		if here.size(): lines.append("Campaigning here lately: " + ", ".join(here))
 		lines.append("Click to tour, or to open an office")

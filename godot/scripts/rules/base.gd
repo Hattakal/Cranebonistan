@@ -23,6 +23,7 @@ var FOREIGN: Array
 var CAPITAL: Dictionary
 var VIEW_GROUPS: Array
 var PARTIES: Array
+var STYLE_NOTES: Dictionary   # what each speaking-style label means (content.json)
 var PARTY_HISTORY: Array    # what the parties remember from before the game (content.json)
 var MINOR_PARTIES: Array    # small parties with a fixed share of the vote (content.json MINOR_PARTIES)
 var LEADER_POOL: Array
@@ -173,6 +174,12 @@ func pick(s: Dictionary, arr: Array) -> Variant:
 	return arr[int(floor(rand(s) * arr.size()))]
 
 # ---------- Calendar ----------
+## Is it the right time of year for this event or story? `months`: the months it can happen
+## in (1 = January); none means any time.
+func in_season(s: Dictionary, item: Dictionary) -> bool:
+	var ms: Array = item.get("months", [])
+	return ms.is_empty() or ms.has(calendar(s.week).monthIndex + 1)
+
 func calendar(week: int) -> Dictionary:
 	var month = week / WEEKS_PER_MONTH
 	return {

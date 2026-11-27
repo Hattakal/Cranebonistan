@@ -693,7 +693,8 @@ func _build_negotiation() -> void:
 	elif _phase == "final":
 		foot.add_child(_big_button("Send final offers", true, _send_finals))
 	if _phase == "verdicts" or _options.is_empty():
-		foot.add_child(_big_button("Reject all: force the next round" if rnd == 1 else "Reject all: let the others try", false, func():
+		var lbl: String = ("Reject all: force the next round" if rnd == 1 else "Reject all: let the others try") if _options.size() else ("Force the next round" if rnd == 1 else "Let the others try")
+		foot.add_child(_big_button(lbl, _options.is_empty(), func():
 			var from: int = co.log.size()
 			G.coalition_force(S)
 			_clear()

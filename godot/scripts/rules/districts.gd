@@ -203,6 +203,7 @@ func tour(s: Dictionary, id: String, mult := 1.0, rally := false) -> Dictionary:
 	var pw: Dictionary = visit_power(s, id)
 	var k: float = pw.k * mult
 	st.visits = int(st.visits) + 1
+	st.lastVisit = s.week
 	s.roadFund = maxf(0, float(s.get("roadFund", 0)) - pw.money)
 	district_boost(s, id, VISIT_AWARE * k, VISIT_GOODWILL * k)
 	for o in DISTRICTS:
@@ -348,6 +349,9 @@ func place_story(s: Dictionary, it: Dictionary) -> Dictionary:
 		return {"district": "", "city": String(r.name), "province": String(r.name), "region": String(r.id), "whole": true}
 	var pool: Array = []
 	if w.has("province"): pool = DISTRICTS.filter(func(d): return d.id == String(w.province))
+	elif w.has("provinces"):   # one of a few named provinces (a border, a coast)
+		var ids: Array = w.provinces
+		pool = DISTRICTS.filter(func(d): return ids.has(d.id))
 	elif w.has("regions"):
 		var regs: Array = w.regions
 		var need_city: bool = bool(w.get("city", false))

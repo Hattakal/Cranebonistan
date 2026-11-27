@@ -80,7 +80,7 @@
   "pacts": {"_note": "Pacts to stand aside, in the official campaign. 'share': the part of the voters of the party standing aside that go to its partner. A party agrees when it would win the province it gets by more than 'clear' and is more than 'notClose' behind in the one it gives up; the two must be fewer than 'seatGap' seats apart and neither more than 'seatRatio' times the other. 'warmth': how much a pact warms the two parties. Each campaign week two rivals who aren't enemies make a pact with chance 'rivalChance' (when one suits both), and a rival offers you one with chance 'askChance'.", "share": 0.7, "clear": 0.03, "notClose": 0.08, "seatGap": 4, "seatRatio": 1.5, "warmth": 6, "rivalChance": 0.25, "askChance": 0.1},
   "voiceCurve": 0.5,
   "voiceCurveNote": "How the leader's image grows with the share of speeches in one voice: share + voiceCurve × share × (1 − share). 0 is straight (80% of the time in a voice is 80% of the image); 0.5 makes 80% worth 88% and 50% worth 63%.",
-  "delivery": {"_note": "What a line that goes viral or turns into a gaffe does. viralPos: its good reactions multiplied; viralNeg: its bad ones (more people hear it); viralCharisma: charisma gained. gaffeNeg: its bad reactions multiplied; gaffeCharisma: charisma lost; gaffeLeader and gaffeGoodwill: what every voter thinks less of the leader and the party.", "viralPos": 2.0, "viralNeg": 1.3, "viralCharisma": 2.0, "gaffeNeg": 1.8, "gaffeCharisma": 2.5, "gaffeLeader": 0.04, "gaffeGoodwill": 0.03},
+  "delivery": {"_note": "What a line that goes viral or turns into a gaffe does. viralPos: its good reactions multiplied; viralNeg: its bad ones (1: a viral clip is never worse than the same line said quietly); viralCharisma: charisma gained. gaffePos: its good reactions on a gaffe (the gaffe drowns them out, so a gaffe never helps); gaffeNeg: its bad reactions multiplied; gaffeCharisma: charisma lost; gaffeLeader and gaffeGoodwill: what every voter thinks less of the leader and the party.", "viralPos": 2.0, "viralNeg": 1.0, "viralCharisma": 2.0, "gaffePos": 0.3, "gaffeNeg": 1.8, "gaffeCharisma": 2.5, "gaffeLeader": 0.04, "gaffeGoodwill": 0.03},
   "relations": {"_note": "Between parties: 'isolated' is how much two parties nobody else will touch warm to each other (at most); 'stronghold' what a convoy stop in another party's stronghold costs between the two (a province it won by more than 'strongMargin').", "isolated": 25, "stronghold": -1.5, "strongMargin": 0.12},
   "upkeep": {"_note": "Running costs, paid out of each quarter's income (millions): each party office by its size (1, 2, 3: about ₱20k, ₱30k, ₱40k a quarter), and the press office. 'pollCost': better polling for a quarter (the polls you see come without their random noise). The press office: built once ('pressCost', one action, not during the campaign); a gaffe then costs 'pressSoften' less.", "office": [0.02, 0.03, 0.04], "press": 0.02, "pressCost": 1.5, "pressSoften": 0.25, "pollCost": 1.0},
   "campaign": {"_note": "The official campaign: the last 'weeks' weeks before the election, played week by week with 'actionsPerWeek' actions. The convoy stops in one province a week ('stops' in all), never more than 'reach' map units from the last stop (the map is about 2480 wide); its rally there is 'rally' times as strong as an ordinary trip, and provinces within 'nearReach' feel 'near' of it. A national advert campaign (an action, campaign only) costs 'adCost' (millions) and gives everyone 'adGoodwill' goodwill and 'adAwareness' awareness, less each time it is repeated.", "weeks": 12, "actionsPerWeek": 3, "stops": 12, "reach": 420, "rally": 0.8, "near": 0.06, "nearReach": 300, "adCost": 1.5, "adGoodwill": 0.12, "adAwareness": 0.03},
@@ -1311,7 +1311,7 @@
    "saturate": 0.6
   }
  },
- "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}. 'minSerious': the event only comes once you are taken seriously at least that much (0-100). 'minDemagogue': only once you have blamed groups and provoked enough (each group blamed counts 3, each sharp line 1.2).",
+ "EVENTS_NOTE": "Events: what happens to the country, and what you say about it. 'where' (optional) says where it happens, so it is pinned on the Local map and what you say counts for more there: {\"province\": id}, {\"regions\": [...]} (a province there is picked when it happens; \"city\": true for one with a town) or {\"region\": id} (the whole region). Texts then write {city}, {province} and {region}. 'minSerious': the event only comes once you are taken seriously at least that much (0-100). 'minDemagogue': only once you have blamed groups and provoked enough (each group blamed counts 3, each sharp line 1.2). 'months': the months it can happen in (1 = January), for seasonal events; none means any time.",
  "EVENTS": [
   {
    "id": "pezo_slide",
@@ -3072,7 +3072,7 @@
    ]
   },
   {
-   "id": "festival_holiday", "where": {"region": "erland"},
+   "id": "festival_holiday", "months": [8, 9, 10], "where": {"region": "erland"},
    "kind": "opportunity",
    "title": "Make Harvest Day a national holiday?",
    "text": "Erland's ancient Harvest Day festival is hugely popular, and a petition to make it a national holiday has a million signatures. Business groups grumble about lost working days.",
@@ -3706,7 +3706,7 @@
    ]
   },
   {
-   "id": "dillihan_border", "where": {"regions": ["fauraifai"]},
+   "id": "dillihan_border", "where": {"provinces": ["fauraifai_4", "fauraifai_5"]},
    "kind": "foreign",
    "title": "Dillihan patrol enters Fauran pastures",
    "text": "A Dillihan border patrol crossed into grazing land in {province} claimed by Fauran farmers and impounded two hundred head of cattle. The government has issued a \"strongly worded note\". The farmers say nobody in Cranebo cares about them.",
@@ -4440,7 +4440,7 @@
    ]
   },
   {
-   "id": "yamlin_flood", "where": {"regions": ["yamlin"], "city": true},
+   "id": "yamlin_flood", "months": [3, 4, 10, 11, 12], "where": {"regions": ["yamlin"], "city": true},
    "trust": -4,
    "kind": "opportunity",
    "title": "Floods devastate {city}'s old town",
@@ -4596,7 +4596,7 @@
    }
   },
   {
-   "id": "cup_victory",
+   "id": "cup_victory", "months": [6, 7],
    "trust": 5,
    "kind": "opportunity",
    "title": "{country} wins the Continental Cup",
@@ -5044,7 +5044,7 @@
    }
   },
   {
-   "id": "smog_cranbia", "where": {"region": "cranbia"}, "sourceRegion": "cranbia",
+   "id": "smog_cranbia", "months": [11, 12, 1, 2], "where": {"region": "cranbia"}, "sourceRegion": "cranbia",
    "trust": -2,
    "kind": "regional",
    "title": "Smog chokes Cranbia",
@@ -5227,7 +5227,7 @@
    ]
   },
   {
-   "id": "erland_drought", "where": {"region": "erland"}, "sourceRegion": "erland",
+   "id": "erland_drought", "months": [6, 7, 8, 9], "where": {"region": "erland"}, "sourceRegion": "erland",
    "trust": -2,
    "kind": "regional",
    "title": "Drought hits the Erland harvest",
@@ -14645,7 +14645,7 @@
    ]
   },
   {
-   "id": "fauran_fires",
+   "id": "fauran_fires", "months": [6, 7, 8, 9],
    "kind": "crisis",
    "title": "Wildfires across {province} in a record heatwave",
    "trust": -2,
@@ -19841,6 +19841,7 @@
    "good": "low"
   }
  ],
+ "STYLE_NOTES": {"Still finding a voice": "Too few speeches yet for people to know how you sound.", "A bit of everything": "No one voice stands out: people aren't sure who you are yet.", "Charismatic buffoon": "Folksy and often over the line: entertaining, never boring, rarely taken at your word.", "Firebrand": "Fiery, and often over the line: you start fights and people come to watch.", "Angry dreamer": "Hopeful, with an edge: a better country, and harsh words for whoever stands in its way.", "Visionary": "Mostly hopeful: you talk about the country it could be.", "Statesman": "Mostly measured: calm, careful, in charge.", "Man of the people": "Mostly folksy: you talk like the neighbour over the fence.", "Woman of the people": "Mostly folksy: you talk like the neighbour over the fence.", "Hardliner": "Measured and fiery: calm when it suits you, hard when it counts.", "Reassuring uncle": "Measured and folksy: warm, sensible, a safe pair of hands.", "Reassuring aunt": "Measured and folksy: warm, sensible, a safe pair of hands."},
  "TONES": {
   "statesman": {
    "name": "Measured",
@@ -20024,11 +20025,11 @@
    "line": "Never moved an inch. Whether that was principle or stubbornness, the voters decided."
   },
   "strongman": {
-   "title": "The Strongman",
+   "title": "The Iron Hand",
    "line": "Loud, certain, and adored by a crowd that would follow anywhere."
   },
   "clown": {
-   "title": "The Clown Prince",
+   "title": "The Court Jester",
    "line": "Every week a new outrage, and every outrage a few more followers."
   },
   "technocrat": {

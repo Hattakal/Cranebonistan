@@ -1,5 +1,5 @@
 {
- "_note": "Minor issues: local stories that turn up in the news for a few months. Any of them can be raised into a national debate, most easily while they are still in the headlines. 'when' makes a story likelier (x3) while the country is in that state. Lines: two or three per side (hopeful where it fits) (L = the axis's left side, R = its right). 'where': where the story happens; the game picks a province when it turns up: {\"regions\": [...]} (any province there; \"city\": true for provinces with a town only) or {\"province\": id}. 'returns': the story coming back once, months later, if it faded from the news without becoming a debate (never solved): a new title and text; it costs a little trust in politics. Texts and lines write {city} (a town in that province, or the province's name if it has none), {province} and {region}.",
+ "_note": "Minor issues: local stories that turn up in the news for a few months. Any of them can be raised into a national debate, most easily while they are still in the headlines. 'when' makes a story likelier (x3) while the country is in that state. Lines: two or three per side (hopeful where it fits) (L = the axis's left side, R = its right). 'where': where the story happens; the game picks a province when it turns up: {\"regions\": [...]} (any province there; \"city\": true for provinces with a town only) or {\"province\": id}. 'returns': the story coming back once, months later, if it faded from the news without becoming a debate (never solved): a new title and text; it costs a little trust in politics. Texts and lines write {city} (a town in that province, or the province's name if it has none), {province} and {region}. 'months': the months a seasonal story can turn up in (1 = January).",
  "ISSUES": [
   {
    "id": "bayernal_bridge",
@@ -129,6 +129,7 @@
   },
   {
    "id": "kansilia_drought",
+   "months": [6, 7, 8, 9],
    "region": "erland",
    "axis": "welfare",
    "where": {"regions": ["erland", "fauraifai"]},
@@ -260,6 +261,7 @@
   },
   {
    "id": "grenhera_festival",
+   "months": [6, 7, 8],
    "region": "yamlin",
    "axis": "society",
    "where": {"regions": ["yamlin", "cranbia"], "city": true},
@@ -337,7 +339,7 @@
    "id": "dillihan_border_stones",
    "region": "fauraifai",
    "axis": "foreign",
-   "where": {"regions": ["fauraifai"]},
+   "where": {"provinces": ["fauraifai_4", "fauraifai_5"]},
    "title": "Dillihan border stones",
    "text": "Dillihan surveyors have been setting border stones two kilometres inside Fauran. The border guard there has one working jeep.",
    "returns": {

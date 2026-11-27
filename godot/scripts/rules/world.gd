@@ -8,6 +8,7 @@ func eligible_events(s: Dictionary) -> Array:
 	for e in EVENTS:
 		if e.get("deck", true) == false: continue
 		if e.get("minYear") and year < e.minYear: continue
+		if not in_season(s, e): continue
 		if e.get("requires") and not s.flags.has(e.requires): continue
 		if e.get("minSerious") and serious_of(s) < float(e.minSerious): continue   # only once the country takes you seriously
 		if e.get("minDemagogue") and demagoguery(s) < float(e.minDemagogue): continue   # only once you've been hateful enough to be noticed for it
@@ -524,6 +525,7 @@ func issues_monthly(s: Dictionary) -> void:
 		if s.issues.any(func(x): return x.id == it.id): continue
 		if debate_by_id(s, "issue:" + it.id) != null: continue
 		if s.week - int(s.issueCooldown.get(it.id, -9999)) < 18 * WEEKS_PER_MONTH: continue
+		if not in_season(s, it): continue
 		var w = 1.0
 		for k in it.get("when", {}):
 			var cond: String = it.when[k]
@@ -809,7 +811,7 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	elif r < risk * (0.3 + charm * 0.3): outcome = "viral"     # charm helps, but a risky line stays risky
 	elif r > 1 - risk * (0.5 - charm * 0.2): outcome = "gaffe"
 	var dc: Dictionary = C.get("delivery", {})
-	var pos = float(dc.get("viralPos", 2.0)) if outcome == "viral" else 1.0   # a line that goes viral: its good effects hit hard
+	var pos = float(dc.get("viralPos", 2.0)) if outcome == "viral" else (float(dc.get("gaffePos", 0.3)) if outcome == "gaffe" else 1.0)   # viral: its good effects hit hard; a gaffe drowns them out
 	var neg = float(dc.get("gaffeNeg", 1.8)) if outcome == "gaffe" else (float(dc.get("viralNeg", 1.3)) if outcome == "viral" else 1.0)
 	var press: float = 1.0 - (float(C.upkeep.get("pressSoften", 0.25)) if s.get("pressOffice", false) else 0.0)   # the press office softens a gaffe
 	if outcome == "gaffe": neg *= press

@@ -27,12 +27,12 @@ func _district_sheet(id: String) -> void:
 			var name: String = "You" if k == "player" else G.party_of(S, k).short
 			p.add(Look.label("%s%s  %d%%" % ["★ " if k == x.winner else "", name, Game.jround(shares[k] * 100)], "body_bold", 17, Color(G.party_of(S, k).color).darkened(0.25) if k != "player" else Look.RED))
 		if x.winner == "player":
-			p.small("Yours today, by %d points. Votes beyond what wins it are wasted: if it's safe, campaign elsewhere." % maxi(1, Game.jround(float(x.margin) * 100)), Look.INK)
+			p.small("Yours today, by %d percentage points of the vote. Votes beyond what wins it are wasted: if it's safe, campaign elsewhere." % maxi(1, Game.jround(float(x.margin) * 100)), Look.INK)
 		else:
-			p.small("You'd need about %d more points to take it." % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)), Look.INK)
+			p.small("You'd need about %d more percentage points of the vote here to take it." % maxi(1, Game.jround((float(x.share) - float(x.you)) * 100)), Look.INK)
 		if w < int(d.seats): p.small("The other %d seat%s go to parties by their vote across the whole country, so every vote here still counts toward them." % [int(d.seats) - w, "" if int(d.seats) - w == 1 else "s"])
 	var st: Dictionary = S.districts.get(id, {})
-	if int(st.get("visits", 0)) > 0: p.small("%s has toured here %d time%s." % [G.player_party(S).leader, int(st.visits), "" if int(st.visits) == 1 else "s"])
+	if int(st.get("visits", 0)) > 0: p.small("%s has toured here %d time%s%s. Each trip back counts for a little less." % [G.player_party(S).leader, int(st.visits), "" if int(st.visits) == 1 else "s", (", last in " + G.date_label(int(st.lastVisit), false)) if st.has("lastVisit") else ""])
 	# rivals campaigning here: why your share can fall without you doing anything
 	var here: Array = _rivals_here(id)
 	if here.size(): p.callout("%s %s been campaigning here. When a rival's leader tours a province, people there warm to them, and every other party's share shrinks, yours included. It fades over a few months; a trip or an office of your own answers it." % [" and ".join(here), "has" if here.size() == 1 else "have"], Look.MUTED)

@@ -114,6 +114,7 @@ The rules refer to a few things by id. Change their names, numbers and text free
 - **World numbers** `jobs`, `prices`, `migration`, `border`, `unrest`.
 - **Money offers** `chamber` and `tycoon` (business money that feeds hypocrisy).
 - **Leader types** `star`, `statesman`, `revolutionary`, `strongman`, `one_of_us`, `clean`, `expert`, `visionary`.
+- **`STYLE_NOTES`** in content.json: what each speaking-style label means (keyed by the label).
 - **`PARTY_HISTORY`** in content.json: grudges and favours between parties at the start (`parties`, `amt`, `why`).
 - **Outlets** `cbc` (the state broadcaster: the evening news, the TV debate, election night, the ticker) and `herald` (the paper of record: the news sheet, the ending's column).
 - **Media kinds** `public`, `paper`, `tabloid`, `business`, `network`, `online`, `regional`, `platform`, `foreign`, `influencer`.

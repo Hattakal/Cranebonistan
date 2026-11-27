@@ -284,6 +284,7 @@ func _interview_piece(p: Paper) -> void:
 	p.kicker("%s meets %s" % [iv.who, G.player_party(S).leader])
 	p.heading(v.title, 40)
 	p.text(v.text, 18, "news_italic")
+	for n in v.get("notes", []): p.text(String(n), 16)
 	var best = null
 	for r in iv.results:
 		if best == null or r.outcome == "viral": best = r

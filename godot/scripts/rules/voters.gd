@@ -788,7 +788,7 @@ func style_profile(s: Dictionary) -> Dictionary:
 	elif sh.call("hopeful") > 0.5: label = "Visionary"
 	elif sh.call("statesman") > 0.55: label = "Statesman"
 	elif sh.call("folksy") > 0.5: label = "Man of the people"
-	elif sh.call("statesman") + sh.call("fiery") > 0.7: label = "Strongman"
+	elif sh.call("statesman") + sh.call("fiery") > 0.7: label = "Hardliner"
 	elif sh.call("statesman") + sh.call("folksy") > 0.7: label = "Reassuring uncle"
 	if label == "Man of the people" and player_party(s).leaderSex == "f": label = "Woman of the people"
 	if label == "Reassuring uncle" and player_party(s).leaderSex == "f": label = "Reassuring aunt"

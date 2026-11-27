@@ -229,13 +229,20 @@ func _say_it(p: Paper, lines: Array, head: Callable, step: int, pick: Callable, 
 	for st in styles:
 		var tone: Dictionary = G.TONES.get(st.tone, {})
 		var idx: Array = st.idx
-		p.card("index", func(box):
-			box.add_child(Look.label(_tone_name(st.tone), "display", 22, Look.INK))
-			if tone.has("pitch"): box.add_child(Look.label(tone.pitch, "body", 13, Look.MUTED, true)),
+		var c = p.card("index" if idx.size() > 1 else "slip", func(box):
+			if idx.size() == 1:   # one wording in this voice: show the words themselves
+				var line: Dictionary = lines[idx[0]]
+				_tone_tag(box, line, extra.call(line) if extra.is_valid() else "", true)
+				box.add_child(Look.label("“%s”" % line.text, "news_italic", 20, Look.INK, true))
+			else:
+				box.add_child(Look.label(_tone_name(st.tone), "display", 22, Look.INK))
+				if tone.has("pitch"): box.add_child(Look.label(tone.pitch, "body", 13, Look.MUTED, true))
+				box.add_child(Look.label("%d ways to put it" % idx.size(), "body_italic", 12, Look.MUTED)),
 			func():
 				if idx.size() == 1: pick.call(idx[0])
 				else: _say_words(p, lines, idx, head, step + 1 if step > 0 else 0, pick,
 					func(): _say_it(p, lines, head, step, pick, back, back_label, extra), "← Another style", extra))
+		if tone.has("pitch"): c.tooltip_text = "%s: %s" % [_tone_name(st.tone), tone.pitch]
 	_back_button(p, back, back_label)
 	p.top()
 
@@ -339,7 +346,7 @@ func _raise_words(p: Paper, opt: Dictionary, side: String) -> void:
 		if res.delivery.outcome == "normal": _advisor.say("raise_caught" if res.caught else "raise_fizzled", false, 0.8)
 		p.clear()
 		_result_body(p, opt.title, res)
-		p.stamp("It caught on" if res.caught else "It fizzled", Look.GOOD if res.caught else Look.MUTED)
+		p.stamp("The debate caught on" if res.caught else "Nobody took it up", Look.GOOD if res.caught else Look.MUTED)
 		p.actions([p.button("Back to work", func(): _done(p))])
 		p.top()
 	var chance = func(line): return "%d%% chance it catches on" % Game.jround(G.raise_chance(S, opt, line) * 100)

@@ -10,7 +10,7 @@
   {"id": "revolutionary", "label": "A revolutionary", "want": "someone to tear the system down",
    "base": 0.4, "by": {"age": {"18-29": 0.4}}, "lean": {"system:L": 0.9}, "disaffected": 1.6,
    "climate": {"distrust": 0.7, "hard_times": 0.3}},
-  {"id": "strongman", "label": "A strongman", "want": "a firm hand",
+  {"id": "strongman", "label": "A strong hand", "want": "a firm hand",
    "base": 0.5, "lean": {"order:L": 0.8, "nation:L": 0.4, "foreign:L": 0.3},
    "climate": {"crisis": 0.6, "war": 0.7}},
   {"id": "one_of_us", "label": "One of us", "want": "someone like them",

@@ -163,6 +163,27 @@ func _card(to: Control = null) -> VBoxContainer:
 	p.add_child(v)
 	return v
 
+## The speaking style on hover: what it means, and the voices that earned it.
+func _style_tip() -> String:
+	var sp: Dictionary = G.style_profile(S)
+	var sh: Dictionary = sp.shares
+	var desc: String = String(G.STYLE_NOTES.get(sp.label, ""))
+	if sh.is_empty(): return desc
+	var parts = []
+	for k in G.TONES:
+		if k == "provocative": continue
+		var v: float = float(sh.get(k, 0))
+		if v >= 0.05: parts.append("%d%% %s" % [Game.jround(v * 100), String(G.TONES[k].get("name", k)).to_lower()])
+	var out: String = (desc + "\n\n" if desc != "" else "") + "Your speeches lately: " + ", ".join(parts) + "."
+	if float(sh.get("sharp", 0)) >= 0.05: out += " About %d%% of them sharp." % Game.jround(float(sh.sharp) * 100)
+	return out + " Recent speeches count most."
+
+## The kind of leader you come across as, on hover: what it is, and who wants one.
+func _image_tip(player: Dictionary) -> String:
+	if G.LEADER_TYPES.is_empty(): return ""
+	var top: Dictionary = G.leader_image(S, player)[0].type
+	return "%s: %s. It comes from your words, your record and your positions; each group of voters wants a different kind of leader (see the Electorate file)." % [top.label, String(top.get("want", ""))]
+
 func _facts(pairs: Array, to: Control = null, cols := 3) -> void:
 	var g = GridContainer.new()
 	g.columns = cols
@@ -174,6 +195,10 @@ func _facts(pairs: Array, to: Control = null, cols := 3) -> void:
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(Look.dcaps(pr[0], 10, Look.FAINT, 1))
 		v.add_child(Look.dlabel(pr[1], "display_bold", 22, Look.TXT))
+		if pr.size() > 2 and String(pr[2]) != "":   # a description on hover
+			v.tooltip_text = pr[2]
+			v.mouse_filter = Control.MOUSE_FILTER_STOP
+			for ch in v.get_children(): ch.mouse_filter = Control.MOUSE_FILTER_PASS
 		g.add_child(v)
 	_add(g, to)
 
@@ -411,8 +436,8 @@ func _platform() -> void:
 	_facts([
 		["Charisma", charisma_word(player.charisma)],
 		["Personal image", "%s (%s)" % [leader_words(nation.leader), leader_score(nation.leader)]],
-		["Speaking style", G.style_profile(S).label],
-		["Comes across as", G.leader_image(S, player)[0].type.label if G.LEADER_TYPES.size() else "—"],
+		["Speaking style", G.style_profile(S).label, _style_tip()],
+		["Comes across as", G.leader_image(S, player)[0].type.label if G.LEADER_TYPES.size() else "—", _image_tip(player)],
 		["Devotion", "Fanatical" if dev > 0.4 else ("Strong" if dev > 0.2 else ("Growing" if dev > 0.08 else "Little"))],
 		["Would follow you anywhere", ("%sM" % Game.fmt1(nation.followers / 1e6)) if nation.followers >= 1e6 else "%dk" % Game.jround(nation.followers / 1000.0)],
 	], c1, 2)
@@ -1056,29 +1081,6 @@ func _country() -> void:
 			mn.add_child(Look.dlabel("%s · %s" % [G.view_label(p.perceived), p.leader], "body", 13, Look.DIM))
 			if poll: mt.add_child(Look.dlabel("%s%%" % Game.fmt1(float(poll.national.get(p.id, 0)) * 100), "display", 20, Look.TXT))
 			_p(String(p.blurb), mc, Look.TXT, 13)
-	# the small parties: fixed support, no campaign, no seats under the threshold
-	if G.MINOR_PARTIES.size():
-		_eyebrow("Small parties")
-		_p("True believers vote for them whatever happens. Under %d%% of the national vote a party wins no seats at all." % Game.jround(G.threshold() * 100), null, Look.DIM, 13)
-		var mg = GridContainer.new()
-		mg.columns = 2 if size.x > 1100 else 1
-		mg.add_theme_constant_override("h_separation", 12)
-		mg.add_theme_constant_override("v_separation", 12)
-		_add(mg)
-		for p in G.MINOR_PARTIES:
-			var mc = _card(mg)
-			mc.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			var mt = HBoxContainer.new()
-			mt.add_theme_constant_override("separation", 10)
-			mc.add_child(mt)
-			var mn = VBoxContainer.new()
-			mn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			mn.add_theme_constant_override("separation", 0)
-			mt.add_child(mn)
-			mn.add_child(Look.dlabel(p.name, "display", 17, Look.lit(Color(p.color))))
-			mn.add_child(Look.dlabel("%s · %s" % [G.view_label(p.perceived), p.leader], "body", 13, Look.DIM))
-			if poll: mt.add_child(Look.dlabel("%s%%" % Game.fmt1(float(poll.national.get(p.id, 0)) * 100), "display", 20, Look.TXT))
-			_p(String(p.blurb), mc, Look.TXT, 13)
 	# neighbours
 	_eyebrow("Neighbours")
 	var ng = GridContainer.new()
@@ -1281,6 +1283,7 @@ func _polls() -> void:
 	# the parties, and what they have been up to
 	var seats: Dictionary = G.projected_seats(S.projection) if S.get("projection", {}).size() else {}
 	var order: Array = Game.ssort(S.parties.duplicate(), func(a, b): return float(poll.national.get(b.id, 0)) - float(poll.national.get(a.id, 0)))
+	order = order.filter(func(p): return p.isPlayer) + order.filter(func(p): return not p.isPlayer)   # yours first, top left
 	var g = GridContainer.new()
 	g.columns = 3 if size.x > 1100 else 1
 	g.add_theme_constant_override("h_separation", 12)
@@ -1317,6 +1320,10 @@ func _polls() -> void:
 			if st == "ally": allies.append(nm2)
 			elif st == "enemy": enemies.append(nm2)
 		_add(Look.dlabel("Allies: %s · Enemies: %s" % [", ".join(allies) if allies.size() else "none", ", ".join(enemies) if enemies.size() else "none"], "body", 13, Look.TXT, true), c)
+		if not p.isPlayer:   # how they feel about you, and the last thing that moved it
+			var rel: float = G.relation(S, p.id)
+			var notes: Array = S.get("relationNotes", {}).get(p.id, [])
+			_add(Look.dlabel("Relations with you: %s (%+d)%s" % [G.relation_word(rel), Game.jround(rel), (" · last: " + String(notes[-1].text)) if notes.size() else ""], "body_bold", 12, Look.GOOD_HI if rel >= 15 else (Look.RED_HI if rel <= -15 else Look.TXT), true), c)
 		# bad blood between rivals, and why
 		if not p.isPlayer:
 			var grudges = []

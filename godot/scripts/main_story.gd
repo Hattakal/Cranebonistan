@@ -170,7 +170,15 @@ func _profile_sheet() -> void:
 			p.add(_said_pair({"text": b.promised, "week": b.promisedWeek, "spoken": b.get("promisedSpoken", true)}, {"text": b.now, "week": b.week, "spoken": b.get("nowSpoken", true)}, null))
 	if pr.blamed.size(): p.text("Groups you blamed along the way: %s." % ", ".join(pr.blamed), 15)
 	var dirty: Array = pr.money.filter(func(m): return m.dirty)
-	if dirty.size(): p.text("You took money from %s." % ", ".join(dirty.map(func(m): return m.source)), 15)
+	if dirty.size():
+		var counts = {}
+		var total = 0.0
+		for m in dirty:
+			counts[m.source] = int(counts.get(m.source, 0)) + 1
+			total += float(m.get("amount", 0))
+		var times = ["", "", "twice", "three times", "four times", "five times"]
+		var parts: Array = counts.keys().map(func(k): return k if counts[k] == 1 else "%s (%s)" % [k, times[counts[k]] if counts[k] < times.size() else "%d times" % counts[k]])
+		p.text("You took money from %s: ₱%sM in all." % [Game.and_list(parts), Game.fmt1(total)], 15)
 	if pr.crisis: p.text("The crisis: %s.%s" % [pr.crisis.name, " Your own campaign helped bring it about." if pr.crisis.blamed else ""], 15)
 	var pl = func(n: int, w: String) -> String: return "%d %s%s" % [n, w, "" if n == 1 else "s"]
 	p.small("Speaking style: %s · %s · %s · %s" % [pr.style, pl.call(pr.statements, "statement"), pl.call(pr.memes, "viral moment"), pl.call(pr.gaffes, "gaffe")], Look.INK)
