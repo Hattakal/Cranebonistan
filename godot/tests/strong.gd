@@ -47,6 +47,10 @@ const STYLES := {
 	"vv_fiery": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "oracle": "viral"},
 	"vv_folksy": {"m": {"nation": 3, "system": 1, "society": 1, "order": 3, "economy": 0, "welfare": 0, "foreign": 3}, "tone": "folksy", "oracle": "viral"},
 	"vv_hopeful": {"m": {"nation": 2, "system": 1, "society": 1, "order": 2, "economy": 1, "welfare": 1, "foreign": 2}, "tone": "hopeful", "oracle": "viral"},
+	# the designer's way: a fiery populist, hawkish nationalist and statist but for welfare and civil
+	# liberties; Erland and Fauran first, then Yamlin and Cranbia ("_greedy": trips to the best close race)
+	"ozan": {"m": {"nation": 1, "system": 1, "society": 2, "order": 3, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "phase": true},
+	"ozan_greedy": {"m": {"nation": 1, "system": 1, "society": 2, "order": 3, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery"},
 	"switch": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative", "then": "fiery", "at": 96},
 }
 var G
@@ -245,6 +249,8 @@ func _init() -> void:
 				var gap: float = (float(x.share) - float(x.you)) if x.winner != "player" else float(x.margin)
 				if d.region == "alinni" and not ST.has("alinni"): continue
 				if ST.has("alinni") and s.week < 96 and d.region != "alinni": continue
+				if ST.has("phase") and s.week < 96 and not (d.region in ["erland", "fauraifai"]): continue
+				if ST.has("phase") and s.week >= 96 and not (d.region in ["yamlin", "cranbia"]): continue
 				var v: float = float(d.seats) * maxf(0.02, 0.2 - gap) / (1.0 + 0.3 * int(s.districts[d.id].visits))
 				if v > bv: bv = v; best = d.id
 			if best != "": G.act_visit(s, best)
@@ -323,6 +329,22 @@ func _init() -> void:
 		var x: Dictionary = s.get("projection", {}).get(d.id, {})
 		for k in x.get("votes", {}): alt += float(x.votes[k])
 		alv += float(x.get("votes", {}).get("player", 0))
+	var visits = {}
+	for d in G.DISTRICTS:
+		var n: int = int(s.districts[d.id].get("visits", 0))
+		if n: visits[d.region] = int(visits.get(d.region, 0)) + n
+	var regshare = []
+	for d in ["cranbia", "yamlin", "erland", "fauraifai", "alinni"]:
+		var v = 0.0
+		var tt = 0.0
+		for dd in G.DISTRICTS:
+			if dd.region != d: continue
+			var x: Dictionary = s.get("projection", {}).get(dd.id, {})
+			for k in x.get("votes", {}): tt += float(x.votes[k])
+			v += float(x.get("votes", {}).get("player", 0))
+		regshare.append("%s %.0f%%" % [d.substr(0, 4), v / maxf(1, tt) * 100])
+	var top = G.ssort(G.DISTRICTS.filter(func(d): return int(s.districts[d.id].get("visits", 0)) > 0), func(a, b): return int(s.districts[b.id].visits) - int(s.districts[a.id].visits)).slice(0, 4).map(func(d): return "%s %d" % [d.name, int(s.districts[d.id].visits)])
+	print("TRIPS %s seed %d | by region %s | most visited %s | your vote by region %s" % [style, seed_n, str(visits), ", ".join(top), " ".join(regshare)])
 	if ST.has("oracle"): print("SWAPS %s seed %d gaffes dodged %d, viral swaps %d" % [style, seed_n, swaps.gaffe, swaps.viral])
 	print("EXTRA %s seed %d | Alinni vote %.1f%% | relations: %s | pacts %d (all: %d) | dirty money taken %d, leaked %s | dug %d, released %d" % [style, seed_n, alv / maxf(1, alt) * 100, ", ".join(rels), pacts_made, s.get("pacts", []).size() / 2,
 		dirty_taken, "%d (any scandal leaked: %d)" % [s.get("secrets", []).filter(func(x): return x.get("kind", "") == "money" and x.get("leaked", false)).size(), s.get("secrets", []).filter(func(x): return x.get("leaked", false)).size()], dug, released])
