@@ -167,6 +167,7 @@ func _result_body(p: Paper, title: String, res: Dictionary, strap := "", picture
 		p.text(dl.press, 17, "news_italic")
 		if dl.outcome == "viral": p.stamp("It went viral", Look.GOOD)
 		elif dl.outcome == "gaffe": p.stamp("Gaffe", Look.RED)
+		elif dl.outcome == "unheard": p.stamp("Nobody noticed", Look.MUTED)
 		if dl.styleNote != "": p.small(dl.styleNote, Look.INK)
 	if res.get("extra", "") != "": p.small(res.extra.strip_edges(), Look.INK)
 	for f in res.get("flips", []):

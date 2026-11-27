@@ -432,16 +432,13 @@ func _platform() -> void:
 	var seen = G.view_label(player.perceived)
 	var meant = G.view_label(player.manifesto)
 	_add(Look.dlabel("Voters see you as: %s%s" % [seen, "" if seen == meant else " (your manifesto says %s)" % meant.to_lower()], "body_bold", 14, Look.RED_HI if seen != meant else Look.TXT, true), c1)
-	var dev: float = nation.devotion
 	_facts([
 		["Charisma", charisma_word(player.charisma)],
 		["Personal image", "%s (%s)" % [leader_words(nation.leader), leader_score(nation.leader)]],
 		["Speaking style", G.style_profile(S).label, _style_tip()],
 		["Comes across as", G.leader_image(S, player)[0].type.label if G.LEADER_TYPES.size() else "—", _image_tip(player)],
-		["Devotion", "Fanatical" if dev > 0.4 else ("Strong" if dev > 0.2 else ("Growing" if dev > 0.08 else "Little"))],
-		["Would follow you anywhere", ("%sM" % Game.fmt1(nation.followers / 1e6)) if nation.followers >= 1e6 else "%dk" % Game.jround(nation.followers / 1000.0)],
 	], c1, 2)
-	_p("Your style comes from the words you choose: a recognisable voice builds charisma. Devoted voters care less about your positions and forgive flip-flops. What kind of leader you come across as depends on your words, your record and your positions; each group wants a different kind (see the Electorate file), and a crisis, a war, hard times or low trust change what they want.", c1)
+	_p("Your style comes from the words you choose: a recognisable voice builds charisma. What kind of leader you come across as depends on your words, your record and your positions; each group wants a different kind (see the Electorate file), and a crisis, a war, hard times or low trust change what they want.", c1)
 	var state: Array = ["Consistent", "Voters believe you mean what you say."] if inc < 0.5 else (["Wobbling", "A few voters have noticed you changing your tune."] if inc < 2 else (["Unreliable", "Your core supporters are leaving, and engaged voters punish you."] if inc < 5 else ["Flip-flopper", "Nobody knows what you stand for. Your base is collapsing."]))
 	_add(Look.dlabel("Consistency: %s. %s" % [state[0], state[1]], "body_bold", 13, Look.RED_HI if inc >= 2 else Look.TXT, true), c1)
 	var flips: Array = S.flips.filter(func(f): return f.party == "player" and S.week - f.week < G.C.flipMemoryWeeks)

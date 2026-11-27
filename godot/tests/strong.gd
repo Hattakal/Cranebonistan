@@ -51,6 +51,11 @@ const STYLES := {
 	# liberties; Erland and Fauran first, then Yamlin and Cranbia ("_greedy": trips to the best close race)
 	"ozan": {"m": {"nation": 1, "system": 1, "society": 2, "order": 3, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "phase": true},
 	"ozan_greedy": {"m": {"nation": 1, "system": 1, "society": 2, "order": 3, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery"},
+	# the same game, the words chosen well or at random: how much the wording is worth
+	"wb_populist": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "pick": "best"},
+	"wr_populist": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "fiery", "pick": "random"},
+	"wb_centrist": {"m": {"nation": 2, "system": 3, "society": 2, "order": 2, "economy": 2, "welfare": 2, "foreign": 2}, "tone": "statesman", "pick": "best"},
+	"wr_centrist": {"m": {"nation": 2, "system": 3, "society": 2, "order": 2, "economy": 2, "welfare": 2, "foreign": 2}, "tone": "statesman", "pick": "random"},
 	"switch": {"m": {"nation": 0, "system": 0, "society": 3, "order": 1, "economy": 1, "welfare": 1, "foreign": 1}, "tone": "provocative", "then": "fiery", "at": 96},
 }
 var G
@@ -89,7 +94,7 @@ func line_score(s: Dictionary, line: Dictionary) -> float:
 	for g in reacts: v += float(g.amt) * _share(s, g.who)
 	var risk = line.get("risk")
 	if risk == null: risk = G.TONE_RISK.get("provocative" if G.line_sharp(line) else st, 0.2)
-	return v - float(risk) * 0.03
+	return v * (1.0 - G.unheard_chance(float(risk))) - float(risk) * 0.03
 
 ## Choosing well or badly this time?
 func _bad() -> bool:
@@ -129,6 +134,7 @@ func pick_line(s: Dictionary, lines: Array) -> int:
 	if lines.is_empty(): return -1
 	if ST.get("pick", "") == "":
 		return line_of(lines)
+	if ST.pick == "random": return rng.randi() % lines.size()
 	var bad: bool = _bad()
 	var best = 0
 	var bv = INF if bad else -INF
