@@ -171,6 +171,7 @@ func _home_start(s: Dictionary, city: String) -> void:
 
 # ---------- Monthly dynamics ----------
 func monthly_update(s: Dictionary) -> void:
+	_close_move_report(s)
 	for ax in s.salMod: s.salMod[ax] *= C.salienceDecay
 	var hd: Dictionary = s.get("heard", {})
 	for k in hd: hd[k] = float(hd[k]) * 0.75
@@ -323,3 +324,83 @@ func describe_choice(s: Dictionary, fx: Dictionary) -> Dictionary:
 		"stances": preview_shift(s, fx.get("shift")),
 		"tags": tags,
 	}
+
+# ---------- Why your support moved: every move you make, measured ----------
+## Your support across the whole electorate right now (not a poll: no noise).
+func true_support(s: Dictionary) -> float:
+	return float(summarize(s, s.pops).support.get("player", 0.0))
+
+func _track(s: Dictionary, what: String, before: float) -> void:
+	if not s.has("moves"): s.moves = []
+	var d: float = true_support(s) - before
+	if absf(d) >= 0.0005: s.moves.append({"what": what, "d": d, "week": s.week})
+
+## At the start of each month: last month's change, the moves that made it, and the rest
+## (rivals, the media, time) as one line (s.moveReport, shown on the top bar).
+func _close_move_report(s: Dictionary) -> void:
+	var now: float = true_support(s)
+	var mark: float = float(s.get("supportMark", now))
+	var moves: Array = s.get("moves", [])
+	var sum = 0.0
+	for m in moves: sum += float(m.d)
+	s.moveReport = {"total": now - mark, "moves": moves, "other": now - mark - sum, "week": s.week}
+	s.moves = []
+	s.supportMark = now
+
+func resolve_event(s: Dictionary, choice_index: int, line_index := -1) -> Dictionary:
+	var what: String = String(event_of(s.queue[0]).get("title", "An event")) if s.queue.size() else "An event"
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, choice_index, line_index)
+	_track(s, "Your answer: " + what, b)
+	return r
+
+func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dictionary:
+	var d = debate_by_id(s, id)
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, id, side, line_index)
+	if r.get("ok", false): _track(s, "Speaking on " + (String(d.title) if d else "a debate"), b)
+	return r
+
+func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) -> Dictionary:
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, opt, side, line_index)
+	if r.get("ok", false): _track(s, "Starting a debate: " + String(opt.title), b)
+	return r
+
+func act_visit(s: Dictionary, id: String) -> Dictionary:
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, id)
+	if r.get("ok", false): _track(s, "Trip to " + String(district_by_id(id).name), b)
+	return r
+
+func resolve_budget(s: Dictionary, alloc: Dictionary, offers_taken := []) -> Dictionary:
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, alloc, offers_taken)
+	_track(s, "The budget and its money", b)
+	return r
+
+func answer_debate(s: Dictionary, line_index: int) -> Dictionary:
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, line_index)
+	_track(s, "The final debate", b)
+	return r
+
+func answer_interview(s: Dictionary, line_index: int) -> Dictionary:
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, line_index)
+	_track(s, "The big interview", b)
+	return r
+
+func answer_appearance(s: Dictionary, line_index: int) -> Dictionary:
+	var name: String = String(s.appearance.outletName)
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, line_index)
+	_track(s, "On " + name, b)
+	return r
+
+func act_release(s: Dictionary, index: int) -> Dictionary:
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, index)
+	if r.get("ok", false): _track(s, "Releasing a dossier", b)
+	return r
+

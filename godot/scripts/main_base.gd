@@ -562,7 +562,7 @@ func _render_bar() -> void:
 		S.money, func(x): return "₱%sM" % Game.fmt1(x))
 	var arrow = _polling().substr(_polling().find("%") + 1)
 	var paid: bool = S.polls.size() > 0 and S.polls[-1].get("paid", false)
-	_chip("Polling", _polling(), "Your national vote share in the latest poll." + (" A careful, paid-for poll: no random noise." if paid else ""), Color.TRANSPARENT,
+	_chip("Polling", _polling(), "Your national vote share in the latest poll." + (" A careful, paid-for poll: no random noise." if paid else "") + _why_moved(), Color.TRANSPARENT,
 		S.polls[-1].national.player * 100 if S.polls.size() else null, func(x): return "%s%%%s" % [Game.fmt1(x), arrow])
 	_chip("Known by", "%d%%" % Game.jround(G.national_awareness(S) * 100), "Share of adults who know your party and roughly what it stands for: they could place you on the issues. Nobody votes for a party they can't place.", Color.TRANSPARENT,
 		G.national_awareness(S) * 100, func(x): return "%d%%" % Game.jround(x))
@@ -801,6 +801,20 @@ func _outlet(id: String) -> String:
 ## The evening news strap, on the state broadcaster.
 func _tv(what: String) -> String:
 	return "%s · %s" % [_outlet("cbc"), what]
+
+## Why your support moved last month: the moves you made, biggest first, and the rest
+## (rivals, the media, time) in one line. Your true support, not the poll.
+func _why_moved() -> String:
+	var rep = S.get("moveReport")
+	if rep == null: return ""
+	var pts = func(d: float) -> String: return "%+.1f" % (d * 100)
+	var lines = ["", "", "Last month your true support moved %s points:" % pts.call(float(rep.total))]
+	var moves: Array = Game.ssort(rep.moves.duplicate(), func(a, b): return absf(float(b.d)) - absf(float(a.d)))
+	for m in moves.slice(0, 6): lines.append("  %s  %s" % [pts.call(float(m.d)), m.what])
+	if moves.size() > 6: lines.append("  …and %d smaller moves" % (moves.size() - 6))
+	lines.append("  %s  everything else: rivals, the media, the economy, time" % pts.call(float(rep.other)))
+	lines.append("The poll adds its own margin of error on top.")
+	return "\n".join(lines)
 
 # ---------- Hooks: filled in by later files of the chain ----------
 func _appearance_sheet() -> void: pass

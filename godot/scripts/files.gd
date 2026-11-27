@@ -417,11 +417,13 @@ func _platform() -> void:
 	var player: Dictionary = G.player_party(S)
 	var inc: float = G.inconsistency_of(S, player)
 	var nation: Dictionary = G.summarize(S, S.pops)
-	var top = HBoxContainer.new()
+	# the leader on the left, the manifesto on the right (stacked on a narrow window)
+	var top = (HBoxContainer.new() if size.x > 1100 else VBoxContainer.new())
 	top.add_theme_constant_override("separation", 14)
 	_add(top)
 	var c1 = _card(top)
 	c1.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	c1.get_parent().size_flags_stretch_ratio = 1.0
 	_eyebrow("Your leader", c1)
 	_h(player.leader, 26, c1)
 	if S.get("home", "") != "": _p("Former mayor of %s" % S.home, c1, Look.DIM, 13)
@@ -433,20 +435,79 @@ func _platform() -> void:
 	var meant = G.view_label(player.manifesto)
 	_add(Look.dlabel("Voters see you as: %s%s" % [seen, "" if seen == meant else " (your manifesto says %s)" % meant.to_lower()], "body_bold", 14, Look.RED_HI if seen != meant else Look.TXT, true), c1)
 	_facts([
-		["Charisma", charisma_word(player.charisma)],
-		["Personal image", "%s (%s)" % [leader_words(nation.leader), leader_score(nation.leader)]],
+		["Charisma", charisma_word(player.charisma), "How much voters warm to you as a person. A recognisable voice builds it: keep speaking in the same way."],
+		["Personal image", "%s (%s)" % [leader_words(nation.leader), leader_score(nation.leader)], "What the whole country thinks of you, from -100 to +100. Gaffes and scandals lower it; good appearances raise it."],
 		["Speaking style", G.style_profile(S).label, _style_tip()],
 		["Comes across as", G.leader_image(S, player)[0].type.label if G.LEADER_TYPES.size() else "—", _image_tip(player)],
 	], c1, 2)
-	_p("Your style comes from the words you choose: a recognisable voice builds charisma. What kind of leader you come across as depends on your words, your record and your positions; each group wants a different kind (see the Electorate file), and a crisis, a war, hard times or low trust change what they want.", c1)
 	var state: Array = ["Consistent", "Voters believe you mean what you say."] if inc < 0.5 else (["Wobbling", "A few voters have noticed you changing your tune."] if inc < 2 else (["Unreliable", "Your core supporters are leaving, and engaged voters punish you."] if inc < 5 else ["Flip-flopper", "Nobody knows what you stand for. Your base is collapsing."]))
 	_add(Look.dlabel("Consistency: %s. %s" % [state[0], state[1]], "body_bold", 13, Look.RED_HI if inc >= 2 else Look.TXT, true), c1)
 	var flips: Array = S.flips.filter(func(f): return f.party == "player" and S.week - f.week < G.C.flipMemoryWeeks)
 	flips.reverse()
 	if flips.size(): _add(Look.dlabel("Changed stance: " + "; ".join(flips.slice(0, 3).map(func(f): return "%s → %s (%s)" % [G.stance_name(f.axis, f.from).to_lower(), G.stance_name(f.axis, f.to).to_lower(), G.date_label(f.week, false)])), "body", 12, Look.DIM, true), c1)
+	# the manifesto: one line per issue
+	var c3 = _card(top)
+	c3.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	c3.get_parent().size_flags_stretch_ratio = 1.7
+	_eyebrow("Your manifesto", c3)
+	var lg = _row(c3, 14)
+	lg.add_child(Look.dlabel("▭ Manifesto", "body", 12, Look.RED_HI))
+	lg.add_child(Look.dlabel("● Where voters place you", "body", 12, Look.RED_HI))
+	for p in G.rivals(S): lg.add_child(Look.dlabel("● " + p.short, "body", 12, Look.lit(Color(p.color))))
+	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
+	for ax in G.AXES:
+		var st: int = G.stance_of(player.manifesto[ax.id])
+		var ps: int = G.stance_of(player.perceived[ax.id])
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		c3.add_child(row)
+		var name_col = VBoxContainer.new()
+		name_col.add_theme_constant_override("separation", -2)
+		name_col.custom_minimum_size.x = Look.fs(175)
+		var iss = Look.dcaps(ax.issue, 10, Look.FAINT, 1)
+		iss.clip_text = true
+		iss.custom_minimum_size.x = Look.fs(175)
+		name_col.add_child(iss)
+		name_col.add_child(Look.dlabel(ax.stances[st], "display_bold", 18, Look.TXT))
+		if ps != st: name_col.add_child(Look.dlabel("seen as %s" % ax.stances[ps].to_lower(), "body", 11, Look.RED_HI))
+		row.add_child(name_col)
+		for dir in [-1, 1]:
+			var ends = Look.dlabel(ax.left if dir < 0 else ax.right, "body", 12, Look.DIM)
+			ends.custom_minimum_size.x = Look.fs(82)
+			ends.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if dir < 0 else HORIZONTAL_ALIGNMENT_LEFT
+			ends.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			var b = _btn("◀" if dir < 0 else "▶", func():
+				var res: Dictionary = G.act_steer(S, ax.id, dir)
+				toast.emit(res.text)
+				changed.emit(), st + dir < 0 or st + dir > 4 or blocked or G.steer_block(S, ax.id, dir) != "")
+			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			b.add_theme_font_size_override("font_size", Look.fs(11))
+			if st + dir >= 0 and st + dir <= 4:
+				var rx: Dictionary = G.steer_reactions(S, ax.id, dir)
+				var tip = "Steer the party toward %s: one action, three months." % ax.stances[st + dir].to_lower()
+				if rx.angry.size(): tip += "\nAngers: " + ", ".join(rx.angry.map(func(f): return f.name))
+				if rx.pleased.size(): tip += "\nPleases: " + ", ".join(rx.pleased.map(func(f): return f.name))
+				var why: String = G.steer_block(S, ax.id, dir)
+				if why != "": tip += "\n" + why
+				b.tooltip_text = tip
+			else: b.modulate.a = 0.0
+			if dir < 0:
+				row.add_child(b); row.add_child(ends)
+				var t = AxisTrack.new(G, S, ax, player)
+				t.custom_minimum_size.y = 26
+				t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				t.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+				t.tooltip_text = ("Your manifesto says %s; voters place you at %s." % [ax.stances[st].to_lower(), ax.stances[ps].to_lower()]) if ps != st else "Voters place you where your manifesto says: %s." % ax.stances[st].to_lower()
+				row.add_child(t)
+			else:
+				row.add_child(ends); row.add_child(b)
+	if S.steer:
+		var sax = Game.by_id(G.AXES, S.steer.axis)
+		_p("Steering the party on %s toward %s: month %d of %d. The people who disagree get angrier every month." % [sax.issue.to_lower(), G.stance_name(S.steer.axis, G.stance_of(player.manifesto[S.steer.axis]) + S.steer.dir).to_lower(), S.steer.months + 1, G.STEER_MONTHS], c3, Look.RED_HI, 13)
+	else:
+		_p("◀ ▶ steer the party one stance: three months and an action, and politicians who care about the other side may quit. Afterwards, saying the new line no longer counts as drifting.", c3, Look.DIM, 12)
 	# party offices
-	var c2 = _card(top)
-	c2.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var c2 = _card()
 	_eyebrow("Party offices", c2)
 	var blocked_o: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0 or G.in_campaign(S)
 	_p("Open an office in a city, then grow it (one action, ₱1–2M). It works every month on its own province: supporters there become core voters and turn out, and members pay a little in dues; rent is ₱20–40k a quarter. You can also open one by clicking the province on the map.", c2)
@@ -461,8 +522,14 @@ func _platform() -> void:
 		pb.tooltip_text = "Uses one action. It doesn't stop gaffes; it explains them away faster."
 		pr_row.add_child(pb)
 	c2.add_child(pr_row)
+	var og = GridContainer.new()
+	og.columns = 2 if size.x > 1100 else 1
+	og.add_theme_constant_override("h_separation", 24)
+	og.add_theme_constant_override("v_separation", 6)
+	c2.add_child(og)
 	for r in G.REGIONS:
 		var line = HFlowContainer.new()
+		line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		line.add_theme_constant_override("h_separation", 6)
 		line.add_theme_constant_override("v_separation", 6)
 		var rl = Look.dcaps(r.name, 10, Look.DIM, 1)
@@ -476,37 +543,7 @@ func _platform() -> void:
 			b.tooltip_text = ("Full size." if lvl >= G.COMMUNITY_MAX else ("Open an office: ₱%sM" % Game.fmt1(cost) if lvl == 0 else "Grow it: ₱%sM" % Game.fmt1(cost)))
 			b.add_theme_font_size_override("font_size", Look.fs(11))
 			line.add_child(b)
-		c2.add_child(line)
-	_rule()
-	var lg = _row(null, 14)
-	lg.add_child(Look.dlabel("■ Manifesto", "body", 12, Look.RED_HI))
-	lg.add_child(Look.dlabel("● How voters see you", "body", 12, Look.RED_HI))
-	for p in G.rivals(S): lg.add_child(Look.dlabel("● " + p.short, "body", 12, Color(p.color)))
-	var blocked: bool = S.queue.size() > 0 or S.result != null or S.actionsLeft <= 0
-	if S.steer:
-		var sax = Game.by_id(G.AXES, S.steer.axis)
-		_p("Steering the party on %s toward %s: month %d of %d. The people who disagree get angrier every month." % [sax.issue.to_lower(), G.stance_name(S.steer.axis, G.stance_of(player.manifesto[S.steer.axis]) + S.steer.dir).to_lower(), S.steer.months + 1, G.STEER_MONTHS], null, Look.RED_HI, 14)
-	else:
-		_p("Steering the party moves the manifesto one stance. It takes three months and an action, and the politicians who care about the other side may quit. Once it's done, saying the new line no longer counts as drifting.", null, Look.DIM, 13)
-	for ax in G.AXES:
-		var t = AxisTrack.new(G, S, ax, player)
-		t.custom_minimum_size.y = 62
-		_add(t)
-		var st: int = G.stance_of(player.manifesto[ax.id])
-		var sr = _row(null, 8)
-		for dir in [-1, 1]:
-			if st + dir < 0 or st + dir > 4: continue
-			var rx: Dictionary = G.steer_reactions(S, ax.id, dir)
-			var b = _btn(("◀ Steer toward %s" if dir < 0 else "Steer toward %s ▶") % ax.stances[st + dir].to_lower(), func():
-				var res: Dictionary = G.act_steer(S, ax.id, dir)
-				toast.emit(res.text)
-				changed.emit(), blocked or G.steer_block(S, ax.id, dir) != "")
-			var tip = "One action, three months."
-			if rx.angry.size(): tip += "\nAngers: " + ", ".join(rx.angry.map(func(f): return f.name))
-			if rx.pleased.size(): tip += "\nPleases: " + ", ".join(rx.pleased.map(func(f): return f.name))
-			b.tooltip_text = tip
-			b.add_theme_font_size_override("font_size", Look.fs(11))
-			sr.add_child(b)
+		og.add_child(line)
 	# what only you know
 	var secs: Array = S.get("secrets", []).filter(func(x): return not x.get("closed", false) and not x.get("leaked", false))
 	if secs.size():
@@ -576,12 +613,8 @@ class AxisTrack extends Control:
 		G = g; S = s; ax = a; party = p
 		mouse_filter = Control.MOUSE_FILTER_PASS
 	func _draw() -> void:
-		var f = Look.font("body")
-		draw_string(f, Vector2(0, 14), ax.left, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Look.TXT)
-		var rw = f.get_string_size(ax.right, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		draw_string(f, Vector2(size.x - rw, 14), ax.right, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Look.TXT)
-		var y = 20.0
-		var h = 22.0
+		var y = 2.0
+		var h = size.y - 4
 		var ms: int = G.stance_of(party.manifesto[ax.id])
 		var ps: int = G.stance_of(party.perceived[ax.id])
 		for i in 5:
@@ -598,9 +631,6 @@ class AxisTrack extends Control:
 			draw_circle(Vector2(px.call(p.perceived[ax.id]), y + h / 2), 4, Look.lit(Color(p.color)))
 		draw_circle(Vector2(px.call(party.perceived[ax.id]), y + h / 2), 8, Look.N850)
 		draw_circle(Vector2(px.call(party.perceived[ax.id]), y + h / 2), 7, Look.RED_HI)
-		var off = absi(ps - ms)
-		var txt = ("Seen as %s, manifesto says %s%s" % [ax.stances[ps], ax.stances[ms], " · serious" if off > 1 else ""]) if off else "%s, as promised" % ax.stances[ps]
-		draw_string(f, Vector2(0, y + h + 16), txt, HORIZONTAL_ALIGNMENT_LEFT, size.x, 12, Look.RED_HI if off else Look.DIM)
 
 # ---------- This month's moves ----------
 func _section(title: String, cost: String, help: String) -> void:
