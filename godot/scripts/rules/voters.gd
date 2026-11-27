@@ -298,7 +298,11 @@ func leader_fit(s: Dictionary, p: Dictionary) -> Dictionary:
 	if p.isPlayer:
 		est = clampf2(0.5 + float(pos.system) / 140.0, 0, 1)
 		var sh: Dictionary = style_profile(s).shares
-		if sh.size(): tone = {"statesman": float(sh.get("statesman", 0)), "fiery": float(sh.get("fiery", 0)), "folksy": float(sh.get("folksy", 0)), "hopeful": float(sh.get("hopeful", 0)), "provocative": float(sh.get("sharp", 0))}
+		if sh.size():
+			# one voice always pays, but the last stretch to 100% counts for less (CONFIG.voiceCurve)
+			var kc: float = float(C.get("voiceCurve", 0.0))
+			var cv = func(x: float) -> float: return x + kc * x * (1.0 - x)
+			tone = {"statesman": cv.call(float(sh.get("statesman", 0))), "fiery": cv.call(float(sh.get("fiery", 0))), "folksy": cv.call(float(sh.get("folksy", 0))), "hopeful": cv.call(float(sh.get("hopeful", 0))), "provocative": cv.call(float(sh.get("sharp", 0)))}
 		for id in s.get("districts", {}): visits += int(s.districts[id].get("visits", 0))
 		stains = s.record.money.filter(func(m): return m.dirty).size() * 0.35 + float(s.record.outrages) * 0.1
 		slips = float(s.record.gaffes)

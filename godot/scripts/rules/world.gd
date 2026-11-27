@@ -808,8 +808,9 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	if quick: pass
 	elif r < risk * (0.3 + charm * 0.3): outcome = "viral"     # charm helps, but a risky line stays risky
 	elif r > 1 - risk * (0.5 - charm * 0.2): outcome = "gaffe"
-	var pos = 2.0 if outcome == "viral" else 1.0   # a line that goes viral: its good effects hit hard
-	var neg = 1.8 if outcome == "gaffe" else (1.3 if outcome == "viral" else 1.0)
+	var dc: Dictionary = C.get("delivery", {})
+	var pos = float(dc.get("viralPos", 2.0)) if outcome == "viral" else 1.0   # a line that goes viral: its good effects hit hard
+	var neg = float(dc.get("gaffeNeg", 1.8)) if outcome == "gaffe" else (float(dc.get("viralNeg", 1.3)) if outcome == "viral" else 1.0)
 	var press: float = 1.0 - (float(C.upkeep.get("pressSoften", 0.25)) if s.get("pressOffice", false) else 0.0)   # the press office softens a gaffe
 	if outcome == "gaffe": neg *= press
 	var reacts: Array = TONES[tone].react.duplicate()
@@ -852,14 +853,14 @@ func deliver_line(s: Dictionary, line: Dictionary, quick := false) -> Dictionary
 	media_hear(s, "provocative" if sharp else tone, outcome, 0.5 if quick else 1.0)
 	if outcome == "viral":
 		s.record.memes += 1
-		gain_charisma(player, 2.0)
+		gain_charisma(player, float(dc.get("viralCharisma", 2.0)))
 	if outcome == "gaffe":
 		s.record.gaffes += 1
-		player.charisma = clampf2(player.charisma - 2.5 * press, 10, 100)
+		player.charisma = clampf2(player.charisma - float(dc.get("gaffeCharisma", 2.5)) * press, 10, 100)
 		# a gaffe is remembered: everyone thinks a little less of the leader, not only the offended
 		for pop in s.pops:
-			pop.leader.player = clampf2(pop.leader.player - 0.04 * press, -2, 2)
-			pop.goodwill.player = clampf2(pop.goodwill.player - 0.03 * press * (1 - shield_of(pop, "player")), -2, 2)
+			pop.leader.player = clampf2(pop.leader.player - float(dc.get("gaffeLeader", 0.04)) * press, -2, 2)
+			pop.goodwill.player = clampf2(pop.goodwill.player - float(dc.get("gaffeGoodwill", 0.03)) * press * (1 - shield_of(pop, "player")), -2, 2)
 	return {"outcome": outcome, "press": TONES["provocative" if sharp and TONES.has("provocative") else tone].press[outcome], "styleNote": style_note, "sharp": sharp}
 
 ## The style a line is said in (statesman, fiery, folksy, hopeful); an old "provocative" line is fiery.
