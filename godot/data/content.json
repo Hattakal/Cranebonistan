@@ -106,7 +106,7 @@
   "typeWeight": 0.8,
   "flagshipOwnership": 0.05,
   "flagshipSalience": 0.05,
-  "laws": {"agree": 15, "voteMonths": 3, "gapMonths": 2, "firstMonth": 3, "heat": 45, "push": 20, "base": 0.85, "partnerAgainst": 0.35, "publicWeight": 0.8, "weakGov": 0.15, "failStability": 5, "sinkSerious": 4}
+  "laws": {"agree": 15, "voteMonths": 3, "gapMonths": 2, "firstMonth": 3, "heat": 45, "push": 20, "base": 0.5, "partnerAgainst": 0.35, "publicFrom": 10, "publicAgainst": 0.1, "weakBelow": 40, "weakGov": 0.15, "failStability": 5, "sinkSerious": 4}
  },
  "AXES": [
   {

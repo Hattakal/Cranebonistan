@@ -63,28 +63,27 @@ func law_odds(s: Dictionary) -> Dictionary:
 	if not s.get("bill"): return out
 	var law: Dictionary = law_by_id(s.bill.id)
 	var sign: float = -1.0 if law.side == "L" else 1.0
-	var p: float = float(LAWS_C.get("base", 0.85))
-	out.parts.append({"why": "The government has a majority", "d": p})
+	var p: float = float(LAWS_C.get("base", 0.5))
+	out.parts.append({"why": "A government bill, with a majority on paper", "d": p})
 	for opp in law_opponents(s, law):
 		var k: float = -float(LAWS_C.get("partnerAgainst", 0.35))
 		p += k
 		out.parts.append({"why": "%s, in government, is against it" % opp.short, "d": k})
 	var d = debate_by_id(s, "law_" + s.bill.id)
-	if d:
-		var k2: float = clampf2(d.lean * sign / 100.0 * float(LAWS_C.get("publicWeight", 0.8)), -0.6, 0.15)
-		if absf(k2) >= 0.01:
-			p += k2
-			out.parts.append({"why": "The public argument is going %s it" % ("for" if k2 > 0 else "against"), "d": k2})
+	if d and d.lean * sign < -float(LAWS_C.get("publicFrom", 10)):
+		var k2: float = -float(LAWS_C.get("publicAgainst", 0.1))
+		p += k2
+		out.parts.append({"why": "The public argument is going against it", "d": k2})
 	var sp = party_of(s, s.bill.sponsor)
-	if sp and float(sp.stability) < 40:
+	if sp and float(sp.stability) < float(LAWS_C.get("weakBelow", 40)):
 		var k3: float = -float(LAWS_C.get("weakGov", 0.15))
 		p += k3
-		out.parts.append({"why": "%s is divided and weak" % sp.short, "d": k3})
+		out.parts.append({"why": "%s's hold on power is weak" % sp.short, "d": k3})
 	out.p = clampf2(p, 0.05, 0.97)
 	return out
 
 func law_odds_word(p: float) -> String:
-	return "Sure to pass" if p >= 0.85 else ("Likely to pass" if p >= 0.65 else ("In doubt" if p >= 0.4 else "Likely to fall"))
+	return "Likely to pass" if p >= 0.6 else ("In doubt" if p >= 0.4 else ("Likely to fall" if p >= 0.15 else "Almost sure to fall"))
 
 func law_vote(s: Dictionary) -> void:
 	var bill: Dictionary = s.bill

@@ -760,7 +760,7 @@ func _debate_card(d: Dictionary, to: Control, blocked: bool) -> void:
 	v.add_child(tx)
 	if d.has("law") and S.get("bill") and S.bill.id == d.law:
 		var od: Dictionary = G.law_odds(S)
-		var bl = Look.dlabel("A bill before parliament · vote %s · %s" % [G.date_label(int(S.bill.vote), false), G.law_odds_word(od.p)], "body_bold", 13, Look.RED_HI if od.p < 0.65 else Look.LAMP, true)
+		var bl = Look.dlabel("A bill before parliament · vote %s · %s" % [G.date_label(int(S.bill.vote), false), G.law_odds_word(od.p)], "body_bold", 13, Look.RED_HI if od.p < 0.4 else Look.LAMP, true)
 		bl.tooltip_text = _law_tip(od) + "\n\nSpeaking against it moves the argument; if it falls, you get the credit for sinking it."
 		bl.mouse_filter = Control.MOUSE_FILTER_STOP
 		v.add_child(bl)
