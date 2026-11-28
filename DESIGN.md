@@ -281,6 +281,8 @@ The designer wanted concrete policies, not just "statist", tied to the debates, 
 
 **The flagship comes from your big promises** (the designer's decision): a year before the election, once you have made two or more big promises, the flagship choices are your open big promises, the four the country cares most about, each showing how much it cares; the words come from the debate you made it in. Breaking the flagship costs double. With fewer than two big promises, the old flagship (the country's biggest issue, fixed promises from flagship.json) stays.
 
+Measured (test players with the best wording, three seeds, against the version just before promises): populist 32.2% → 29.2%, centrist 36.5% → 35.3%. The test players don't plan around their promises, so they break some; a player who keeps to a line loses nothing. (Both are higher than in the words measurement, 25.1% and 31.4%, since bills started failing more often than not: a government that can't pass anything helps newcomers.) The centrist is still the strongest; that waits for the balance pass.
+
 Next, if the designer agrees: events that remind you of a promise or tempt you to break it.
 
 ### 5.5 The major crisis — Built
