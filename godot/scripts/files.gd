@@ -515,7 +515,7 @@ func _platform() -> void:
 	var cp = _card()
 	_eyebrow("Your promises", cp)
 	if S.pledges.is_empty():
-		_p("None yet. After you speak in a debate, you can make a promise on it: the voters on your side warm to you now, and remember if you break it.", cp)
+		_p("None yet. Speaking in a debate is a promise, where there is a concrete one to make: a big one in a major debate, a small one otherwise. The voters on your side warm to you now, and remember if you break it. A year before the election, the flagship on every poster is chosen from your big ones.", cp)
 	else:
 		var order = {"open": 0, "kept": 1, "broken": 2}
 		var pls: Array = Game.ssort(S.pledges.duplicate(), func(a, b): return int(order.get(a.status, 3)) - int(order.get(b.status, 3)))
@@ -524,17 +524,15 @@ func _platform() -> void:
 		pg2.add_theme_constant_override("h_separation", 24)
 		pg2.add_theme_constant_override("v_separation", 4)
 		cp.add_child(pg2)
-		var big_open = 0
 		for pl in pls:
 			var pd = G.pledge_by_id(pl.id)
 			if pd == null: continue
-			if pl.status == "open" and pd.size == "big": big_open += 1
 			var st: String = {"open": "", "kept": " · kept", "broken": " · broken"}.get(pl.status, "")
 			var col: Color = Look.TXT if pl.status == "open" else (Look.GOOD_HI if pl.status == "kept" else Look.RED_HI)
 			var row = HBoxContainer.new()
 			row.add_theme_constant_override("separation", 8)
 			row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			var nm = Look.dlabel(("● " if pd.size == "big" else "○ ") + pd.title, "body_bold" if pd.size == "big" else "body", 14, col, true)
+			var nm = Look.dlabel(("★ " if pl.get("flagship", false) else ("● " if pd.size == "big" else "○ ")) + pd.title, "body_bold" if pd.size == "big" else "body", 14, col, true)
 			nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(nm)
 			var when = Look.dlabel(G.date_label(int(pl.week), false) + st, "body", 12, Look.DIM)
@@ -543,13 +541,13 @@ func _platform() -> void:
 			var gs: Array = G.pledge_groups(pd)
 			var care: Array = G.pledge_care(S, pd)
 			var tip = "%s promise. Pleases %s; cools %s. The country cares %s about this issue now." % ["A big" if pd.size == "big" else "A small", G.describe_who(gs[0]), G.describe_who(gs[1]), care[1]]
-			if pl.status == "open": tip += "\nSpeaking for the other side of %s breaks it." % ("this issue" if pd.size == "big" else "this debate")
+			if pl.status == "open": tip += "\nSpeaking for the other side of %s breaks it%s." % ["this issue" if pd.size == "big" else "this debate", ", and it's on every poster: breaking it costs double" if pl.get("flagship", false) else ""]
 			elif pl.status == "kept": tip += "\nKept: the bill you promised to stop fell."
 			else: tip += "\nBroken: the voters it pleased hold it against you."
 			row.tooltip_text = tip
 			row.mouse_filter = Control.MOUSE_FILTER_STOP
 			pg2.add_child(row)
-		_p("● big promise (%d of %d open) · ○ small. Hover one for who it pleases and what breaks it." % [big_open, int(G.PLEDGES_C.get("maxBig", 5))], cp, Look.DIM, 12)
+		_p("● big promise (made in a major debate) · ○ small · ★ on the posters. Hover one for who it pleases and what breaks it.", cp, Look.DIM, 12)
 	# party offices
 	var c2 = _card()
 	_eyebrow("Party offices", c2)

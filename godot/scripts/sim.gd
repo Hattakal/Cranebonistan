@@ -45,6 +45,7 @@ func load_content(_unused := "") -> void:
 	LAWS_C = C.get("laws", {})
 	PLEDGES = _data("pledges", {}).get("PLEDGES", [])
 	PLEDGES_C = C.get("pledges", {})
+	FLAGSHIP_PROMISES = _data("flagship", {}).get("FROM_PROMISES", {})
 	LINES = _data("debate_lines", {})
 	ISSUES = _data("issues", {}).get("ISSUES", [])
 	FIGURES = _data("party", {}).get("FIGURES", [])
@@ -365,13 +366,11 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 	var r: Dictionary = super(s, id, side, line_index)
 	if r.get("ok", false):
 		r.broken = break_pledges(s, d.axis, side, String(d.get("topic", d.id)))
+		var pd = speech_pledge(s, d, side)
+		if pd:
+			act_pledge(s, pd.id)
+			r.pledged = pd.title
 		_track(s, "Speaking on " + (String(d.title) if d else "a debate"), b)
-	return r
-
-func act_pledge(s: Dictionary, id: String) -> Dictionary:
-	var b: float = true_support(s)
-	var r: Dictionary = super(s, id)
-	if r.get("ok", false): _track(s, "A promise: " + String(pledge_by_id(id).title), b)
 	return r
 
 func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) -> Dictionary:

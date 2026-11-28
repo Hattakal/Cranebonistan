@@ -223,8 +223,11 @@ func take_poll(s: Dictionary, label: String, silent := false) -> void:
 # ---------- The flagship promise: what it changes ----------
 func _flagship_made(s: Dictionary, ev: Dictionary, choice: Dictionary, quote) -> void:
 	var it: Dictionary = by_id(FLAGSHIP, ev.flagship)
-	var sh: float = float(choice.effects.shift.get(it.axis, 0))
-	var axis: String = it.axis
+	var axis: String = String(choice.get("axis", it.axis))
+	var sh: float = float(choice.effects.shift.get(axis, 0))
+	if choice.has("pledge"):   # one of your own promises, now on every poster
+		for pl in s.pledges:
+			if pl.id == choice.pledge: pl.flagship = true
 	if sh == 0:
 		for ax in choice.effects.shift:
 			axis = ax; sh = float(choice.effects.shift[ax]); break

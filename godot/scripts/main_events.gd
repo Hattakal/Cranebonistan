@@ -282,6 +282,8 @@ func _speak_sheet(id: String, side: String) -> void:
 		p.heading(d.title, 34)
 		p.text(d.text, 16)
 		p.text("Your side: %s." % (ax.left if side == "L" else ax.right), 14, "type")
+		var pd = G.speech_pledge(S, d, side)
+		if pd: p.text("Speaking for this side is a promise: %s (%s)." % [pd.title, "a big one" if pd.size == "big" else "a small one"], 14, "type")
 		if major: p.scribble("The whole country is watching. Your exact words will be quoted: they can go viral, or become a gaffe that helps the other side.  — C.")
 		else: p.small("A smaller argument. Your line mostly shapes how people hear you; it won't make the evening news.")
 	var lines: Array = G.debate_lines(S, d, side)
@@ -295,36 +297,14 @@ func _speak_sheet(id: String, side: String) -> void:
 		func(): p.close(), "Back")
 
 ## Every speech shows how it played (a smaller debate just doesn't make the evening news),
-## any promise it broke, and the promises you could make on it now.
+## any promise it broke, and the promise it made.
 func _speech_result(p: Paper, res: Dictionary, d: Dictionary, side: String) -> void:
 	p.clear()
 	_result_body(p, res.title, res, "" if res.major else "On the record")
 	for b in res.get("broken", []):
 		p.callout("You broke a promise: %s. The people who believed it will remember." % b)
-	var ax: Dictionary = Game.by_id(G.AXES, d.axis)
 	if res.has("pledged"):
-		p.callout("You promised: %s." % res.pledged, Look.INK)
-	else:
-		var offers: Array = G.pledges_for(S, d, side)
-		if offers.size():
-			p.add(Look.caps("Make it a promise?", 11, Look.MUTED, 2))
-			p.small("Optional, and free. A promise wins over the voters on your side now. Speak for the other side later and you break it, and they remember.")
-			for pd in offers:
-				var care: Array = G.pledge_care(S, pd)
-				var blk: String = G.pledge_block(S, pd)
-				var gs: Array = G.pledge_groups(pd)
-				p.card("index", func(box):
-					box.add_child(Look.label(pd.title, "news_bold", 19, Look.INK, true))
-					box.add_child(Look.label("%s promise · the country cares %s about %s" % ["Big" if pd.size == "big" else "Small", care[1], ax.issue.to_lower()], "body", 13, Look.MUTED, true))
-					box.add_child(Look.label("Pleases %s · cools %s" % [G.describe_who(gs[0]), G.describe_who(gs[1])], "body", 13, Look.INK, true))
-					if blk != "": box.add_child(Look.label(blk, "body", 13, Look.RED, true)),
-					func():
-						var r: Dictionary = G.act_pledge(S, pd.id)
-						_toast(r.text)
-						if r.ok:
-							res.pledged = pd.title
-							_speech_result(p, res, d, side)
-							render(), blk != "")
+		p.callout("You promised: %s. It's on your list now; speak for the other side later and you break it." % res.pledged, Look.INK)
 	p.actions([p.button("Back to work", func(): _done(p))])
 	p.top()
 

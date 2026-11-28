@@ -107,7 +107,7 @@
   "flagshipOwnership": 0.05,
   "flagshipSalience": 0.05,
   "laws": {"agree": 15, "voteMonths": 3, "gapMonths": 2, "firstMonth": 3, "heat": 45, "push": 20, "base": 0.5, "partnerAgainst": 0.35, "publicFrom": 10, "publicAgainst": 0.1, "weakBelow": 40, "weakGov": 0.15, "failStability": 5, "sinkSerious": 4},
-  "pledges": {"maxBig": 5, "big": 0.12, "small": 0.05, "breakBig": 0.45, "breakSmall": 0.18}
+  "pledges": {"big": 0.06, "small": 0.025, "breakBig": 0.45, "breakSmall": 0.18, "breakFlagship": 2, "flagshipMax": 4}
  },
  "AXES": [
   {

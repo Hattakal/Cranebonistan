@@ -24,9 +24,30 @@ func flagship_issue(s: Dictionary) -> Dictionary:
 
 func flagship_event(s: Dictionary) -> Dictionary:
 	var it: Dictionary = flagship_issue(s)
+	var mine: Array = flagship_from_pledges(s)
+	if mine.size() >= 2:   # it has to be one you've made: voters have heard it from you before
+		var fp: Dictionary = FLAGSHIP_PROMISES
+		var fill = {"issue": String(by_id(AXES, it.axis).issue).to_lower()}
+		return {"id": "flagship_pledges", "kind": "flagship", "flagship": it.id, "title": String(fp.get("title", "What goes on the posters")).format(fill), "text": String(fp.get("text", "")).format(fill), "choices": mine}
 	var choices: Array = it.promises.duplicate(true)
 	for ch in choices: ch.lines = shuffle(s, ch.lines)   # so the plain bad one isn't always last
 	return {"id": "flagship_" + it.id, "kind": "flagship", "flagship": it.id, "title": it.title, "text": it.text, "choices": choices}
+
+## Your open big promises as flagship choices, the ones the country cares most about first:
+## the words come from the debate you made it in.
+func flagship_from_pledges(s: Dictionary) -> Array:
+	var open: Array = s.pledges.filter(func(pl): return pl.status == "open" and pledge_by_id(pl.id) != null and pledge_by_id(pl.id).size == "big")
+	var pds: Array = ssort(open.map(func(pl): return pledge_by_id(pl.id)), func(a, b): return float(pledge_care(s, b)[0]) - float(pledge_care(s, a)[0]))
+	var out = []
+	for pd in pds.slice(0, int(PLEDGES_C.get("flagshipMax", 4))):
+		var ax: String = pledge_axis(pd)
+		var gs: Array = pledge_groups(pd)
+		var lines = LINES.TOPIC_LINES.get(pd.topic, {}).get(pd.side, LINES.AXIS_LINES[ax][pd.side])
+		out.append({"label": pd.title, "axis": ax, "pledge": pd.id,
+			"note": "The country cares %s about %s." % [pledge_care(s, pd)[1], String(by_id(AXES, ax).issue).to_lower()],
+			"effects": {"shift": {ax: -6.0 if pd.side == "L" else 6.0}, "salience": {ax: 0.16}, "goodwill": [{"who": gs[0], "amt": 0.15}, {"who": gs[1], "amt": -0.1}]},
+			"lines": shuffle(s, lines.duplicate(true))})
+	return out
 
 ## Every month until the election, the promise keeps its voters warm.
 func flagship_monthly(s: Dictionary) -> void:

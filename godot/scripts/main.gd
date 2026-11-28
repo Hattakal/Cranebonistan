@@ -36,6 +36,8 @@ func _shot(args: Dictionary) -> void:
 	render()
 	for i in 20: await get_tree().process_frame
 	if args.has("hover"): _map.hover_kind = String(args.get("hoverkind", "")); _map.hover = args.hover; _map._mouse = _map.to_screen(Vector2(1300, 980)); _map.queue_redraw()
+	if args.has("promises"):   # --promises=1: three big promises made, for the flagship or the Platform page
+		for id in ["queues_L_big", "cost_of_living_L_big", "how_many_L_big"]: G.act_pledge(S, id)
 	if args.has("flagship"):
 		S.queue.push_front({"type": "event", "event": G.flagship_event(S)})
 	if args.has("violence"):

@@ -148,9 +148,15 @@ func pledge_axis(pd: Dictionary) -> String:
 
 func pledge_block(s: Dictionary, pd: Dictionary) -> String:
 	if pledge_of(s, pd.id) != null: return "You've already promised it."
-	if pd.size == "big" and s.pledges.filter(func(p): return p.status == "open" and pledge_by_id(p.id) and pledge_by_id(p.id).size == "big").size() >= int(PLEDGES_C.get("maxBig", 5)):
-		return "You have %d big promises open. A voter can only remember so many." % int(PLEDGES_C.get("maxBig", 5))
 	return ""
+
+## Speaking in a debate is a promise, where the debate has one: the big promise in a
+## major debate, the small one in a smaller argument. Null if there is none (or it's made).
+func speech_pledge(s: Dictionary, d: Dictionary, side: String) -> Variant:
+	var want: String = "big" if is_major(d) else "small"
+	for pd in pledges_for(s, d, side):
+		if pd.size == want: return pd
+	return null
 
 ## How much the country cares about this promise's issue, 0 to 1 and in words.
 func pledge_care(s: Dictionary, pd: Dictionary) -> Array:
@@ -198,9 +204,10 @@ func break_pledges(s: Dictionary, axis: String, side: String, topic: String) -> 
 		pl.status = "broken"
 		pl.weekDone = s.week
 		var k: float = float(PLEDGES_C.get("breakBig", 0.35)) if pd.size == "big" else float(PLEDGES_C.get("breakSmall", 0.12))
+		if pl.get("flagship", false): k *= float(PLEDGES_C.get("breakFlagship", 2))   # the one on every poster
 		var gs: Array = pledge_groups(pd)
 		for pop in pops_matching(s, gs[0]): pop.goodwill.player = clampf2(pop.goodwill.player - k * minf(1.5, float(pop.sal.get(pledge_axis(pd), 1.0))) * (1 - 0.5 * devotion_of(pop, player_party(s))), -2, 2)
-		push_news(s, {"kind": "bad", "title": "You promised: %s" % pd.title, "text": "Your own words, played back on every channel next to today's. The people who believed it are the ones who mind."})
+		push_news(s, {"kind": "bad", "title": "You promised: %s" % pd.title, "text": ("It was on every poster. " if pl.get("flagship", false) else "") + "Your own words, played back on every channel next to today's. The people who believed it are the ones who mind."})
 		_log(s, "action", "Broke a promise: %s." % pd.title)
 		broken.append(pd.title)
 	return broken
