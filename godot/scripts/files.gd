@@ -511,6 +511,45 @@ func _platform() -> void:
 		_p("Steering the party on %s toward %s: month %d of %d. The people who disagree get angrier every month." % [sax.issue.to_lower(), G.stance_name(S.steer.axis, G.stance_of(player.manifesto[S.steer.axis]) + S.steer.dir).to_lower(), S.steer.months + 1, G.STEER_MONTHS], c3, Look.RED_HI, 13)
 	else:
 		_p("◀ ▶ steer the party one stance: three months and an action, and politicians who care about the other side may quit. Afterwards, saying the new line no longer counts as drifting.", c3, Look.DIM, 12)
+	# promises
+	var cp = _card()
+	_eyebrow("Your promises", cp)
+	if S.pledges.is_empty():
+		_p("None yet. After you speak in a debate, you can make a promise on it: the voters on your side warm to you now, and remember if you break it.", cp)
+	else:
+		var order = {"open": 0, "kept": 1, "broken": 2}
+		var pls: Array = Game.ssort(S.pledges.duplicate(), func(a, b): return int(order.get(a.status, 3)) - int(order.get(b.status, 3)))
+		var pg2 = GridContainer.new()
+		pg2.columns = 2 if size.x > 1100 else 1
+		pg2.add_theme_constant_override("h_separation", 24)
+		pg2.add_theme_constant_override("v_separation", 4)
+		cp.add_child(pg2)
+		var big_open = 0
+		for pl in pls:
+			var pd = G.pledge_by_id(pl.id)
+			if pd == null: continue
+			if pl.status == "open" and pd.size == "big": big_open += 1
+			var st: String = {"open": "", "kept": " · kept", "broken": " · broken"}.get(pl.status, "")
+			var col: Color = Look.TXT if pl.status == "open" else (Look.GOOD_HI if pl.status == "kept" else Look.RED_HI)
+			var row = HBoxContainer.new()
+			row.add_theme_constant_override("separation", 8)
+			row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var nm = Look.dlabel(("● " if pd.size == "big" else "○ ") + pd.title, "body_bold" if pd.size == "big" else "body", 14, col, true)
+			nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(nm)
+			var when = Look.dlabel(G.date_label(int(pl.week), false) + st, "body", 12, Look.DIM)
+			when.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			row.add_child(when)
+			var gs: Array = G.pledge_groups(pd)
+			var care: Array = G.pledge_care(S, pd)
+			var tip = "%s promise. Pleases %s; cools %s. The country cares %s about this issue now." % ["A big" if pd.size == "big" else "A small", G.describe_who(gs[0]), G.describe_who(gs[1]), care[1]]
+			if pl.status == "open": tip += "\nSpeaking for the other side of %s breaks it." % ("this issue" if pd.size == "big" else "this debate")
+			elif pl.status == "kept": tip += "\nKept: the bill you promised to stop fell."
+			else: tip += "\nBroken: the voters it pleased hold it against you."
+			row.tooltip_text = tip
+			row.mouse_filter = Control.MOUSE_FILTER_STOP
+			pg2.add_child(row)
+		_p("● big promise (%d of %d open) · ○ small. Hover one for who it pleases and what breaks it." % [big_open, int(G.PLEDGES_C.get("maxBig", 5))], cp, Look.DIM, 12)
 	# party offices
 	var c2 = _card()
 	_eyebrow("Party offices", c2)

@@ -38,6 +38,7 @@ Put a file in your mod's `data/` folder with the **same name** as the game's fil
 | `cities.json` | City population, size, lean and one-line fact |
 | `debates.json`, `debate_lines.json`, `issues.json` | The national debate: topics, what the leader can say, local issues |
 | `laws.json` | The government's programme: the bills it tables, what they change, the events they bring (lines for their debates in `debate_lines.json`) |
+| `pledges.json` | The promises the leader can make after speaking in a debate: a big and a small one per side of each topic, and a promise to scrap each bill |
 | `flagship.json`, `interview.json`, `final_debate.json` | The year-three promise, the year-one interview, the final debate |
 | `media.json` | Outlets, personalities, their scandals, foreign money |
 | `scandals.json`, `violence.json` | Secrets and how they leak; political violence and rivals' labels |

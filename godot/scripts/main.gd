@@ -128,6 +128,17 @@ func _shot(args: Dictionary) -> void:
 		S.queue.clear()
 		var ds: Array = Game.ssort(S.debates.duplicate(), func(a, b): return b.heat - a.heat)
 		_speak_sheet(ds[int(args.speak)].id, "L")
+	if args.has("spoke"):   # --spoke=1: speak in a debate that has promises on offer, and show how it played
+		S.queue.clear()
+		S.actionsLeft = 3
+		var with_p: Array = S.debates.filter(func(x): return G.pledges_for(S, x, "L").size() > 0)
+		if with_p.size():
+			var dd: Dictionary = with_p[0]
+			var res: Dictionary = G.act_speak(S, dd.id, "L", 0)
+			if args.has("pledge"): G.act_pledge(S, G.pledges_for(S, dd, "L")[0].id)
+			if args.has("file"):   # with --file: show that file with the promise made, not the speech
+				_files.render()
+			else: _speech_result(_paper(760, false), res, dd, "L")
 	if args.has("raise"):
 		S.queue.clear()
 		_raise_sheet(G.raise_options(S)[int(args.raise)])

@@ -1,4 +1,4 @@
-## rules/laws.gd — The government at work: every few months it tables a bill from its own programme
+## rules/laws.gd — The government at work, and the promises you make in return. The government: every few months it tables a bill from its own programme
 ## (data/laws.json). The bill opens a debate; after a few months parliament votes. Whether it
 ## passes depends on the coalition partner and on how the argument went, so speaking on it can
 ## sink it. A law that passes changes the country for good (where its numbers settle) and
@@ -117,3 +117,90 @@ func law_vote(s: Dictionary) -> void:
 		push_news(s, {"kind": "issue", "title": "%s falls" % law.title, "text": String(law.get("failed", "Parliament votes the bill down. The government is embarrassed.")) + tail2})
 		if you == "against": s.serious = clampf2(serious_of(s) + float(LAWS_C.get("sinkSerious", 4)), 0, 100)
 	_log(s, "world", "%s %s." % [law.title, "passes" if passed else "falls"])
+	_pledges_after_vote(s, bill, passed)
+
+func _pledges_after_vote(s: Dictionary, bill: Dictionary, passed: bool) -> void:
+	for pl in s.pledges:   # promises to undo this bill
+		var pd = pledge_by_id(pl.id)
+		if pd and String(pd.get("law", "")) == bill.id and pl.status == "open" and not passed:
+			pl.status = "kept"
+			pl.weekDone = s.week
+
+# ---------- Pledges ----------
+## Promises made in debates (data/pledges.json): concrete, remembered, and costly to break.
+func pledge_by_id(id: String) -> Variant:
+	return by_id(PLEDGES, id)
+
+func pledge_of(s: Dictionary, id: String) -> Variant:
+	for pl in s.pledges:
+		if pl.id == id: return pl
+	return null
+
+## The promises on offer after speaking in this debate, on this side.
+func pledges_for(s: Dictionary, d: Dictionary, side: String) -> Array:
+	var topic: String = String(d.get("topic", d.id))
+	return PLEDGES.filter(func(p): return p.topic == topic and p.side == side and pledge_of(s, p.id) == null)
+
+func pledge_axis(pd: Dictionary) -> String:
+	if pd.has("law"): return String(law_by_id(pd.law).axis)
+	var t = by_id(TOPICS, pd.topic)
+	return String(t.axis) if t else ""
+
+func pledge_block(s: Dictionary, pd: Dictionary) -> String:
+	if pledge_of(s, pd.id) != null: return "You've already promised it."
+	if pd.size == "big" and s.pledges.filter(func(p): return p.status == "open" and pledge_by_id(p.id) and pledge_by_id(p.id).size == "big").size() >= int(PLEDGES_C.get("maxBig", 5)):
+		return "You have %d big promises open. A voter can only remember so many." % int(PLEDGES_C.get("maxBig", 5))
+	return ""
+
+## How much the country cares about this promise's issue, 0 to 1 and in words.
+func pledge_care(s: Dictionary, pd: Dictionary) -> Array:
+	var ax: String = pledge_axis(pd)
+	var sal: float = float(summarize(s, s.pops).sal.get(ax, 1.0))
+	return [sal, "a great deal" if sal >= 1.4 else ("quite a lot" if sal >= 1.0 else ("a little" if sal >= 0.7 else "hardly at all"))]
+
+## Who warms to it and who cools: [pleased who, angered who] for showing.
+func pledge_groups(pd: Dictionary) -> Array:
+	var ax: String = pledge_axis(pd)
+	var mine = {"lean": {ax: "<-25" if pd.side == "L" else ">25"}}
+	var theirs = {"lean": {ax: ">25" if pd.side == "L" else "<-25"}}
+	return [mine, theirs]
+
+func act_pledge(s: Dictionary, id: String) -> Dictionary:
+	var pd = pledge_by_id(id)
+	if pd == null: return {"ok": false, "text": "No such promise."}
+	var block = pledge_block(s, pd)
+	if block: return {"ok": false, "text": block}
+	var big: bool = pd.size == "big"
+	var k: float = float(PLEDGES_C.get("big", 0.25)) if big else float(PLEDGES_C.get("small", 0.1))
+	var ax: String = pledge_axis(pd)
+	var gs: Array = pledge_groups(pd)
+	for pop in s.pops:
+		var sal: float = minf(1.5, float(pop.sal.get(ax, 1.0)))
+		if matches(pop, gs[0]): pop.goodwill.player = clampf2(pop.goodwill.player + k * sal, -2, 2)
+		elif matches(pop, gs[1]): pop.goodwill.player = clampf2(pop.goodwill.player - k * 0.7 * sal * (1 - shield_of(pop, "player")), -2, 2)
+	for r in pd.get("react", []):
+		for pop in pops_matching(s, r.who): pop.goodwill.player = clampf2(pop.goodwill.player + float(r.amt), -2, 2)
+	add_ownership(s, "player", side_key(ax, pd.side), 0.04 if big else 0.015)
+	s.pledges.append({"id": id, "week": s.week, "status": "open"})
+	var text = "You promised: %s." % pd.title
+	_log(s, "action", text)
+	return {"ok": true, "text": text}
+
+## You spoke (or started a debate) for one side: promises to the other side of the same
+## debate, or big ones on the same issue, are broken, and those they pleased remember.
+func break_pledges(s: Dictionary, axis: String, side: String, topic: String) -> Array:
+	var broken = []
+	for pl in s.pledges:
+		if pl.status != "open": continue
+		var pd = pledge_by_id(pl.id)
+		if pd == null or pd.side == side or pledge_axis(pd) != axis: continue
+		if pd.topic != topic and pd.size != "big": continue
+		pl.status = "broken"
+		pl.weekDone = s.week
+		var k: float = float(PLEDGES_C.get("breakBig", 0.35)) if pd.size == "big" else float(PLEDGES_C.get("breakSmall", 0.12))
+		var gs: Array = pledge_groups(pd)
+		for pop in pops_matching(s, gs[0]): pop.goodwill.player = clampf2(pop.goodwill.player - k * minf(1.5, float(pop.sal.get(pledge_axis(pd), 1.0))) * (1 - 0.5 * devotion_of(pop, player_party(s))), -2, 2)
+		push_news(s, {"kind": "bad", "title": "You promised: %s" % pd.title, "text": "Your own words, played back on every channel next to today's. The people who believed it are the ones who mind."})
+		_log(s, "action", "Broke a promise: %s." % pd.title)
+		broken.append(pd.title)
+	return broken

@@ -273,6 +273,12 @@ A law that passes changes the country twice: a jolt to the state of the nation n
 
 First set: six laws for the NUP–CLF government (the border fence, the Public Order Act, the Family Allowance, the bread and fuel price cap, new jets, the winter pension bonus). Measured over four seeds (at the first odds): about six bills a game, four or five pass; the CLF tables the economic ones, and the NUP's traditional and hawkish ones often fall to the CLF. With six laws every game sees nearly all of them: more are needed so games differ.
 
+### 5.4c Promises (pledges) — Built (first stage, November 2026)
+
+The designer wanted concrete policies, not just "statist", tied to the debates, with importance levels, a list of what you promised, promises to scrap the government's laws, and events that touch them. First stage: every debate topic has, on each side, a big and a small promise (data/pledges.json: "Cap bread and fuel prices for two years", "Hire 20,000 nurses"), and every bill has a big "scrap it" promise for its opponents. After a speech, the promises for that debate and side are offered: optional and free, each card saying how big it is, how much the country cares about the issue now, and whom it pleases and cools. A promise warms the voters on that side (a big one about two-thirds of what the speech did; a small one less) and cools the other side. Speaking or starting a debate for the other side of the same debate (or the same issue, for a big promise) breaks it: the news plays your words back, and those it pleased cool more than they warmed (devoted voters half as much). At most five big promises open at once. A promise to scrap a bill is kept if the bill falls. The Platform page lists your promises (open, kept, broken), with who they please and what breaks them on hover; the poll hover lists them as a cause.
+
+Next, if the designer agrees: the year-three flagship chosen from your big promises; events that remind you of a promise (or tempt you to break it); scrapping a passed law as a promise that keeps paying.
+
 ### 5.5 The major crisis — Built
 
 Every game has **exactly one** major crisis, in the second year, drawn from a pool of five:

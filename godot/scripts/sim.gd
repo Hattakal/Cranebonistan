@@ -43,6 +43,8 @@ func load_content(_unused := "") -> void:
 	TOPICS = _data("debates", {}).get("TOPICS", [])
 	LAWS = _data("laws", {}).get("LAWS", [])
 	LAWS_C = C.get("laws", {})
+	PLEDGES = _data("pledges", {}).get("PLEDGES", [])
+	PLEDGES_C = C.get("pledges", {})
 	LINES = _data("debate_lines", {})
 	ISSUES = _data("issues", {}).get("ISSUES", [])
 	FIGURES = _data("party", {}).get("FIGURES", [])
@@ -95,7 +97,7 @@ func new_game(opts := {}) -> Dictionary:
 		"crisisPressure": {}, "crisis": null, "quietMonths": 0, "style": {},
 		"record": {"quotes": [], "blamed": [], "betrayed": [], "promises": [], "money": [], "memes": 0, "gaffes": 0, "dossiers": 0, "outrages": 0},
 		"result": null, "parties": [], "pops": [], "countries": {}, "story": {},
-		"debates": [], "debatesPast": [], "bill": null, "lawsDone": {}, "lawShift": {}, "lawNext": int(C.get("laws", {}).get("firstMonth", 3)) * int(C.weeksPerMonth), "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {}, "flagship": {}, "roadFund": 0.0, "roadPerTrip": 0.0,
+		"debates": [], "debatesPast": [], "bill": null, "lawsDone": {}, "pledges": [], "lawShift": {}, "lawNext": int(C.get("laws", {}).get("firstMonth", 3)) * int(C.weeksPerMonth), "debateCooldown": {}, "spoke": {}, "issues": [], "issueCooldown": {}, "communities": {}, "figures": [], "figuresLost": [], "steer": null, "home": "", "districts": {}, "projection": {}, "lastVisit": -99, "relations": {}, "relationNotes": {}, "relScars": {}, "flagship": {}, "roadFund": 0.0, "roadPerTrip": 0.0,
 	}
 	for p in PARTIES:
 		var me: bool = p.get("isPlayer", false)
@@ -361,13 +363,23 @@ func act_speak(s: Dictionary, id: String, side: String, line_index: int) -> Dict
 	var d = debate_by_id(s, id)
 	var b: float = true_support(s)
 	var r: Dictionary = super(s, id, side, line_index)
-	if r.get("ok", false): _track(s, "Speaking on " + (String(d.title) if d else "a debate"), b)
+	if r.get("ok", false):
+		r.broken = break_pledges(s, d.axis, side, String(d.get("topic", d.id)))
+		_track(s, "Speaking on " + (String(d.title) if d else "a debate"), b)
+	return r
+
+func act_pledge(s: Dictionary, id: String) -> Dictionary:
+	var b: float = true_support(s)
+	var r: Dictionary = super(s, id)
+	if r.get("ok", false): _track(s, "A promise: " + String(pledge_by_id(id).title), b)
 	return r
 
 func act_raise(s: Dictionary, opt: Dictionary, side: String, line_index: int) -> Dictionary:
 	var b: float = true_support(s)
 	var r: Dictionary = super(s, opt, side, line_index)
-	if r.get("ok", false): _track(s, "Starting a debate: " + String(opt.title), b)
+	if r.get("ok", false):
+		r.broken = break_pledges(s, opt.axis, side, String(opt.get("topic", opt.get("ref", ""))))
+		_track(s, "Starting a debate: " + String(opt.title), b)
 	return r
 
 func act_visit(s: Dictionary, id: String) -> Dictionary:

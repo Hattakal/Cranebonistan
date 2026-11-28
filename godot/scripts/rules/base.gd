@@ -10,7 +10,7 @@
 ## change the game state, one Dictionary `s`; saving is JSON.stringify(s).
 extends Node
 
-const SAVE_VERSION := 56
+const SAVE_VERSION := 57
 
 # ---------- Content (from data/content.json) ----------
 var C: Dictionary            # CONFIG
@@ -58,6 +58,8 @@ var _events_by_id = {}
 var TOPICS: Array = []        # debate topics (data/debates.json)
 var LAWS: Array = []          # the government's programme (data/laws.json)
 var LAWS_C: Dictionary = {}   # CONFIG.laws: how often, how bills pass
+var PLEDGES: Array = []       # promises made in debates (data/pledges.json)
+var PLEDGES_C: Dictionary = {}  # CONFIG.pledges
 var LINES: Dictionary = {}    # what the leader can say in them (data/debate_lines.json)
 var ISSUES: Array = []        # minor issues: local stories (data/issues.json)
 var FIGURES: Array = []       # your party's politicians (data/party.json)
